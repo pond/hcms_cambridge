@@ -1,0 +1,40 @@
+<%= form_for(@admin_page) do |f| %>
+  <% if @admin_page.errors.any? %>
+    <div id="error_explanation">
+      <h3><%= pluralize(@admin_page.errors.count, "error") %> prohibited the page from being saved:</h3>
+
+      <ul>
+      <% @admin_page.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <p>
+      <%= f.label :title %><br>
+      <%= f.text_field :title %>
+    </p>
+  </div>
+
+  <div class="field">
+    <p>
+      <%= f.label :owning_page %><br>
+      <%= f.select :page_id,
+                   options_from_collection_for_select( Admin::Page.top_level_except( @admin_page ), :id, :title ),
+                   :include_blank => 'None' %>
+    </p>
+  </div>
+
+  <div id="redactor_toolbar"></div>
+  <div class="redactor_container">
+    <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
+  </div>
+
+  <div class="actions">
+    <p>
+      <%= f.submit %>
+    </p>
+  </div>
+<% end %>

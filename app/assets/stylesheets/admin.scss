@@ -1,0 +1,58 @@
+@import 'shared.scss';
+@import 'redactor_custom.css';
+
+body {
+  background: #061923;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+div.redactor-container {
+  min-width: 800px;
+}
+
+.redactor-box {
+  overflow: scroll;
+}
+
+.redactor-editor {
+  background: transparent;
+  border: none;
+  padding-top: 10px !important;
+  overflow: scroll;
+}
+
+section.admin, footer {
+  margin: 20px 10%;
+  padding: 20px;
+  background: rgba( 255, 255, 255, 0.8 );
+  border-radius: 4px;
+  box-shadow: 0 0 10px #fff;
+
+  table {
+    border-collapse: collapse;
+
+    th {
+      text-align: left;
+    }
+
+    td {
+      border: 1px solid black;
+      padding: 4px;
+    }
+
+    tr.odd { background: white }
+  }
+
+  input, select {
+    font-size: 14pt;
+    line-height: 150%;
+    margin: 5px 0;
+  }
+}
+
+footer {
+  text-align: center;
+}

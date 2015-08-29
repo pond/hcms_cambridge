@@ -1,0 +1,209 @@
+@import 'http://yui.yahooapis.com/pure/0.6.0/menus-min.css';
+
+//////////////////////////////////////////////////////////////////////////////
+// Fonts
+//////////////////////////////////////////////////////////////////////////////
+
+@import url( 'http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' );
+
+@font-face {
+  font-family: 'TrajanPro-bold';
+  src: url( 'TrajanPro-Bold.ttf' );
+}
+
+@font-face {
+  font-family: 'TrajanPro-regular';
+  src: url( 'TrajanPro-Regular.ttf' );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Shared styles
+//////////////////////////////////////////////////////////////////////////////
+
+body {
+  font-size: 14pt;
+
+  h1, h2, h3, h4, h5, h6, nav a {
+    font-weight: bold;
+    font-family: "TrajanPro-Bold", serif;
+  }
+
+  h1 {
+    font-size: 27pt;
+  }
+}
+
+section.header, section.footer, section.main, .redactor-editor {
+  width: 800px;
+  margin: 0 auto;
+  font-family: 'Lora', serif;
+}
+
+section.header {
+  position: relative;
+  height: 191px;
+  background: url( 'clipboard_top_slice.png' ) bottom center no-repeat;
+
+  #logo {
+    position: absolute;
+    top: 77px;
+    left: 30px;
+  }
+
+  nav {
+    position: absolute;
+    top: 91px;
+    right: 180px;
+
+    a, a:visited {
+      display: inline-block;
+      padding-left: 20px;
+      color: #332d18;
+      font-size: 2.5em;
+      opacity: 0.9;
+    }
+
+    a:hover {
+      color: #534d38;
+    }
+  }
+}
+
+section.main, .redactor-box {
+  min-height: 352px;
+  color: #000;
+
+  section.content > h1:first-child,
+  section.content > h2:first-child,
+  section.content > h3:first-child,
+  section.content > h4:first-child,
+  section.content > h5:first-child,
+  section.content > h6:first-child,
+  section.content >  p:first-child {
+    margin-top: 0;
+  }
+
+  /* Without this, WebKit completely destroys the layout assigning large
+   * tracts of white space either above, and/or below the section.main block.
+   * Firefox shows no such issues and there's no logic to it, as indeed
+   * adding in this transparent border shows.
+   */
+
+  border: 1px solid transparent;
+
+  /* Given the above hack, the background position needs to be adjusted */
+
+  background: url( 'clipboard_tile_slice.png' ) 0px -1px repeat-y;
+  background-size: 800px 100%;
+
+  nav, section.content, .redactor-editor {
+    width: 610px;
+    margin: 0;
+    padding: 0 50px 0 30px;
+  }
+
+  nav {
+    padding-top: 20px;
+    padding-bottom: 25px;
+    text-align: center;
+
+    .pure-menu-horizontal {
+      overflow: visible !important;
+
+      li {
+        text-align: left;
+        a { padding-top: 4px; }
+      }
+    }
+
+    a {
+      display: inline-block;
+      padding: 0 10px;
+      text-decoration: none;
+      color: #332d18;
+      font-size: 18pt;
+    }
+  }
+
+  img {
+    -webkit-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+    -moz-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+    box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+    max-width: 100%;
+  }
+
+  img[ align = 'right' ] {
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+section.footer {
+  height: 134px;
+  background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
+
+  section.footer_content {
+    width: 610px;
+    margin: 0;
+    padding: 0 50px 0 30px;
+    text-align: center;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Narrow viewport / mobile variations
+//////////////////////////////////////////////////////////////////////////////
+
+@media only screen and (max-width: 720px) {
+
+  section.header, section.main, section.footer {
+    width: 400px;
+  }
+
+  section.header {
+    height: 95px;
+    background-size: 100%;
+
+    #logo {
+      top: 38px;
+      left: 15px;
+      width: 110px;
+      height: 36px;
+    }
+
+    nav {
+      top: 45px;
+      right: 70px;
+
+      a {
+        display: inline-block;
+        padding-left: 20px;
+        color: #332d18;
+        font-size: 1.25em;
+      }
+    }
+  }
+
+  section.main {
+    background-size: 100%;
+
+    nav, section.content {
+      width: 305px;
+      padding: 0 25px 0 15px;
+    }
+
+    nav {
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      a {
+        font-size: 14pt;
+      }
+    }
+  }
+
+  section.footer {
+    height: 67px;
+    background-size: 100%;
+  }
+}

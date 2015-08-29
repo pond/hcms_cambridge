@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=0.8">
+
+    <title>HMCS Admin</title>
+
+    <%= stylesheet_link_tag    'admin', media: 'all' %>
+    <%= javascript_include_tag 'admin'               %>
+    <%= csrf_meta_tags %>
+  </head>
+
+  <body>
+    <section class="admin">
+<% if notice.present? || alert.present? -%>
+      <section class="messages">
+<%   if notice.present? -%>
+        <p class="notice"><%= notice %></p>
+<%   end -%>
+<%   if alert.present? %>
+        <p class="alert"><%= alert %></p>
+<%   end -%>
+      </section>
+<% end -%>
+<%= yield %>
+    </section>
+
+    <footer>
+<% if user_signed_in? -%>
+      <%= link_to( 'Log out', destroy_admin_user_session_path, :method => :delete ) %>
+<% end -%>
+    </footer>
+  </body>
+</html>

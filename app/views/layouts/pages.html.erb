@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+
+    <title><%= @page.title %></title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <%= stylesheet_link_tag    'pages', media: 'all' %>
+    <%= javascript_include_tag 'pages' %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <section class="header">
+      <img id="logo" src="<%= image_path( 'logo.png' )%>" width="210" height="72">
+      <nav>
+        <a target="_blank" href="https://www.facebook.com/CambridgePuntingCompany"><i class="fa fa-facebook-official"></i></a>
+        <a target="_blank" href="https://twitter.com/CambridgePuntCo"><i class="fa fa-twitter-square"></i></a>
+        <a target="_blank" href="https://instagram.com/cambridgepuntingcompany/"><i class="fa fa-instagram"></i></a>
+        <a target="_blank" href="https://plus.google.com/103583413447290259419/posts"><i class="fa fa-google-plus-square"></i></a>
+      </nav>
+    </section>
+
+    <section class="main">
+      <nav>
+        <div class="pure-menu pure-menu-horizontal pure-menu-scrollable">
+          <ul class="pure-menu-list">
+<% Page.top_level.each do | page | -%>
+            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.present? ? ' pure-menu-has-children' : '' %>">
+              <%= link_to( page.title, page_path( page ), :class => 'pure-menu-link' ) %>
+<%   if page.children.present? -%>
+              <ul class="pure-menu-children">
+<%     page.children.each do | child | -%>
+                <li class="pure-menu-item">
+                  <%= link_to( child.title, page_path( child ), :class => 'pure-menu-link' ) %>
+                </li>
+<%     end -%>
+              </ul>
+<%   end -%>
+            </li>
+<% end -%>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="content">
+<%= yield %>
+      </section>
+    </section>
+
+    <section class="footer">
+      <section class="footer_content">
+<% if user_signed_in? -%>
+      <%= link_to( 'Got to Page Administration', admin_pages_path() ) %>
+<% end -%>
+      </section>
+    </section>
+  </body>
+</html>
