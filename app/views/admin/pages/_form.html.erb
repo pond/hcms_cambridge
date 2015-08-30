@@ -22,7 +22,12 @@
     <p>
       <%= f.label :owning_page %><br>
       <%= f.select :page_id,
-                   options_from_collection_for_select( Admin::Page.top_level_except( @admin_page ), :id, :title ),
+                   options_from_collection_for_select(
+                     Admin::Page.top_level_except( @admin_page ),
+                     :id,
+                     :title,
+                     @admin_page.page_id
+                   ),
                    :include_blank => 'None' %>
     </p>
   </div>

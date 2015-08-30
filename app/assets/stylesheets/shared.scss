@@ -17,6 +17,30 @@
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Variables
+//////////////////////////////////////////////////////////////////////////////
+
+$container_width: 800px;
+$content_width: 600px;
+$content_padding_lr: 50px;
+
+$container_width_narrow: $container_width / 2;
+$content_width_narrow: $content_width / 2;
+$content_padding_lr_narrow: $content_padding_lr / 2;
+
+@mixin content_metrics {
+  width: $content_width;
+  margin: 0;
+  padding: 0 $content_padding_lr 0 $content_padding_lr;
+}
+
+@mixin content_metrics_narrow {
+  width: $content_width_narrow;
+  margin: 0;
+  padding: 0 $content_padding_lr_narrow 0 $content_padding_lr_narrow;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Shared styles
 //////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +64,7 @@ input, select {
 }
 
 section.header, section.footer, section.main, .redactor-editor {
-  width: 800px;
+  width: $container_width;
   margin: 0 auto;
   font-family: 'Lora', serif;
 }
@@ -102,9 +126,7 @@ section.main, .redactor-box {
   background-size: 800px 100%;
 
   nav, section.content, .redactor-editor {
-    width: 600px;
-    margin: 0;
-    padding: 0 50px 0 50px;
+    @include content_metrics;
   }
 
   nav {
@@ -148,9 +170,7 @@ section.footer {
   background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
 
   section.footer_content {
-    width: 600px;
-    margin: 0;
-    padding: 0 50px 0 50px;
+    @include content_metrics;
     text-align: center;
   }
 }
@@ -166,7 +186,7 @@ section.footer {
   }
 
   section.header, section.main, section.footer, .redactor-editor {
-    width: 400px;
+    width: $container_width_narrow;
   }
 
   section.header {
@@ -194,11 +214,10 @@ section.footer {
   }
 
   section.main, .redactor-box {
-    background-size: 400px 100%;
+    background-size: $container_width_narrow 100%;
 
     nav, section.content, .redactor-editor {
-      width: 300px;
-      padding: 0 25px 0 25px;
+      @include content_metrics_narrow;
     }
 
     nav {
@@ -216,8 +235,7 @@ section.footer {
     background-size: 100%;
 
     section.footer_content {
-      width: 300px;
-      padding: 0 25px 0 25px;
+      @include content_metrics_narrow;
     }
   }
 }
