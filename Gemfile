@@ -9,9 +9,11 @@ gem 'pg'
 gem 'coffee-rails', '~> 4.1.0'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
-
 # Use Thin rather than Mongrel
 gem 'thin'
+
+# For Heroku only
+gem 'rails_12factor'
 
 # Asset pipeline (sigh)
 gem 'sass-rails'
