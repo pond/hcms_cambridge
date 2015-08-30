@@ -25,7 +25,7 @@ window.init_redactor = function()
       toolbarExternal: "#redactor_toolbar",
       buttons: [ 'formatting', 'bold', 'italic', 'deleted', 'unorderedlist',
                  'orderedlist', 'outdent', 'indent', 'image', 'link',
-                 'alignment' ],
+                 'alignment', 'html' ],
 
     }
   );
