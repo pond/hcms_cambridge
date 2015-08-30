@@ -89,11 +89,10 @@ section.main, .redactor-box {
    * adding in this transparent border shows.
    */
 
-  border: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
 
-  /* Given the above hack, the background position needs to be adjusted */
-
-  background: url( 'clipboard_tile_slice.png' ) 0px -1px repeat-y;
+  background: url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
   background-size: 800px 100%;
 
   nav, section.content, .redactor-editor {
@@ -156,7 +155,7 @@ section.footer {
 
 @media only screen and (max-width: 720px) {
 
-  section.header, section.main, section.footer {
+  section.header, section.main, section.footer, .redactor-editor {
     width: 400px;
   }
 
@@ -173,21 +172,21 @@ section.footer {
 
     nav {
       top: 45px;
-      right: 70px;
+      right: 80px;
 
       a {
         display: inline-block;
-        padding-left: 20px;
+        padding-left: 10px;
         color: #332d18;
-        font-size: 1.25em;
+        font-size: 1.8em;
       }
     }
   }
 
-  section.main {
-    background-size: 100%;
+  section.main, .redactor-box {
+    background-size: 400px 100%;
 
-    nav, section.content {
+    nav, section.content, .redactor-editor {
       width: 305px;
       padding: 0 25px 0 15px;
     }
@@ -205,5 +204,10 @@ section.footer {
   section.footer {
     height: 67px;
     background-size: 100%;
+
+    section.footer_content {
+      width: 305px;
+      padding: 0 25px 0 15px;
+    }
   }
 }
