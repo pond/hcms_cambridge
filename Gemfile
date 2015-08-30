@@ -28,9 +28,21 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 
 # Device for Auth, with Device-integrated Redactor for editing
 gem 'devise'
+
+# Imperavi Redactor via Redactor Rails gem, which uses Carrierwave for
+# file uploads and MiniMagick for image processing; Fog AWS is used for
+# Amazon S3 storage if on Heroku, else local filesystem will be used.
+#
+# We have to use 'master' branch of CarrierWave from GitHub because it's
+# a mess of broken parts. See:
+#
+# https://github.com/carrierwaveuploader/carrierwave/issues/1608
+# https://github.com/carrierwaveuploader/carrierwave/issues/1698
+#
+gem 'fog', require: 'fog/aws'
+gem 'carrierwave', github: 'carrierwaveuploader/carrierwave'
+gem 'mini_magick'
 gem 'redactor-rails'
-gem "carrierwave"
-gem "mini_magick"
 
 # Use Unicorn as the app server
 # gem 'unicorn'
