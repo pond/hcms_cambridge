@@ -96,9 +96,9 @@ section.main, .redactor-box {
   background-size: 800px 100%;
 
   nav, section.content, .redactor-editor {
-    width: 610px;
+    width: 600px;
     margin: 0;
-    padding: 0 50px 0 30px;
+    padding: 0 50px 0 50px;
   }
 
   nav {
@@ -142,9 +142,9 @@ section.footer {
   background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
 
   section.footer_content {
-    width: 610px;
+    width: 600px;
     margin: 0;
-    padding: 0 50px 0 30px;
+    padding: 0 50px 0 50px;
     text-align: center;
   }
 }
@@ -187,8 +187,8 @@ section.footer {
     background-size: 400px 100%;
 
     nav, section.content, .redactor-editor {
-      width: 305px;
-      padding: 0 25px 0 15px;
+      width: 300px;
+      padding: 0 25px 0 25px;
     }
 
     nav {
@@ -206,8 +206,8 @@ section.footer {
     background-size: 100%;
 
     section.footer_content {
-      width: 305px;
-      padding: 0 25px 0 15px;
+      width: 300px;
+      padding: 0 25px 0 25px;
     }
   }
 }
