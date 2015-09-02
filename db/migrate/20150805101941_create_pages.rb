@@ -10,8 +10,6 @@ class CreatePages < ActiveRecord::Migration
       t.belongs_to :page
       t.timestamps :null => false
     end
-
-    Page.create :title => 'Home', :body => 'Welcome!'
   end
 
   def self.down
