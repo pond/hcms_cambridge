@@ -2,7 +2,8 @@ Rails.application.routes.draw do
 
   mount RedactorRails::Engine => '/redactor_rails'
   root 'pages#show'
-  resources :pages, :only => [ :show ]
+  resources :pages,     :only => [ :show ]
+  resources :by_titles, :only => [ :show ]
 
   namespace :admin do
     root 'pages#index'
