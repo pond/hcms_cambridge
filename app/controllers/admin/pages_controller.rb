@@ -76,7 +76,7 @@ class Admin::PagesController < ApplicationController
     end
 
     def admin_page_params
-      params.require( :admin_page ).permit( :title, :body, :page_id )
+      params.require( :admin_page ).permit( :title, :body, :page_id, :hidden )
     end
 
 end

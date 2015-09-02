@@ -26,12 +26,12 @@
       <nav>
         <div class="pure-menu pure-menu-horizontal">
           <ul class="pure-menu-list">
-<% Page.top_level.each do | page | -%>
+<% Page.top_level.for_navigation.each do | page | -%>
             <li class="pure-menu-item pure-menu-allow-hover<%= page.children.present? ? ' pure-menu-has-children' : '' %>">
               <%= link_to( page.title, page_path( page ), :class => 'pure-menu-link' ) %>
-<%   if page.children.present? -%>
+<%   if page.children.for_navigation.present? -%>
               <ul class="pure-menu-children">
-<%     page.children.each do | child | -%>
+<%     page.children.for_navigation.each do | child | -%>
                 <li class="pure-menu-item">
                   <%= link_to( child.title, page_path( child ), :class => 'pure-menu-link' ) %>
                 </li>

@@ -4,28 +4,25 @@
   <thead>
     <tr>
       <th>Title</th>
-      <th>Owner</th>
-      <th colspan="3"></th>
+      <th class="centre" colspan="2">Move</th>
+      <th class="centre" colspan="3">Actions</th>
+      <th class="centre">In navigation bar?</th>
     </tr>
   </thead>
 
   <tbody>
-<% @admin_pages.each do |admin_page| -%>
+<% @admin_pages.each do | admin_page | -%>
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= admin_page.title %></td>
-        <td>&nbsp;</td>
-        <td><%= link_to 'Show', admin_page %></td>
-        <td><%= link_to 'Edit', edit_admin_page_path( admin_page ) %></td>
-        <td><%= link_to 'Destroy', admin_page, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+<%= render :partial => 'actions', :locals => { :admin_page => admin_page } %>
+        <td class="centre"><%= admin_page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
       </tr>
 <%  sub_pages = Admin::Page.where( :page_id => admin_page.id ).all
     sub_pages.each do | sub_page | -%>
-      <tr class="<%= cycle( 'even', 'odd' ) %>">
+      <tr class="children <%= cycle( 'even', 'odd' ) %>">
         <td>&mdash; <%= sub_page.title %></td>
-        <td><%= sub_page.page.title %></td>
-        <td><%= link_to 'Show', sub_page %></td>
-        <td><%= link_to 'Edit', edit_admin_page_path( sub_page ) %></td>
-        <td><%= link_to 'Destroy', sub_page, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+<%= render :partial => 'actions', :locals => { :admin_page => sub_page } %>
+        <td class="centre"><%= sub_page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
       </tr>
 <%  end -%>
 <% end -%>

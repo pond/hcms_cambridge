@@ -11,17 +11,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150809185053) do
+ActiveRecord::Schema.define(version: 20150902065834) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "carrier_wave_files", force: :cascade do |t|
+    t.string   "identifier"
+    t.string   "original_filename"
+    t.string   "content_type"
+    t.string   "size"
+    t.binary   "data"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "pages", force: :cascade do |t|
-    t.text     "title",      default: "", null: false
-    t.text     "body",       default: "", null: false
+    t.text     "title",      default: "",    null: false
+    t.text     "body",       default: "",    null: false
     t.integer  "page_id"
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.integer  "position"
+    t.boolean  "hidden",     default: false, null: false
   end
 
   create_table "redactor_assets", force: :cascade do |t|

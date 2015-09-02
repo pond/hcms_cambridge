@@ -1,7 +1,7 @@
 <%= form_for(@admin_page) do |f| %>
   <% if @admin_page.errors.any? %>
     <div id="error_explanation">
-      <h3><%= pluralize(@admin_page.errors.count, "error") %> prohibited the page from being saved:</h3>
+      <h3><%= pluralize(@admin_page.errors.count, "error") %> prevented the page from being saved:</h3>
 
       <ul>
       <% @admin_page.errors.full_messages.each do |message| %>
@@ -18,9 +18,10 @@
     </p>
   </div>
 
+<% if Page.top_level.count > 0 -%>
   <div class="field">
     <p>
-      <%= f.label :owning_page %><br>
+      <%= f.label :page_id, 'Put into a menu under which page?' %><br>
       <%= f.select :page_id,
                    options_from_collection_for_select(
                      Admin::Page.top_level_except( @admin_page ),
@@ -28,7 +29,15 @@
                      :title,
                      @admin_page.page_id
                    ),
-                   :include_blank => 'None' %>
+                   :include_blank => 'Do not put into a menu' %>
+    </p>
+  </div>
+
+<% end -%>
+
+  <div class="field">
+    <p>
+      <%= f.check_box :hidden %> <%= f.label :hidden, 'Hidden from the navigation bar?' %>
     </p>
   </div>
 

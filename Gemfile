@@ -44,6 +44,10 @@ gem 'carrierwave', github: 'carrierwaveuploader/carrierwave'
 gem 'mini_magick'
 gem 'redactor-rails'
 
+# Orderable pages
+# https://github.com/swanandp/acts_as_list
+gem 'acts_as_list'
+
 # Use Unicorn as the app server
 # gem 'unicorn'
 

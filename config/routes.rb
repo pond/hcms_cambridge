@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root 'pages#index'
     resources :pages
+    resources :move_pages, :only => [ :update ]
 
     devise_for :users
   end
