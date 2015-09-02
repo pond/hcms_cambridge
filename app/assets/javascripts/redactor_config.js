@@ -21,10 +21,11 @@ window.init_redactor = function()
       fileUpload:   "/redactor_rails/documents?" + params,
       fileGetJson:  "/redactor_rails/documents",
       path:         "/assets/redactor-rails",
+      plugins:      [ "video" ],
 
       toolbarExternal: "#redactor_toolbar",
       buttons: [ 'formatting', 'bold', 'italic', 'deleted', 'unorderedlist',
-                 'orderedlist', 'outdent', 'indent', 'image', 'link',
+                 'orderedlist', 'outdent', 'indent', 'image', 'video', 'link',
                  'alignment', 'html' ],
 
     }
