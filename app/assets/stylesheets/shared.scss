@@ -169,8 +169,11 @@ section.main, .redactor-box {
   }
 
   img[ align = 'right' ] {
-    margin-left: 10px;
-    margin-bottom: 10px;
+    margin: 0 10px 10px 0;
+  }
+
+  img[ align = 'left' ] {
+    margin: 0 0 10px 10px;
   }
 
   /* Redactor doesn't understand an iframe wrapped in any containers so
