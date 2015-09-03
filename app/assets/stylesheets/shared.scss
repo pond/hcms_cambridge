@@ -41,6 +41,12 @@ $content_padding_lr_narrow: $content_padding_lr / 2;
   box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
 }
 
+@mixin no_shadow {
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
 @mixin standard_spinner {
   background: url( '/assets/spinner.png' ) center center no-repeat;
 }
@@ -190,6 +196,10 @@ section.main, .redactor-box {
 
     @include standard_shadow;
     @include standard_spinner;
+  }
+
+  img.no_shadow, iframe.no_shadow {
+    @include no_shadow;
   }
 }
 
