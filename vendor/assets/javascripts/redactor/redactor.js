@@ -10,29 +10,6 @@
 	Usage: $('#content').redactor();
 */
 
-// 2015-09-03 (ADH): Modified for HCMS to allow resizeable iframes which maintain
-// aspect ratio, assuming CSS support exists for div.video_embed_wrapper and
-// iframe.video_embed along the following lines:
-//
-//   div.video_embed_wrapper {
-//     position: relative;
-//     width: 100%;
-//     height: 0;
-//     padding-bottom: 51%;
-//   }
-//
-//   div.video_embed_wrapper iframe.video_embed {
-//     position: absolute;
-//     top: 0;
-//     left: 0;
-//     width: 100%;
-//     height: 100%;
-//   }
-//
-// Shamelessly borrowed from:
-//
-//   http://fettblog.eu/blog/2013/06/16/preserving-aspect-ratio-for-embedded-iframes/
-
 (function($)
 {
 
@@ -6221,8 +6198,8 @@
 				},
 				convertVideoLinks: function(html)
 				{
-					var iframeStart = '<div class="video_embed_wrapper redactor-linkify-object"><iframe class="video_embed" src="',
-						iframeEnd = '" frameborder="0" allowfullscreen></iframe></div>';
+					var iframeStart = '<iframe class="redactor-linkify-object" width="500" height="281" src="',
+						iframeEnd = '" frameborder="0" allowfullscreen></iframe>';
 
 					if (html.match(this.opts.linkify.regexps.youtube))
 					{
