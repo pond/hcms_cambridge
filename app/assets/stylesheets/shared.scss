@@ -11,11 +11,6 @@
   src: url( 'TrajanPro-Bold.ttf' );
 }
 
-@font-face {
-  font-family: 'TrajanPro-regular';
-  src: url( 'TrajanPro-Regular.ttf' );
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // Variables
 //////////////////////////////////////////////////////////////////////////////
@@ -143,6 +138,7 @@ section.main, .redactor-box {
   }
 
   nav {
+
     padding-top: 20px;
     padding-bottom: 25px;
     text-align: center;
@@ -153,6 +149,11 @@ section.main, .redactor-box {
       li {
         text-align: left;
         a { padding-top: 4px; }
+
+        &.current_page {
+          margin-bottom: -2px;
+          border-bottom: 2px solid rgba( 0, 0, 0, 0.2 );
+        }
       }
     }
 
