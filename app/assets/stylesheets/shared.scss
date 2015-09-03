@@ -259,6 +259,12 @@ section.footer {
       height: 144px;
     }
 
+    img {
+      max-width: 300px !important;
+      min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
+      height: auto !important;
+    }
+
     nav, section.content, .redactor-editor {
       @include content_metrics_narrow;
     }
