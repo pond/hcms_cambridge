@@ -58,6 +58,7 @@
 <%   if @page || @admin_page -%>
       <%= link_to 'Edit', edit_admin_page_path( @page || @admin_page) %> |
 <%   end -%>
+      <%= link_to 'New', new_admin_page_path %> |
       <%= link_to 'All Pages', admin_pages_path %>
 <% end -%>
       </section>
