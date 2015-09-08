@@ -124,7 +124,6 @@ section.main, div.redactor-box {
     & > h6:first-child,
     & >  p:first-child {
       margin-top: 20px;
-      border: 2px solid red;
     }
   }
 
@@ -221,7 +220,6 @@ section.main, div.redactor-box {
     &            > img:not( [ class = 'no_shadow' ] ):last-child {
       margin-top:    15px !important;
       margin-bottom: 15px !important;
-      border: 2px solid green;
     }
 
     /* Further, for the last image that isn't inside a paragraph
@@ -234,7 +232,6 @@ section.main, div.redactor-box {
 
     & > img:last-child {
       margin-bottom: 35px !important;
-      border: 2px solid blue;
     }
   }
 }
