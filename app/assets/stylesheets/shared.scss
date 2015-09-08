@@ -121,7 +121,7 @@ section.main, .redactor-box {
   section.content > h5:first-child,
   section.content > h6:first-child,
   section.content >  p:first-child {
-    margin-top: 0;
+    margin-top: 20px;
   }
 
   /* Without this, WebKit completely destroys the layout assigning large
@@ -200,6 +200,11 @@ section.main, .redactor-box {
 
   img.no_shadow, iframe.no_shadow {
     @include no_shadow;
+  }
+
+  p:last-child > img:not( [ class = 'no_shadow' ] ):last-child {
+    margin-top: 15px;
+    margin-bottom: 15px;
   }
 }
 

@@ -45,7 +45,9 @@
       </nav>
 
       <section class="content">
+        <div class="above_clear">
 <%= yield %>
+        </div>
         <div style="clear: both"></div>
       </section>
     </section>
@@ -53,7 +55,10 @@
     <section class="footer">
       <section class="footer_content">
 <% if user_signed_in? -%>
-      <%= link_to( 'Go to Page Administration', admin_pages_path() ) %>
+<%   if @page || @admin_page -%>
+      <%= link_to 'Edit', edit_admin_page_path( @page || @admin_page) %> |
+<%   end -%>
+      <%= link_to 'All Pages', admin_pages_path %>
 <% end -%>
       </section>
     </section>
