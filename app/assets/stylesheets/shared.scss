@@ -202,15 +202,27 @@ section.main, .redactor-box {
     @include no_shadow;
   }
 
+  /* For the last image in the last paragraph in the container (be it
+   * Redactor or page display), or for the last image inside the
+   * wrapper DIV inside the page display, or the last image inside a
+   * Redactor container, make sure top/bottom margins are adjusted to
+   * account for shadow stuff; or make sure there's margin to any
+   * content in the footer. Need to use "!important" to override any
+   * margin specifics inside Redactor for this special case.
+   */
+
   p:last-child > img:not( [ class = 'no_shadow' ] ):last-child,
+  & > div      > img:not( [ class = 'no_shadow' ] ):last-child,
   &            > img:not( [ class = 'no_shadow' ] ):last-child {
 
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top:    15px !important;
+    margin-bottom: 15px !important;
   }
 
-  & > img:last-child {
-    margin-bottom: 35px;
+  & > div > img:last-child,
+  & >       img:last-child {
+
+    margin-bottom: 35px !important;
   }
 }
 
