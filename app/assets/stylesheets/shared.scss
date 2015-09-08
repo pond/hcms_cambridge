@@ -110,18 +110,22 @@ section.header {
   }
 }
 
-section.main, .redactor-box {
+section.main, div.redactor-box {
   min-height: 352px;
   color: #000;
 
-  section.content > h1:first-child,
-  section.content > h2:first-child,
-  section.content > h3:first-child,
-  section.content > h4:first-child,
-  section.content > h5:first-child,
-  section.content > h6:first-child,
-  section.content >  p:first-child {
-    margin-top: 20px;
+  div.redactor-editor,
+  div.above-clear {
+    & > h1:first-child,
+    & > h2:first-child,
+    & > h3:first-child,
+    & > h4:first-child,
+    & > h5:first-child,
+    & > h6:first-child,
+    & >  p:first-child {
+      margin-top: 20px;
+      border: 2px solid red;
+    }
   }
 
   /* Without this, WebKit completely destroys the layout assigning large
@@ -202,27 +206,36 @@ section.main, .redactor-box {
     @include no_shadow;
   }
 
-  /* For the last image in the last paragraph in the container (be it
-   * Redactor or page display), or for the last image inside the
-   * wrapper DIV inside the page display, or the last image inside a
-   * Redactor container, make sure top/bottom margins are adjusted to
-   * account for shadow stuff; or make sure there's margin to any
-   * content in the footer. Need to use "!important" to override any
-   * margin specifics inside Redactor for this special case.
-   */
+  div.redactor-editor,
+  div.above-clear {
 
-  p:last-child > img:not( [ class = 'no_shadow' ] ):last-child,
-  & > div      > img:not( [ class = 'no_shadow' ] ):last-child,
-  &            > img:not( [ class = 'no_shadow' ] ):last-child {
+    /* Inside the editor or content before-float-clear wrapper DIV,
+     * for the last image inside the last paragraph, or for the last
+     * image directly without a wrapping paragraph, adjust the
+     * top/bottom margins a bit for better spacing with shadows. Use
+     * "!important" to override inline styles set by Redactor in for
+     * this special case.
+     */
 
-    margin-top:    15px !important;
-    margin-bottom: 15px !important;
-  }
+    p:last-child > img:not( [ class = 'no_shadow' ] ):last-child,
+    &            > img:not( [ class = 'no_shadow' ] ):last-child {
+      margin-top:    15px !important;
+      margin-bottom: 15px !important;
+      border: 2px solid green;
+    }
 
-  & > div > img:last-child,
-  & >       img:last-child {
+    /* Further, for the last image that isn't inside a paragraph
+     * whether or not it has a shadow ensure spacing to any footer
+     * content. If there's a wrapping paragraph, that ensure
+     * enough space by itself. This stuff won't always work inside
+     * the Redactor editor due to extra control containers it adds,
+     * but it catches some cases and gives reasonable results.
+     */
 
-    margin-bottom: 35px !important;
+    & > img:last-child {
+      margin-bottom: 35px !important;
+      border: 2px solid blue;
+    }
   }
 }
 
