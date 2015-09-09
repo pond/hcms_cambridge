@@ -110,11 +110,11 @@ section.header {
   }
 }
 
-section.main, div.redactor-box {
+section.main, .redactor-box {
   min-height: 352px;
   color: #000;
 
-  div.redactor-editor,
+  .redactor-editor,
   div.above-clear {
     & > h1:first-child,
     & > h2:first-child,
@@ -205,7 +205,7 @@ section.main, div.redactor-box {
     @include no_shadow;
   }
 
-  div.redactor-editor,
+  .redactor-editor,
   div.above-clear {
 
     /* Inside the editor or content before-float-clear wrapper DIV,
