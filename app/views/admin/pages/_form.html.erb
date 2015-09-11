@@ -36,15 +36,30 @@
 <% end -%>
 
   <div class="field">
-    <p>
-      <%= f.check_box :hidden %> <%= f.label :hidden, 'Hidden from the navigation bar?' %>
-    </p>
+    <%= f.check_box :hidden %> <%= f.label :hidden, 'Hidden from the navigation bar?' %>
   </div>
 
+  <div class="field">
+    <%= f.check_box :raw_editor %> <%= f.label :raw_editor, 'Use the low-level "raw" HTML editor?' %><br />
+    &nbsp;&nbsp;&nbsp;&nbsp;You must save then re-edit the page if you change this setting.
+  </div>
+
+  <p></p>
+
+<% if @admin_page.raw_editor -%>
+  <div class="redactor_container">
+    <div class="redactor-box">
+      <div class="redactor-editor">
+        <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
+      </div>
+    </div>
+  </div>
+<% else -%>
   <div id="redactor_toolbar"></div>
   <div class="redactor_container">
     <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
   </div>
+<% end -%>
 
   <div class="actions">
     <p>

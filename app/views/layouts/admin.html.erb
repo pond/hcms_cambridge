@@ -13,16 +13,7 @@
 
   <body>
     <section class="admin">
-<% if notice.present? || alert.present? -%>
-      <section class="messages">
-<%   if notice.present? -%>
-        <p class="notice"><%= notice %></p>
-<%   end -%>
-<%   if alert.present? %>
-        <p class="alert"><%= alert %></p>
-<%   end -%>
-      </section>
-<% end -%>
+<%= render :partial => 'layouts/messages' %>
 <%= yield %>
     </section>
 

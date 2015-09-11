@@ -45,7 +45,11 @@ class Admin::PagesController < ApplicationController
     def update
       respond_to do | format |
         if @admin_page.update( admin_page_params )
-          format.html { redirect_to @admin_page, notice: 'Page was successfully updated.' }
+          if @admin_page.previous_changes.has_key?( 'raw_editor' )
+            format.html { redirect_to edit_admin_page_url( @admin_page ), notice: 'Editing style changed.' }
+          else
+            format.html { redirect_to @admin_page, notice: 'Page was successfully updated.' }
+          end
         else
           format.html { render :edit }
         end
@@ -76,7 +80,7 @@ class Admin::PagesController < ApplicationController
     end
 
     def admin_page_params
-      params.require( :admin_page ).permit( :title, :body, :page_id, :hidden )
+      params.require( :admin_page ).permit( :title, :body, :page_id, :hidden, :raw_editor )
     end
 
 end
