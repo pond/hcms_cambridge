@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   resources :pages,     :only => [ :show ]
   resources :by_titles, :only => [ :show ]
 
-  namespace :admin do
+  namespace :admin, :path => 'hcms' do
     root 'pages#index'
     resources :pages
     resources :move_pages, :only => [ :update ]
