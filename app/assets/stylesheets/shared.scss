@@ -243,6 +243,30 @@ section.footer {
   section.footer_content {
     @include content_metrics;
     text-align: center;
+
+    font-size: 80%;
+
+    a {
+      text-decoration: none;
+      border-bottom: 1px solid rgba( 0, 0, 0, 0.2 );
+    }
+  }
+}
+
+section.content, section.footer {
+  a {
+    padding: 1px;
+    color: #332d18;
+    opacity: 0.8;
+  }
+
+  a:visited {
+    color: #534d38;
+  }
+
+  a:hover {
+    color: black;
+    background: white;
   }
 }
 
