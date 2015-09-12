@@ -258,6 +258,7 @@ section.content, section.footer {
     padding: 1px;
     color: #332d18;
     opacity: 0.8;
+    word-break: break-word;
   }
 
   a:visited {
@@ -342,6 +343,14 @@ section.content, section.footer {
 
     section.footer_content {
       @include content_metrics_narrow;
+
+      font-size: 60%;
+      white-space: nowrap;
+      br { display: none; }
+    }
+
+    section.footer_content br {
+      display: none;
     }
   }
 }
