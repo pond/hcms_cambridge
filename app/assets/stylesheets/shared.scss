@@ -19,6 +19,10 @@ $container_width: 800px;
 $content_width: 600px;
 $content_padding_lr: 50px;
 
+$container_width_mid: $container_width / 1.5;
+$content_width_mid: $content_width / 1.5;
+$content_padding_lr_mid: $content_padding_lr / 1.5;
+
 $container_width_narrow: $container_width / 2;
 $content_width_narrow: $content_width / 2;
 $content_padding_lr_narrow: $content_padding_lr / 2;
@@ -27,6 +31,12 @@ $content_padding_lr_narrow: $content_padding_lr / 2;
   width: $content_width;
   margin: 0;
   padding: 0 $content_padding_lr 0 $content_padding_lr;
+}
+
+@mixin content_metrics_mid {
+  width: $content_width_mid;
+  margin: 0;
+  padding: 0 $content_padding_lr_mid 0 $content_padding_lr_mid;
 }
 
 @mixin content_metrics_narrow {
@@ -84,6 +94,7 @@ section.header {
   position: relative;
   height: 191px;
   background: url( 'clipboard_top_slice.png' ) bottom center no-repeat;
+  background-size: 100%;
 
   #logo {
     position: absolute;
@@ -194,8 +205,8 @@ section.main, .redactor-box {
   iframe {
     margin-left: auto;
     margin-right: auto;
-    width: 512px;
-    height: 288px;
+    width: $content_width * 0.85333333333;
+    height: ( ( $content_width * 0.85333333333 ) * 9 ) / 16;
 
     @include standard_shadow;
     @include standard_spinner;
@@ -239,6 +250,7 @@ section.main, .redactor-box {
 section.footer {
   height: 134px;
   background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
+  background-size: 100%;
 
   section.footer_content {
     @include content_metrics;
@@ -275,19 +287,84 @@ section.content, section.footer {
 // Narrow viewport / mobile variations
 //////////////////////////////////////////////////////////////////////////////
 
-@media only screen and (max-width: 720px) {
-
-  input, select {
-    width: 90%;
+@media only screen and (max-width: $container_width) {
+  section.header, section.main, section.footer, .redactor-editor {
+    width: $container_width_mid;
   }
 
+  section.header {
+    height: 127px;
+
+    #logo {
+      top: 38px;
+      left: 15px;
+      width: 147px;
+      height: auto;
+    }
+
+    nav {
+      top: 55px;
+      right: 110px;
+
+      a {
+        padding-left: 10px;
+        font-size: 2em;
+      }
+    }
+  }
+
+  section.main, .redactor-box {
+    background-size: $container_width_mid 100%;
+
+    iframe {
+      width: $content_width_mid * 0.85333333333;
+      height: ( ( $content_width_mid * 0.85333333333 ) * 9 ) / 16;
+    }
+
+    img {
+      max-width: $content_width_mid * 0.75 !important;
+      min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
+      height: auto !important;
+    }
+
+    nav, section.content, .redactor-editor {
+      @include content_metrics_mid;
+    }
+
+    nav {
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      a {
+        font-size: 14pt;
+      }
+    }
+  }
+
+  section.footer {
+    height: 67px;
+
+    section.footer_content {
+      @include content_metrics_mid;
+
+      font-size: 60%;
+      white-space: nowrap;
+      br { display: none; }
+    }
+
+    section.footer_content br {
+      display: none;
+    }
+  }
+}
+
+@media only screen and (max-width: $container_width_mid) {
   section.header, section.main, section.footer, .redactor-editor {
     width: $container_width_narrow;
   }
 
   section.header {
     height: 95px;
-    background-size: 100%;
 
     #logo {
       top: 38px;
@@ -301,9 +378,7 @@ section.content, section.footer {
       right: 80px;
 
       a {
-        display: inline-block;
         padding-left: 10px;
-        color: #332d18;
         font-size: 1.8em;
       }
     }
@@ -313,12 +388,12 @@ section.content, section.footer {
     background-size: $container_width_narrow 100%;
 
     iframe {
-      width: 256px;
-      height: 144px;
+      width: $content_width_narrow * 0.85333333333;
+      height: ( ( $content_width_narrow * 0.85333333333 ) * 9 ) / 16;
     }
 
     img {
-      max-width: 300px !important;
+      max-width: $content_width_narrow * 0.75 !important;
       min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
       height: auto !important;
     }
@@ -338,8 +413,7 @@ section.content, section.footer {
   }
 
   section.footer {
-    height: 67px;
-    background-size: 100%;
+    height: 89px;
 
     section.footer_content {
       @include content_metrics_narrow;
