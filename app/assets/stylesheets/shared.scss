@@ -367,8 +367,6 @@ section.content, section.footer {
     height: 95px;
 
     #logo {
-      top: 38px;
-      left: 15px;
       width: 110px;
       height: 36px;
     }
@@ -394,21 +392,10 @@ section.content, section.footer {
 
     img {
       max-width: $content_width_narrow * 0.75 !important;
-      min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
-      height: auto !important;
     }
 
     nav, section.content, .redactor-editor {
       @include content_metrics_narrow;
-    }
-
-    nav {
-      padding-top: 15px;
-      padding-bottom: 15px;
-
-      a {
-        font-size: 14pt;
-      }
     }
   }
 
@@ -417,14 +404,6 @@ section.content, section.footer {
 
     section.footer_content {
       @include content_metrics_narrow;
-
-      font-size: 60%;
-      white-space: nowrap;
-      br { display: none; }
-    }
-
-    section.footer_content br {
-      display: none;
     }
   }
 }
