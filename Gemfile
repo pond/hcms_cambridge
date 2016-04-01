@@ -39,6 +39,7 @@ gem 'devise'
 # https://github.com/carrierwaveuploader/carrierwave/issues/1608
 # https://github.com/carrierwaveuploader/carrierwave/issues/1698
 #
+gem 'fog-aliyun', '~> 0.1.0' # Argh: https://github.com/CultivateLabs/storytime/issues/188
 gem 'fog', require: 'fog/aws'
 gem 'carrierwave', github: 'carrierwaveuploader/carrierwave'
 gem 'mini_magick'
