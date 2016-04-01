@@ -8,7 +8,7 @@ HCMS source code is managed by Git and hosted by GitHub; site styling is done by
 
 ### Admin
 
-All routes at `/hmcsadmin` are for editing pages and so-on.
+All routes at `/hcms/...` are for editing pages and so-on.
 
 ### Public
 
