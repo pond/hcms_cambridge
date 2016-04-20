@@ -1,0 +1,17 @@
+    <p>You have received a booking request.</p>
+    <dl>
+      <dt><strong>Name</strong></dt>
+      <dd><%= @name %></dd>
+      <dt><strong>E-mail address</strong></dt>
+      <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
+      <dt><strong>Phone number</strong></dt>
+      <dd><%= @phone %></dd>
+      <dt><strong>Preferred date</strong></dt>
+      <dd><%= @date %></dd>
+      <dt><strong>Preferred time</strong></dt>
+      <dd><%= @time %></dd>
+      <dt><strong>Menu selection</strong></dt>
+      <dd><%= @menu.blank? ? 'None' : @menu %></dd>
+      <dt><strong>Other notes</strong></dt>
+      <dd><%= @notes.blank? ? 'None' : '"' + @notes + '"' %></dd>
+    </dl>

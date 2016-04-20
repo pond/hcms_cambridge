@@ -84,6 +84,17 @@ input, select {
   margin: 5px 0;
 }
 
+textarea {
+  margin: 10px 20px 0 0;
+  font-size: 12pt;
+  max-width: 100%;
+}
+
+select {
+  margin-right: 20px;
+  max-width: 100%;
+}
+
 section.header, section.footer, section.main, .redactor-editor {
   width: $container_width;
   margin: 0 auto;
@@ -202,7 +213,7 @@ section.main, .redactor-box {
    * acceptable ratio.
    */
 
-  iframe {
+  iframe:not([title='recaptcha widget']) {
     margin-left: auto;
     margin-right: auto;
     width: $content_width * 0.85333333333;

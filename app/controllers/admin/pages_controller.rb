@@ -1,6 +1,7 @@
 class Admin::PagesController < ApplicationController
 
   layout :determine_layout
+  helper ::PagesHelper
 
   # Via Devise
   before_action :authenticate_admin_user!
@@ -80,7 +81,13 @@ class Admin::PagesController < ApplicationController
     end
 
     def admin_page_params
-      params.require( :admin_page ).permit( :title, :body, :page_id, :hidden, :raw_editor )
+      params.require( :admin_page ).permit( :title,
+                                            :body,
+                                            :page_id,
+                                            :hidden,
+                                            :raw_editor,
+                                            :page_type,
+                                            :form_selection_list_contents )
     end
 
 end
