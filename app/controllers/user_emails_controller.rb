@@ -11,7 +11,7 @@ class UserEmailsController < ApplicationController
     form_kind  = is_booking ? 'booking' : 'message'
 
     success = begin
-      true#verify_recaptcha( {} )
+      verify_recaptcha( {} )
     rescue
       false
     end
