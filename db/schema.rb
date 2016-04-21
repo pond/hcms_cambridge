@@ -36,7 +36,7 @@ ActiveRecord::Schema.define(version: 20160419092331) do
     t.boolean  "hidden",                       default: false,    null: false
     t.boolean  "raw_editor",                   default: false,    null: false
     t.string   "page_type",                    default: "normal", null: false
-    t.text     "form_selection_list_contents"
+    t.text     "form_selection_list_contents", default: "",       null: false
   end
 
   create_table "redactor_assets", force: :cascade do |t|
