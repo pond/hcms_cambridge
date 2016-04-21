@@ -63,7 +63,7 @@ Rails.application.configure do
     :enable_starttls_auto => true,
     :user_name            => ENV[ 'SENDGRID_USERNAME' ],
     :password             => ENV[ 'SENDGRID_PASSWORD' ],
-    :domain               => Mail::Address.new( Rails.application.config.uk_org_pond_hcms_email ).domain,
+    :domain               => Mail::Address.new( Rails.application.config.uk_org_pond_hcms.email ).domain,
     :authentication       => :plain
   }
 
