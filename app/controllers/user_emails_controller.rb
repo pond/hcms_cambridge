@@ -16,9 +16,21 @@ class UserEmailsController < ApplicationController
       false
     end
 
+    # IMPORTANT! DO NOT put externally sourced data into @message, as it
+    # rendered raw on the page (we want to add HTML to it sometimes).
+
     unless success
       @page.title = "Couldn't send #{ form_kind }"
       @message = "Sorry! The reCaptcha challenge wasn't happy with the response. Please try again or contact us by phone for assistance."
+      return
+    end
+
+    unless params[ 'email' ].present? || params[ 'phone' ].present?
+      @page.title = "Couldn't send #{ form_kind }"
+      @message = "Sorry, you must provide at least an e-mail address or phone number so we can get back to you with a response."
+      unless request.env['HTTP_REFERER'].empty?
+        @message << ' ' << view_context.link_to( 'Please try again', request.env['HTTP_REFERER'] ) << '.'
+      end
       return
     end
 
@@ -31,15 +43,3 @@ class UserEmailsController < ApplicationController
     @message = "Your #{ form_kind } has been sent. We'll get back to you as soon as we can."
   end
 end
-
-
-
-# "name"=>"", "email"=>"", "phone"=>"", "notes"=>""
-#
-# "g-recaptcha-response"=>"03A...JHapw",
-#
-# bookings only
-# "date"=>"", "time"=>""
-#
-# optional on anything
-# "selection"=>{"selection"=>"Shared Tour (see above for rates)"}
