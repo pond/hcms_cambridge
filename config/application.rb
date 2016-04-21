@@ -35,7 +35,7 @@ module Hcms
 
     config.autoload_paths << Rails.root.join('lib', 'recaptcha')
 
-    config.uk_org_pond_hcms_email = 'ahodgkin@rowing.org.uk'
+    config.uk_org_pond_hcms_email = 'bookings@cambridgepuntingcompany.co.uk'
 
   end
 end
