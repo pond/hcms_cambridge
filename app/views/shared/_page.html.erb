@@ -20,7 +20,7 @@
     </p>
     <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
       <p>
-        <%= label_tag :date, 'Preferred date (at least two days in advance)' %><br>
+        <%= label_tag :date, 'Date (at least two days in advance)' %><br>
         <%= date_field_tag :date, '', :placeholder => ( Date.today + 2.days ).strftime( '%-d %b %Y' ), :min => Date.today + 2.days %>
       </p>
       <p>
