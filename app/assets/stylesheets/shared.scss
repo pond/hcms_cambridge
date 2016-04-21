@@ -327,7 +327,7 @@ section.content, section.footer {
   section.main, .redactor-box {
     background-size: $container_width_mid 100%;
 
-    iframe {
+    iframe:not([title='recaptcha widget']) {
       width: $content_width_mid * 0.85333333333;
       height: ( ( $content_width_mid * 0.85333333333 ) * 9 ) / 16;
     }
@@ -396,7 +396,7 @@ section.content, section.footer {
   section.main, .redactor-box {
     background-size: $container_width_narrow 100%;
 
-    iframe {
+    iframe:not([title='recaptcha widget']) {
       width: $content_width_narrow * 0.85333333333;
       height: ( ( $content_width_narrow * 0.85333333333 ) * 9 ) / 16;
     }
