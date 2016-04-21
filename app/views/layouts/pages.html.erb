@@ -55,7 +55,7 @@
     <section class="footer">
       <section class="footer_content">
 <% if user_signed_in? -%>
-<%   if @page || @admin_page -%>
+<%   if ( @page && @page.is_a?( Page ) ) || ( @admin_page && @admin_page.is_a?( Admin::Page ) ) -%>
       <%= link_to 'Edit', edit_admin_page_path( @page || @admin_page) %> |
 <%   end -%>
       <%= link_to 'New', new_admin_page_path %> |

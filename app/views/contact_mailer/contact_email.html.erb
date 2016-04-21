@@ -1,0 +1,15 @@
+    <p>You have received a message.</p>
+    <dl>
+      <dt><strong>Name</strong></dt>
+      <dd><%= @name %></dd>
+      <dt><strong>E-mail address</strong></dt>
+      <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
+      <dt><strong>Phone number</strong></dt>
+      <dd><%= @phone %></dd>
+<% unless @menu.blank? -%>
+      <dt><strong>Menu selection</strong></dt>
+      <dd><%= @menu %></dd>
+<% end -%>
+      <dt><strong>Message</strong></dt>
+      <dd><%= @message.blank? ? 'None' : '"' + @message + '"' %></dd>
+    </dl>
