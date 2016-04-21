@@ -2,11 +2,13 @@ Rails.application.routes.draw do
 
   mount RedactorRails::Engine => '/redactor_rails'
   root 'pages#show'
-  resources :pages,     :only => [ :show ]
-  resources :by_titles, :only => [ :show ]
+  resources :pages,       :only => [ :show   ]
+  resources :by_titles,   :only => [ :show   ]
+  resource  :user_emails, :only => [ :create ]
 
   namespace :admin, :path => 'hcms' do
     root 'pages#index'
+
     resources :pages
     resources :move_pages, :only => [ :update ]
 

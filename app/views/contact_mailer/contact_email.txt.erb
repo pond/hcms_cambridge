@@ -1,0 +1,18 @@
+You have received a message.
+
+Name:
+<%= @name %>
+
+E-mail address:
+<%= @email %>
+
+Phone number:
+<%= @phone %>
+
+<% unless @menu.blank? -%>
+Menu selection:
+<%= @menu %>
+<% end -%>
+
+Main message:
+<%= @message.blank? ? 'None' : '"' + @message + '"' %>

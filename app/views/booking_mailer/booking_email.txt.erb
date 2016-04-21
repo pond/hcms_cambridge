@@ -1,0 +1,24 @@
+You have received a booking request.
+
+Name:
+<%= @name %>
+
+E-mail address:
+<%= @email %>
+
+Phone number:
+<%= @phone %>
+
+Preferred date:
+<%= @date %>
+
+Preferred time:
+<%= @time %>
+
+<% unless @menu.blank? -%>
+Menu selection:
+<%= @menu %>
+<% end -%>
+
+Other notes:
+<%= @notes.blank? ? 'None' : '"' + @notes + '"' %>
