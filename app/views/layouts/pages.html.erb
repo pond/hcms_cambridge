@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
 
-    <title>Canterbury Punting Company: <%= @page.title %></title>
+    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @page.title %></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <%= stylesheet_link_tag    'pages', media: 'all' %>
@@ -13,12 +13,12 @@
   </head>
   <body>
     <section class="header">
-      <img id="logo" src="<%= image_path( 'logo.png' )%>" width="210" height="68">
+      <img id="logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
       <nav>
-        <a target="_blank" href="https://www.facebook.com/CanterburyPuntingCompany"><i class="fa fa-facebook-official"></i></a>
-        <a target="_blank" href="https://twitter.com/CanterburyPunt"><i class="fa fa-twitter-square"></i></a>
-        <a target="_blank" href="https://instagram.com/canterburypuntingcompany/"><i class="fa fa-instagram"></i></a>
-        <a target="_blank" href="https://plus.google.com/110659658154563209853/posts"><i class="fa fa-google-plus-square"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook  %>"><i class="fa fa-facebook-official"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter   %>"><i class="fa fa-twitter-square"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.google    %>"><i class="fa fa-google-plus-square"></i></a>
       </nav>
     </section>
 
@@ -62,8 +62,8 @@
       <%= link_to 'All Pages', admin_pages_path %>
 <% else -%>
       <br>
-      <%= link_to '07786 332666', 'tel:+447786332666' %> |
-      <%= link_to 'ashley@canterburypunting.co.uk', 'mailto:ashley@canterburypunting.co.uk' %>
+      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
 <% end -%>
       </section>
     </section>

@@ -1,4 +1,6 @@
 class BookingMailer < ApplicationMailer
+  default :to => Rails.application.config.uk_org_pond_hcms.booking_email
+
   def booking_email( params )
     @name    = params[ 'name'      ]
     @email   = params[ 'email'     ]

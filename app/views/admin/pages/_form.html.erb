@@ -35,7 +35,7 @@
   <div class="field">
     <p>
       <%= f.label :page_type, 'What kind of page is this going to be?' %><br />
-      <%= f.collection_select :page_type, Page::PAGE_TYPES, :internal_type, :human_text %><br />
+      <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %><br />
       <small><em>You must save then re-edit the page if you change this setting</em></small>
     </p>
   </div>
