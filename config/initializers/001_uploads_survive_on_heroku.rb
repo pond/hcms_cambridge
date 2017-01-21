@@ -29,5 +29,6 @@ if use_s3?
       :region                 => ENV['AWS_S3_REGION']
     }
     config.fog_directory  = ENV['AWS_S3_BUCKET_NAME']
+    config.storage        = :fog
   end
 end
