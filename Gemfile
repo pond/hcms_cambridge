@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.2.3'
+ruby '2.2.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 4.2'
@@ -41,7 +41,7 @@ gem 'devise'
 #
 gem 'fog-aliyun', '~> 0.1.0' # Argh: https://github.com/CultivateLabs/storytime/issues/188
 gem 'fog', require: 'fog/aws'
-gem 'carrierwave', github: 'carrierwaveuploader/carrierwave'
+gem 'carrierwave', '~> 1.0.0' # github: 'carrierwaveuploader/carrierwave'
 gem 'mini_magick'
 gem 'redactor-rails'
 
