@@ -213,7 +213,7 @@ section.main, .redactor-box {
    * acceptable ratio.
    */
 
-  iframe:not([title='recaptcha widget']) {
+  iframe:not([title='recaptcha widget']):not(.no_decorations) {
     margin-left: auto;
     margin-right: auto;
     width: $content_width * 0.85333333333;
@@ -221,6 +221,20 @@ section.main, .redactor-box {
 
     @include standard_shadow;
     @include standard_spinner;
+  }
+
+  /* No-decoration arbitrary content iframes are square by default; to
+   * match bespoke content height, use an inline CSS declaration -
+   * <iframe ... style="height: 400px" ...> - though it won't be
+   * responsive.
+   */
+
+  iframe.no_decorations {
+    margin-left: auto;
+    margin-right: auto;
+    width: $content_width;
+    height: $content_width;
+    overflow: hidden;
   }
 
   img.no_shadow, iframe.no_shadow {
