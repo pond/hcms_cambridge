@@ -241,6 +241,15 @@ section.main, .redactor-box {
     @include no_shadow;
   }
 
+  div.g-recaptcha iframe {
+    background: none !important;
+    height: auto !important;
+    width: auto !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+  }
+
   .redactor-editor,
   div.above-clear {
 
