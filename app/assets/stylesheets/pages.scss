@@ -2,11 +2,17 @@
 
 body {
   background: #061923 url( 'background.jpg' ) no-repeat center center fixed;
-  background-position: fixed;
+  background-attachment: fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+
+  @media (max-width: $container_width) {
+    background-size: 100%;
+    background-attachment: scroll;
+    background-repeat: repeat-y;
+  }
 }
 
 .pure-menu-horizontal {
