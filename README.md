@@ -48,7 +48,7 @@ Next set variable `AWS_ACCESS_KEY_ID` to switch CarrierWave over to Amazon S3 st
 
 In brief:
 
-```bash
+```sh
 heroku --app your-appname-1234 config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy
 heroku --app your-appname-1234 config:set AWS_S3_REGION=region # e.g. 'eu-west-1'
 heroku --app your-appname-1234 config:set AWS_S3_BUCKET_NAME=s3-bucket-name
