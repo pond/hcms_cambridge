@@ -15,6 +15,23 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Patch to work with PG 1.x - see
+# https://github.com/rails/rails/issues/31673#issuecomment-409528178
+module Kernel
+  def gem_with_pg_fix(dep, *reqs)
+    if dep == "pg" && reqs == ["~> 0.15"]
+      reqs = ["~> 1.0"]
+    end
+    gem_without_pg_fix(dep, *reqs)
+  end
+
+  alias_method_chain :gem, :pg_fix
+end
+# pg 1.0 gem has removed these constants, but 4.2 ActiveRecord still expects them
+PGconn   = PG::Connection
+PGresult = PG::Result
+PGError  = PG::Error
+
 module Hcms
   class Application < Rails::Application
 
