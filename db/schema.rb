@@ -16,16 +16,6 @@ ActiveRecord::Schema.define(version: 20160419092331) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "carrier_wave_files", force: :cascade do |t|
-    t.string   "identifier"
-    t.string   "original_filename"
-    t.string   "content_type"
-    t.string   "size"
-    t.binary   "data"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "pages", force: :cascade do |t|
     t.text     "title",                        default: "",       null: false
     t.text     "body",                         default: "",       null: false
