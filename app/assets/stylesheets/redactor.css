@@ -1051,10 +1051,11 @@
 .redactor-styles {
   margin: 0;
   padding: 16px 18px;
-  color: #333;
+/*  color: #333;
   font-family: "Trebuchet MS", "Helvetica Neue", Helvetica, Tahoma, sans-serif;
   font-size: 1em;
   line-height: 1.5;
+*/
   box-sizing: border-box; }
   .redactor-styles *,
   .redactor-styles *:before,
@@ -1071,11 +1072,11 @@
     .redactor-styles[dir="rtl"] ul ul,
     .redactor-styles[dir="rtl"] ol ol,
     .redactor-styles[dir="rtl"] ul ol,
-    .redactor-styles[dir="rtl"] ol ul {
+/*    .redactor-styles[dir="rtl"] ol ul {
       margin: 0 1.5em 0 0; }
-    .redactor-styles[dir="rtl"] figcaption {
+*/    .redactor-styles[dir="rtl"] figcaption {
       text-align: right; }
-  .redactor-styles ul[dir="rtl"],
+/*  .redactor-styles ul[dir="rtl"],
   .redactor-styles ul[dir="rtl"] ul,
   .redactor-styles ul[dir="rtl"] ol,
   .redactor-styles ol[dir="rtl"],
@@ -1146,18 +1147,20 @@
     font-size: 0.83333em;
     text-transform: uppercase;
     letter-spacing: .035em; }
+*/
   .redactor-styles blockquote {
     font-style: italic;
     color: rgba(0, 0, 0, 0.5);
     border: none; }
   .redactor-styles table {
     width: 100%; }
-  .redactor-styles time, .redactor-styles small, .redactor-styles var, .redactor-styles code, .redactor-styles kbd, .redactor-styles mark {
+/*  .redactor-styles time, .redactor-styles small, .redactor-styles var, .redactor-styles code, .redactor-styles kbd, .redactor-styles mark {
     display: inline-block;
     font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
     font-size: 87.5%;
     line-height: 1;
     color: rgba(51, 51, 51, 0.9); }
+*/
   .redactor-styles var, .redactor-styles cite {
     opacity: .6; }
   .redactor-styles var {

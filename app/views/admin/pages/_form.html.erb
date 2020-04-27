@@ -59,15 +59,13 @@
 
 <% if @admin_page.raw_editor -%>
   <div class="redactor_container">
-    <div class="redactor-box">
-      <div class="redactor-editor">
-        <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
-      </div>
+    <div class="redactor-box redactor-styles-on">
+      <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
     </div>
   </div>
 <% else -%>
-  <div id="redactor_toolbar"></div>
   <div class="redactor_container">
+    <div id="redactor_toolbar"></div>
     <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
   </div>
 <% end -%>
