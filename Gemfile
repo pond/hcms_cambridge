@@ -1,16 +1,10 @@
 source 'https://rubygems.org'
 ruby '2.6.6'
 
-gem 'rails', '>= 4', '< 5.0'
+gem 'rails', '>= 5', '< 5.1'
 
 gem 'pg'
 gem 'thin'
-
-# For Heroku onl.y
-#
-#   https://github.com/heroku/rails_12factor
-#
-gem 'rails_12factor'
 
 # Asset pipeline (sigh).
 #
