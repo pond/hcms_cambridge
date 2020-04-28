@@ -40,7 +40,7 @@ Rails.application.configure do
   # config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = true
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
@@ -66,7 +66,7 @@ Rails.application.configure do
     :enable_starttls_auto => true,
     :user_name            => ENV[ 'SENDGRID_USERNAME' ],
     :password             => ENV[ 'SENDGRID_PASSWORD' ],
-    :domain               => Mail::Address.new( Rails.application.config.uk_org_pond_hcms.email ).domain,
+    :domain               => Rails.application.config.uk_org_pond_hcms.mail_domain,
     :authentication       => :plain
   }
 
