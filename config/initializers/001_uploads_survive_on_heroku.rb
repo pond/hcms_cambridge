@@ -30,5 +30,6 @@ if use_s3?
     }
     config.fog_directory  = ENV['AWS_S3_BUCKET_NAME']
     config.storage        = :fog
+    config.fog_provider   = 'fog/aws'
   end
 end
