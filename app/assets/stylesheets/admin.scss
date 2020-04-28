@@ -1,5 +1,5 @@
 @import 'shared.scss';
-@import 'redactor_custom.css';
+@import 'redactor.css';
 
 body {
   background: #061923;
@@ -20,17 +20,22 @@ section.messages {
 
 div.redactor-container {
   min-width: 800px;
-}
-
-.redactor-box {
   overflow: scroll;
 }
 
-.redactor-editor {
+#redactor_toolbar {
+  background: white;
+  padding: 3px 3px 0 3px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+
+.redactor-styles, .redactor-in {
+  position: static;
   background: transparent;
   border: none;
   padding-top: 10px !important;
-  overflow: scroll;
+  box-sizing: content-box;
 }
 
 section.admin, footer {

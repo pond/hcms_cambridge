@@ -95,7 +95,7 @@ select {
   max-width: 100%;
 }
 
-section.header, section.footer, section.main, .redactor-editor {
+section.header, section.footer, section.main, .redactor-styles.redactor-in {
   width: $container_width;
   margin: 0 auto;
   font-family: 'Lora', serif;
@@ -132,11 +132,11 @@ section.header {
   }
 }
 
-section.main, .redactor-box {
+section.main, .redactor-box.redactor-styles-on {
   min-height: 352px;
   color: #000;
 
-  .redactor-editor,
+  .redactor-styles.redactor-in,
   div.above-clear {
     & > h1:first-child,
     & > h2:first-child,
@@ -161,7 +161,7 @@ section.main, .redactor-box {
   background: url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
   background-size: 800px 100%;
 
-  nav, section.content, .redactor-editor {
+  nav, section.content, .redactor-styles.redactor-in {
     @include content_metrics;
   }
 
@@ -241,7 +241,7 @@ section.main, .redactor-box {
     @include no_shadow;
   }
 
-  .redactor-editor,
+  .redactor-styles.redactor-in,
   div.above-clear {
 
     /* Inside the editor or content before-float-clear wrapper DIV,
@@ -313,7 +313,7 @@ section.content, section.footer {
 //////////////////////////////////////////////////////////////////////////////
 
 @media only screen and (max-width: $container_width) {
-  section.header, section.main, section.footer, .redactor-editor {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_mid;
   }
 
@@ -338,7 +338,7 @@ section.content, section.footer {
     }
   }
 
-  section.main, .redactor-box {
+  section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_mid 100%;
 
     iframe:not([title='recaptcha widget']),
@@ -353,7 +353,7 @@ section.content, section.footer {
       height: auto !important;
     }
 
-    nav, section.content, .redactor-editor {
+    nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_mid;
     }
 
@@ -385,7 +385,7 @@ section.content, section.footer {
 }
 
 @media only screen and (max-width: $container_width_mid) {
-  section.header, section.main, section.footer, .redactor-editor {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_narrow;
   }
 
@@ -408,7 +408,7 @@ section.content, section.footer {
     }
   }
 
-  section.main, .redactor-box {
+  section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_narrow 100%;
 
     iframe:not([title='recaptcha widget']),
@@ -421,7 +421,7 @@ section.content, section.footer {
       max-width: $content_width_narrow * 0.75 !important;
     }
 
-    nav, section.content, .redactor-editor {
+    nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_narrow;
     }
   }

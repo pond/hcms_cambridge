@@ -1,5 +1,10 @@
 //= require jquery
 //= require jquery_ujs
-//= require redactor/redactor.js
-//= require redactor/video.js
+//= require redactor3_rails
+//= require redactor
+//= require redactor_plugins/alignment
+//= require redactor_plugins/fontcolor
+//= require redactor_plugins/fontsize
+//= require redactor_plugins/fullscreen
+//= require redactor_plugins/video
 //= require redactor_config.js

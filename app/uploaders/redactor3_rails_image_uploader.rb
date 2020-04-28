@@ -1,6 +1,6 @@
 # encoding: utf-8
-class RedactorRailsPictureUploader < CarrierWave::Uploader::Base
-  include RedactorRails::Backend::CarrierWave
+class Redactor3RailsImageUploader < CarrierWave::Uploader::Base
+  include Redactor3Rails::Backend::CarrierWave
 
   # Include RMagick or ImageScience support:
   # include CarrierWave::RMagick
@@ -39,7 +39,7 @@ class RedactorRailsPictureUploader < CarrierWave::Uploader::Base
   # Add a white list of extensions which are allowed to be uploaded.
   # For images you might use something like this:
   def extension_white_list
-    RedactorRails.image_file_types
+    Redactor3Rails.images_file_types
   end
 
   # Override the filename of the uploaded files:
