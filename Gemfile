@@ -26,7 +26,7 @@ gem 'sdoc'
 
 # Device for Auth, with Device-integrated Redactor for editing.
 #
-#   https://github.com/heartcombo/devise
+#   https://rubygems.org/gems/devise
 #
 gem 'devise', '~> 4.7'
 
