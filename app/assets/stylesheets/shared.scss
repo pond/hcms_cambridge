@@ -95,7 +95,7 @@ select {
   max-width: 100%;
 }
 
-section.header, section.footer, section.main, .redactor-editor {
+section.header, section.footer, section.main, .redactor-styles.redactor-in {
   width: $container_width;
   margin: 0 auto;
   font-family: 'Lora', serif;
@@ -132,11 +132,11 @@ section.header {
   }
 }
 
-section.main, .redactor-box {
+section.main, .redactor-box.redactor-styles-on {
   min-height: 352px;
   color: #000;
 
-  .redactor-editor,
+  .redactor-styles.redactor-in,
   div.above-clear {
     & > h1:first-child,
     & > h2:first-child,
@@ -161,7 +161,7 @@ section.main, .redactor-box {
   background: url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
   background-size: 800px 100%;
 
-  nav, section.content, .redactor-editor {
+  nav, section.content, .redactor-styles.redactor-in {
     @include content_metrics;
   }
 
@@ -199,11 +199,11 @@ section.main, .redactor-box {
     @include standard_spinner;
   }
 
-  img[ align = 'right' ] {
+  img[align = 'right'] {
     margin: 0 10px 10px 0;
   }
 
-  img[ align = 'left' ] {
+  img[align = 'left'] {
     margin: 0 0 10px 10px;
   }
 
@@ -212,8 +212,7 @@ section.main, .redactor-box {
    * 16:9 video inside any such frame, or something where 16:9 is an
    * acceptable ratio.
    */
-
-  iframe:not([title='recaptcha widget']):not(.no_decorations) {
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
     margin-left: auto;
     margin-right: auto;
     width: $content_width * 0.85333333333;
@@ -241,16 +240,7 @@ section.main, .redactor-box {
     @include no_shadow;
   }
 
-  div.g-recaptcha iframe {
-    background: none !important;
-    height: auto !important;
-    width: auto !important;
-    -webkit-box-shadow: none !important;
-    -moz-box-shadow: none !important;
-    box-shadow: none !important;
-  }
-
-  .redactor-editor,
+  .redactor-styles.redactor-in,
   div.above-clear {
 
     /* Inside the editor or content before-float-clear wrapper DIV,
@@ -322,7 +312,7 @@ section.content, section.footer {
 //////////////////////////////////////////////////////////////////////////////
 
 @media only screen and (max-width: $container_width) {
-  section.header, section.main, section.footer, .redactor-editor {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_mid;
   }
 
@@ -347,11 +337,10 @@ section.content, section.footer {
     }
   }
 
-  section.main, .redactor-box {
+  section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_mid 100%;
 
-    iframe:not([title='recaptcha widget']),
-    iframe:not([title='recaptcha widget']):not(.no_decorations) {
+    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
       width: $content_width_mid * 0.85333333333;
       height: ( ( $content_width_mid * 0.85333333333 ) * 9 ) / 16;
     }
@@ -362,7 +351,7 @@ section.content, section.footer {
       height: auto !important;
     }
 
-    nav, section.content, .redactor-editor {
+    nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_mid;
     }
 
@@ -394,7 +383,7 @@ section.content, section.footer {
 }
 
 @media only screen and (max-width: $container_width_mid) {
-  section.header, section.main, section.footer, .redactor-editor {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_narrow;
   }
 
@@ -417,11 +406,10 @@ section.content, section.footer {
     }
   }
 
-  section.main, .redactor-box {
+  section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_narrow 100%;
 
-    iframe:not([title='recaptcha widget']),
-    iframe:not([title='recaptcha widget']):not(.no_decorations) {
+    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
       width: $content_width_narrow * 0.85333333333;
       height: ( ( $content_width_narrow * 0.85333333333 ) * 9 ) / 16;
     }
@@ -430,7 +418,7 @@ section.content, section.footer {
       max-width: $content_width_narrow * 0.75 !important;
     }
 
-    nav, section.content, .redactor-editor {
+    nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_narrow;
     }
   }

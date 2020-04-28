@@ -1,5 +1,5 @@
-class Page < ActiveRecord::Base
-  belongs_to :page
+class Page < ApplicationRecord
+  belongs_to :page, optional: true
   has_many :pages
   alias_method :children, :pages
 

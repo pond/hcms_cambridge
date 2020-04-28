@@ -1,7 +1,7 @@
 class UserEmailsController < ApplicationController
   layout 'pages'
 
-  before_filter do
+  before_action do
     @page = OpenStruct.new
     @page.title = 'Contact'
   end
@@ -11,7 +11,7 @@ class UserEmailsController < ApplicationController
     form_kind  = is_booking ? 'booking' : 'message'
 
     success = begin
-      verify_recaptcha( {} )
+      verify_recaptcha({})
     rescue
       false
     end
