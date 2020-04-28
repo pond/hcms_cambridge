@@ -8,38 +8,51 @@ gem 'thin'
 
 # Asset pipeline (sigh).
 #
+#   https://rubygems.org/gems/sass-rails
+#   https://rubygems.org/gems/coffee-rails
+#   https://rubygems.org/gems/uglifier
+#
 gem 'sass-rails'
-gem 'coffee-rails', '~> 4.1'
+gem 'coffee-rails'
 gem 'uglifier'
 
 # jQuery for JavaScript, SDoc formatted documentation.
 #
+#   https://rubygems.org/gems/sdoc
+#   https://rubygems.org/gems/jquery-rails
+#
 gem 'jquery-rails'
-gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'sdoc'
 
 # Device for Auth, with Device-integrated Redactor for editing.
 #
 #   https://github.com/heartcombo/devise
 #
-gem 'devise'
+gem 'devise', '~> 4.7'
+
+# Recaptcha used for e.g. the "booking" type pages.
+#
+#   https://rubygems.org/gems/recaptcha
+#
+gem 'recaptcha', '~> 5.5'
 
 # Image uploads and support for the Redactor WYSIWYG-ish page editor.
 #
-#   https://github.com/fog/fog-aws / https://github.com/fog/fog
-#   https://github.com/carrierwaveuploader/carrierwave
-#   https://github.com/minimagick/minimagick
-#   https://github.com/marsz/redactor3_rails
+#   https://rubygems.org/gems/fog-aws / https://github.com/fog/fog
+#   https://rubygems.org/gems/carrierwave
+#   https://rubygems.org/gems/mini_magick
+#   https://rubygems.org/gems/redactor3_rails
 #
-gem 'fog-aws'
-gem 'carrierwave', '~> 1.0'
-gem 'mini_magick'
-gem 'redactor3_rails'
+gem 'fog-aws',         '~> 3.6'
+gem 'carrierwave',     '~> 1.0'
+gem 'mini_magick',     '~> 4.10'
+gem 'redactor3_rails', '~> 0.1'
 
 # Orderable pages.
 #
-#   https://github.com/swanandp/acts_as_list
+#   https://rubygems.org/gems/acts_as_list
 #
-gem 'acts_as_list'
+gem 'acts_as_list', '~> 1.0'
 
 group :development, :test do
   gem 'byebug'
@@ -47,10 +60,4 @@ group :development, :test do
   # Access an IRB console on exception pages or by using <%= console %> in views.
   #
   gem 'web-console', '~> 2.0'
-
-  # Catch e-mails on SMTP port 1025 and display a GUI for them on HTTP port 1080.
-  #
-  #   https://mailcatcher.me
-  #
-  gem 'mailcatcher'
 end
