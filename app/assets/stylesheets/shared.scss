@@ -33,16 +33,40 @@ $content_padding_lr_narrow: $content_padding_lr / 2;
   padding: 0 $content_padding_lr 0 $content_padding_lr;
 }
 
+@mixin widescreen_block {
+  $inner_width: $content_width * 0.85333333333;
+  $inner_height: ($inner_width * 9) / 16;
+  width: $inner_width !important;
+  height: $inner_height !important;
+  margin: 0 ($content_width - $inner_width) / 2;
+}
+
 @mixin content_metrics_mid {
   width: $content_width_mid;
   margin: 0;
   padding: 0 $content_padding_lr_mid 0 $content_padding_lr_mid;
 }
 
+@mixin widescreen_block_mid {
+  $inner_width_mid: $content_width_mid * 0.85333333333;
+  $inner_height_mid: ($inner_width_mid * 9) / 16;
+  width: $inner_width_mid !important;
+  height: $inner_height_mid !important;
+  margin: 0 ($content_width_mid - $inner_width_mid) / 2;
+}
+
 @mixin content_metrics_narrow {
   width: $content_width_narrow;
   margin: 0;
   padding: 0 $content_padding_lr_narrow 0 $content_padding_lr_narrow;
+}
+
+@mixin widescreen_block_narrow {
+  $inner_width_narrow: $content_width_narrow * 0.85333333333;
+  $inner_height_narrow: ($inner_width_narrow * 9) / 16;
+  width: $inner_width_narrow !important;
+  height: $inner_height_narrow !important;
+  margin: 0 ($content_width_narrow - $inner_width_narrow) / 2;
 }
 
 @mixin standard_shadow {
@@ -194,9 +218,15 @@ section.main, .redactor-box.redactor-styles-on {
     }
   }
 
+  figure {
+    margin: 0;
+    padding: 0;
+  }
+
   img {
     @include standard_shadow;
     @include standard_spinner;
+    max-width: $content_width;
   }
 
   img[align = 'right'] {
@@ -212,12 +242,12 @@ section.main, .redactor-box.redactor-styles-on {
    * 16:9 video inside any such frame, or something where 16:9 is an
    * acceptable ratio.
    */
-  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
-    margin-left: auto;
-    margin-right: auto;
-    width: $content_width * 0.85333333333;
-    height: ( ( $content_width * 0.85333333333 ) * 9 ) / 16;
 
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+    @include widescreen_block;
+  }
+
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
     @include standard_shadow;
     @include standard_spinner;
   }
@@ -308,10 +338,10 @@ section.content, section.footer {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Narrow viewport / mobile variations
+// Medium width viewport
 //////////////////////////////////////////////////////////////////////////////
 
-@media only screen and (max-width: $container_width) {
+@media only screen and (min-width: $container_width_mid) and (max-width: $container_width) {
   section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_mid;
   }
@@ -341,12 +371,11 @@ section.content, section.footer {
     background-size: $container_width_mid 100%;
 
     iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
-      width: $content_width_mid * 0.85333333333;
-      height: ( ( $content_width_mid * 0.85333333333 ) * 9 ) / 16;
+      @include widescreen_block_mid;
     }
 
     img {
-      max-width: $content_width_mid * 0.75 !important;
+      max-width: $content_width_mid !important;
       min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
       height: auto !important;
     }
@@ -382,6 +411,10 @@ section.content, section.footer {
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Narrow viewport
+//////////////////////////////////////////////////////////////////////////////
+
 @media only screen and (max-width: $container_width_mid) {
   section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_narrow;
@@ -410,12 +443,11 @@ section.content, section.footer {
     background-size: $container_width_narrow 100%;
 
     iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
-      width: $content_width_narrow * 0.85333333333;
-      height: ( ( $content_width_narrow * 0.85333333333 ) * 9 ) / 16;
+      @include widescreen_block_narrow;
     }
 
     img {
-      max-width: $content_width_narrow * 0.75 !important;
+      max-width: $content_width_narrow !important;
     }
 
     nav, section.content, .redactor-styles.redactor-in {
