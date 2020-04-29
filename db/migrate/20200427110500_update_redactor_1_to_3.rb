@@ -1,4 +1,4 @@
-class UpdateRedactor1To3 < ActiveRecord::Migration
+class UpdateRedactor1To3 < ActiveRecord::Migration[4.2]
   def self.change
     alter_table :redactor_assets do |t|
       t.string :custom_file_name
