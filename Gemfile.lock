@@ -1,3 +1,13 @@
+GIT
+  remote: https://github.com/pond/redactor3_rails.git
+  revision: 1e144530acc77eb13fe49fa5ee8a19d0d57cae0f
+  branch: feature/fix-js
+  specs:
+    redactor3_rails (0.1.4)
+      devise
+      mime-types
+      orm_adapter
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -165,10 +175,6 @@ GEM
     rdoc (6.2.1)
     recaptcha (5.5.0)
       json
-    redactor3_rails (0.1.5)
-      devise
-      mime-types
-      orm_adapter
     responders (3.0.0)
       actionpack (>= 5.0)
       railties (>= 5.0)
@@ -230,7 +236,7 @@ DEPENDENCIES
   pg
   rails (>= 5.2, < 6)
   recaptcha (~> 5.5)
-  redactor3_rails (~> 0.1)
+  redactor3_rails!
   sass-rails
   sdoc
   thin
