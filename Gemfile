@@ -46,7 +46,7 @@ gem 'recaptcha', '~> 5.5'
 gem 'fog-aws',         '~> 3.6'
 gem 'carrierwave',     '~> 2.1'
 gem 'mini_magick',     '~> 4.10'
-gem 'redactor3_rails', '~> 0.1'
+gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branch: 'feature/fix-js'
 
 # Orderable pages.
 #
