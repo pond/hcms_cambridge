@@ -3,14 +3,22 @@ class Page < ApplicationRecord
   has_many :pages
   alias_method :children, :pages
 
+  before_validation :assign_slug
+
+  def assign_slug
+    self.slug = (self.title || '').parameterize if self.slug.blank?
+  end
+
   acts_as_list :scope => :page
 
   validates_presence_of :title, :body
+  validates_uniqueness_of :slug
 
   default_scope -> { order( :position => :asc ) }
   scope :top_level, -> { where( :page_id => nil  ) }
   scope :for_navigation, -> { where( :hidden => false ) }
 
+  IS_INTEGER             = /\A\d+\z/
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BOOKING_FORM = 'booking_form'
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
@@ -24,6 +32,14 @@ class Page < ApplicationRecord
   def self.top_level_except( exceptions = nil )
     array = [ exceptions ].flatten
     self.top_level().to_a - array
+  end
+
+  def self.find_by_id_or_slug!( thing )
+    if IS_INTEGER.match?( thing )
+      self.find( thing )
+    else
+      self.find_by_slug!( thing )
+    end
   end
 
   def is_normal_type?
