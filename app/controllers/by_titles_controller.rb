@@ -1,5 +1,6 @@
-# Show a page based on title, rather than ID.
-
+# Show a page based on title, rather than ID. This is outdated now that slugs
+# are supported properly, but kept around in case of historical bookmarks etc.
+#
 class ByTitlesController < ApplicationController
   layout 'pages'
 

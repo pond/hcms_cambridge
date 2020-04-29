@@ -2,6 +2,7 @@ class AddSlugs < ActiveRecord::Migration[5.2]
   def change
     change_table :pages do | t |
       t.text :slug, :null => false, :default => ''
+      t.index :slug
     end
 
     pairs = Page.pluck(:id, :title)
