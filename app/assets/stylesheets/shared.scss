@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'TrajanPro-bold';
-  src: url( 'TrajanPro-Bold.ttf' );
+  src: asset-url( 'TrajanPro-Bold.ttf' );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ $content_padding_lr_narrow: $content_padding_lr / 2;
 }
 
 @mixin standard_spinner {
-  background: url( '/assets/spinner.png' ) center center no-repeat;
+  background: image-url( 'spinner.png' ) center center no-repeat;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ section.header, section.footer, section.main, .redactor-styles.redactor-in {
 section.header {
   position: relative;
   height: 191px;
-  background: url( 'clipboard_top_slice.png' ) bottom center no-repeat;
+  background: image-url( 'clipboard_top_slice.png' ) bottom center no-repeat;
   background-size: 100%;
 
   #logo {
@@ -182,7 +182,7 @@ section.main, .redactor-box.redactor-styles-on {
   border-bottom: 1px solid transparent;
   margin-bottom: -1px;
 
-  background: url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
+  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
   background-size: 800px 100%;
 
   nav, section.content, .redactor-styles.redactor-in {
@@ -303,7 +303,7 @@ section.main, .redactor-box.redactor-styles-on {
 
 section.footer {
   height: 134px;
-  background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
+  background: image-url( 'clipboard_bottom_slice.png' ) top center no-repeat;
   background-size: 100%;
 
   section.footer_content {

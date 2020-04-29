@@ -1,7 +1,7 @@
 @import 'shared.scss';
 
 body {
-  background: #061923 url( 'background.jpg' ) no-repeat center center fixed;
+  background: #061923 image-url( 'background.jpg' ) no-repeat center center fixed;
   background-attachment: fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
