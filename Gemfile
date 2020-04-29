@@ -44,7 +44,7 @@ gem 'recaptcha', '~> 5.5'
 #   https://rubygems.org/gems/redactor3_rails
 #
 gem 'fog-aws',         '~> 3.6'
-gem 'carrierwave',     '~> 1.0'
+gem 'carrierwave',     '~> 2.1'
 gem 'mini_magick',     '~> 4.10'
 gem 'redactor3_rails', '~> 0.1'
 
