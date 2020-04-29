@@ -77,11 +77,12 @@ class Admin::PagesController < ApplicationController
     end
 
     def set_admin_page
-      @admin_page = Admin::Page.find( params[ :id ] )
+      @admin_page = Admin::Page.find_by_id_or_slug!( params[ :id ] )
     end
 
     def admin_page_params
       params.require( :admin_page ).permit( :title,
+                                            :slug,
                                             :body,
                                             :page_id,
                                             :hidden,
