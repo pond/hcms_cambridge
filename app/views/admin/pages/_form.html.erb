@@ -18,6 +18,13 @@
     </p>
   </div>
 
+  <div class="field">
+    <p>
+      <%= f.label :slug %> (optional)<br />
+      <%= f.text_field :slug %>
+    </p>
+  </div>
+
 <% if Page.top_level.count > 0 -%>
   <div class="field">
     <p>
