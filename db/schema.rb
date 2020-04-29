@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(version: 2020_04_29_040904) do
     t.string "page_type", default: "normal", null: false
     t.text "form_selection_list_contents", default: "", null: false
     t.text "slug", default: "", null: false
-    t.index ["slug"], name: "index_pages_on_slug"
+    t.index ["slug"], name: "index_pages_on_slug", unique: true
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

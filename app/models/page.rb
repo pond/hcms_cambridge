@@ -3,7 +3,7 @@ class Page < ApplicationRecord
   has_many :pages
   alias_method :children, :pages
 
-  before_save :assign_slug
+  before_validation :assign_slug
 
   def assign_slug
     self.slug = (self.title || '').parameterize if self.slug.blank?
@@ -12,6 +12,7 @@ class Page < ApplicationRecord
   acts_as_list :scope => :page
 
   validates_presence_of :title, :body
+  validates_uniqueness_of :slug
 
   default_scope -> { order( :position => :asc ) }
   scope :top_level, -> { where( :page_id => nil  ) }
