@@ -20,7 +20,11 @@
 
   <div class="field">
     <p>
-      <%= f.label :slug %> (optional)<br />
+      <%= f.label :slug %>
+      <small>
+        <%= @admin_page.persisted? ? '(beware if changing this; people may have bookmarked this page using its old slug)' : '(optional; if omitted, the slug is generated from the page title)' %>
+      </small>
+      <br />
       <%= f.text_field :slug %>
     </p>
   </div>
