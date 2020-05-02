@@ -227,6 +227,7 @@ section.main, .redactor-box.redactor-styles-on {
     @include standard_shadow;
     @include standard_spinner;
     max-width: $content_width;
+    height: auto !important;
   }
 
   img[align = 'right'] {
@@ -448,6 +449,7 @@ section.content, section.footer {
 
     img {
       max-width: $content_width_narrow !important;
+      height: auto !important;
     }
 
     nav, section.content, .redactor-styles.redactor-in {
