@@ -1,0 +1,10 @@
+<%
+  # Render with:
+  #
+  #   render :partial => 'actions', :locals => {
+  #     :article => Page or Article-model-instance
+  #   }
+-%>
+        <td><%= link_to 'Show', admin_page_article_path( page_id: article.page_id, id: article.id ) %></td>
+        <td><%= link_to 'Edit', edit_admin_page_article_path( page_id: article.page_id, id: article.id ) %></td>
+        <td><%= link_to 'Destroy', admin_page_article_path( page_id: article.page_id, id: article.id ), method: :delete, data: { confirm: 'Are you sure?' } %></td>

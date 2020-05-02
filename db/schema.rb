@@ -10,10 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_29_040904) do
+ActiveRecord::Schema.define(version: 2020_05_02_011706) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "articles", force: :cascade do |t|
+    t.text "title", null: false
+    t.text "slug", null: false
+    t.text "article_hero_image", null: false
+    t.text "summary", null: false
+    t.text "body", null: false
+    t.boolean "raw_editor", default: false, null: false
+    t.bigint "page_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_id"], name: "index_articles_on_page_id"
+    t.index ["slug"], name: "index_articles_on_slug", unique: true
+  end
 
   create_table "pages", id: :serial, force: :cascade do |t|
     t.text "title", default: "", null: false
@@ -28,22 +42,6 @@ ActiveRecord::Schema.define(version: 2020_04_29_040904) do
     t.text "form_selection_list_contents", default: "", null: false
     t.text "slug", default: "", null: false
     t.index ["slug"], name: "index_pages_on_slug", unique: true
-  end
-
-  create_table "redactor_assets", id: :serial, force: :cascade do |t|
-    t.integer "user_id"
-    t.string "data_file_name", null: false
-    t.string "data_content_type"
-    t.integer "data_file_size"
-    t.integer "assetable_id"
-    t.string "assetable_type", limit: 30
-    t.string "type", limit: 30
-    t.integer "width"
-    t.integer "height"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["assetable_type", "assetable_id"], name: "idx_redactor_assetable"
-    t.index ["assetable_type", "type", "assetable_id"], name: "idx_redactor_assetable_type"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

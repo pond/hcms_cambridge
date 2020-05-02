@@ -8,3 +8,21 @@
 //= require redactor_plugins/fullscreen
 //= require redactor_plugins/video
 //= require redactor_config.js
+
+$(document).on('ready page:load', function() {
+  function setVisibilities() {
+    const selectedPageType = $('#admin_page_page_type').children("option:selected").val();
+
+    if (selectedPageType == 'blog') {
+      $('#non-blog-fields').slideUp();
+    } else {
+      $('#non-blog-fields').slideDown();
+    }
+  }
+
+  setVisibilities();
+
+  $('#admin_page_page_type').change(function(event) {
+    setVisibilities();
+  });
+});

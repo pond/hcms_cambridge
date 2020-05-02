@@ -1,0 +1,18 @@
+<%
+  # Ensure a local "article" is set to the Article instance to render:
+  #
+  #   render :partial => 'shared/article', :locals => { :article => ... }
+-%>
+<div style="text-align: center; border-top: 1px solid grey; border-bottom: 1px solid grey; margin-bottom: 20px;">
+  <h3><%= article.title %></h3>
+  <small><%= article.created_at.to_formatted_s(:short) %></small>
+  <p>
+    <em><small><%= article.summary %></small></em>
+  </p>
+</div>
+
+<p>
+  <img src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
+</p>
+
+<%= article.body.html_safe() %>
