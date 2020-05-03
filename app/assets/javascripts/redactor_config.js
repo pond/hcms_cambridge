@@ -17,6 +17,9 @@ $(document).on('ready page:load', function() {
       imageUpload:     "/redactor3_rails/images?" + params,
       imageResizable:  true,
       imagePosition:   true,
+      spellcheck:      true,
+      minHeight:       '450px',
+      maxHeight:       '720px',
       toolbarExternal: "#redactor_toolbar",
       plugins:         [
         'alignment',

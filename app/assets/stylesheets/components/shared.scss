@@ -158,10 +158,6 @@ section.main {
   min-height: 352px;
 }
 
-.redactor-box.redactor-styles-on {
-  min-height: 452px;
-}
-
 section.main, .redactor-box.redactor-styles-on {
   color: #000;
   border: none;
@@ -392,7 +388,6 @@ section.content, section.footer {
 
     img {
       max-width: $content_width_mid !important;
-      min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
       height: auto !important;
     }
 
