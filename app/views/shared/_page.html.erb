@@ -9,7 +9,7 @@
     <section class="blog-articles">
       <% page.articles.each do | article | %>
         <article class="article">
-          <%= link_to admin_page_article_path(page_id: page.id, id: article.id), class: 'article-link' do %>
+          <%= link_to page_article_path(page_id: page.id, id: article.id), class: 'article-link' do %>
             <img class="article-hero-image" src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
             <div class="article-date-and-heading-container">
               <h4 class="article-heading"><%= article.title %></h4>
