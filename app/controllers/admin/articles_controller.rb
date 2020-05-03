@@ -106,11 +106,11 @@ class Admin::ArticlesController < ApplicationController
 
     def article_params
       params.require( :article ).permit( :title,
-                                               :slug,
-                                               :article_hero_image,
-                                               :summary,
-                                               :body,
-                                               :raw_editor )
+                                         :slug,
+                                         :article_hero_image,
+                                         :summary,
+                                         :body,
+                                         :raw_editor )
     end
 
 end

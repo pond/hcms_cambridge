@@ -53,7 +53,7 @@
 
     <section class="footer">
       <section class="footer_content">
-        <% if false&&user_signed_in? -%>
+        <% if user_signed_in? -%>
 
           <% if @page.is_a?( Page ) -%>
             <% if @page.is_blog_type? -%>

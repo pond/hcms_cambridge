@@ -8,12 +8,10 @@ gem 'thin'
 
 # Asset pipeline (sigh).
 #
-#   http://rubygems.org/gems/listen
 #   https://rubygems.org/gems/sass-rails
 #   https://rubygems.org/gems/coffee-rails
 #   https://rubygems.org/gems/uglifier
 #
-gem 'listen'
 gem 'sass-rails'
 gem 'coffee-rails'
 gem 'uglifier'

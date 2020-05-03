@@ -3,7 +3,7 @@ class Page < ActsLikePage
   belongs_to :page, optional: true
 
   has_many :pages
-  has_many :articles
+  has_many :articles, dependent: :destroy
 
   alias_method :children, :pages
 

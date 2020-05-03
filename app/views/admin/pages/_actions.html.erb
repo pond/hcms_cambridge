@@ -25,4 +25,4 @@
 </td>
 <td><%= link_to 'Show',    [        :admin, page ] %></td>
 <td><%= link_to 'Edit',    [ :edit, :admin, page ] %></td>
-<td><%= link_to 'Destroy', [        :admin, page ], method: :delete, data: { confirm: 'Are you sure?' } %></td>
+<td><%= link_to 'Destroy', [        :admin, page ], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %></td>
