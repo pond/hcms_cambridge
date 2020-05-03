@@ -3,8 +3,6 @@
   #
   #   render :partial => 'shared/page', :locals => { :page => ... }
 -%>
-<%= page.body.html_safe() %>
-
 <% if page.is_blog_type? -%>
 
   <% if page.articles.any? -%>
@@ -28,6 +26,8 @@
   <% end -%>
 
 <% elsif page.is_form_type? -%>
+
+  <%= page.body.html_safe() %>
 
   <%= form_tag( user_emails_path ) do %>
     <p>
@@ -80,5 +80,9 @@
       <% end -%>
     </p>
   <% end -%>
+
+<% else -%>
+
+  <%= page.body.html_safe() %>
 
 <% end -%>

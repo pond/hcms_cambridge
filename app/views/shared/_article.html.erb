@@ -5,13 +5,15 @@
 -%>
 <article class="article">
   <div class='blog-header'>
-    <div class="article-date"><%= apphelp_human_time(article.created_at) %></div>
-    <h3 class="article-heading"><%= article.title %></h3>
+    <div class="article-date-and-heading-container">
+      <h2 class="article-heading"><%= article.title %></h2>
+      <div class="article-date"><%= apphelp_human_time(article.created_at) %></div>
+    </div>
     <div class="article-summary"><%= article.summary %></div>
   </div>
 
   <p>
-    <img src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
+    <img class="article-hero-imag" src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
   </p>
 
   <%= article.body.html_safe() %>
