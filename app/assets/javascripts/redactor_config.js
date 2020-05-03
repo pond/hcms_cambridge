@@ -29,10 +29,10 @@ $(document).on('ready page:load', function() {
         'format',
         'bold',
         'italic',
-        'unorderedlist',
-        'orderedlist',
-        'outdent',
+        'ul',
+        'ol',
         'indent',
+        'outdent',
         'image',
         'link',
         'html'
