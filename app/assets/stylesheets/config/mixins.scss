@@ -57,5 +57,6 @@
 }
 
 @mixin standard_spinner {
+  min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
   background: image-url( 'spinner.png' ) center center no-repeat;
 }
