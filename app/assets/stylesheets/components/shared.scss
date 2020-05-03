@@ -132,7 +132,7 @@ section.blog-articles {
     }
   }
 
-  article.article:nth-child(odd):last-child {
+  article.article:only-child {
     margin-left: ($content_width - $article_width) / 2;
   }
 
@@ -406,7 +406,7 @@ section.content, section.footer {
         }
       }
 
-      article.article:nth-child(odd):last-child {
+      article.article:only-child {
         margin-left: ($content_width_mid - $article_width_mid) / 2;
       }
     }
@@ -480,7 +480,7 @@ section.content, section.footer {
         width: $content_width_narrow;
       }
 
-      article.article:nth-child(odd):last-child {
+      article.article:only-child {
         margin-left: 0;
       }
     }
