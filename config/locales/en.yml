@@ -20,4 +20,19 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  time:
+    formats:
+      short: '%B %-d %Y, %l:%M%P'
+      short_no_year: '%B %-d, %l:%M%P'
+
+  activerecord:
+    models:
+      article: Blog article
+
+    attributes:
+      article:
+        title: Article title
+        summary: Brief summary of article
+        article_hero_image: Main photo
+        raw_editor: 'Use the low-level "raw" HTML editor?'
+        body: Main article text

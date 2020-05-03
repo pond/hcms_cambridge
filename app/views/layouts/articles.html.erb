@@ -4,10 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
 
-    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @page.title %></title>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://cambridgepuntguide.com/js/message.js"></script>
+    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @article.title %></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <%= stylesheet_link_tag 'pages', media: 'all' %>
@@ -28,7 +25,7 @@
         <div class="pure-menu pure-menu-horizontal">
           <ul class="pure-menu-list">
 <% Page.top_level.for_navigation.each do | page | -%>
-            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %><%= page.id == @page.id || page.id == @page.page.try( :id ) ? ' current_page' : ''%>">
+            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %>">
               <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
 <%   if page.children.for_navigation.present? -%>
               <ul class="pure-menu-children">
@@ -47,8 +44,8 @@
 
       <section class="content">
         <div class="above-clear">
-          <%= render :partial => 'layouts/messages' %>
-          <%= yield %>
+<%= render :partial => 'layouts/messages' %>
+<%= yield %>
         </div>
         <div style="clear: both"></div>
       </section>
@@ -58,19 +55,11 @@
       <section class="footer_content">
         <% if user_signed_in? -%>
 
-          <% if @page.is_a?( Page ) -%>
-            <% if @page.is_blog_type? -%>
-              <%= link_to 'New article', new_admin_page_article_path( page_id: @page.id ) %> |
-              <%= link_to 'List articles', admin_page_articles_path( page_id: @page.id ) %> |
-              <%= link_to 'Edit this page', [ :edit, :admin, @page ] %> |
-            <% else -%>
-              <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
-              <%= link_to 'New page', new_admin_page_path %> |
-            <% end -%>
-          <% else -%>
-            <%= link_to 'New page', new_admin_page_path %> |
+          <% if @article.present? -%>
+            <%= link_to 'Edit', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
           <% end -%>
-          <%= link_to 'List pages', admin_pages_path %>
+          <%= link_to 'New', new_admin_page_article_path() %> |
+          <%= link_to 'List', admin_page_articles_path %>
 
         <% else -%>
 

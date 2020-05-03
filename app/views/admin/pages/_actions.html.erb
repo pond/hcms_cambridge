@@ -2,27 +2,27 @@
   # Render with:
   #
   #   render :partial => 'actions', :locals => {
-  #     :admin_page => Page or Admin::Page-model-instance
+  #     :page => Page model instance
   #   }
 -%>
-        <td>
-<% if admin_page.first? -%>
-          &nbsp;
-<% else -%>
-          <%= form_for( admin_page, :url => admin_move_page_path( admin_page ) ) do | f | %>
-          <%= f.submit( '↑', :name => 'higher' ) %>
-          <% end -%>
-<% end -%>
-        </td>
-        <td>
-<% if admin_page.last? -%>
-          &nbsp;
-<% else -%>
-          <%= form_for( admin_page, :url => admin_move_page_path( admin_page ) ) do | f | %>
-          <%= f.submit( '↓', :name => 'lower' ) %>
-          <% end -%>
-<% end -%>
-        </td>
-        <td><%= link_to 'Show', page_path( admin_page.id ) %></td>
-        <td><%= link_to 'Edit', edit_admin_page_path( admin_page ) %></td>
-        <td><%= link_to 'Destroy', admin_page, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+<td>
+  <% if page.first? -%>
+    &nbsp;
+  <% else -%>
+    <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
+    <%= f.submit( '↑', :name => 'higher' ) %>
+    <% end -%>
+  <% end -%>
+</td>
+<td>
+  <% if page.last? -%>
+    &nbsp;
+  <% else -%>
+    <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
+    <%= f.submit( '↓', :name => 'lower' ) %>
+    <% end -%>
+  <% end -%>
+</td>
+<td><%= link_to 'Show',    [        :admin, page ] %></td>
+<td><%= link_to 'Edit',    [ :edit, :admin, page ] %></td>
+<td><%= link_to 'Destroy', [        :admin, page ], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %></td>

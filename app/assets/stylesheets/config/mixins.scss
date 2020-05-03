@@ -1,0 +1,61 @@
+//////////////////////////////////////////////////////////////////////////////
+// Mixins: If you change anything, restart the server for it to take effect
+//////////////////////////////////////////////////////////////////////////////
+
+@mixin content_metrics {
+  width: $content_width;
+  margin: 0;
+  padding: 0 $content_padding_r 0 $content_padding_l;
+}
+
+@mixin widescreen_block {
+  $inner_width: $content_width * 0.85333333333;
+  $inner_height: ($inner_width * 9) / 16;
+  width: $inner_width !important;
+  height: $inner_height !important;
+  margin: 0 ($content_width - $inner_width) / 2;
+}
+
+@mixin content_metrics_mid {
+  width: $content_width_mid;
+  margin: 0;
+  padding: 0 $content_padding_r_mid 0 $content_padding_l_mid;
+}
+
+@mixin widescreen_block_mid {
+  $inner_width_mid: $content_width_mid * 0.85333333333;
+  $inner_height_mid: ($inner_width_mid * 9) / 16;
+  width: $inner_width_mid !important;
+  height: $inner_height_mid !important;
+  margin: 0 ($content_width_mid - $inner_width_mid) / 2;
+}
+
+@mixin content_metrics_narrow {
+  width: $content_width_narrow;
+  margin: 0;
+  padding: 0 $content_padding_r_narrow 0 $content_padding_l_narrow;
+}
+
+@mixin widescreen_block_narrow {
+  $inner_width_narrow: $content_width_narrow * 0.85333333333;
+  $inner_height_narrow: ($inner_width_narrow * 9) / 16;
+  width: $inner_width_narrow !important;
+  height: $inner_height_narrow !important;
+  margin: 0 ($content_width_narrow - $inner_width_narrow) / 2;
+}
+
+@mixin standard_shadow {
+  -webkit-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+  -moz-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+  box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
+}
+
+@mixin no_shadow {
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+@mixin standard_spinner {
+  background: image-url( 'spinner.png' ) center center no-repeat;
+}
