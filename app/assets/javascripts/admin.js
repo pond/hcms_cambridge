@@ -11,7 +11,7 @@
 
 $(document).on('ready page:load', function() {
   function setVisibilities() {
-    const selectedPageType = $('#admin_page_page_type').children("option:selected").val();
+    const selectedPageType = $('#page_page_type').children("option:selected").val();
 
     if (selectedPageType == 'blog') {
       $('#non-blog-fields').slideUp();
@@ -22,7 +22,7 @@ $(document).on('ready page:load', function() {
 
   setVisibilities();
 
-  $('#admin_page_page_type').change(function(event) {
+  $('#page_page_type').change(function(event) {
     setVisibilities();
   });
 });

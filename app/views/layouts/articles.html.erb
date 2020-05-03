@@ -25,7 +25,7 @@
         <div class="pure-menu pure-menu-horizontal">
           <ul class="pure-menu-list">
 <% Page.top_level.for_navigation.each do | page | -%>
-            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %><%= page.id == @article.id || page.id == @article.page.try( :id ) ? ' current_page' : ''%>">
+            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %>">
               <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
 <%   if page.children.for_navigation.present? -%>
               <ul class="pure-menu-children">
@@ -53,17 +53,21 @@
 
     <section class="footer">
       <section class="footer_content">
-<% if user_signed_in? -%>
-<%   if ( @article && @article.is_a?( Article ) ) -%>
-      <%= link_to 'Edit', edit_admin_page_article_path( page_id: @article.page_id, id: @article.id ) %> |
-<%   end -%>
-      <%= link_to 'New', new_admin_page_article_path() %> |
-      <%= link_to 'All Pages', admin_page_articles_path %>
-<% else -%>
-      <br>
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
-<% end -%>
+        <% if user_signed_in? -%>
+
+          <% if @article.present? -%>
+            <%= link_to 'Edit', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
+          <% end -%>
+          <%= link_to 'New', new_admin_page_article_path() %> |
+          <%= link_to 'All articles', admin_page_articles_path %>
+
+        <% else -%>
+
+          <br>
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+
+        <% end -%>
       </section>
     </section>
   </body>

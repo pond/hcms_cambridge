@@ -3,12 +3,10 @@
   #
   #   render :partial => 'shared/article', :locals => { :article => ... }
 -%>
-<div style="text-align: center; border-top: 1px solid grey; border-bottom: 1px solid grey; margin-bottom: 20px;">
-  <h3><%= article.title %></h3>
-  <small><%= article.created_at.to_formatted_s(:short) %></small>
-  <p>
-    <em><small><%= article.summary %></small></em>
-  </p>
+<div class='blog-header'>
+  <div class="article-date"><%= article.created_at.to_formatted_s(:short) %></div>
+  <h3 class="article-heading"><%= article.title %></h3>
+  <div class="article-summary"><%= article.summary %></div>
 </div>
 
 <p>

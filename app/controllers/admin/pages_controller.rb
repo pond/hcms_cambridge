@@ -6,23 +6,22 @@ class Admin::PagesController < ApplicationController
   # Via Devise
   before_action :authenticate_admin_user!
 
-  before_action :set_admin_page, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_page, only: [ :show, :edit, :update, :destroy ]
 
   public
 
     # GET /admin/pages
     def index
-      @admin_pages = Admin::Page.top_level.all
+      @pages = Page.top_level.all
     end
 
     # GET /admin/pages/1
     def show
-      @page = @admin_page # for 'pages' layout
     end
 
     # GET /admin/pages/new
     def new
-      @admin_page = Admin::Page.new
+      @page = Page.new
     end
 
     # GET /admin/pages/1/edit
@@ -31,11 +30,11 @@ class Admin::PagesController < ApplicationController
 
     # POST /admin/pages
     def create
-      @admin_page = Admin::Page.new( admin_page_params )
+      @page = Page.new( page_params )
 
       respond_to do | format |
-        if @admin_page.save
-          format.html { redirect_to @admin_page, notice: 'Page was successfully created.' }
+        if @page.save
+          format.html { redirect_to [:admin, @page], notice: 'Page was successfully created.' }
         else
           format.html { render :new }
         end
@@ -45,11 +44,11 @@ class Admin::PagesController < ApplicationController
     # PATCH/PUT /admin/pages/1
     def update
       respond_to do | format |
-        if @admin_page.update( admin_page_params )
-          if @admin_page.previous_changes.has_key?( 'raw_editor' )
-            format.html { redirect_to edit_admin_page_url( @admin_page ), notice: 'Editing style changed.' }
+        if @page.update( page_params )
+          if @page.previous_changes.has_key?( 'raw_editor' )
+            format.html { redirect_to [ :edit, :admin, @page ], notice: 'Editing style changed.' }
           else
-            format.html { redirect_to @admin_page, notice: 'Page was successfully updated.' }
+            format.html { redirect_to [ :admin, @page ], notice: 'Page was successfully updated.' }
           end
         else
           format.html { render :edit }
@@ -59,7 +58,7 @@ class Admin::PagesController < ApplicationController
 
     # DELETE /admin/pages/1
     def destroy
-      @admin_page.destroy
+      @page.destroy
       respond_to do | format |
         format.html { redirect_to admin_pages_url, notice: 'Page was successfully destroyed.' }
       end
@@ -76,19 +75,19 @@ class Admin::PagesController < ApplicationController
       end
     end
 
-    def set_admin_page
-      @admin_page = Admin::Page.find_by_id_or_slug!( params[ :id ] )
+    def set_page
+      @page = Page.find_by_id_or_slug!( params[ :id ] )
     end
 
-    def admin_page_params
-      params.require( :admin_page ).permit( :title,
-                                            :slug,
-                                            :body,
-                                            :page_id,
-                                            :hidden,
-                                            :raw_editor,
-                                            :page_type,
-                                            :form_selection_list_contents )
+    def page_params
+      params.require( :page ).permit( :title,
+                                      :slug,
+                                      :body,
+                                      :page_id,
+                                      :hidden,
+                                      :raw_editor,
+                                      :page_type,
+                                      :form_selection_list_contents )
     end
 
 end

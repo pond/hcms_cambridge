@@ -44,8 +44,8 @@
 
       <section class="content">
         <div class="above-clear">
-<%= render :partial => 'layouts/messages' %>
-<%= yield %>
+          <%= render :partial => 'layouts/messages' %>
+          <%= yield %>
         </div>
         <div style="clear: both"></div>
       </section>
@@ -53,17 +53,24 @@
 
     <section class="footer">
       <section class="footer_content">
-<% if user_signed_in? -%>
-<%   if ( @page && @page.is_a?( Page ) ) || ( @admin_page && @admin_page.is_a?( Admin::Page ) ) -%>
-      <%= link_to 'Edit', edit_admin_page_path( @page || @admin_page) %> |
-<%   end -%>
-      <%= link_to 'New', new_admin_page_path %> |
-      <%= link_to 'All Pages', admin_pages_path %>
-<% else -%>
-      <br>
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
-<% end -%>
+        <% if user_signed_in? -%>
+
+          <% if @page.is_a?( Page ) -%>
+            <% if @page.is_blog_type? -%>
+              <%= link_to 'New blog article', new_admin_page_article_path( page_id: @page.id ) %> |
+            <% end -%>
+            <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
+          <% end -%>
+          <%= link_to 'New', new_admin_page_path %> |
+          <%= link_to 'All pages', admin_pages_path %>
+
+        <% else -%>
+
+          <br>
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+
+        <% end -%>
       </section>
     </section>
   </body>

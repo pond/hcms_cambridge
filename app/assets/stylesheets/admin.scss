@@ -1,5 +1,5 @@
-@import 'redactor.scss';
-@import 'shared.scss';
+//= require components/redactor
+//= require components/shared
 
 body {
   background: #061923;

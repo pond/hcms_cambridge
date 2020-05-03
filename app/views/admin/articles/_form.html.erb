@@ -1,4 +1,4 @@
-<%= form_for([Admin::Page.find(@article.page_id), @article]) do |f| %>
+<%= form_for( [ :admin, @page, @article ] ) do | f | %>
   <% if @article.errors.any? -%>
     <div id="error_explanation">
       <h3><%= pluralize(@article.errors.count, "error") %> prevented the article from being saved:</h3>
