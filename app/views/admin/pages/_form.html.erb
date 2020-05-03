@@ -32,7 +32,7 @@
   <% if Page.top_level.count > 0 -%>
     <div class="field">
       <p>
-        <%= f.label :page_id, 'Put into a menu under which page?' %><br />
+        <%= f.label :page_id %><br />
         <%= f.collection_select :page_id,
                                 Page.top_level_except( @page ),
                                 :id,
@@ -44,7 +44,7 @@
 
   <div class="field">
     <p>
-      <%= f.label :page_type, 'What kind of page is this going to be?' %><br />
+      <%= f.label :page_type %><br />
       <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %><br />
       <small><em>You must save then re-edit the page if you change this setting</em></small><br />
     </p>
@@ -52,11 +52,11 @@
 
   <div id="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
     <div class="field">
-      <%= f.check_box :hidden %> <%= f.label :hidden, 'Hidden from the navigation bar?' %>
+      <%= f.check_box :hidden %> <%= f.label :hidden %>
     </div>
 
     <div class="field">
-      <%= f.check_box :raw_editor %> <%= f.label :raw_editor, 'Use the low-level "raw" HTML editor?' %><br />
+      <%= f.check_box :raw_editor %> <%= f.label :raw_editor %><br />
       &nbsp;&nbsp;&nbsp;&nbsp;<small><em>You must save then re-edit the page if you change this setting</em></small>
     </div>
 
