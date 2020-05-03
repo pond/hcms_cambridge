@@ -154,9 +154,28 @@ section.blog-articles {
   }
 }
 
-section.main, .redactor-box.redactor-styles-on {
+section.main {
+  min-height: 352px;
+}
+
+.redactor-box.redactor-styles-on {
   min-height: 452px;
+}
+
+section.main, .redactor-box.redactor-styles-on {
   color: #000;
+  border: none;
+  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
+  background-size: 800px 100%;
+
+  /* Without this, layout problems arise on some browsers where margins in
+   * the last content element push the footer away from the main section,
+   * but the browser doesn't draw the main section's background in that
+   * margin part leading to a gap between them. This hack works around it.
+   */
+
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
 
   .redactor-styles.redactor-in,
   div.above-clear {
@@ -170,19 +189,6 @@ section.main, .redactor-box.redactor-styles-on {
       margin-top: 20px;
     }
   }
-
-  border: none;
-  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
-  background-size: 800px 100%;
-
-  /* Without this, layout problems arise on some browsers where margins in
-   * the last content element push the footer away from the main section,
-   * but the browser doesn't draw the main section's background in that
-   * margin part leading to a gap between them. This hack works around it.
-   */
-
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
 
   nav, section.content, .redactor-styles.redactor-in {
     @include content_metrics;
