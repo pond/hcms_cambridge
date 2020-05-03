@@ -1,5 +1,5 @@
-@import 'redactor.scss';
-@import 'shared.scss';
+//= require components/redactor
+//= require components/shared
 
 body {
   background: #061923;
@@ -70,4 +70,8 @@ section.admin, footer {
 
 footer {
   text-align: center;
+}
+
+label {
+  font-weight: bold;
 }

@@ -1,0 +1,24 @@
+<h1>All articles for blog "<%= @page.title %>"</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th class="centre" colspan="3">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+<% @articles.each do | article | -%>
+      <tr class="<%= cycle( 'even', 'odd' ) %>">
+        <td><%= article.title %></td>
+        <%= render :partial => 'actions', :locals => { :article => article } %>
+      </tr>
+<% end -%>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New blog article', new_admin_page_article_path() %> |
+<%= link_to 'Visit blog page', [ :admin, @page ] %>

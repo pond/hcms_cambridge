@@ -1,0 +1,65 @@
+<%= form_for( [ :admin, @page, @article ] ) do | f | %>
+  <% if @article.errors.any? -%>
+    <div id="error_explanation">
+      <h3><%= pluralize(@article.errors.count, "error") %> prevented the article from being saved:</h3>
+
+      <ul>
+      <% @article.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end -%>
+
+  <div class="field">
+    <p>
+      <%= f.label :title %><br />
+      <%= f.text_field :title %>
+    </p>
+  </div>
+
+  <div class="field">
+    <p>
+      <%= f.label :article_hero_image %><br />
+      <%= f.file_field :article_hero_image %>
+    </p>
+  </div>
+
+  <div class="field">
+    <p>
+      <%= f.label :summary %><br />
+      <%= f.text_area :summary, cols: '60', rows: '5' %><br />
+      <small><em>This is a brief, plain text (no styling) summary used in the list of blog articles</em></small>
+    </p>
+  </div>
+
+  <div class="field">
+    <%= f.check_box :raw_editor %> <%= f.label :raw_editor %><br />
+    &nbsp;&nbsp;&nbsp;&nbsp;<small><em>You must save then re-edit the article if you change this setting</em></small>
+  </div>
+
+  <div class="field">
+    <p>
+      <%= f.label :body %><br />
+    </p>
+  </div>
+
+  <% if @article.raw_editor -%>
+    <div class="redactor_container">
+      <div class="redactor-box redactor-styles-on">
+        <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
+      </div>
+    </div>
+  <% else -%>
+    <div class="redactor_container">
+      <div id="redactor_toolbar"></div>
+      <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
+    </div>
+  <% end -%>
+
+  <div class="actions">
+    <p>
+      <%= f.submit %>
+    </p>
+  </div>
+<% end %>
