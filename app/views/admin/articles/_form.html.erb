@@ -22,6 +22,9 @@
     <p>
       <%= f.label :article_hero_image %><br />
       <%= f.file_field :article_hero_image %>
+      <% if @page.persisted? -%>
+        <br><small><em>You only need to choose an image if changing the one that's already attached to the article</em></small>
+      <% end -%>
     </p>
   </div>
 
