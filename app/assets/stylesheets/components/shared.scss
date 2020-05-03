@@ -51,7 +51,7 @@ input[type="file"] {
   font-size: 12pt;
 }
 
-input[type="file"]::-webkit-file-upload-button {
+input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
   font-size: 12pt;
   border: 1px solid #aaaaaa;
   border-radius: 4px;
@@ -155,7 +155,7 @@ section.blog-articles {
 }
 
 section.main, .redactor-box.redactor-styles-on {
-  min-height: 352px;
+  min-height: 452px;
   color: #000;
 
   .redactor-styles.redactor-in,
@@ -171,15 +171,7 @@ section.main, .redactor-box.redactor-styles-on {
     }
   }
 
-  /* Without this, WebKit completely destroys the layout assigning large
-   * tracts of white space either above, and/or below the section.main block.
-   * Firefox shows no such issues and there's no logic to it, as indeed
-   * adding in this transparent border shows.
-   */
-
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
-
+  border: none;
   background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
   background-size: 800px 100%;
 
