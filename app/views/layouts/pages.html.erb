@@ -12,7 +12,7 @@
   </head>
   <body>
     <section class="header">
-      <img id="logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
+      <img id="logo" alt="Logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
       <nav>
         <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook  %>"><i class="fa fa-facebook-official"></i></a>
         <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter   %>"><i class="fa fa-twitter-square"></i></a>
@@ -53,16 +53,21 @@
 
     <section class="footer">
       <section class="footer_content">
-        <% if user_signed_in? -%>
+        <% if false&&user_signed_in? -%>
 
           <% if @page.is_a?( Page ) -%>
             <% if @page.is_blog_type? -%>
-              <%= link_to 'New blog article', new_admin_page_article_path( page_id: @page.id ) %> |
+              <%= link_to 'New article', new_admin_page_article_path( page_id: @page.id ) %> |
+              <%= link_to 'List articles', admin_page_articles_path( page_id: @page.id ) %> |
+              <%= link_to 'Edit this page', [ :edit, :admin, @page ] %> |
+            <% else -%>
+              <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
+              <%= link_to 'New page', new_admin_page_path %> |
             <% end -%>
-            <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
+          <% else -%>
+            <%= link_to 'New page', new_admin_page_path %> |
           <% end -%>
-          <%= link_to 'New', new_admin_page_path %> |
-          <%= link_to 'All pages', admin_pages_path %>
+          <%= link_to 'List pages', admin_pages_path %>
 
         <% else -%>
 

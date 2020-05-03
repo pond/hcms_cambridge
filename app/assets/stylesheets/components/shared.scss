@@ -84,26 +84,55 @@ section.header {
   }
 }
 
-.blog-header {
-  border-top:    1px solid grey;
-  border-bottom: 1px solid grey;
-  margin-bottom: 20px;
+article.article {
+  .blog-header {
+    border-top:    1px dotted #999;
+    border-bottom: 1px dotted #999;
+    margin-bottom: 20px;
+  }
+
+  .article-date-and-heading-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  .article-date {
+    font-size: small;
+    margin: 0;
+    padding-left: 5px;
+    text-align: right;
+  }
+
+  .article-heading {
+    margin: 5px 0;
+  }
+
+  .article-summary {
+    font-size: smaller;
+    font-style: italic;
+    margin-bottom: 1em;
+  }
 }
 
-.article-date {
-  float: right;
-  margin: 1.5em 0;
-  font-size: smaller;
-}
+section.blog-articles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 
-.article-heading {
-  margin: 1em 0 0 0;
-}
+  article.article {
+    width: ($content-width / 2) - 10px;
 
-.article-summary {
-  font-size: smaller;
-  font-style: italic;
-  margin-bottom: 1em;
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  article.article a {
+    text-decoration: none;
+  }
 }
 
 section.main, .redactor-box.redactor-styles-on {
@@ -271,9 +300,11 @@ section.footer {
 }
 
 section.content, section.footer {
+  $base_colour: #332d18;
+
   a {
     padding: 1px;
-    color: #332d18;
+    color: $base_colour;
     opacity: 0.8;
     word-break: break-word;
   }
@@ -282,9 +313,18 @@ section.content, section.footer {
     color: #534d38;
   }
 
+  a.article-link:visited {
+    color: $base_colour;
+  }
+
   a:hover {
     color: black;
     background: white;
+  }
+
+  a.article-link:hover {
+    color: lighten($base_colour, 15%);
+    background: none;
   }
 }
 
@@ -341,6 +381,19 @@ section.content, section.footer {
 
       a {
         font-size: 14pt;
+      }
+    }
+
+    section.blog-articles article.article {
+      width: ($content_width_mid / 2) - 10px;
+
+      .article-date-and-heading-container {
+        flex-wrap: wrap;
+      }
+
+      .article-date {
+        padding-left: 0;
+        margin-bottom: 5px;
       }
     }
   }
@@ -407,6 +460,10 @@ section.content, section.footer {
     nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_narrow;
     }
+
+    section.blog-articles article.article {
+      width: $content_width_narrow;
+    }
   }
 
   section.footer {
@@ -414,6 +471,13 @@ section.content, section.footer {
 
     section.footer_content {
       @include content_metrics_narrow;
+
+      font-size: 60%;
+      white-space: nowrap;
+
+      br {
+        display: none;
+      }
     }
   }
 }
