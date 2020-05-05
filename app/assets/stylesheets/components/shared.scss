@@ -266,7 +266,7 @@ section.main, .redactor-box.redactor-styles-on {
     @include standard_spinner;
   }
 
-  iframe[allowtransparency='true'] {
+  iframe[allowtransparency='true'], iframe.tickets {
     background-image: none !important;
     border: none !important;
   }
