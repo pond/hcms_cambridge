@@ -6,7 +6,7 @@ class PagesController < ApplicationController
 
   def show
     if params[:id].nil?
-      @page = Page.order( :created_at => :asc ).first
+      @page = Page.home()
     else
       @page = Page.find_by_id_or_slug!( params[ :id ] )
     end

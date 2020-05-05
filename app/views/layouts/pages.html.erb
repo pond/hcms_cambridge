@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, viewport-fit=cover">
 
     <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @page.title %></title>
 
@@ -55,7 +55,7 @@
       <section class="footer_content">
         <% if user_signed_in? -%>
 
-          <% if @page.is_a?( Page ) -%>
+          <% if @page.is_a?(Page) -%>
             <% if @page.is_blog_type? -%>
               <%= link_to 'New article', new_admin_page_article_path( page_id: @page.id ) %> |
               <%= link_to 'List articles', admin_page_articles_path( page_id: @page.id ) %> |
