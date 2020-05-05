@@ -1,11 +1,12 @@
 class Page < ActsLikePage
 
   belongs_to :page, optional: true
-
   has_many :pages
-  has_many :articles, dependent: :destroy
 
   alias_method :children, :pages
+  alias_method :parent,   :page
+
+  has_many :articles, dependent: :destroy
 
   before_validation do
     generate_unique_slug() if self.slug.blank? # see ApplicationRecord
@@ -33,6 +34,10 @@ class Page < ActsLikePage
     OpenStruct.new( { :internal_type => PAGE_TYPE_CONTACT_FORM, :human_text => '"Contact us" form' } )
   ]
 
+  def self.home
+    Page.top_level.order(:created_at => :asc).first
+  end
+
   def self.top_level_except( exceptions = nil )
     array = [ exceptions ].flatten
     self.top_level().to_a - array
@@ -48,6 +53,17 @@ class Page < ActsLikePage
 
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
+  end
+
+  # Is this page 'normal' type, with at least one child all also of 'normal'
+  # type? If so, it can be converted to a blog so return +true+; else +false+.
+  #
+  def can_convert_to_blog?
+    return (
+      self.page_type == PAGE_TYPE_NORMAL &&
+      self.children.count > 0 &&
+      children.where.not(page_type: Page::PAGE_TYPE_NORMAL).none?
+    )
   end
 
   # Attempt to summarise body content by retrieving the first non-header
