@@ -97,6 +97,15 @@ section.header {
   }
 }
 
+section.messages, div#error_explanation {
+  padding: 0 10px;
+  background: #eef;
+  border: 1px solid #00f;
+  color: #00f;
+  font-size: 125%;
+  font-weight: bold;
+}
+
 article.article {
   .blog-header {
     border-top:    1px dotted #999;
@@ -255,6 +264,11 @@ section.main, .redactor-box.redactor-styles-on {
   iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
     @include standard_shadow;
     @include standard_spinner;
+  }
+
+  iframe[allowtransparency='true'] {
+    background-image: none !important;
+    border: none !important;
   }
 
   /* No-decoration arbitrary content iframes are square by default; to

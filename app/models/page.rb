@@ -49,4 +49,35 @@ class Page < ActsLikePage
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
   end
+
+  # Attempt to summarise body content by retrieving the first non-header
+  # sentence; usually used for Page -> blog Article auto-conversion.
+  #
+  def summarise
+    headerless = self.body.gsub(/\<h\d.*?\>.*?\<\/h\d\>/m, '')
+    summary    = ActionView::Base.full_sanitizer.sanitize(headerless).strip.match(/^(.+?)[\.\r\n]/m)&.captures&.first || self.title
+
+    return "#{ summary }."
+  end
+
+  # Used by #find_first_image_uploader to find URLs in Redactor body text
+  # which lead to asset IDs, from which an image uploader instance can be
+  # generated.
+  #
+  IMAGE_UPLOADER_SIGNATURE = Regexp.quote('/system/redactor_assets/pictures/')
+
+  # Return a Redactor3RailsImageUploader instance for the first image uploaded
+  # in the Redactor body content of this page. This can then be assigned as the
+  # image for another entity, usually for Page -> blog Article auto-conversion.
+  # Returns +nil+ if none is found.
+  #
+  def find_first_image_uploader
+    matches = self.body.match(/#{IMAGE_UPLOADER_SIGNATURE}(\d+)/)
+    return nil unless matches.present?
+
+    first_page_image_id = matches.captures.first
+    return nil unless first_page_image_id.present?
+
+    return Redactor3Rails::Image.find_by_id(first_page_image_id)&.data
+  end
 end
