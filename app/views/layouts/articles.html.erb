@@ -56,10 +56,11 @@
         <% if user_signed_in? -%>
 
           <% if @article.present? -%>
-            <%= link_to 'Edit', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
+            <%= link_to 'Edit article', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
           <% end -%>
-          <%= link_to 'New', new_admin_page_article_path() %> |
-          <%= link_to 'List', admin_page_articles_path %>
+          <%= link_to 'New blog article', new_admin_page_article_path() %> |
+          <%= link_to 'List articles', admin_page_articles_path %> |
+          <%= link_to 'New page', new_admin_page_path() %>
 
         <% else -%>
 
