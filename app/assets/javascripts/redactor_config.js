@@ -25,22 +25,21 @@ $(document).on('ready page:load', function() {
         'alignment',
         'fontcolor',
         'fontsize',
-        'video'
+        'table',
+        'properties',
+        'video',
+        'widget'
       ],
-
       buttons: [
         'format',
         'bold',
         'italic',
-        'ul',
-        'ol',
-        'indent',
-        'outdent',
-        'image',
+        'sup',
+        'lists',
         'link',
+        'image',
         'html'
       ]
     }
   );
-
 });

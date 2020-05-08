@@ -28,7 +28,7 @@
     		dropdown.right = { title: this.lang.get('align-right'), api: 'plugin.alignment.set', args: 'right' };
     		dropdown.justify = { title: this.lang.get('align-justify'), api: 'plugin.alignment.set', args: 'justify' };
 
-            var $button = this.toolbar.addButtonAfter('italic', 'alignment', { title: this.lang.get('align') });
+            var $button = this.toolbar.addButtonAfter('sup', 'alignment', { title: this.lang.get('align') });
             $button.setIcon('<i class="re-icon-alignment"></i>');
 			$button.setDropdown(dropdown);
         },
