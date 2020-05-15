@@ -22,8 +22,8 @@
 en:
   time:
     formats:
-      short: '%B %-d %Y, %l:%M%P'
-      short_no_year: '%B %-d, %l:%M%P'
+      short: '%B %-d %Y, %k:%M%P'
+      short_no_year: '%B %-d, %H:%M'
 
   activerecord:
     models:
