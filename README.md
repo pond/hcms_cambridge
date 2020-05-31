@@ -49,9 +49,17 @@ Next set variable `AWS_ACCESS_KEY_ID` to switch CarrierWave over to Amazon S3 st
 In brief:
 
 ```bash
-heroku --app your-appname-1234 config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy
-heroku --app your-appname-1234 config:set AWS_S3_REGION=region # e.g. 'eu-west-1'
-heroku --app your-appname-1234 config:set AWS_S3_BUCKET_NAME=s3-bucket-name
+heroku config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy  --app your-appname-1234
+heroku config:set AWS_S3_REGION=region # e.g. 'eu-west-1'          --app your-appname-1234
+heroku config:set AWS_S3_BUCKET_NAME=s3-bucket-name                --app your-appname-1234
+```
+
+### GTM
+
+A Google site tag snippet is included for your AD ID (`9xxyyyzzz` or some similar number) if you specify the GOOGLE_AD_ID variable.
+
+```bash
+heroku config:set GOOGLE_AD_ID=9xxyyyzzz --app your-appname-1234
 ```
 
 ## Development
