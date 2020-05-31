@@ -8,9 +8,10 @@
 
     <%= stylesheet_link_tag    'admin', media: 'all' %>
     <%= javascript_include_tag 'admin'               %>
-    <%= csrf_meta_tags %>
 
+    <%= csrf_meta_tags %>
     <script src="https://cambridgepuntguide.com/js/message.js"></script>
+    <%= render partial: 'layouts/google_tags' %>
   </head>
 
   <body>
