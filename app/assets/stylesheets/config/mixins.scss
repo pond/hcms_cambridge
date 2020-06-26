@@ -12,7 +12,7 @@
   $inner_width: $content_width * 0.85333333333;
   $inner_height: ($inner_width * 9) / 16;
   width: $inner_width !important;
-  height: $inner_height !important;
+  height: $inner_height;
   margin: 0 ($content_width - $inner_width) / 2;
 }
 
@@ -26,7 +26,7 @@
   $inner_width_mid: $content_width_mid * 0.85333333333;
   $inner_height_mid: ($inner_width_mid * 9) / 16;
   width: $inner_width_mid !important;
-  height: $inner_height_mid !important;
+  height: $inner_height_mid;
   margin: 0 ($content_width_mid - $inner_width_mid) / 2;
 }
 
@@ -40,7 +40,7 @@
   $inner_width_narrow: $content_width_narrow * 0.85333333333;
   $inner_height_narrow: ($inner_width_narrow * 9) / 16;
   width: $inner_width_narrow !important;
-  height: $inner_height_narrow !important;
+  height: $inner_height_narrow;
   margin: 0 ($content_width_narrow - $inner_width_narrow) / 2;
 }
 
