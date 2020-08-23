@@ -240,6 +240,24 @@ section.main, .redactor-box.redactor-styles-on {
     @include no_shadow;
   }
 
+  /* The booking form frame JavaScript adds and removes this class
+   * when the initial form fields are filled in and "buy" button used.
+   */
+
+  iframe.fullscreen-overlay {
+    position: fixed !important;
+    margin: 0 !important;
+    padding: 5px !important;
+    height: 99% !important;
+    width: 100% !important;
+    top: 0px !important;
+    left: 0px !important;
+    right: 0px !important;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    overflow: auto;
+  }
+
   .redactor-styles.redactor-in,
   div.above-clear {
 
