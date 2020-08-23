@@ -1,15 +1,15 @@
-<%= form_for(@admin_page) do |f| %>
-  <% if @admin_page.errors.any? %>
+<%= form_for( [ :admin, @page ] ) do | f | %>
+  <% if @page.errors.any? -%>
     <div id="error_explanation">
-      <h3><%= pluralize(@admin_page.errors.count, "error") %> prevented the page from being saved:</h3>
+      <h3><%= pluralize( @page.errors.count, "error" ) %> prevented the page from being saved:</h3>
 
       <ul>
-      <% @admin_page.errors.full_messages.each do |message| %>
+      <% @page.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
       </ul>
     </div>
-  <% end %>
+  <% end -%>
 
   <div class="field">
     <p>
@@ -18,66 +18,78 @@
     </p>
   </div>
 
-<% if Page.top_level.count > 0 -%>
   <div class="field">
     <p>
-      <%= f.label :page_id, 'Put into a menu under which page?' %><br />
-      <%= f.collection_select :page_id,
-                              Admin::Page.top_level_except( @admin_page ),
-                              :id,
-                              :title,
-                              :include_blank => 'Do not put into a menu' %>
+      <%= f.label :slug %>
+      <small>
+        <%= @page.persisted? ? '(beware if changing this; people may have bookmarked this page using its old slug)' : '(optional; if omitted, the slug is generated from the page title)' %>
+      </small>
+      <br />
+      <%= f.text_field :slug %>
     </p>
   </div>
 
-<% end -%>
-
-  <div class="field">
-    <p>
-      <%= f.label :page_type, 'What kind of page is this going to be?' %><br />
-      <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %><br />
-      <small><em>You must save then re-edit the page if you change this setting</em></small>
-    </p>
-  </div>
-
-  <div class="field">
-    <%= f.check_box :hidden %> <%= f.label :hidden, 'Hidden from the navigation bar?' %>
-  </div>
-
-  <div class="field">
-    <%= f.check_box :raw_editor %> <%= f.label :raw_editor, 'Use the low-level "raw" HTML editor?' %><br />
-    &nbsp;&nbsp;&nbsp;&nbsp;<small><em>You must save then re-edit the page if you change this setting</em></small>
-  </div>
-
-<% if @admin_page.is_form_type? -%>
-  <p>
-    In the editing area below, just type in any page contents you want <i>above</i> the main form itself. The form on the finished page will always have the same contents - name, contact information and so-on. Currently, you can't edit that section.
-  </p>
-<% else -%>
-  <p></p>
-<% end -%>
-
-<% if @admin_page.raw_editor -%>
-  <div class="redactor_container">
-    <div class="redactor-box redactor-styles-on">
-      <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
+  <% if Page.top_level.count > 0 -%>
+    <div class="field">
+      <p>
+        <%= f.label :page_id %><br />
+        <%= f.collection_select :page_id,
+                                Page.top_level_except( @page ),
+                                :id,
+                                :title,
+                                :include_blank => 'Do not put into a menu' %>
+      </p>
     </div>
-  </div>
-<% else -%>
-  <div class="redactor_container">
-    <div id="redactor_toolbar"></div>
-    <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
-  </div>
-<% end -%>
+  <% end -%>
 
-<% if @admin_page.is_form_type? -%>
   <div class="field">
     <p>
-      <%= f.label :form_selection_list_contents, 'Below, you can type in an optional list of selectable items to show in a drop-down menu as part of the form. Add one per line. If left empty, no such menu is offered:' %><br />
-      <%= f.text_area :form_selection_list_contents, :rows => 8, :cols => 80 %>
+      <%= f.label :page_type %><br />
+      <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %><br />
+      <small><em>You must save then re-edit the page if you change this setting</em></small><br />
     </p>
   </div>
-<% end -%>
+
+  <div id="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+    <div class="field">
+      <%= f.check_box :hidden %> <%= f.label :hidden %>
+    </div>
+
+    <div class="field">
+      <%= f.check_box :raw_editor %> <%= f.label :raw_editor %><br />
+      &nbsp;&nbsp;&nbsp;&nbsp;<small><em>You must save then re-edit the page if you change this setting</em></small>
+    </div>
+
+    <% if @page.is_form_type? -%>
+      <p>
+        In the editing area below, just type in any page contents you want <i>above</i> the main form itself. The form on the finished page will always have the same contents - name, contact information and so-on. Currently, you can't edit that section.
+      </p>
+    <% else -%>
+      <p></p>
+    <% end -%>
+
+    <% if @page.raw_editor -%>
+      <div class="redactor_container">
+        <div class="redactor-box redactor-styles-on">
+          <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
+        </div>
+      </div>
+    <% else -%>
+      <div class="redactor_container">
+        <div id="redactor_toolbar"></div>
+        <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
+      </div>
+    <% end -%>
+
+    <% if @page.is_form_type? -%>
+      <div class="field">
+        <p>
+          <%= f.label :form_selection_list_contents, 'Below, you can type in an optional list of selectable items to show in a drop-down menu as part of the form. Add one per line. If left empty, no such menu is offered:' %><br />
+          <%= f.text_area :form_selection_list_contents, :rows => 8, :cols => 80 %>
+        </p>
+      </div>
+    <% end -%>
+  </div>
 
   <div class="actions">
     <p>

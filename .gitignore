@@ -11,6 +11,7 @@ capybara-*.html
 **.orig
 rerun.txt
 pickle-email-*.html
+public/assets
 
 # Readctor
 /public/uploads/tmp
@@ -27,6 +28,9 @@ pickle-email-*.html
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
 
+# macOS spam
+.DS_Store
+
 # if using bower-rails ignore default bower_components path bower.json files
 /vendor/assets/bower_components
 *.bowerrc
@@ -34,4 +38,3 @@ bower.json
 
 # Ignore pow environment settings
 .powenv
-

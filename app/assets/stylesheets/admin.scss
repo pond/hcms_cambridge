@@ -1,5 +1,5 @@
-@import 'shared.scss';
-@import 'redactor.css';
+//= require components/redactor
+//= require components/shared
 
 body {
   background: #061923;
@@ -7,15 +7,6 @@ body {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-}
-
-section.messages {
-  padding: 0 10px;
-  background: #eef;
-  border: 1px solid #00f;
-  color: #00f;
-  font-size: 125%;
-  font-weight: bold;
 }
 
 div.redactor-container {
@@ -70,4 +61,8 @@ section.admin, footer {
 
 footer {
   text-align: center;
+}
+
+label {
+  font-weight: bold;
 }

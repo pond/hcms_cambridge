@@ -1,4 +1,6 @@
-@import 'yui/pure-menus-min.scss';
+@import 'config/variables';
+@import 'config/mixins';
+@import 'yui/pure-menus-min';
 
 //////////////////////////////////////////////////////////////////////////////
 // Fonts
@@ -8,57 +10,7 @@
 
 @font-face {
   font-family: 'TrajanPro-bold';
-  src: url( 'TrajanPro-Bold.ttf' );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Variables
-//////////////////////////////////////////////////////////////////////////////
-
-$container_width: 800px;
-$content_width: 600px;
-$content_padding_lr: 50px;
-
-$container_width_mid: $container_width / 1.5;
-$content_width_mid: $content_width / 1.5;
-$content_padding_lr_mid: $content_padding_lr / 1.5;
-
-$container_width_narrow: $container_width / 2;
-$content_width_narrow: $content_width / 2;
-$content_padding_lr_narrow: $content_padding_lr / 2;
-
-@mixin content_metrics {
-  width: $content_width;
-  margin: 0;
-  padding: 0 $content_padding_lr 0 $content_padding_lr;
-}
-
-@mixin content_metrics_mid {
-  width: $content_width_mid;
-  margin: 0;
-  padding: 0 $content_padding_lr_mid 0 $content_padding_lr_mid;
-}
-
-@mixin content_metrics_narrow {
-  width: $content_width_narrow;
-  margin: 0;
-  padding: 0 $content_padding_lr_narrow 0 $content_padding_lr_narrow;
-}
-
-@mixin standard_shadow {
-  -webkit-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
-  -moz-box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
-  box-shadow: 0px 0px 5px 2px rgba( 0, 0, 0, 0.25 );
-}
-
-@mixin no_shadow {
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-}
-
-@mixin standard_spinner {
-  background: url( '/assets/spinner.png' ) center center no-repeat;
+  src: asset-url( 'TrajanPro-Bold.ttf' );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -95,6 +47,19 @@ select {
   max-width: 100%;
 }
 
+input[type="file"] {
+  font-size: 12pt;
+}
+
+input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
+  font-size: 12pt;
+  border: 1px solid #aaaaaa;
+  border-radius: 4px;
+  padding: 5px 10px;
+  background-image: -webkit-gradient(linear, left bottom, left top, from(#d2d0d0), to(#f0f0f0));
+  background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
+}
+
 section.header, section.footer, section.main, .redactor-styles.redactor-in {
   width: $container_width;
   margin: 0 auto;
@@ -104,7 +69,7 @@ section.header, section.footer, section.main, .redactor-styles.redactor-in {
 section.header {
   position: relative;
   height: 191px;
-  background: url( 'clipboard_top_slice.png' ) bottom center no-repeat;
+  background: image-url( 'clipboard_top_slice.png' ) bottom center no-repeat;
   background-size: 100%;
 
   #logo {
@@ -132,9 +97,90 @@ section.header {
   }
 }
 
-section.main, .redactor-box.redactor-styles-on {
+section.messages, div#error_explanation {
+  padding: 0 10px;
+  background: #eef;
+  border: 1px solid #00f;
+  color: #00f;
+  font-size: 125%;
+  font-weight: bold;
+}
+
+article.article {
+  .blog-header {
+    border-top:    1px dotted #999;
+    border-bottom: 1px dotted #999;
+    margin-bottom: 20px;
+  }
+
+  .article-date-and-heading-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  .article-date {
+    font-size: small;
+    margin: 0;
+    padding-left: 5px;
+    text-align: right;
+  }
+
+  .article-heading {
+    margin: 5px 0;
+  }
+
+  .article-summary {
+    font-size: smaller;
+    font-style: italic;
+    margin-bottom: 1em;
+  }
+}
+
+section.blog-articles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  $article_width: ($content_width / 2) - 10px;
+
+  article.article {
+    width: $article_width;
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  article.article:only-child {
+    margin-left: ($content_width - $article_width) / 2;
+  }
+
+  article.article a {
+    text-decoration: none;
+  }
+}
+
+section.main {
   min-height: 352px;
+}
+
+section.main, .redactor-box.redactor-styles-on {
   color: #000;
+  border: none;
+  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
+  background-size: 800px 100%;
+
+  /* Without this, layout problems arise on some browsers where margins in
+   * the last content element push the footer away from the main section,
+   * but the browser doesn't draw the main section's background in that
+   * margin part leading to a gap between them. This hack works around it.
+   */
+
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
 
   .redactor-styles.redactor-in,
   div.above-clear {
@@ -149,24 +195,11 @@ section.main, .redactor-box.redactor-styles-on {
     }
   }
 
-  /* Without this, WebKit completely destroys the layout assigning large
-   * tracts of white space either above, and/or below the section.main block.
-   * Firefox shows no such issues and there's no logic to it, as indeed
-   * adding in this transparent border shows.
-   */
-
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
-
-  background: url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
-  background-size: 800px 100%;
-
   nav, section.content, .redactor-styles.redactor-in {
     @include content_metrics;
   }
 
   nav {
-
     padding-top: 20px;
     padding-bottom: 25px;
     text-align: center;
@@ -194,9 +227,16 @@ section.main, .redactor-box.redactor-styles-on {
     }
   }
 
+  figure {
+    margin: 20px 0;
+    padding: 0;
+  }
+
   img {
     @include standard_shadow;
     @include standard_spinner;
+    max-width: $content_width;
+    height: auto !important;
   }
 
   img[align = 'right'] {
@@ -212,14 +252,19 @@ section.main, .redactor-box.redactor-styles-on {
    * 16:9 video inside any such frame, or something where 16:9 is an
    * acceptable ratio.
    */
-  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
-    margin-left: auto;
-    margin-right: auto;
-    width: $content_width * 0.85333333333;
-    height: ( ( $content_width * 0.85333333333 ) * 9 ) / 16;
 
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+    @include widescreen_block;
+  }
+
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
     @include standard_shadow;
     @include standard_spinner;
+  }
+
+  iframe[allowtransparency='true'], iframe.tickets {
+    background-image: none !important;
+    border: none !important;
   }
 
   /* No-decoration arbitrary content iframes are square by default; to
@@ -291,7 +336,7 @@ section.main, .redactor-box.redactor-styles-on {
 
 section.footer {
   height: 134px;
-  background: url( 'clipboard_bottom_slice.png' ) top center no-repeat;
+  background: image-url( 'clipboard_bottom_slice.png' ) top center no-repeat;
   background-size: 100%;
 
   section.footer_content {
@@ -308,9 +353,11 @@ section.footer {
 }
 
 section.content, section.footer {
+  $base_colour: #332d18;
+
   a {
     padding: 1px;
-    color: #332d18;
+    color: $base_colour;
     opacity: 0.8;
     word-break: break-word;
   }
@@ -319,17 +366,26 @@ section.content, section.footer {
     color: #534d38;
   }
 
+  a.article-link:visited {
+    color: $base_colour;
+  }
+
   a:hover {
     color: black;
     background: white;
   }
+
+  a.article-link:hover {
+    color: lighten($base_colour, 15%);
+    background: none;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Narrow viewport / mobile variations
+// Medium width viewport
 //////////////////////////////////////////////////////////////////////////////
 
-@media only screen and (max-width: $container_width) {
+@media only screen and (min-width: $container_width_mid) and (max-width: $container_width) {
   section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_mid;
   }
@@ -359,13 +415,11 @@ section.content, section.footer {
     background-size: $container_width_mid 100%;
 
     iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
-      width: $content_width_mid * 0.85333333333;
-      height: ( ( $content_width_mid * 0.85333333333 ) * 9 ) / 16;
+      @include widescreen_block_mid;
     }
 
     img {
-      max-width: $content_width_mid * 0.75 !important;
-      min-height: 36px; // For the spinner, with fingers crossed no images are smaller! CSS hack :-/
+      max-width: $content_width_mid !important;
       height: auto !important;
     }
 
@@ -379,6 +433,27 @@ section.content, section.footer {
 
       a {
         font-size: 14pt;
+      }
+    }
+
+    section.blog-articles {
+      $article_width_mid: ($content_width_mid / 2) - 5px;
+
+      article.article {
+        width: $article_width_mid;
+
+        .article-date-and-heading-container {
+          flex-wrap: wrap;
+        }
+
+        .article-date {
+          padding-left: 0;
+          margin-bottom: 5px;
+        }
+      }
+
+      article.article:only-child {
+        margin-left: ($content_width_mid - $article_width_mid) / 2;
       }
     }
   }
@@ -400,6 +475,10 @@ section.content, section.footer {
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Narrow viewport
+//////////////////////////////////////////////////////////////////////////////
+
 @media only screen and (max-width: $container_width_mid) {
   section.header, section.main, section.footer, .redactor-styles.redactor-in {
     width: $container_width_narrow;
@@ -409,6 +488,8 @@ section.content, section.footer {
     height: 95px;
 
     #logo {
+      top: 44px;
+      left: 14px;
       width: 110px;
       height: 36px;
     }
@@ -428,16 +509,26 @@ section.content, section.footer {
     background-size: $container_width_narrow 100%;
 
     iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
-      width: $content_width_narrow * 0.85333333333;
-      height: ( ( $content_width_narrow * 0.85333333333 ) * 9 ) / 16;
+      @include widescreen_block_narrow;
     }
 
     img {
-      max-width: $content_width_narrow * 0.75 !important;
+      max-width: $content_width_narrow !important;
+      height: auto !important;
     }
 
     nav, section.content, .redactor-styles.redactor-in {
       @include content_metrics_narrow;
+    }
+
+    section.blog-articles {
+      article.article {
+        width: $content_width_narrow;
+      }
+
+      article.article:only-child {
+        margin-left: 0;
+      }
     }
   }
 
@@ -446,6 +537,13 @@ section.content, section.footer {
 
     section.footer_content {
       @include content_metrics_narrow;
+
+      font-size: 60%;
+      white-space: nowrap;
+
+      br {
+        display: none;
+      }
     }
   }
 }

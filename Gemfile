@@ -26,7 +26,7 @@ gem 'sdoc'
 
 # Device for Auth, with Device-integrated Redactor for editing.
 #
-#   https://github.com/heartcombo/devise
+#   https://rubygems.org/gems/devise
 #
 gem 'devise', '~> 4.7'
 
@@ -44,9 +44,9 @@ gem 'recaptcha', '~> 5.5'
 #   https://rubygems.org/gems/redactor3_rails
 #
 gem 'fog-aws',         '~> 3.6'
-gem 'carrierwave',     '~> 1.0'
+gem 'carrierwave',     '~> 2.1'
 gem 'mini_magick',     '~> 4.10'
-gem 'redactor3_rails', '~> 0.1'
+gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branch: 'feature/fix-js'
 
 # Orderable pages.
 #
@@ -56,8 +56,4 @@ gem 'acts_as_list', '~> 1.0'
 
 group :development, :test do
   gem 'byebug'
-
-  # Access an IRB console on exception pages or by using <%= console %> in views.
-  #
-  gem 'web-console', '~> 2.0'
 end
