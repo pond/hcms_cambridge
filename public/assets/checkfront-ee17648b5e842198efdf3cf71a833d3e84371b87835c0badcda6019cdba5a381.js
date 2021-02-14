@@ -1,0 +1,1 @@
+$(document).ready(function(){$(".CHECKFRONT_DROPLET").attr("title","widget")});
