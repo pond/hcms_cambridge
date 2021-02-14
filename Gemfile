@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 ruby '2.7.2'
 
 gem 'rails', '>= 5.2', '< 6'
+gem 'rake', '>= 13.0'
 
 gem 'pg'
 gem 'thin'
