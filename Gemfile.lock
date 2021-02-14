@@ -229,6 +229,7 @@ DEPENDENCIES
   mini_magick (~> 4.10)
   pg
   rails (>= 5.2, < 6)
+  rake (>= 13.0)
   recaptcha (~> 5.5)
   redactor3_rails!
   sass-rails
