@@ -1,0 +1,549 @@
+@import 'config/variables';
+@import 'config/mixins';
+@import 'yui/pure-menus-min';
+
+//////////////////////////////////////////////////////////////////////////////
+// Fonts
+//////////////////////////////////////////////////////////////////////////////
+
+@import url( 'https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' );
+
+@font-face {
+  font-family: 'TrajanPro-bold';
+  src: asset-url( 'TrajanPro-Bold.ttf' );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Shared styles
+//////////////////////////////////////////////////////////////////////////////
+
+body {
+  font-size: 14pt;
+
+  h1, h2, h3, h4, h5, h6, nav a {
+    font-weight: bold;
+    font-family: "TrajanPro-Bold", serif;
+  }
+
+  h1 {
+    font-size: 27pt;
+  }
+}
+
+input, select {
+  font-size: 14pt;
+  line-height: 150%;
+  margin: 5px 0;
+}
+
+textarea {
+  margin: 10px 20px 0 0;
+  font-size: 12pt;
+  max-width: 100%;
+}
+
+select {
+  margin-right: 20px;
+  max-width: 100%;
+}
+
+input[type="file"] {
+  font-size: 12pt;
+}
+
+input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
+  font-size: 12pt;
+  border: 1px solid #aaaaaa;
+  border-radius: 4px;
+  padding: 5px 10px;
+  background-image: -webkit-gradient(linear, left bottom, left top, from(#d2d0d0), to(#f0f0f0));
+  background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
+}
+
+section.header, section.footer, section.main, .redactor-styles.redactor-in {
+  width: $container_width;
+  margin: 0 auto;
+  font-family: 'Lora', serif;
+}
+
+section.header {
+  position: relative;
+  height: 191px;
+  background: image-url( 'clipboard_top_slice.png' ) bottom center no-repeat;
+  background-size: 100%;
+
+  #logo {
+    position: absolute;
+    top: 77px;
+    left: 30px;
+  }
+
+  nav {
+    position: absolute;
+    top: 91px;
+    right: 180px;
+
+    a, a:visited {
+      display: inline-block;
+      padding-left: 20px;
+      color: #332d18;
+      font-size: 2.5em;
+      opacity: 0.9;
+    }
+
+    a:hover {
+      color: #534d38;
+    }
+  }
+}
+
+section.messages, div#error_explanation {
+  padding: 0 10px;
+  background: #eef;
+  border: 1px solid #00f;
+  color: #00f;
+  font-size: 125%;
+  font-weight: bold;
+}
+
+article.article {
+  .blog-header {
+    border-top:    1px dotted #999;
+    border-bottom: 1px dotted #999;
+    margin-bottom: 20px;
+  }
+
+  .article-date-and-heading-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  .article-date {
+    font-size: small;
+    margin: 0;
+    padding-left: 5px;
+    text-align: right;
+  }
+
+  .article-heading {
+    margin: 5px 0;
+  }
+
+  .article-summary {
+    font-size: smaller;
+    font-style: italic;
+    margin-bottom: 1em;
+  }
+}
+
+section.blog-articles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  $article_width: ($content_width / 2) - 10px;
+
+  article.article {
+    width: $article_width;
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  article.article:only-child {
+    margin-left: ($content_width - $article_width) / 2;
+  }
+
+  article.article a {
+    text-decoration: none;
+  }
+}
+
+section.main {
+  min-height: 352px;
+}
+
+section.main, .redactor-box.redactor-styles-on {
+  color: #000;
+  border: none;
+  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
+  background-size: 800px 100%;
+
+  /* Without this, layout problems arise on some browsers where margins in
+   * the last content element push the footer away from the main section,
+   * but the browser doesn't draw the main section's background in that
+   * margin part leading to a gap between them. This hack works around it.
+   */
+
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+
+  .redactor-styles.redactor-in,
+  div.above-clear {
+    & > h1:first-child,
+    & > h2:first-child,
+    & > h3:first-child,
+    & > h4:first-child,
+    & > h5:first-child,
+    & > h6:first-child,
+    & >  p:first-child {
+      margin-top: 20px;
+    }
+  }
+
+  nav, section.content, .redactor-styles.redactor-in {
+    @include content_metrics;
+  }
+
+  nav {
+    padding-top: 20px;
+    padding-bottom: 25px;
+    text-align: center;
+
+    .pure-menu-horizontal {
+      overflow: visible !important;
+
+      li {
+        text-align: left;
+        a { padding-top: 4px; }
+
+        &.current_page {
+          margin-bottom: -2px;
+          border-bottom: 2px solid rgba( 0, 0, 0, 0.2 );
+        }
+      }
+    }
+
+    a {
+      display: inline-block;
+      padding: 0 10px;
+      text-decoration: none;
+      color: #332d18;
+      font-size: 18pt;
+    }
+  }
+
+  figure {
+    margin: 20px 0;
+    padding: 0;
+  }
+
+  img {
+    @include standard_shadow;
+    @include standard_spinner;
+    max-width: $content_width;
+    height: auto !important;
+  }
+
+  img[align = 'right'] {
+    margin: 0 10px 10px 0;
+  }
+
+  img[align = 'left'] {
+    margin: 0 0 10px 10px;
+  }
+
+  /* Redactor doesn't understand an iframe wrapped in any containers so
+   * we just have to make do with hard-coded sizes on an assumption of a
+   * 16:9 video inside any such frame, or something where 16:9 is an
+   * acceptable ratio.
+   */
+
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+    @include widescreen_block;
+  }
+
+  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
+    @include standard_shadow;
+    @include standard_spinner;
+  }
+
+  iframe[allowtransparency='true'], iframe.tickets {
+    background-image: none !important;
+    border: none !important;
+  }
+
+  /* The booking form frame JavaScript adds and removes this class
+   * when the initial form fields are filled in and "buy" button used.
+   */
+
+  iframe.tickets.fullscreen-overlay {
+    position: fixed !important;
+    margin: 0 !important;
+    padding: 5px !important;
+    height: 99% !important;
+    width: 100% !important;
+    top: 0px !important;
+    left: 0px !important;
+    right: 0px !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    z-index: 999;
+    overflow: auto;
+  }
+
+  /* No-decoration arbitrary content iframes are square by default; to
+   * match bespoke content height, use an inline CSS declaration -
+   * <iframe ... style="height: 400px" ...> - though it won't be
+   * responsive.
+   */
+
+  iframe.no_decorations {
+    margin-left: auto;
+    margin-right: auto;
+    width: $content_width;
+    height: $content_width;
+    overflow: hidden;
+  }
+
+  img.no_shadow, iframe.no_shadow {
+    @include no_shadow;
+  }
+
+  .redactor-styles.redactor-in,
+  div.above-clear {
+
+    /* Inside the editor or content before-float-clear wrapper DIV,
+     * for the last image inside the last paragraph, or for the last
+     * image directly without a wrapping paragraph, adjust the
+     * top/bottom margins a bit for better spacing with shadows. Use
+     * "!important" to override inline styles set by Redactor in for
+     * this special case.
+     */
+
+    p:last-child > img:not( [ class = 'no_shadow' ] ):last-child,
+    &            > img:not( [ class = 'no_shadow' ] ):last-child {
+      margin-top:    15px !important;
+      margin-bottom: 15px !important;
+    }
+
+    /* Further, for the last image that isn't inside a paragraph
+     * whether or not it has a shadow ensure spacing to any footer
+     * content. If there's a wrapping paragraph, that ensure
+     * enough space by itself. This stuff won't always work inside
+     * the Redactor editor due to extra control containers it adds,
+     * but it catches some cases and gives reasonable results.
+     */
+
+    & > img:last-child {
+      margin-bottom: 35px !important;
+    }
+  }
+}
+
+section.footer {
+  height: 134px;
+  background: image-url( 'clipboard_bottom_slice.png' ) top center no-repeat;
+  background-size: 100%;
+
+  section.footer_content {
+    @include content_metrics;
+    text-align: center;
+
+    font-size: 80%;
+
+    a {
+      text-decoration: none;
+      border-bottom: 1px solid rgba( 0, 0, 0, 0.2 );
+    }
+  }
+}
+
+section.content, section.footer {
+  $base_colour: #332d18;
+
+  a {
+    padding: 1px;
+    color: $base_colour;
+    opacity: 0.8;
+    word-break: break-word;
+  }
+
+  a:visited {
+    color: #534d38;
+  }
+
+  a.article-link:visited {
+    color: $base_colour;
+  }
+
+  a:hover {
+    color: black;
+    background: white;
+  }
+
+  a.article-link:hover {
+    color: lighten($base_colour, 15%);
+    background: none;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Medium width viewport
+//////////////////////////////////////////////////////////////////////////////
+
+@media only screen and (min-width: $container_width_mid) and (max-width: $container_width) {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
+    width: $container_width_mid;
+  }
+
+  section.header {
+    height: 127px;
+
+    #logo {
+      top: 38px;
+      left: 15px;
+      width: 147px;
+      height: auto;
+    }
+
+    nav {
+      top: 55px;
+      right: 110px;
+
+      a {
+        padding-left: 10px;
+        font-size: 2em;
+      }
+    }
+  }
+
+  section.main, .redactor-box.redactor-styles-on {
+    background-size: $container_width_mid 100%;
+
+    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+      @include widescreen_block_mid;
+    }
+
+    img {
+      max-width: $content_width_mid !important;
+      height: auto !important;
+    }
+
+    nav, section.content, .redactor-styles.redactor-in {
+      @include content_metrics_mid;
+    }
+
+    nav {
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      a {
+        font-size: 14pt;
+      }
+    }
+
+    section.blog-articles {
+      $article_width_mid: ($content_width_mid / 2) - 5px;
+
+      article.article {
+        width: $article_width_mid;
+
+        .article-date-and-heading-container {
+          flex-wrap: wrap;
+        }
+
+        .article-date {
+          padding-left: 0;
+          margin-bottom: 5px;
+        }
+      }
+
+      article.article:only-child {
+        margin-left: ($content_width_mid - $article_width_mid) / 2;
+      }
+    }
+  }
+
+  section.footer {
+    height: 67px;
+
+    section.footer_content {
+      @include content_metrics_mid;
+
+      font-size: 60%;
+      white-space: nowrap;
+      br { display: none; }
+    }
+
+    section.footer_content br {
+      display: none;
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Narrow viewport
+//////////////////////////////////////////////////////////////////////////////
+
+@media only screen and (max-width: $container_width_mid) {
+  section.header, section.main, section.footer, .redactor-styles.redactor-in {
+    width: $container_width_narrow;
+  }
+
+  section.header {
+    height: 95px;
+
+    #logo {
+      top: 44px;
+      left: 14px;
+      width: 110px;
+      height: 36px;
+    }
+
+    nav {
+      top: 45px;
+      right: 80px;
+
+      a {
+        padding-left: 10px;
+        font-size: 1.8em;
+      }
+    }
+  }
+
+  section.main, .redactor-box.redactor-styles-on {
+    background-size: $container_width_narrow 100%;
+
+    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+      @include widescreen_block_narrow;
+    }
+
+    img {
+      max-width: $content_width_narrow !important;
+      height: auto !important;
+    }
+
+    nav, section.content, .redactor-styles.redactor-in {
+      @include content_metrics_narrow;
+    }
+
+    section.blog-articles {
+      article.article {
+        width: $content_width_narrow;
+      }
+
+      article.article:only-child {
+        margin-left: 0;
+      }
+    }
+  }
+
+  section.footer {
+    height: 89px;
+
+    section.footer_content {
+      @include content_metrics_narrow;
+
+      font-size: 60%;
+      white-space: nowrap;
+
+      br {
+        display: none;
+      }
+    }
+  }
+}

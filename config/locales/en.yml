@@ -20,4 +20,29 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  time:
+    formats:
+      short: '%B %-d %Y, %k:%M%P'
+      short_no_year: '%B %-d, %H:%M'
+
+  activerecord:
+    models:
+      article: Article
+      page: Page
+
+    attributes:
+      article:
+        title: Article title
+        summary: Brief summary of article
+        article_hero_image: Main photo
+        raw_editor: 'Use the low-level "raw" HTML editor?'
+        body: Main article text
+
+      page:
+        title: Page title
+        slug: Slug
+        page_id: Put into a menu under which page?
+        page_type: What kind of page is this going to be?
+        hidden: 'Hidden from the navigation bar?'
+        raw_editor: 'Use the low-level "raw" HTML editor?'
+        body: Main page text

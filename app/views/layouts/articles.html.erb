@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, viewport-fit=cover">
+
+    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @article.title %></title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <%= stylesheet_link_tag 'pages', media: 'all' %>
+    <%= csrf_meta_tags %>
+    <%= render partial: 'layouts/google_tags' %>
+  </head>
+  <body>
+    <section class="header">
+      <img id="logo" alt="Logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
+      <nav>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook  %>"><i class="fa fa-facebook-official"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter   %>"><i class="fa fa-twitter-square"></i></a>
+        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
+      </nav>
+    </section>
+
+    <section class="main">
+      <nav>
+        <div class="pure-menu pure-menu-horizontal">
+          <ul class="pure-menu-list">
+<% Page.top_level.for_navigation.each do | page | -%>
+            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %>">
+              <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
+<%   if page.children.for_navigation.present? -%>
+              <ul class="pure-menu-children">
+<%     page.children.for_navigation.each do | child | -%>
+                <li class="pure-menu-item">
+                  <%= link_to( child.title, page_path( child.slug ), :class => 'pure-menu-link' ) %>
+                </li>
+<%     end -%>
+              </ul>
+<%   end -%>
+            </li>
+<% end -%>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="content">
+        <div class="above-clear">
+<%= render :partial => 'layouts/messages' %>
+<%= yield %>
+        </div>
+        <div style="clear: both"></div>
+      </section>
+    </section>
+
+    <section class="footer">
+      <section class="footer_content">
+        <% if user_signed_in? -%>
+
+          <% if @article.present? -%>
+            <%= link_to 'Edit article', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
+          <% end -%>
+          <%= link_to 'New blog article', new_admin_page_article_path() %> |
+          <%= link_to 'List articles', admin_page_articles_path %> |
+          <%= link_to 'New page', new_admin_page_path() %>
+
+        <% else -%>
+
+          <br>
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+
+        <% end -%>
+      </section>
+    </section>
+  </body>
+</html>

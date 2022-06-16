@@ -1,5 +1,5 @@
-window.init_redactor = function()
-{
+$(document).on('ready page:load', function() {
+
   var csrf_token = $('meta[name=csrf-token]').attr('content');
   var csrf_param = $('meta[name=csrf-param]').attr('content');
   var params;
@@ -9,27 +9,37 @@ window.init_redactor = function()
       params = csrf_param + "=" + encodeURIComponent(csrf_token);
   }
 
-  $('.custom_redactor').redactor(
+  $R(
+    '.custom_redactor',
     {
-      // You can specify, which ones plugins you need.
-      // If you want to use plugins, you have add plugins to your
-      // application.js and application.css files and uncomment the line below:
-      // "plugins": ['fontsize', 'fontcolor', 'fontfamily', 'fullscreen', 'textdirection', 'clips'],
-
-      imageUpload:  "/redactor_rails/pictures?" + params,
-      imageGetJson: "/redactor_rails/pictures",
-      fileUpload:   "/redactor_rails/documents?" + params,
-      fileGetJson:  "/redactor_rails/documents",
-      path:         "/assets/redactor-rails",
-      plugins:      [ "video" ],
-
+      path:            "/assets/redactor3-rails",
+      fileUpload:      "/redactor3_rails/files?"  + params,
+      imageUpload:     "/redactor3_rails/images?" + params,
+      imageResizable:  true,
+      imagePosition:   true,
+      spellcheck:      true,
+      minHeight:       '450px',
+      maxHeight:       '720px',
       toolbarExternal: "#redactor_toolbar",
-      buttons: [ 'formatting', 'bold', 'italic', 'deleted', 'unorderedlist',
-                 'orderedlist', 'outdent', 'indent', 'image', 'video', 'link',
-                 'alignment', 'html' ],
-
+      plugins:         [
+        'alignment',
+        'fontcolor',
+        'fontsize',
+        'table',
+        'properties',
+        'video',
+        'widget'
+      ],
+      buttons: [
+        'format',
+        'bold',
+        'italic',
+        'sup',
+        'lists',
+        'link',
+        'image',
+        'html'
+      ]
     }
   );
-}
-
-$(document).on( 'ready page:load', window.init_redactor );
+});

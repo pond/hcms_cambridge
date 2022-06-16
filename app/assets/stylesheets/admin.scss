@@ -1,5 +1,5 @@
-@import 'shared.scss';
-@import 'redactor_custom.css';
+//= require components/redactor
+//= require components/shared
 
 body {
   background: #061923;
@@ -9,28 +9,24 @@ body {
   background-size: cover;
 }
 
-section.messages {
-  padding: 0 10px;
-  background: #eef;
-  border: 1px solid #00f;
-  color: #00f;
-  font-size: 125%;
-  font-weight: bold;
-}
-
 div.redactor-container {
   min-width: 800px;
-}
-
-.redactor-box {
   overflow: scroll;
 }
 
-.redactor-editor {
+#redactor_toolbar {
+  background: white;
+  padding: 3px 3px 0 3px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+
+.redactor-styles, .redactor-in {
+  position: static;
   background: transparent;
   border: none;
   padding-top: 10px !important;
-  overflow: scroll;
+  box-sizing: content-box;
 }
 
 section.admin, footer {
@@ -65,4 +61,8 @@ section.admin, footer {
 
 footer {
   text-align: center;
+}
+
+label {
+  font-weight: bold;
 }

@@ -49,7 +49,40 @@ Next set variable `AWS_ACCESS_KEY_ID` to switch CarrierWave over to Amazon S3 st
 In brief:
 
 ```bash
-heroku --app your-appname-1234 config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy
-heroku --app your-appname-1234 config:set AWS_S3_REGION=region # e.g. 'eu-west-1'
-heroku --app your-appname-1234 config:set AWS_S3_BUCKET_NAME=s3-bucket-name
+heroku config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy  --app your-appname-1234
+heroku config:set AWS_S3_REGION=region # e.g. 'eu-west-1'          --app your-appname-1234
+heroku config:set AWS_S3_BUCKET_NAME=s3-bucket-name                --app your-appname-1234
+```
+
+### GTM
+
+A Google site tag snippet is included for your AD ID (`9xxyyyzzz` or some similar number) if you specify the GOOGLE_AD_ID variable.
+
+```bash
+heroku config:set GOOGLE_AD_ID=9xxyyyzzz --app your-appname-1234
+```
+
+## Development
+
+### Mailcatcher
+
+ActiveMailer is configured for use with [MailCatcher](https://github.com/sj26/mailcatcher). You should install this gem separately, as it has requirements on gems such as Rake or Thin which are mutually incompatible with the bundle used by HCMS.
+
+```
+gem install mailcatcher
+mailcatcher
+```
+
+A daemon will listen at localhost port 1080 for a web UI showing received mail, with an SMTP server on localhost port 1025 - this is the thing that HCMS is configured to communicate with for local development.
+
+### Recaptcha
+
+If you want to test things like booking pages, you'll need Google V2 checkbox recaptcha credentials.
+
+  https://www.google.com/recaptcha/admin
+
+Run HCMS with:
+
+```
+RECAPTCHA_PUBLIC_KEY="..." RECAPTCHA_PRIVATE_KEY="..." be rails s
 ```

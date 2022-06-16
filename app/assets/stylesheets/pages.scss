@@ -1,7 +1,9 @@
-@import 'shared.scss';
+//= require components/shared
+
+@import 'config/variables';
 
 body {
-  background: #061923 url( 'background.jpg' ) no-repeat center center fixed;
+  background: #061923 image-url( 'background.jpg' ) no-repeat center center fixed;
   background-attachment: fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;

@@ -2,23 +2,22 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, viewport-fit=cover">
 
     <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @page.title %></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <%= stylesheet_link_tag    'pages', media: 'all' %>
-    <%= javascript_include_tag 'pages' %>
+    <%= stylesheet_link_tag 'pages', media: 'all' %>
     <%= csrf_meta_tags %>
+    <%= render partial: 'layouts/google_tags' %>
   </head>
   <body>
     <section class="header">
-      <img id="logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
+      <img id="logo" alt="Logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
       <nav>
         <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook  %>"><i class="fa fa-facebook-official"></i></a>
         <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter   %>"><i class="fa fa-twitter-square"></i></a>
         <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
-        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.google    %>"><i class="fa fa-google-plus-square"></i></a>
       </nav>
     </section>
 
@@ -28,12 +27,12 @@
           <ul class="pure-menu-list">
 <% Page.top_level.for_navigation.each do | page | -%>
             <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %><%= page.id == @page.id || page.id == @page.page.try( :id ) ? ' current_page' : ''%>">
-              <%= link_to( page.title, page_path( page ), :class => 'pure-menu-link' ) %>
+              <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
 <%   if page.children.for_navigation.present? -%>
               <ul class="pure-menu-children">
 <%     page.children.for_navigation.each do | child | -%>
                 <li class="pure-menu-item">
-                  <%= link_to( child.title, page_path( child ), :class => 'pure-menu-link' ) %>
+                  <%= link_to( child.title, page_path( child.slug ), :class => 'pure-menu-link' ) %>
                 </li>
 <%     end -%>
               </ul>
@@ -46,7 +45,8 @@
 
       <section class="content">
         <div class="above-clear">
-<%= yield %>
+          <%= render :partial => 'layouts/messages' %>
+          <%= yield %>
         </div>
         <div style="clear: both"></div>
       </section>
@@ -54,17 +54,29 @@
 
     <section class="footer">
       <section class="footer_content">
-<% if user_signed_in? -%>
-<%   if ( @page && @page.is_a?( Page ) ) || ( @admin_page && @admin_page.is_a?( Admin::Page ) ) -%>
-      <%= link_to 'Edit', edit_admin_page_path( @page || @admin_page) %> |
-<%   end -%>
-      <%= link_to 'New', new_admin_page_path %> |
-      <%= link_to 'All Pages', admin_pages_path %>
-<% else -%>
-      <br>
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
-      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
-<% end -%>
+        <% if user_signed_in? -%>
+
+          <% if @page.is_a?(Page) -%>
+            <% if @page.is_blog_type? -%>
+              <%= link_to 'New article', new_admin_page_article_path( page_id: @page.id ) %> |
+              <%= link_to 'List articles', admin_page_articles_path( page_id: @page.id ) %> |
+              <%= link_to 'Edit this page', [ :edit, :admin, @page ] %> |
+            <% else -%>
+              <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
+              <%= link_to 'New page', new_admin_page_path %> |
+            <% end -%>
+          <% else -%>
+            <%= link_to 'New page', new_admin_page_path %> |
+          <% end -%>
+          <%= link_to 'List pages', admin_pages_path %>
+
+        <% else -%>
+
+          <br>
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+
+        <% end -%>
       </section>
     </section>
   </body>

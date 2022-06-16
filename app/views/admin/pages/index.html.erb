@@ -11,24 +11,27 @@
   </thead>
 
   <tbody>
-<% @admin_pages.each do | admin_page | -%>
+    <% @pages.each do | page | -%>
+
       <tr class="<%= cycle( 'even', 'odd' ) %>">
-        <td><%= admin_page.title %></td>
-<%= render :partial => 'actions', :locals => { :admin_page => admin_page } %>
-        <td class="centre"><%= admin_page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
+        <td><%= page.title %></td>
+          <%= render :partial => 'actions', :locals => { :page => page } %>
+        <td class="centre"><%= page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
       </tr>
-<%  sub_pages = Admin::Page.where( :page_id => admin_page.id ).all
-    sub_pages.each do | sub_page | -%>
-      <tr class="children <%= cycle( 'even', 'odd' ) %>">
-        <td>&mdash; <%= sub_page.title %></td>
-<%= render :partial => 'actions', :locals => { :admin_page => sub_page } %>
-        <td class="centre"><%= sub_page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
-      </tr>
-<%  end -%>
-<% end -%>
+
+      <% page.children.each do | child_page | -%>
+
+        <tr class="children <%= cycle( 'even', 'odd' ) %>">
+          <td>&mdash; <%= child_page.title %></td>
+            <%= render :partial => 'actions', :locals => { :page => child_page } %>
+          <td class="centre"><%= child_page.hidden? ? '<b>No</b>'.html_safe : 'Yes' %>
+        </tr>
+
+      <% end -%>
+    <% end -%>
   </tbody>
 </table>
 
 <br>
 
-<%= link_to 'New Page', new_admin_page_path %>
+<%= link_to 'New page', new_admin_page_path %>
