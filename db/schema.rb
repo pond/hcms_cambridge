@@ -44,7 +44,7 @@ ActiveRecord::Schema.define(version: 2020_05_03_234816) do
     t.index ["slug"], name: "index_pages_on_slug", unique: true
   end
 
-  create_table "redactor_assets", force: :cascade do |t|
+  create_table "redactor_assets", id: :serial, force: :cascade do |t|
     t.integer "user_id"
     t.string "data_file_name", null: false
     t.string "data_content_type"
@@ -54,9 +54,8 @@ ActiveRecord::Schema.define(version: 2020_05_03_234816) do
     t.string "type", limit: 30
     t.integer "width"
     t.integer "height"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "custom_file_name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.index ["assetable_type", "assetable_id"], name: "idx_redactor_assetable"
     t.index ["assetable_type", "type", "assetable_id"], name: "idx_redactor_assetable_type"
   end
