@@ -253,11 +253,11 @@ section.main, .redactor-box.redactor-styles-on {
    * acceptable ratio.
    */
 
-  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+  iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
     @include widescreen_block;
   }
 
-  iframe:not([src*='www.google.com/recaptcha']):not([title='widget']):not(.no_decorations) {
+  iframe:not([src*='www.recaptcha.net']):not([title='widget']):not(.no_decorations) {
     @include standard_shadow;
     @include standard_spinner;
   }
@@ -414,7 +414,7 @@ section.content, section.footer {
   section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_mid 100%;
 
-    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+    iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
       @include widescreen_block_mid;
     }
 
@@ -508,7 +508,7 @@ section.content, section.footer {
   section.main, .redactor-box.redactor-styles-on {
     background-size: $container_width_narrow 100%;
 
-    iframe:not([src*='www.google.com/recaptcha']):not([title='widget']) {
+    iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
       @include widescreen_block_narrow;
     }
 

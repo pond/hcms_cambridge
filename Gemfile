@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
-ruby '2.7.6'
+ruby '3.3.5'
 
-gem 'rails', '>= 5.2', '< 6'
+gem 'rails', '>= 6.1', '< 7'
 
 gem 'pg'
 gem 'thin'
