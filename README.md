@@ -77,12 +77,34 @@ A daemon will listen at localhost port 1080 for a web UI showing received mail, 
 
 ### Recaptcha
 
-If you want to test things like booking pages, you'll need Google V2 checkbox recaptcha credentials.
+If you want to test things like booking pages, you'll need Google V2 checkbox recaptcha credentials, or use Enterprise V3.
 
   https://www.google.com/recaptcha/admin
 
-Run HCMS with:
+**For V2** run HCMS with:
 
 ```
-RECAPTCHA_PUBLIC_KEY="..." RECAPTCHA_PRIVATE_KEY="..." be rails s
+RECAPTCHA_SITE_KEY="..." RECAPTCHA_SECRET_KEY="..." be rails s
 ```
+
+Legacy alternatives environment variable names, now deprecated:
+
+* Site key `RECAPTCHA_PUBLIC_KEY`
+* Secret key `RECAPTCHA_PRIVATE_KEY`
+
+**For V3** run HCMS with:
+
+```
+RECAPTCHA_KEY_ID="..." RECAPTCHA_GCLOUD_API_KEY="..." RECAPTCHA_GCLOUD_PROJECT_ID="..." be rails s
+```
+
+In Google Cloud Console, you need to set up a recaptcha key ("key ID") and a Google Cloud API key ("API key") for the recaptcha API calls being made behind the scenes, or use an existing one if you have one. This is all done within what Google Console calls a Project ("project ID"). The Google UI seems to change completely every 5 minutes, but at the time of writing:
+
+* Go to "https://console.cloud.google.com/"
+* Make sure you're in the correct Project. Top-left next to the Google Cloud logo should be a project picker. You can create a new Project if you have none, or want a new one just to hold recaptcha stuff; when finished, go back to "https://console.cloud.google.com/" again.
+* At the top right is a vertical "..." menu, which should have "Project Settings" (else try to find the project settings somewhere else!) - therein, beneath project name, should be Project ID (typically a dash-case / kebab-case version of the project name). That's for `RECAPTCHA_GCLOUD_PROJECT_ID`.
+* Search for "Recaptcha", probably ending up at "https://console.cloud.google.com/security/recaptcha"
+* Create a key. No special settings likely needed other than domain names. For local testing you need to add domain "localhost" (or just turn off domain verification) and *will* need to specify that it's a test key in additional settings.
+* In the Key Details page the ID is clearly visible. That's for `RECAPTCHA_KEY_ID`.
+* Back at https://console.cloud.google.com/ search for "Credentials" (looking for the one under APIs & Services), probably ending up at "https://console.cloud.google.com/apis/credentials"
+* Here you can Create Credentials -> API Key and get an API key. That's for `RECAPTCHA_GCLOUD_API_KEY`.

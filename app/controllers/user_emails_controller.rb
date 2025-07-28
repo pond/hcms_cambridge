@@ -8,10 +8,10 @@ class UserEmailsController < ApplicationController
 
   def create
     is_booking = params.has_key?( 'date' ) && params.has_key?( 'time' )
-    form_kind  = is_booking ? 'booking' : 'message'
+    form_kind  = is_booking ? 'booking enquiry' : 'message'
 
     success = begin
-      verify_recaptcha({})
+      verify_recaptcha(action: 'contact')
     rescue
       false
     end

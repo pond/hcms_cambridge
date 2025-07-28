@@ -30,6 +30,7 @@
   <%= page.body.html_safe() %>
 
   <%= form_tag( user_emails_path ) do %>
+    <hr>
     <p>
       <%= label_tag :name, 'Your name' %><br>
       <%= text_field_tag :name, nil, :placeholder =>'Name' %>
@@ -42,6 +43,13 @@
       <%= label_tag :email, 'Preferred telephone contact number' %><br>
       <%= telephone_field_tag :phone, nil, :placeholder => 'Telephone number' %>
     </p>
+    <p>
+      <em>
+        Your name along with an e-mail address or a telephone number are
+        required so that we can respond to your enquiry.
+      </em>
+    </p>
+    <hr>
     <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
       <p>
         <%= label_tag :date, 'Date (at least two days in advance)' %><br>
@@ -70,7 +78,11 @@
       </p>
     <% end -%>
 
-    <%= recaptcha_tags() %>
+    <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
+      <%= recaptcha_tags() %>
+    <% else %>
+      <%= recaptcha_v3(action: 'contact') %>
+    <% end %>
 
     <p>
       <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
