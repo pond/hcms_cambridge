@@ -102,7 +102,7 @@
                 title: this.lang.get('table')
             };
 
-			var $button = this.toolbar.addButtonAfter('lists', 'table', obj);
+			var $button = this.toolbar.addButtonBefore('link', 'table', obj);
 			$button.setIcon('<i class="re-icon-table"></i>');
 			$button.setDropdown(dropdown);
         },
@@ -224,11 +224,16 @@
                 var $currentRow = $R.dom(current).closest('tr');
                 var nextRow = $currentRow.nextElement().get();
                 var prevRow = $currentRow.prevElement().get();
+                var $head = $R.dom(current).closest('thead');
 
                 $component.removeRow(current);
 
                 if (nextRow) this.caret.setStart(nextRow);
                 else if (prevRow) this.caret.setEnd(prevRow);
+                else if ($head.length !== 0) {
+                    $component.removeHead();
+                    this.caret.setStart($component);
+                }
                 else this.deleteTable();
             }
         },
@@ -341,7 +346,7 @@
 				var $origCell = $R.dom(origCell);
 
 				var $td = $origCell.clone();
-				$td.html('');
+				$td.html('<div data-redactor-tag="tbr"></div>');
 
 				if (type === 'right') $origCell.after($td);
 				else                  $origCell.before($td);
@@ -428,6 +433,7 @@
             {
                 var $cell = $R.dom(tag);
                 $cell.attr('contenteditable', true);
+                $cell.html('<div data-redactor-tag="tbr"></div>');
 
                 $row.append($cell);
             }

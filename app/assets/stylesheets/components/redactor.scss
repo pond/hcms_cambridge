@@ -284,6 +284,7 @@
   position: absolute;
   z-index: 1; }
 
+.redactor-component[data-redactor-type=image],
 .redactor-component[data-redactor-type=widget] {
   clear: both; }
 
@@ -337,7 +338,7 @@
 
 #redactor-image-resizer {
   position: absolute;
-  z-index: 1050;
+  z-index: 1051;
   background-color: rgba(0, 125, 255, 0.9);
   width: 13px;
   height: 13px;
@@ -363,7 +364,7 @@
   .redactor-file-remover:hover {
     opacity: 1; }
 
-#redactor-overlay {
+.redactor-overlay {
   position: fixed;
   z-index: 1051;
   top: 0;
@@ -371,7 +372,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(16, 16, 18, 0.3); }
-  #redactor-overlay > .redactor-close {
+  .redactor-overlay > .redactor-close {
     position: fixed;
     top: 1rem;
     right: 1rem; }
@@ -1050,11 +1051,10 @@
 .redactor-styles {
   margin: 0;
   padding: 16px 18px;
-/*  color: #333;
+  color: #333;
   font-family: "Trebuchet MS", "Helvetica Neue", Helvetica, Tahoma, sans-serif;
   font-size: 1em;
   line-height: 1.5;
-*/
   box-sizing: border-box; }
   .redactor-styles *,
   .redactor-styles *:before,
@@ -1071,17 +1071,17 @@
     .redactor-styles[dir="rtl"] ul ul,
     .redactor-styles[dir="rtl"] ol ol,
     .redactor-styles[dir="rtl"] ul ol,
-/*    .redactor-styles[dir="rtl"] ol ul {
-      margin: 0 1.5em 0 0; }
-*/    .redactor-styles[dir="rtl"] figcaption {
+    .redactor-styles[dir="rtl"] ol ul {
+      margin-left: 1.5em; }
+    .redactor-styles[dir="rtl"] figcaption {
       text-align: right; }
-/*  .redactor-styles ul[dir="rtl"],
+  .redactor-styles ul[dir="rtl"],
   .redactor-styles ul[dir="rtl"] ul,
   .redactor-styles ul[dir="rtl"] ol,
   .redactor-styles ol[dir="rtl"],
   .redactor-styles ol[dir="rtl"] ul,
   .redactor-styles ol[dir="rtl"] ol {
-    margin: 0 1.5em 0 0; }
+    margin-right: 1.5em; }
   .redactor-styles ul[dir="rtl"] li,
   .redactor-styles ol[dir="rtl"] li {
     text-align: right; }
@@ -1146,20 +1146,18 @@
     font-size: 0.83333em;
     text-transform: uppercase;
     letter-spacing: .035em; }
-*/
   .redactor-styles blockquote {
     font-style: italic;
     color: rgba(0, 0, 0, 0.5);
     border: none; }
   .redactor-styles table {
     width: 100%; }
-/*  .redactor-styles time, .redactor-styles small, .redactor-styles var, .redactor-styles code, .redactor-styles kbd, .redactor-styles mark {
+  .redactor-styles time, .redactor-styles small, .redactor-styles var, .redactor-styles code, .redactor-styles kbd, .redactor-styles mark {
     display: inline-block;
     font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
     font-size: 87.5%;
     line-height: 1;
     color: rgba(51, 51, 51, 0.9); }
-*/
   .redactor-styles var, .redactor-styles cite {
     opacity: .6; }
   .redactor-styles var {

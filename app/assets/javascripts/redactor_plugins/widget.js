@@ -87,7 +87,7 @@
                 observe: 'widget'
             };
 
-            var $button = this.toolbar.addButtonBefore('html', 'widget', obj);
+            var $button = this.toolbar.addButton('widget', obj);
             $button.setIcon('<i class="re-icon-widget"></i>');
         },
         open: function()

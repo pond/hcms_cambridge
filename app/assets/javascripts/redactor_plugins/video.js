@@ -25,13 +25,15 @@
             this.component = app.component;
             this.insertion = app.insertion;
             this.inspector = app.inspector;
+            this.selection = app.selection;
         },
         // messages
         onmodal: {
             video: {
                 opened: function($modal, $form)
                 {
-                    $form.getField('video').focus();
+                    $video = $form.getField('video');
+                    $video.focus();
                 },
                 insert: function($modal, $form)
                 {
@@ -135,7 +137,11 @@
             {
     			if (data.match(this.opts.regex.youtube))
     			{
-    				data = data.replace(this.opts.regex.youtube, iframeStart + '//www.youtube.com/embed/$1' + iframeEnd);
+                    var yturl = '//www.youtube.com';
+                    if (data.search('youtube-nocookie.com') !== -1) {
+                        yturl = '//www.youtube-nocookie.com';
+                    }
+    				data = data.replace(this.opts.regex.youtube, iframeStart + yturl + '/embed/$1' + iframeEnd);
     			}
     			else if (data.match(this.opts.regex.vimeo))
     			{

@@ -70,6 +70,9 @@
                 }
             }
         },
+        onclick: function() {
+            //this._observeButton();
+        },
 
         // public
         start: function()
@@ -80,7 +83,7 @@
                 observe: 'properties'
             };
 
-            var $button = this.toolbar.addButtonAfter('link', 'properties', data);
+            var $button = this.toolbar.addButton('properties', data);
             $button.setIcon('<i class="re-icon-properties"></i>');
 
             this._createLabel();
