@@ -1,3 +1,5 @@
+$R.opts.buttons = []
+
 $(document).on('ready page:load', function() {
 
   var csrf_token = $('meta[name=csrf-token]').attr('content');
@@ -25,21 +27,38 @@ $(document).on('ready page:load', function() {
         'alignment',
         'fontcolor',
         'fontsize',
+        // 'properties',
         'table',
-        'properties',
         'video',
-        'widget'
+        // 'widget',
+        'spacer',
       ],
       buttons: [
         'format',
+        'alignment',
+        'lists',
+        'undo',
+        'redo',
+        'spacer',
+
         'bold',
         'italic',
         'sup',
-        'lists',
+        'fontcolor',
+        'fontsize',
         'link',
+        'spacer',
+
+        'table',
         'image',
-        'html'
-      ]
+        'video',
+        'widget',
+        'properties',
+        'line',
+        'spacer',
+
+        'html',
+      ],
     }
   );
 });
