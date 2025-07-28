@@ -1,0 +1,11 @@
+Redactor v3.5.2 was the last of the V3 series at the time of writing (mid 2025). The current release was sadly far too expensive to be worthwhile in the project - the most basic, lowest price update at 50% discount due to the existing licence was still $249 USD for only one year of updates.
+
+The version herein has been hand-modified to provide a couple of new features:
+
+* An "enforceButtonOrder" (default-true) configuration file will override all plugin attempts to specify their own button position. If the configure includes the plugin but does not declare that plugin's button in the "buttons" array, though, then the plugin's button(s) will be appended. The name is taken from a feature I stumbled across in [CraftCMS](https://github.com/craftcms/redactor/commit/bfd45e4bed17462a2f3a53c0c839d92c2b538c77) although the implementation is completely different.
+
+* A new "spacer" button name will do what that name suggests. Additional CSS is needed to make it look good, though; that has been added into "admin.scss" rather than thrown into Redactor's SCSS data.
+
+For diffs, see:
+
+* https://github.com/pond/hcms_cambridge/commit/0a5319454b42862b1aff54fbce5670d9be83f8ea
