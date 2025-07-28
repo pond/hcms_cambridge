@@ -1643,6 +1643,7 @@ $R.opts = {
     buttonsAddBefore: false,
     buttonsHide: [],
     buttonsHideOnMobile: [],
+    enforceButtonOrder: true,
 
     // image
     imageUpload: false,
@@ -1877,6 +1878,11 @@ $R.buttons = {
         title: '## redo ##',
         icon: true,
         api: 'module.buffer.redo'
+    },
+    spacer: {
+       title: '',
+       icon: false,
+       api: '',
     },
     format: {
         title: '## format ##',
@@ -4889,9 +4895,9 @@ $R.add('service', 'toolbar', {
 
         if (this.is())
         {
-            if (position === 'first') this.$toolbar.prepend($button);
-            else if (position === 'after') $el.after($button);
-            else if (position === 'before') $el.before($button);
+            if (!this.opts.enforceButtonOrder && position === 'first') this.$toolbar.prepend($button);
+            else if (!this.opts.enforceButtonOrder && position === 'after') $el.after($button);
+            else if (!this.opts.enforceButtonOrder && position === 'before') $el.before($button);
             else {
                 var index = this.opts.buttons.indexOf(name);
                 if (start !== true && index !== -1) {

@@ -29,6 +29,17 @@ div.redactor-container {
   box-sizing: content-box;
 }
 
+.redactor-toolbar a.re-spacer {
+  border: none;
+  box-shadow: none;
+  cursor: auto;
+  padding: 0 10px;
+}
+
+.redactor-toolbar a.re-spacer:hover {
+  background: none;
+}
+
 section.admin, footer {
   margin: 20px 10%;
   padding: 20px;
