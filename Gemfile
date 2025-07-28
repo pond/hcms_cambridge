@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
-ruby '3.3.5'
+ruby '3.4.5'
 
-gem 'rails', '>= 6.1', '< 7'
+gem 'rails', '>= 7', '< 8'
 
 gem 'pg'
-gem 'thin'
+gem 'puma'
 
 # Asset pipeline (sigh).
 #
@@ -28,13 +28,13 @@ gem 'sdoc'
 #
 #   https://rubygems.org/gems/devise
 #
-gem 'devise', '~> 4.7'
+gem 'devise', '~> 4.9'
 
 # Recaptcha used for e.g. the "booking" type pages.
 #
 #   https://rubygems.org/gems/recaptcha
 #
-gem 'recaptcha', '~> 5.5'
+gem 'recaptcha', '~> 5.20'
 
 # Image uploads and support for the Redactor WYSIWYG-ish page editor.
 #
@@ -43,17 +43,17 @@ gem 'recaptcha', '~> 5.5'
 #   https://rubygems.org/gems/mini_magick
 #   https://rubygems.org/gems/redactor3_rails
 #
-gem 'fog-aws',         '~> 3.6'
-gem 'carrierwave',     '~> 2.1'
-gem 'mini_magick',     '~> 4.10'
+gem 'fog-aws',         '~> 3.32'
+gem 'carrierwave',     '~> 3.1'
+gem 'mini_magick',     '~> 5.3'
 gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branch: 'feature/fix-js'
 
 # Orderable pages.
 #
 #   https://rubygems.org/gems/acts_as_list
 #
-gem 'acts_as_list', '~> 1.0'
+gem 'acts_as_list', '~> 1.2'
 
 group :development, :test do
-  gem 'byebug'
+  gem 'debug'
 end
