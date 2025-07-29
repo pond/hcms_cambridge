@@ -6,6 +6,10 @@ gem 'rails', '>= 7', '< 8'
 gem 'pg'
 gem 'puma'
 
+# Things that used to be in the standard library.
+#
+gem 'ostruct'
+
 # Asset pipeline (sigh).
 #
 #   https://rubygems.org/gems/sass-rails
@@ -56,4 +60,5 @@ gem 'acts_as_list', '~> 1.2'
 
 group :development, :test do
   gem 'debug'
+  gem 'awesome_print'
 end

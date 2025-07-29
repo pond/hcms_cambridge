@@ -80,14 +80,19 @@ class Admin::PagesController < ApplicationController
     end
 
     def page_params
-      params.require( :page ).permit( :title,
-                                      :slug,
-                                      :body,
-                                      :page_id,
-                                      :hidden,
-                                      :raw_editor,
-                                      :page_type,
-                                      :form_selection_list_contents )
+      params
+        .require( :page )
+        .permit(
+          :title,
+          :slug,
+          :navigation_title,
+          :body,
+          :page_id,
+          :hidden,
+          :raw_editor,
+          :page_type,
+          :form_selection_list_contents,
+          :form_selection_list_label,
+        )
     end
-
 end

@@ -6,10 +6,10 @@
       <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
       <dt><strong>Phone number</strong></dt>
       <dd><%= @phone %></dd>
-<% unless @menu.blank? -%>
+<% unless @menu.blank? %>
       <dt><strong>Menu selection</strong></dt>
       <dd><%= @menu %></dd>
-<% end -%>
+<% end %>
       <dt><strong>Message</strong></dt>
       <dd><%= @message.blank? ? 'None' : '"' + @message + '"' %></dd>
     </dl>

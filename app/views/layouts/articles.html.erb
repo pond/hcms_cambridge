@@ -12,65 +12,77 @@
     <%= render partial: 'layouts/google_tags' %>
   </head>
   <body>
-    <section class="header">
-      <img id="logo" alt="Logo" src="<%= image_path( 'logo.png' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
-      <nav>
-        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook  %>"><i class="fa fa-facebook-official"></i></a>
-        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter   %>"><i class="fa fa-twitter-square"></i></a>
-        <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
-      </nav>
-    </section>
+    <header>
+      <section class="header_content">
+        <img id="logo" alt="Logo" src="<%= image_path( 'logo' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
 
-    <section class="main">
-      <nav>
-        <div class="pure-menu pure-menu-horizontal">
-          <ul class="pure-menu-list">
-<% Page.top_level.for_navigation.each do | page | -%>
-            <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %>">
-              <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
-<%   if page.children.for_navigation.present? -%>
-              <ul class="pure-menu-children">
-<%     page.children.for_navigation.each do | child | -%>
-                <li class="pure-menu-item">
-                  <%= link_to( child.title, page_path( child.slug ), :class => 'pure-menu-link' ) %>
+        <nav class="main_menu">
+          <% if @page.navigation_title.present? %>
+            <h1 id="navigation_title"><%= @page.navigation_title %></h1>
+          <% end %>
+
+          <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+              <% Page.top_level.for_navigation.each do | page | %>
+                <li class="pure-menu-item pure-menu-allow-hover<%= page.children.for_navigation.present? ? ' pure-menu-has-children' : '' %>">
+                  <%= link_to( page.title, page_path( page.slug ), :class => 'pure-menu-link' ) %>
+                  <% if page.children.for_navigation.present? %>
+                    <ul class="pure-menu-children">
+                      <% page.children.for_navigation.each do | child | %>
+                        <li class="pure-menu-item">
+                          <%= link_to( child.title, page_path( child.slug ), :class => 'pure-menu-link' ) %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  <% end %>
                 </li>
-<%     end -%>
-              </ul>
-<%   end -%>
-            </li>
-<% end -%>
-          </ul>
-        </div>
-      </nav>
+              <% end %>
+            </ul>
+          </div>
+        </nav>
+      </section>
+    </header>
 
-      <section class="content">
+    <main>
+      <section class="main_content">
         <div class="above-clear">
-<%= render :partial => 'layouts/messages' %>
-<%= yield %>
+          <%= render :partial => 'layouts/messages' %>
+          <%= yield %>
         </div>
         <div style="clear: both"></div>
       </section>
-    </section>
+    </main>
 
-    <section class="footer">
+    <footer>
       <section class="footer_content">
-        <% if user_signed_in? -%>
+        <nav class="cms_menu">
+          <% if user_signed_in? %>
+            <% if @article.present? %>
+              <%= link_to 'Edit article', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
+            <% end %>
+            <%= link_to 'New blog article', new_admin_page_article_path() %> |
+            <%= link_to 'List articles', admin_page_articles_path %> |
+            <%= link_to 'New page', new_admin_page_path() %>
+          <% else %>
+            <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+            <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+          <% end %>
+        </nav>
 
-          <% if @article.present? -%>
-            <%= link_to 'Edit article', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
-          <% end -%>
-          <%= link_to 'New blog article', new_admin_page_article_path() %> |
-          <%= link_to 'List articles', admin_page_articles_path %> |
-          <%= link_to 'New page', new_admin_page_path() %>
-
-        <% else -%>
-
-          <br>
-          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
-          <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
-
-        <% end -%>
+        <nav class="social_menu">
+          <nav>
+            <% if Rails.application.config.uk_org_pond_hcms.facebook.present? %>
+              <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook %>"><i class="fa fa-facebook-official"></i></a>
+            <% end %>
+            <% if Rails.application.config.uk_org_pond_hcms.twitter.present? %>
+              <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter %>"><i class="fa fa-twitter-square"></i></a>
+            <% end %>
+            <% if Rails.application.config.uk_org_pond_hcms.instagram.present? %>
+              <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
+            <% end %>
+          </nav>
+        </nav>
       </section>
-    </section>
+    </footer>
   </body>
 </html>

@@ -15,10 +15,10 @@ Date:
 Preferred time:
 <%= @time %>
 
-<% unless @menu.blank? -%>
+<% unless @menu.blank? %>
 Menu selection:
 <%= @menu %>
-<% end -%>
+<% end %>
 
 Other notes:
 <%= @notes.blank? ? 'None' : '"' + @notes + '"' %>

@@ -1,7 +1,7 @@
 <%
   google_ad_id = ENV['GOOGLE_AD_ID']
   unless google_ad_id.blank?
--%>
+%>
 <!-- Global site tag (gtag.js) - Google Ads: <%= google_ad_id %> -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-<%= google_ad_id %>"></script>
 <script>
@@ -10,4 +10,4 @@
   gtag('js', new Date());
   gtag('config', 'AW-<%= google_ad_id %>');
 </script>
-<% end -%>
+<% end %>

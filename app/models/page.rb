@@ -28,10 +28,10 @@ class Page < ActsLikePage
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
   PAGE_TYPES             =
   [
-    OpenStruct.new( { :internal_type => PAGE_TYPE_NORMAL,       :human_text => 'Normal page'       } ),
-    OpenStruct.new( { :internal_type => PAGE_TYPE_BLOG,         :human_text => 'Blog'              } ),
-    OpenStruct.new( { :internal_type => PAGE_TYPE_BOOKING_FORM, :human_text => '"Booking" form'    } ),
-    OpenStruct.new( { :internal_type => PAGE_TYPE_CONTACT_FORM, :human_text => '"Contact us" form' } )
+    OpenStruct.new( { :internal_type => PAGE_TYPE_NORMAL,       :human_text => 'Normal page'  } ),
+    OpenStruct.new( { :internal_type => PAGE_TYPE_CONTACT_FORM, :human_text => 'Contact form' } ),
+    OpenStruct.new( { :internal_type => PAGE_TYPE_BOOKING_FORM, :human_text => 'Booking form' } ),
+    OpenStruct.new( { :internal_type => PAGE_TYPE_BLOG,         :human_text => 'Blog'         } ),
   ]
 
   def self.home

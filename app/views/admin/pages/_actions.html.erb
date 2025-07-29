@@ -4,24 +4,24 @@
   #   render :partial => 'actions', :locals => {
   #     :page => Page model instance
   #   }
--%>
+%>
 <td>
-  <% if page.first? -%>
+  <% if page.first? %>
     &nbsp;
-  <% else -%>
+  <% else %>
     <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
     <%= f.submit( '↑', :name => 'higher' ) %>
-    <% end -%>
-  <% end -%>
+    <% end %>
+  <% end %>
 </td>
 <td>
-  <% if page.last? -%>
+  <% if page.last? %>
     &nbsp;
-  <% else -%>
+  <% else %>
     <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
     <%= f.submit( '↓', :name => 'lower' ) %>
-    <% end -%>
-  <% end -%>
+    <% end %>
+  <% end %>
 </td>
 <td><%= link_to 'Show',    [        :admin, page ] %></td>
 <td><%= link_to 'Edit',    [ :edit, :admin, page ] %></td>

@@ -22,27 +22,34 @@
 en:
   time:
     formats:
-      short: '%B %-d %Y, %k:%M%P'
-      short_no_year: '%B %-d, %H:%M'
+      short: "%B %-d %Y, %k:%M%P"
+      short_no_year: "%B %-d, %H:%M"
 
   activerecord:
     models:
-      article: Article
-      page: Page
+      article: "Article"
+      page: "Page"
 
     attributes:
       article:
-        title: Article title
-        summary: Brief summary of article
-        article_hero_image: Main photo
-        raw_editor: 'Use the low-level "raw" HTML editor?'
-        body: Main article text
+        title: "Article title"
+        summary: "Brief summary of article"
+        article_hero_image: "Main photo"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Main article text"
 
       page:
-        title: Page title
-        slug: Slug
-        page_id: Put into a menu under which page?
-        page_type: What kind of page is this going to be?
-        hidden: 'Hidden from the navigation bar?'
-        raw_editor: 'Use the low-level "raw" HTML editor?'
-        body: Main page text
+        title: "Page title"
+        slug: "Path / 'slug'"
+        navigation_title: "Navigation title"
+        page_id: "Put into a menu under which page?"
+        page_type: "What kind of page is this going to be?"
+        hidden: "Hidden from the navigation bar?"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Main page text"
+        form_selection_list_label: "Selection menu title"
+        form_selection_list_contents: "Selection menu items"
+
+  misc:
+    required: "(required)"
+    optional: "(optional)"

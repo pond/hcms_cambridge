@@ -9,12 +9,12 @@
   </thead>
 
   <tbody>
-<% @articles.each do | article | -%>
+<% @articles.each do | article | %>
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= article.title %></td>
         <%= render :partial => 'actions', :locals => { :article => article } %>
       </tr>
-<% end -%>
+<% end %>
   </tbody>
 </table>
 

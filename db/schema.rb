@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2020_05_03_234816) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_29_003242) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,8 @@ ActiveRecord::Schema[7.2].define(version: 2020_05_03_234816) do
     t.string "page_type", default: "normal", null: false
     t.text "form_selection_list_contents", default: "", null: false
     t.text "slug", default: "", null: false
+    t.text "navigation_title"
+    t.text "form_selection_list_label"
     t.index ["slug"], name: "index_pages_on_slug", unique: true
   end
 

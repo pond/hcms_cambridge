@@ -7,33 +7,177 @@
 //////////////////////////////////////////////////////////////////////////////
 
 @import url( 'https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' );
+@import url('https://fonts.googleapis.com/css2?family=Akshar:wght@300..700&family=Barlow+Semi+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
 
-@font-face {
-  font-family: 'TrajanPro-bold';
-  src: asset-url( 'TrajanPro-Bold.ttf' );
-}
+// If a future design adapts to brand guide...
+//
+// @font-face {
+//   font-family: 'Knockout';
+//   src: asset-url( 'Knockout-29.otf' ) format('opentype');
+//   size-adjust: 125%;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Light.otf' ) format('opentype');
+//   font-weight: 100;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Book.otf' ) format('opentype');
+//   font-weight: 200;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Regular.otf' ) format('opentype');
+//   font-weight: 400;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Medium.otf' ) format('opentype');
+//   font-weight: 500;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Semi-Bold.otf' ) format('opentype');
+//   font-weight: 700;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Bold.otf' ) format('opentype');
+//   font-weight: 800;
+//   font-style: normal;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Light-Italic.otf' ) format('opentype');
+//   font-weight: 100;
+//   font-style: italic;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Book-Italic.otf' ) format('opentype');
+//   font-weight: 200;
+//   font-style: italic;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Regular-Italic.otf' ) format('opentype');
+//   font-weight: 400;
+//   font-style: italic;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Medium-Italic.otf' ) format('opentype');
+//   font-weight: 500;
+//   font-style: italic;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Semi-Bold-Italic.otf' ) format('opentype');
+//   font-weight: 700;
+//   font-style: italic;
+// }
+//
+// @font-face {
+//   font-family: 'Metro Sans';
+//   src: asset-url( 'Metro-Sans-Bold-Italic.otf' ) format('opentype');
+//   font-weight: 800;
+//   font-style: italic;
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 // Shared styles
 //////////////////////////////////////////////////////////////////////////////
 
-body {
-  font-size: 14pt;
+html, body {
+  height: 100%;
+  margin: 0;
+}
 
-  h1, h2, h3, h4, h5, h6, nav a {
-    font-weight: bold;
-    font-family: "TrajanPro-Bold", serif;
-  }
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto; // (Sections - header, main, footer)
+  min-height: 100vh;
+}
+
+body, .redactor-styles {
+  font-size: 18px;
+  font-family: "Noto Serif", serif;
 
   h1 {
-    font-size: 27pt;
+    font-weight: 700;
+    color: #525252;
   }
+
+  h2, h3, h4, h5, h6, nav a {
+    font-weight: 300;
+    font-family: "Akshar", sans-serif;
+  }
+
+  h1 { font-size: 30px; }
+  h2 { font-size: 25px; }
+}
+
+hr {
+  border: none;
+  border-top: 1px solid $head_foot_border_colour;
+}
+
+figcaption {
+  font-style: italic;
+  font-size: 80%;
+  color: #525252;
+}
+
+div.two_column {
+  display: grid;
+  grid-template-columns: 50fr 50fr;
+  column-gap: 40px;
+}
+
+div.two_column input[type="text"] {
+  width: 100%;
+}
+
+form div.field {
+  margin-bottom: 1em;
+}
+
+form div.field div.checkbox {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-after;
+  gap: 7px;
+  align-items: baseline;
 }
 
 input, select {
   font-size: 14pt;
   line-height: 150%;
   margin: 5px 0;
+}
+
+input {
+  border: 1px solid black;
+  padding: 2px 5px;
+  box-sizing: border-box;
 }
 
 textarea {
@@ -60,39 +204,40 @@ input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
   background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
 }
 
-section.header, section.footer, section.main, .redactor-styles.redactor-in {
-  width: $container_width;
-  margin: 0 auto;
-  font-family: 'Lora', serif;
+header,
+main,
+footer {
+  width: 100%;
+  margin: 0;
 }
 
-section.header {
-  position: relative;
-  height: 191px;
-  background: image-url( 'clipboard_top_slice.png' ) bottom center no-repeat;
-  background-size: 100%;
+.redactor-styles.redactor-in {
+  width: 100%;
+  margin: 0;
+}
 
-  #logo {
-    position: absolute;
-    top: 77px;
-    left: 30px;
-  }
+section.header_content,
+section.main_content,
+section.footer_content,
+section.footer_suffix {
+  @include content_metrics;
+}
 
-  nav {
-    position: absolute;
-    top: 91px;
-    right: 180px;
+header {
+  background: $head_foot_background_colour;
+  border-bottom: 1px solid $head_foot_border_colour;
+  padding-top: 20px;
+  padding-bottom: 20px;
 
-    a, a:visited {
-      display: inline-block;
-      padding-left: 20px;
-      color: #332d18;
-      font-size: 2.5em;
-      opacity: 0.9;
-    }
+  section.header_content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
 
-    a:hover {
-      color: #534d38;
+    #logo {
+      // ...no special styles yet...
     }
   }
 }
@@ -157,30 +302,10 @@ section.blog-articles {
   article.article:only-child {
     margin-left: ($content_width - $article_width) / 2;
   }
-
-  article.article a {
-    text-decoration: none;
-  }
 }
 
-section.main {
-  min-height: 352px;
-}
-
-section.main, .redactor-box.redactor-styles-on {
-  color: #000;
+main, .redactor-box.redactor-styles-on {
   border: none;
-  background: image-url( 'clipboard_mid_slice.png' ) 0 0 no-repeat;
-  background-size: 800px 100%;
-
-  /* Without this, layout problems arise on some browsers where margins in
-   * the last content element push the footer away from the main section,
-   * but the browser doesn't draw the main section's background in that
-   * margin part leading to a gap between them. This hack works around it.
-   */
-
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
 
   .redactor-styles.redactor-in,
   div.above-clear {
@@ -195,36 +320,9 @@ section.main, .redactor-box.redactor-styles-on {
     }
   }
 
-  nav, section.content, .redactor-styles.redactor-in {
-    @include content_metrics;
-  }
-
-  nav {
-    padding-top: 20px;
-    padding-bottom: 25px;
-    text-align: center;
-
-    .pure-menu-horizontal {
-      overflow: visible !important;
-
-      li {
-        text-align: left;
-        a { padding-top: 4px; }
-
-        &.current_page {
-          margin-bottom: -2px;
-          border-bottom: 2px solid rgba( 0, 0, 0, 0.2 );
-        }
-      }
-    }
-
-    a {
-      display: inline-block;
-      padding: 0 10px;
-      text-decoration: none;
-      color: #332d18;
-      font-size: 18pt;
-    }
+  section.main_content {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   figure {
@@ -254,7 +352,7 @@ section.main, .redactor-box.redactor-styles-on {
    */
 
   iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
-    @include widescreen_block;
+    @include widescreen_video_block;
   }
 
   iframe:not([src*='www.recaptcha.net']):not([title='widget']):not(.no_decorations) {
@@ -334,50 +432,126 @@ section.main, .redactor-box.redactor-styles-on {
   }
 }
 
-section.footer {
-  height: 134px;
-  background: image-url( 'clipboard_bottom_slice.png' ) top center no-repeat;
-  background-size: 100%;
+footer {
+  background: $head_foot_background_colour;
+  border-top: 1px solid $head_foot_border_colour;
+  padding-top: 5px;
+  padding-bottom: 5px;
 
   section.footer_content {
-    @include content_metrics;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  section.footer_suffix {
     text-align: center;
-
     font-size: 80%;
-
-    a {
-      text-decoration: none;
-      border-bottom: 1px solid rgba( 0, 0, 0, 0.2 );
-    }
+    margin: 5px auto;
   }
 }
 
-section.content, section.footer {
-  $base_colour: #332d18;
+a {
+  padding: 1px;
+  opacity: 0.8;
+  color: $nav_base_colour;
+  word-break: break-word;
+  text-decoration: none;
+}
 
-  a {
-    padding: 1px;
-    color: $base_colour;
-    opacity: 0.8;
-    word-break: break-word;
+a:visited {
+  color: $nav_visited_colour;
+}
+
+a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+a.article-link:visited {
+  color: $nav_base_colour;
+}
+
+nav {
+  &.main_menu {
+    text-align: right;
+
+    h1#navigation_title {
+      margin: 0;
+    }
+
+    div.pure-menu-horizontal {
+      overflow: visible !important;
+
+      ul.pure-menu-list {
+        li.pure-menu-item {
+          a {
+            display: inline-block;
+            padding: 0;
+            text-decoration: none;
+            font-size: 25px;
+            color: $nav_base_colour;
+          }
+
+          a:hover {
+            color: #bfbfbf;
+            background: none;
+          }
+
+          &.current_page {
+            // margin-bottom: -2px;
+            // border-bottom: 2px solid rgba( 0, 0, 0, 0.2 );
+            // padding-right: 10px;
+          }
+
+          &.current_page > a {
+            font-weight: 600;
+          }
+
+          &:first-child > a {
+            padding-left: 0;
+          }
+
+          ul.pure-menu-children {
+            text-align: center;
+            border: 1px solid $head_foot_border_colour;
+            border-radius: 5px;
+            padding: 5px 10px;
+          }
+        }
+
+        > li.pure-menu-item:not(:first-child) > a:before {
+          display: inline-block;
+          content: "/";
+          font-weight: normal;
+          padding: 0 15px;
+          color: #bfbfbf;
+        }
+      }
+    }
   }
 
-  a:visited {
-    color: #534d38;
+  &.social_menu {
+    line-height: 100%;
+
+    a, a:visited {
+      display: inline-block;
+      padding-left: 20px;
+      color: $nav_base_colour;
+      font-size: 2.5em;
+      opacity: 0.9;
+    }
+
+    a:hover {
+      color: lighten($nav_base_colour, 15%);
+      background: none;
+    }
   }
 
-  a.article-link:visited {
-    color: $base_colour;
-  }
-
-  a:hover {
-    color: black;
-    background: white;
-  }
-
-  a.article-link:hover {
-    color: lighten($base_colour, 15%);
-    background: none;
+  &.cms_menu {
+    line-height: 125%;
   }
 }
 
@@ -385,55 +559,31 @@ section.content, section.footer {
 // Medium width viewport
 //////////////////////////////////////////////////////////////////////////////
 
-@media only screen and (min-width: $container_width_mid) and (max-width: $container_width) {
-  section.header, section.main, section.footer, .redactor-styles.redactor-in {
-    width: $container_width_mid;
+@media only screen and (min-width: $container_width_mid + 30px) and (max-width: $container_width + 40px) {
+  section.header_content,
+  section.main_content,
+  section.footer_content,
+  section.footer_suffix {
+    @include content_metrics_mid;
   }
 
-  section.header {
-    height: 127px;
-
+  header {
     #logo {
-      top: 38px;
-      left: 15px;
       width: 147px;
-      height: auto;
-    }
-
-    nav {
-      top: 55px;
-      right: 110px;
-
-      a {
-        padding-left: 10px;
-        font-size: 2em;
-      }
+      height: 147px;
     }
   }
 
-  section.main, .redactor-box.redactor-styles-on {
+  main, .redactor-box.redactor-styles-on {
     background-size: $container_width_mid 100%;
 
     iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
-      @include widescreen_block_mid;
+      @include widescreen_video_block_mid;
     }
 
     img {
       max-width: $content_width_mid !important;
       height: auto !important;
-    }
-
-    nav, section.content, .redactor-styles.redactor-in {
-      @include content_metrics_mid;
-    }
-
-    nav {
-      padding-top: 15px;
-      padding-bottom: 15px;
-
-      a {
-        font-size: 14pt;
-      }
     }
 
     section.blog-articles {
@@ -458,19 +608,29 @@ section.content, section.footer {
     }
   }
 
-  section.footer {
-    height: 67px;
-
+  footer {
     section.footer_content {
-      @include content_metrics_mid;
-
-      font-size: 60%;
+      font-size: 80%;
       white-space: nowrap;
-      br { display: none; }
     }
 
-    section.footer_content br {
-      display: none;
+    section.footer_suffix {
+      font-size: 70%;
+    }
+  }
+
+  nav {
+    &.main_menu {
+      a {
+        font-size: 14pt;
+      }
+    }
+
+    &.social_menu {
+      a {
+        padding-left: 10px;
+        font-size: 2em;
+      }
     }
   }
 }
@@ -479,46 +639,29 @@ section.content, section.footer {
 // Narrow viewport
 //////////////////////////////////////////////////////////////////////////////
 
-@media only screen and (max-width: $container_width_mid) {
-  section.header, section.main, section.footer, .redactor-styles.redactor-in {
-    width: $container_width_narrow;
+@media only screen and (min-width: $container_width_narrow + 20px) and (max-width: $container_width_mid + 30px) {
+  section.header_content,
+  section.main_content,
+  section.footer_content,
+  section.footer_suffix {
+    @include content_metrics_narrow;
   }
 
-  section.header {
-    height: 95px;
-
+  header {
     #logo {
-      top: 44px;
-      left: 14px;
-      width: 110px;
-      height: 36px;
-    }
-
-    nav {
-      top: 45px;
-      right: 80px;
-
-      a {
-        padding-left: 10px;
-        font-size: 1.8em;
-      }
+      width: 120px;
+      height: 120px;
     }
   }
 
-  section.main, .redactor-box.redactor-styles-on {
-    background-size: $container_width_narrow 100%;
-
+  main, .redactor-box.redactor-styles-on {
     iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
-      @include widescreen_block_narrow;
+      @include widescreen_video_block_narrow;
     }
 
     img {
       max-width: $content_width_narrow !important;
       height: auto !important;
-    }
-
-    nav, section.content, .redactor-styles.redactor-in {
-      @include content_metrics_narrow;
     }
 
     section.blog-articles {
@@ -532,18 +675,101 @@ section.content, section.footer {
     }
   }
 
-  section.footer {
-    height: 89px;
-
-    section.footer_content {
-      @include content_metrics_narrow;
-
+  footer {
+    section.footer_content,
+    section.footer_suffix {
       font-size: 60%;
-      white-space: nowrap;
+    }
+  }
 
-      br {
-        display: none;
+  nav {
+    &.social_menu {
+      a {
+        padding-left: 10px;
+        font-size: 1.8em;
       }
     }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Mobile viewport
+//////////////////////////////////////////////////////////////////////////////
+
+@media only screen and (max-width: $container_width_narrow + 20px) {
+  section.header_content,
+  section.main_content,
+  section.footer_content,
+  section.footer_suffix {
+    @include content_metrics_mobile;
+    flex-direction: column !important;
+  }
+
+  header {
+    #logo {
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  main, .redactor-box.redactor-styles-on {
+    iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
+      @include widescreen_video_block_mobile;
+    }
+
+    img {
+      max-width: $content_width_mobile !important;
+      height: auto !important;
+    }
+
+    section.blog-articles {
+      article.article {
+        width: $content_width_mobile;
+      }
+
+      article.article:only-child {
+        margin-left: 0;
+      }
+    }
+  }
+
+  footer {
+    section.footer_content,
+    section.footer_suffix {
+      font-size: 60%;
+    }
+  }
+
+  nav {
+    &.main_menu {
+      text-align: center;
+
+      div.pure-menu-horizontal {
+        ul.pure-menu-list {
+          padding-top: 10px;
+
+          a {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+          }
+
+          > li.pure-menu-item:not(:first-child) > a:before {
+            display: none;
+          }
+        }
+      }
+    }
+
+    &.social_menu {
+      a {
+        padding-left: 0;
+        font-size: 1.8em;
+      }
+    }
+  }
+
+  figure {
+    float: none !important;
+    margin: 10px auto !important;
   }
 }

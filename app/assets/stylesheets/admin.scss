@@ -2,11 +2,7 @@
 //= require components/shared
 
 body {
-  background: #061923;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
+  background: #ccc;
 }
 
 div.redactor-container {
@@ -21,12 +17,12 @@ div.redactor-container {
   margin-bottom: 5px;
 }
 
-.redactor-styles, .redactor-in {
+.redactor-styles.redactor-in {
   position: static;
   background: transparent;
   border: none;
-  padding-top: 10px !important;
-  box-sizing: content-box;
+  box-sizing: content-box !important;
+  padding: 16px 0;
 }
 
 .redactor-toolbar a.re-spacer {
@@ -40,9 +36,11 @@ div.redactor-container {
   background: none;
 }
 
-section.admin, footer {
-  margin: 20px 10%;
-  padding: 20px;
+header.admin, footer.admin {
+  border: none;
+}
+
+main.admin {
   background: rgba( 255, 255, 255, 0.8 );
   border-radius: 4px;
   box-shadow: 0 0 10px #fff;
@@ -70,8 +68,13 @@ section.admin, footer {
   }
 }
 
-footer {
-  text-align: center;
+footer.admin {
+  padding: 20px 0;
+
+  section.footer_content {
+    justify-content: center;
+    gap: 10px;
+  }
 }
 
 label {

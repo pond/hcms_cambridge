@@ -2,10 +2,10 @@
   # Ensure a local "page" is set to the Page / AdminPage instance to render:
   #
   #   render :partial => 'shared/page', :locals => { :page => ... }
--%>
-<% if page.is_blog_type? -%>
+%>
+<% if page.is_blog_type? %>
 
-  <% if page.articles.any? -%>
+  <% if page.articles.any? %>
     <section class="blog-articles">
       <% page.articles.each do | article | %>
         <article class="article">
@@ -16,41 +16,35 @@
               <div class="article-date"><%= apphelp_human_time(article.created_at) %></div>
             </div>
             <div class="article-summary"><%= article.summary %></div>
-          <% end -%>
+          <% end %>
         </article>
-      <% end -%>
+      <% end %>
     </section>
-  <% else -%>
+  <% else %>
     No articles have been written for this blog yet.
     <%= link_to 'Write one now!', new_admin_page_article_path(page_id: page.id) %>
-  <% end -%>
+  <% end %>
 
-<% elsif page.is_form_type? -%>
+<% elsif page.is_form_type? %>
 
   <%= page.body.html_safe() %>
 
   <%= form_tag( user_emails_path ) do %>
     <hr>
     <p>
-      <%= label_tag :name, 'Your name' %><br>
+      <%= label_tag :name, 'Your name' %> <%= pageshelp_required() %><br>
       <%= text_field_tag :name, nil, :placeholder =>'Name' %>
     </p>
     <p>
-      <%= label_tag :email, 'Your e-mail address' %><br>
+      <%= label_tag :email, 'Your e-mail address' %> <%= pageshelp_required() %><br>
       <%= email_field_tag :email, nil, :placeholder => 'E-mail address' %>
     </p>
     <p>
       <%= label_tag :email, 'Preferred telephone contact number' %><br>
       <%= telephone_field_tag :phone, nil, :placeholder => 'Telephone number' %>
     </p>
-    <p>
-      <em>
-        Your name along with an e-mail address or a telephone number are
-        required so that we can respond to your enquiry.
-      </em>
-    </p>
     <hr>
-    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
+    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
       <p>
         <%= label_tag :date, 'Date (at least two days in advance)' %><br>
         <%= date_field_tag :date, '', :placeholder => ( Date.today + 2.days ).strftime( '%-d %b %Y' ), :min => Date.today + 2.days %>
@@ -59,24 +53,24 @@
         <%= label_tag :time, 'Preferred time (10am or later)' %><br>
         <%= time_field_tag :time, '', :placeholder => '10:00', :min => Time.parse( '10:00' ), :step => 60.minutes %>
       </p>
-    <% end -%>
-    <% unless page.form_selection_list_contents.strip.blank? -%>
+    <% end %>
+    <% unless page.form_selection_list_contents.strip.blank? %>
       <p>
-        <%= label_tag :selection, 'Please choose an item from the list' %><br>
-        <%= form_page_selection_list( page ) %><br />
+        <%= label_tag :selection, page.form_selection_list_label.presence || 'Please choose an item from the list' %><br>
+        <%= pageshelp_form_page_selection_list( page ) %><br>
       <p>
-    <% end -%>
-    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
+    <% end %>
+    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
       <p>
         <%= label_tag :notes, 'Additional notes and requests' %><br>
         <%= text_area_tag :notes, '', :rows => 8, :cols => 80, :placeholder => 'List of attendees, special date/time requests, questions etc.' %>
       </p>
-    <% else -%>
+    <% else %>
       <p>
         <%= label_tag :message, 'What would you like to ask?' %><br>
         <%= text_area_tag :message, '', :rows => 8, :cols => 80 %>
       </p>
-    <% end -%>
+    <% end %>
 
     <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
       <%= recaptcha_tags() %>
@@ -85,16 +79,16 @@
     <% end %>
 
     <p>
-      <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM -%>
-        <%= submit_tag 'Send booking information' %>
-      <% else -%>
+      <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
+        <%= submit_tag 'Send booking enquiry' %>
+      <% else %>
         <%= submit_tag 'Send message' %>
-      <% end -%>
+      <% end %>
     </p>
-  <% end -%>
+  <% end %>
 
-<% else -%>
+<% else %>
 
   <%= page.body.html_safe() %>
 
-<% end -%>
+<% end %>

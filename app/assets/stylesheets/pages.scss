@@ -3,18 +3,8 @@
 @import 'config/variables';
 
 body {
-  background: #061923 image-url( 'background.jpg' ) no-repeat center center fixed;
-  background-attachment: fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-
-  @media (max-width: $container_width) {
-    background-size: 100%;
-    background-attachment: scroll;
-    background-repeat: repeat-y;
-  }
+  background: #fff;
+  color: #000;
 }
 
 .pure-menu-horizontal {
@@ -28,7 +18,7 @@ input[type='submit'] {
   -moz-border-radius: 4px;
   -o-border-radius: 4px;
   border-radius: 4px;
-  border:1px solid #888;
+  border: 1px solid #888;
 }
 
 input[type='submit']:hover {

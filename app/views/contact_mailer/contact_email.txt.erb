@@ -9,10 +9,10 @@ E-mail address:
 Phone number:
 <%= @phone %>
 
-<% unless @menu.blank? -%>
+<% unless @menu.blank? %>
 Menu selection:
 <%= @menu %>
-<% end -%>
+<% end %>
 
 Main message:
 <%= @message.blank? ? 'None' : '"' + @message + '"' %>

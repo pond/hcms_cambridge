@@ -30,7 +30,7 @@ $(document).on('ready page:load', function() {
         // 'properties',
         'table',
         'video',
-        // 'widget',
+        'widget',
         'spacer',
       ],
       buttons: [

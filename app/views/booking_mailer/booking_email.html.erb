@@ -10,10 +10,10 @@
       <dd><%= @date %></dd>
       <dt><strong>Preferred time</strong></dt>
       <dd><%= @time %></dd>
-<% unless @menu.blank? -%>
+<% unless @menu.blank? %>
       <dt><strong>Menu selection</strong></dt>
       <dd><%= @menu %></dd>
-<% end -%>
+<% end %>
       <dt><strong>Other notes</strong></dt>
       <dd><%= @notes.blank? ? 'None' : '"' + @notes + '"' %></dd>
     </dl>

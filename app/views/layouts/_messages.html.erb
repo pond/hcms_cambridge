@@ -1,11 +1,11 @@
-<% if notice.present? || alert.present? -%>
+<% if notice.present? || alert.present? %>
       <section class="messages">
-<%   if notice.present? -%>
+<%   if notice.present? %>
         <p class="notice"><%= notice %></p>
-<%   end -%>
+<%   end %>
 <%   if alert.present? %>
         <p class="alert"><%= alert %></p>
-<%   end -%>
+<%   end %>
       </section>
-<% end -%>
+<% end %>
 

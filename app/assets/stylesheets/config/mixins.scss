@@ -3,13 +3,14 @@
 //////////////////////////////////////////////////////////////////////////////
 
 @mixin content_metrics {
+  box-sizing: content-box;
   width: $content_width;
-  margin: 0;
-  padding: 0 $content_padding_r 0 $content_padding_l;
+  margin: 0 auto;
+  padding: 0;
 }
 
-@mixin widescreen_block {
-  $inner_width: $content_width * 0.85333333333;
+@mixin widescreen_video_block {
+  $inner_width: $content_width * 0.7;
   $inner_height: ($inner_width * 9) / 16;
   width: $inner_width !important;
   height: $inner_height !important;
@@ -18,12 +19,12 @@
 
 @mixin content_metrics_mid {
   width: $content_width_mid;
-  margin: 0;
-  padding: 0 $content_padding_r_mid 0 $content_padding_l_mid;
+  margin: 0 auto;
+  padding: 0;
 }
 
-@mixin widescreen_block_mid {
-  $inner_width_mid: $content_width_mid * 0.85333333333;
+@mixin widescreen_video_block_mid {
+  $inner_width_mid: $content_width_mid * 0.8;
   $inner_height_mid: ($inner_width_mid * 9) / 16;
   width: $inner_width_mid !important;
   height: $inner_height_mid !important;
@@ -32,16 +33,29 @@
 
 @mixin content_metrics_narrow {
   width: $content_width_narrow;
-  margin: 0;
-  padding: 0 $content_padding_r_narrow 0 $content_padding_l_narrow;
+  margin: 0 auto;
+  padding: 0;
 }
 
-@mixin widescreen_block_narrow {
-  $inner_width_narrow: $content_width_narrow * 0.85333333333;
+@mixin widescreen_video_block_narrow {
+  $inner_width_narrow: $content_width_narrow * 0.9;
   $inner_height_narrow: ($inner_width_narrow * 9) / 16;
   width: $inner_width_narrow !important;
   height: $inner_height_narrow !important;
   margin: 0 ($content_width_narrow - $inner_width_narrow) / 2;
+}
+
+@mixin content_metrics_mobile {
+  width: $content_width_mobile;
+  margin: 0 auto;
+  padding: 0;
+}
+
+@mixin widescreen_video_block_mobile {
+  position: relative;
+  width: $content_width_mobile !important;
+  height: ($content_width_mobile * 9) / 16 !important;
+  margin: 0;
 }
 
 @mixin standard_shadow {

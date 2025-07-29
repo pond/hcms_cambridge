@@ -16,9 +16,15 @@ $(document).on('ready page:load', function() {
     var selectedPageType = $('#page_page_type').children("option:selected").val();
 
     if (selectedPageType == 'blog') {
-      $('#non-blog-fields').slideUp();
+      $('.non-blog-fields').slideUp();
     } else {
-      $('#non-blog-fields').slideDown();
+      $('.non-blog-fields').slideDown();
+    }
+
+    if (selectedPageType.endsWith('_form')) {
+      $('.is-form-fields').slideDown();
+    } else {
+      $('.is-form-fields').slideUp();
     }
   }
 

@@ -1,14 +1,15 @@
-site_name:         'Cambridge Punting Company'
-logo_w:            '210'
-logo_h:            '72'
+site_name:         'Wine Sentience'
+logo_w:            '160'
+logo_h:            '160'
+footer_summary:    "<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand"
 
-facebook:          'https://www.facebook.com/CambridgePuntingCompany'
-twitter:           'https://twitter.com/CambridgePuntCo'
-instagram:         'https://instagram.com/cambridgepuntingcompany/'
+facebook:          ''
+twitter:           '' # 'https://x.com/WineSentience/'
+instagram:         'https://www.instagram.com/winesentience/'
 
-mail_domain:       'cambridgepuntingcompany.co.uk'
-contact_email:     'bookings@cambridgepuntingcompany.co.uk'
-contact_tel_human: '07786 332666'
-contact_tel_full:  '+447786332666'
+mail_domain:       'winesentience.com'
+contact_email:     'stephen@winesentience.com'
+contact_tel_human: '' # '021 488 855'
+contact_tel_full:  '' # '+6421488855'
 
-booking_email:     'bookings@cambridgepuntingcompany.co.uk'
+booking_email:     'stephen@winesentience.com'
