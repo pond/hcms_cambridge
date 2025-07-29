@@ -17,12 +17,17 @@ div.redactor-container {
   margin-bottom: 5px;
 }
 
+.redactor_container {
+  box-shadow: 0 0 5px 5px #fff;
+  background: #fff;
+}
+
 .redactor-styles.redactor-in {
   position: static;
   background: transparent;
   border: none;
   box-sizing: content-box !important;
-  padding: 16px 0;
+  padding: 0;
 }
 
 .redactor-toolbar a.re-spacer {
