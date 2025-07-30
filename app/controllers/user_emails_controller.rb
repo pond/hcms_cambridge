@@ -2,13 +2,24 @@ class UserEmailsController < ApplicationController
   layout 'pages'
 
   before_action do
-    @page = OpenStruct.new
-    @page.title = 'Contact'
+    @page = Page.find(params[:page_id])
   end
 
   def create
-    is_booking = params.has_key?( 'date' ) && params.has_key?( 'time' )
-    form_kind  = is_booking ? 'booking enquiry' : 'message'
+    form_kind   = @page.is_booking_form? ? 'booking enquiry' : 'message'
+    form_class  = @page.form_class
+    safe_params = params
+      .require(form_class.model_name.param_key)
+      .permit(form_class.permitted_params)
+
+    @form_model = form_class.new(safe_params)
+
+    unless @form_model.valid?
+      flash[:alert] = "There were problems with the information you gave"
+
+      render 'pages/show'
+      return
+    end
 
     success = begin
       verify_recaptcha(action: 'contact')
@@ -20,24 +31,19 @@ class UserEmailsController < ApplicationController
     # rendered raw on the page (we want to add HTML to it sometimes).
 
     unless success
-      @page.title = "Couldn't send #{ form_kind }"
-      @message = "Sorry! The reCaptcha challenge wasn't happy with the response. Please try again or contact us by phone for assistance."
+      flash[:alert] = "Sorry! The reCaptcha challenge wasn't happy with the response. Please try again or contact us by phone for assistance."
+
+      render 'pages/show'
       return
     end
 
-    unless params[ 'email' ].present? || params[ 'phone' ].present?
-      @page.title = "Couldn't send #{ form_kind }"
-      @message = "Sorry, you must provide at least an e-mail address or phone number so we can get back to you with a response."
-      unless request.env['HTTP_REFERER'].empty?
-        @message << ' ' << view_context.link_to( 'Please try again', request.env['HTTP_REFERER'] ) << '.'
-      end
-      return
-    end
+    @page = OpenStruct.new
+    @page.title = "#{form_kind.capitalize} sent"
 
-    if is_booking
-      BookingMailer.booking_email( params ).deliver()
+    if @page.is_booking_form?
+      BookingMailer.booking_email(@form_model).deliver()
     else
-      ContactMailer.contact_email( params ).deliver()
+      ContactMailer.contact_email(@form_model).deliver()
     end
 
     @message = "Your #{ form_kind } has been sent. We'll get back to you as soon as we can."

@@ -29,46 +29,54 @@
 
   <%= page.body.html_safe() %>
 
-  <%= form_tag( user_emails_path ) do %>
+  <%=
+    form_with(
+      model:   @form_model,
+      builder: FormBuilderWithInlineErrors,
+      url:     user_emails_path(page_id: @page.id)
+    ) do | f |
+  %>
+    <% if page.body.present? %>
+      <hr>
+    <% end %>
+    <p>
+      <%= apphelp_label(f, :name, required: true) %>
+      <%= f.text_field :name %>
+    </p>
+    <p>
+      <%= apphelp_label(f, :email, required: true) %>
+      <%= f.email_field :email %>
+    </p>
+    <p>
+      <%= apphelp_label(f, :phone) %>
+      <%= f.telephone_field :phone %>
+    </p>
     <hr>
-    <p>
-      <%= label_tag :name, 'Your name' %> <%= pageshelp_required() %><br>
-      <%= text_field_tag :name, nil, :placeholder =>'Name' %>
-    </p>
-    <p>
-      <%= label_tag :email, 'Your e-mail address' %> <%= pageshelp_required() %><br>
-      <%= email_field_tag :email, nil, :placeholder => 'E-mail address' %>
-    </p>
-    <p>
-      <%= label_tag :email, 'Preferred telephone contact number' %><br>
-      <%= telephone_field_tag :phone, nil, :placeholder => 'Telephone number' %>
-    </p>
-    <hr>
-    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
+    <% if page.is_booking_form? %>
       <p>
-        <%= label_tag :date, 'Date (at least two days in advance)' %><br>
-        <%= date_field_tag :date, '', :placeholder => ( Date.today + 2.days ).strftime( '%-d %b %Y' ), :min => Date.today + 2.days %>
+        <%= apphelp_label(f, :date) %>
+        <%= date_field_tag :date, '', :placeholder => (Date.today + 2.days).strftime('%-d %b %Y'), :min => Date.today + 2.days %>
       </p>
       <p>
-        <%= label_tag :time, 'Preferred time (10am or later)' %><br>
-        <%= time_field_tag :time, '', :placeholder => '10:00', :min => Time.parse( '10:00' ), :step => 60.minutes %>
+        <%= apphelp_label(f, :time) %>
+        <%= time_field_tag :time, '', :placeholder => '10:00', :min => Time.parse('10:00'), :step => 60.minutes %>
       </p>
     <% end %>
     <% unless page.form_selection_list_contents.strip.blank? %>
       <p>
-        <%= label_tag :selection, page.form_selection_list_label.presence || 'Please choose an item from the list' %><br>
-        <%= pageshelp_form_page_selection_list( page ) %><br>
+        <%= apphelp_label(f, :menu_selection, text: page.form_selection_list_label.presence) %>
+        <%= pageshelp_form_page_selection_list(f, page) %>
       <p>
     <% end %>
-    <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
+    <% if page.is_booking_form? %>
       <p>
-        <%= label_tag :notes, 'Additional notes and requests' %><br>
-        <%= text_area_tag :notes, '', :rows => 8, :cols => 80, :placeholder => 'List of attendees, special date/time requests, questions etc.' %>
+        <%= apphelp_label(f, :notes) %>
+        <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'List of attendees, special date/time requests, questions etc.' %>
       </p>
     <% else %>
       <p>
-        <%= label_tag :message, 'What would you like to ask?' %><br>
-        <%= text_area_tag :message, '', :rows => 8, :cols => 80 %>
+        <%= apphelp_label(f, :message) %>
+        <%= f.text_area :message, rows: 8, cols: 80 %>
       </p>
     <% end %>
 
@@ -79,7 +87,7 @@
     <% end %>
 
     <p>
-      <% if page.page_type == Page::PAGE_TYPE_BOOKING_FORM %>
+      <% if page.is_booking_form? %>
         <%= submit_tag 'Send booking enquiry' %>
       <% else %>
         <%= submit_tag 'Send message' %>

@@ -8,8 +8,9 @@ Rails.application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
-  # Do not eager load code on boot.
-  config.eager_load = false
+  # Eager load code on boot, to match Production.
+  config.eager_load = true
+  config.autoload_lib(ignore: %w(assets tasks))
 
   # Show full error reports.
   config.consider_all_requests_local = true
@@ -30,18 +31,17 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
-
   config.action_mailer.perform_caching = false
 
   # For Devise messages.
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
   # For Mailcatcher - https://mailcatcher.me.
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = { :address => "localhost", :port => 1025 }
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.delivery_method       = :smtp
+  config.action_mailer.smtp_settings         = { :address => "localhost", :port => 1025 }
+  config.action_mailer.perform_caching       = false
+  config.action_mailer.perform_deliveries    = true
+  config.action_mailer.raise_delivery_errors = true
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

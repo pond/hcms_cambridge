@@ -58,7 +58,14 @@ gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branc
 #
 gem 'acts_as_list', '~> 1.2'
 
+# Phone number validation.
+#
+#   https://rubygems.org/gems/phony
+#
+gem 'phony', '~> 2.22'
+
 group :development, :test do
   gem 'debug'
   gem 'awesome_print'
+  gem 'mailcatcher', '~> 0.10'
 end

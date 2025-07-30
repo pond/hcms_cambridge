@@ -81,6 +81,34 @@ input {
   box-sizing: border-box;
 }
 
+label {
+  display: block;
+}
+
+.field_with_errors {
+  input, textarea {
+    border: 1px dashed red;
+  }
+}
+
+.field_error_messages {
+  color: #800;
+  font-size: small;
+  font-style: italic;
+}
+
+.form_field_label_required {
+  font-size: smaller;
+  font-weight: bold;
+  padding-left: 0.5em;
+}
+
+.form_field_label_optiona {
+  font-size: smaller;
+  font-style: italic;
+  padding-left: 0.5em;
+}
+
 textarea {
   margin: 10px 20px 0 0;
   font-size: 12pt;

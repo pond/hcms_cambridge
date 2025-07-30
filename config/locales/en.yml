@@ -25,6 +25,50 @@ en:
       short: "%B %-d %Y, %k:%M%P"
       short_no_year: "%B %-d, %H:%M"
 
+  activemodel:
+    models:
+      forms/contact: "Message"
+      forms/booking: "Booking enquiry"
+
+    attributes:
+      labels:
+        notes: "hello"
+
+      forms/base:
+        # Short forms for e.g. validation errors
+        name: "Name"
+        email: "E-mail address"
+        phone: "Telephone number"
+        menu_selection: "Selection"
+        # Long forms for labels via apphelp_label
+        labels/name: "Your name"
+        labels/email: "Your e-mail address"
+        labels/phone: "Preferred telephone contact number"
+        labels/menu_selection: "Please choose an item from the list" # Default only
+
+      forms/contact:
+        # Short forms for e.g. validation errors
+        message: "Message"
+        # Long forms for labels via apphelp_label
+        labels/message: "What would you like to ask?"
+
+      forms/booking:
+        # Short forms for e.g. validation errors
+        date: "Date"
+        time: "Time"
+        notes: "Notes"
+        # Long forms for labels via apphelp_label
+        labels/date: "Date (at least two days in advance)"
+        labels/time: "Preferred time (10am or later)"
+        labels/notes: "Additional notes and requests"
+
+    errors:
+      models:
+        forms/contact:
+          attributes:
+            phone:
+              format: "format not recognised; try adding the country code in front, e.g. \"64\" for NZ"
+
   activerecord:
     models:
       article: "Article"
@@ -53,3 +97,4 @@ en:
   misc:
     required: "(required)"
     optional: "(optional)"
+

@@ -47,12 +47,30 @@ class Page < ActsLikePage
     self.page_type == PAGE_TYPE_NORMAL
   end
 
-  def is_form_type?
-    self.page_type == PAGE_TYPE_BOOKING_FORM || self.page_type == PAGE_TYPE_CONTACT_FORM
-  end
-
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
+  end
+
+  def is_form_type?
+    self.is_contact_form? || self.is_booking_form?
+  end
+
+  def is_contact_form?
+    self.page_type == PAGE_TYPE_CONTACT_FORM
+  end
+
+  def is_booking_form?
+    self.page_type == PAGE_TYPE_BOOKING_FORM
+  end
+
+  def form_class
+    if self.is_contact_form?
+      Forms::Contact
+    elsif self.is_booking_form?
+      Forms::Booking
+    else
+      nil
+    end
   end
 
   # Is this page 'normal' type, with at least one child all also of 'normal'
