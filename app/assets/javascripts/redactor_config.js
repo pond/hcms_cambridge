@@ -22,6 +22,7 @@ $(document).on('ready page:load', function() {
       spellcheck:      true,
       minHeight:       '450px',
       maxHeight:       '720px',
+      imageFloatMargin: '1em',
       toolbarExternal: "#redactor_toolbar",
       plugins:         [
         'alignment',

@@ -1,0 +1,9 @@
+<%# Render with current Page or Article in "content" %>
+
+<section class="main_content">
+  <div class="above-clear">
+    <%= render :partial => 'layouts/messages' %>
+    <%= yield %>
+  </div>
+  <div style="clear: both"></div>
+</section>

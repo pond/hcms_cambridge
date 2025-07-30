@@ -18,22 +18,32 @@ module ApplicationHelper
     l(local_time, format: formatter)
   end
 
+  # Writes out a label with required/optional hint if necessary and using I18n
+  # that defaults to "label/<attrname>" as a model's human attribute name for
+  # the label. This allows more descriptive label text, without e.g. validation
+  # errors including those longer strings.
+  #
+  # Falls back to standard I18n human attribute names if no label-specific form
+  # is found. Label text can be fully overridden with the "text" option.
+  #
   # Options - :required/:optional => true to decorate label appropriately.
+  #           :text => "..." to override the label text.
   #
   def apphelp_label(form, attribute, options = {})
     model     = form.object
     namespace = model.is_a?(ActiveRecord::Base) ? 'activerecord' : 'activemodel'
     i18n_key  = model.class.model_name.i18n_key
-    text      = tag.span(model.class.human_attribute_name("labels/#{attribute}"), class: 'form_field_label')
+    text      = options[:text].presence || model.class.human_attribute_name("labels/#{attribute}", default: model.class.human_attribute_name(attribute))
+    contents  = tag.span(text, class: 'form_field_label')
 
     if options[:required]
-      text = text.concat(tag.span(t('misc.required'), class: 'form_field_label_required'))
+      contents.concat(tag.span(t('misc.required'), class: 'form_field_label_required'))
     end
 
     if options[:optional]
-      text = text.concat(tag.span(t('misc.optional'), class: 'form_field_label_optional'))
+      contents.concat(tag.span(t('misc.optional'), class: 'form_field_label_optional'))
     end
 
-    form.label(attribute) { text }
+    form.label(attribute) { contents }
   end
 end

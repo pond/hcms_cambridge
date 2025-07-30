@@ -63,6 +63,8 @@ en:
         labels/notes: "Additional notes and requests"
 
     errors:
+      messages:
+        blank: "must be provided"
       models:
         forms/contact:
           attributes:
@@ -76,11 +78,11 @@ en:
 
     attributes:
       article:
-        title: "Article title"
-        summary: "Brief summary of article"
-        article_hero_image: "Main photo"
+        title: "Title"
+        summary: "Brief summary"
+        article_hero_image: "Thumbnail photo"
         raw_editor: "Use the low-level HTML editor?"
-        body: "Main article text"
+        body: "Main article"
 
       page:
         title: "Page title"
@@ -93,6 +95,10 @@ en:
         body: "Main page text"
         form_selection_list_label: "Selection menu title"
         form_selection_list_contents: "Selection menu items"
+
+    errors:
+      messages:
+        blank: "must be provided"
 
   misc:
     required: "(required)"

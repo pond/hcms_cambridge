@@ -1,0 +1,35 @@
+<%# Render with current Page or Article in "content" and make sure you have %>
+<%# declared "content_for :signed_in_cms_menu { ... }" before rendering.    %>
+
+<section class="footer_content">
+  <nav class="cms_menu">
+    <% if user_signed_in? %>
+      <%= content_for :signed_in_cms_menu %>
+    <% end %>
+
+    <% if Rails.application.config.uk_org_pond_hcms.contact_tel_human.present? %>
+      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |
+    <% end %>
+    <% if Rails.application.config.uk_org_pond_hcms.contact_email.present? %>
+      <%= link_to Rails.application.config.uk_org_pond_hcms.contact_email, "mailto:#{ Rails.application.config.uk_org_pond_hcms.contact_email }" %>
+    <% end %>
+  </nav>
+
+  <nav class="social_menu">
+    <% if Rails.application.config.uk_org_pond_hcms.facebook.present? %>
+      <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.facebook %>"><i class="fa fa-facebook-official"></i></a>
+    <% end %>
+    <% if Rails.application.config.uk_org_pond_hcms.twitter.present? %>
+      <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.twitter %>"><i class="fa fa-twitter-square"></i></a>
+    <% end %>
+    <% if Rails.application.config.uk_org_pond_hcms.instagram.present? %>
+      <a target="_blank" href="<%= Rails.application.config.uk_org_pond_hcms.instagram %>"><i class="fa fa-instagram"></i></a>
+    <% end %>
+  </nav>
+</section>
+
+<% if Rails.application.config.uk_org_pond_hcms.footer_summary.present? %>
+  <section class="footer_suffix">
+    <%= Rails.application.config.uk_org_pond_hcms.footer_summary.html_safe %>
+  </section>
+<% end %>

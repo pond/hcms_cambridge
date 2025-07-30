@@ -64,7 +64,7 @@
     <% end %>
     <% unless page.form_selection_list_contents.strip.blank? %>
       <p>
-        <%= apphelp_label(f, :menu_selection, text: page.form_selection_list_label.presence) %>
+        <%= apphelp_label(f, :menu_selection, text: page.form_selection_list_label) %>
         <%= pageshelp_form_page_selection_list(f, page) %>
       <p>
     <% end %>

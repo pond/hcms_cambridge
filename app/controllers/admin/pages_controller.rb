@@ -17,6 +17,8 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/1
     def show
+      form_class  = @page&.form_class
+      @form_model = form_class.new unless form_class.nil?
     end
 
     # GET /admin/pages/new

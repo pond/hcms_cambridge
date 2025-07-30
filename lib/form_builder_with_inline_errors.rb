@@ -1,6 +1,6 @@
 class FormBuilderWithInlineErrors < ActionView::Helpers::FormBuilder
   ERROR_CAPABLE_FIELDS = ActionView::Helpers::FormBuilder.field_helpers - [
-    :label, :check_box, :radio_button, :fields_for, :fields, :hidden_field, :file_field
+    :label, :check_box, :radio_button, :fields_for, :fields, :hidden_field
   ]
 
   ERROR_CAPABLE_FIELDS.each do | method_name |

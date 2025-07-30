@@ -13,12 +13,12 @@
 
   <div class="two_column">
     <div class="field">
-      <%= f.label :title %><br>
+      <%= apphelp_label(f, :title) %>
       <%= f.text_field :title %>
     </div>
 
     <div class="field">
-      <%= f.label :slug %> <%= pageshelp_optional() %><br>
+      <%= apphelp_label(f, :slug, optional: true) %>
       <%= f.text_field :slug %>
       <br>
       <small><em>
@@ -31,7 +31,7 @@
     </div>
 
     <div class="field">
-      <%= f.label :navigation_title %> <%= pageshelp_optional() %><br>
+      <%= apphelp_label(f, :navigation_title, optional: true) %>
       <%= f.text_field :navigation_title %>
       <br>
       <small><em>
@@ -42,7 +42,7 @@
 
   <div class="two_column">
     <div class="field">
-      <%= f.label :page_type %><br>
+      <%= apphelp_label(f, :page_type) %>
       <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %>
       <br>
       <small><em>
@@ -53,7 +53,7 @@
     <div>
       <% if Page.top_level.count > 0 %>
         <div class="field">
-          <%= f.label :page_id %><br>
+          <%= apphelp_label(f, :page_id) %>
           <%= f.collection_select :page_id,
                                   Page.top_level_except( @page ),
                                   :id,
@@ -80,7 +80,7 @@
 
       <div class="two_column">
         <div class="field">
-          <%= f.label :form_selection_list_label, 'Selection menu title' %> <%= pageshelp_optional() %><br>
+          <%= apphelp_label(f, :form_selection_list_label, optional: true) %>
           <%= f.text_field :form_selection_list_label %>
           <br>
           <small><em>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="field">
-          <%= f.label :form_selection_list_contents %> <%= pageshelp_optional() %><br>
+          <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
           <%= f.text_area :form_selection_list_contents, :rows => 6, :cols => 40 %>
         </div>
       </div>
@@ -117,13 +117,13 @@
     <% if @page.raw_editor %>
       <div class="redactor_container">
         <div class="redactor-box redactor-styles-on">
-          <%= f.text_area :body, :class => 'not_redactor', :rows => 40, :cols => 120 %>
+          <%= f.text_area :body, class: 'not_redactor', rows: 40, cols: 120 %>
         </div>
       </div>
     <% else %>
       <div class="redactor_container">
         <div id="redactor_toolbar"></div>
-        <%= f.text_area :body, :class => 'custom_redactor', :rows => 40, :cols => 120 %>
+        <%= f.text_area :body, class: 'custom_redactor', rows: 40, cols: 120 %>
       </div>
     <% end %>
   </div>

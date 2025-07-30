@@ -21,6 +21,10 @@ body, .redactor-styles {
   font-size: 18px;
   font-family: "Noto Serif", serif;
 
+  p {
+    line-height: 30px;
+  }
+
   h1 {
     font-weight: 700;
     color: #525252;
@@ -85,6 +89,29 @@ label {
   display: block;
 }
 
+textarea {
+  margin: 5px 0;
+  font-size: 12pt;
+  max-width: 100%;
+}
+
+select {
+  max-width: 100%;
+}
+
+input[type="file"] {
+  font-size: 12pt;
+}
+
+input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
+  font-size: 12pt;
+  border: 1px solid #aaaaaa;
+  border-radius: 4px;
+  padding: 5px 10px;
+  background-image: -webkit-gradient(linear, left bottom, left top, from(#d2d0d0), to(#f0f0f0));
+  background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
+}
+
 .field_with_errors {
   input, textarea {
     border: 1px dashed red;
@@ -103,34 +130,11 @@ label {
   padding-left: 0.5em;
 }
 
-.form_field_label_optiona {
+.form_field_label_optional {
   font-size: smaller;
+  font-weight: normal;
   font-style: italic;
   padding-left: 0.5em;
-}
-
-textarea {
-  margin: 10px 20px 0 0;
-  font-size: 12pt;
-  max-width: 100%;
-}
-
-select {
-  margin-right: 20px;
-  max-width: 100%;
-}
-
-input[type="file"] {
-  font-size: 12pt;
-}
-
-input[type="file"]::-webkit-file-upload-button, input[type="submit"] {
-  font-size: 12pt;
-  border: 1px solid #aaaaaa;
-  border-radius: 4px;
-  padding: 5px 10px;
-  background-image: -webkit-gradient(linear, left bottom, left top, from(#d2d0d0), to(#f0f0f0));
-  background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
 }
 
 header,
@@ -178,10 +182,11 @@ section.messages, div#error_explanation {
   color: #00f;
   font-size: 125%;
   font-weight: bold;
+  margin-bottom: 1em;
 }
 
 article.article {
-  .blog-header {
+  section.blog-header {
     border-top:    1px dotted #999;
     border-bottom: 1px dotted #999;
     margin-bottom: 20px;
@@ -213,23 +218,18 @@ article.article {
 }
 
 section.blog-articles {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-
-  $article_width: ($content_width / 2) - 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1em;
 
   article.article {
-    width: $article_width;
-
     img {
       width: 100%;
       height: auto;
+      object-fit: cover;
+      aspect-ratio: 1;
+      border-radius: 0.5em;
     }
-  }
-
-  article.article:only-child {
-    margin-left: ($content_width - $article_width) / 2;
   }
 }
 
@@ -255,8 +255,13 @@ main, .redactor-box.redactor-styles-on {
   }
 
   figure {
-    margin: 20px 0;
+    margin: 0.5em 0; // (~align to top of text lines when floated)
     padding: 0;
+    border-radius: 0.5em;
+
+    > img {
+      border-radius: 0.5em;
+    }
   }
 
   img {
@@ -444,7 +449,7 @@ nav {
           }
 
           ul.pure-menu-children {
-            text-align: center;
+            text-align: left;
             border: 1px solid $head_foot_border_colour;
             border-radius: 5px;
             padding: 5px 10px;
@@ -516,11 +521,7 @@ nav {
     }
 
     section.blog-articles {
-      $article_width_mid: ($content_width_mid / 2) - 5px;
-
       article.article {
-        width: $article_width_mid;
-
         .article-date-and-heading-container {
           flex-wrap: wrap;
         }
@@ -529,10 +530,6 @@ nav {
           padding-left: 0;
           margin-bottom: 5px;
         }
-      }
-
-      article.article:only-child {
-        margin-left: ($content_width_mid - $article_width_mid) / 2;
       }
     }
   }
@@ -594,9 +591,7 @@ nav {
     }
 
     section.blog-articles {
-      article.article {
-        width: $content_width_narrow;
-      }
+      grid-template-columns: 1fr 1fr;
 
       article.article:only-child {
         margin-left: 0;
@@ -652,6 +647,8 @@ nav {
     }
 
     section.blog-articles {
+      grid-template-columns: 1fr;
+
       article.article {
         width: $content_width_mobile;
       }
@@ -666,6 +663,14 @@ nav {
     section.footer_content,
     section.footer_suffix {
       font-size: 60%;
+    }
+  }
+
+  footer.admin {
+    section.footer_content,
+    section.footer_suffix {
+      font-size: 100%;
+      flex-direction: row !important;
     }
   }
 
@@ -700,5 +705,10 @@ nav {
   figure {
     float: none !important;
     margin: 10px auto !important;
+  }
+
+  div.two_column {
+    grid-template-columns: 100fr;
+    row-gap: 1em;
   }
 }

@@ -17092,7 +17092,8 @@ $R.add('class', 'image.component', {
     _set_align: function(align)
     {
         var imageFloat = '';
-        var imageMargin = '';
+        var imageMarginLeft = '';
+        var imageMarginRight = '';
         var textAlign = '';
         var $el = this;
         var $img = this.find('img');
@@ -17121,19 +17122,20 @@ $R.add('class', 'image.component', {
 
                 case 'left':
                     imageFloat = 'left';
-                    imageMargin = this.opts.imageFloatMargin;
+                    imageMarginRight = this.opts.imageFloatMargin;
                 break;
                 case 'right':
                     imageFloat = 'right';
-                    imageMargin = this.opts.imageFloatMargin;
+                    imageMarginLeft = this.opts.imageFloatMargin;
                 break;
                 case 'center':
                     textAlign = 'center';
-                    imageMargin = 'auto';
+                    imageMarginLeft = 'auto';
+                    imageMarginRight = 'auto';
                 break;
             }
 
-            $el.css({ 'float': imageFloat, width: width + 'px', maxWidth: width + 'px', 'margin-left': imageMargin, 'margin-right': imageMargin, 'text-align': textAlign });
+            $el.css({ 'float': imageFloat, width: width + 'px', maxWidth: width + 'px', 'margin-left': imageMarginLeft, 'margin-right': imageMarginRight, 'text-align': textAlign });
             $el.attr('rel', $el.attr('style'));
 
             if (align === 'none') {
