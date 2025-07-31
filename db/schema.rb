@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_29_003242) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_30_205040) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "articles", force: :cascade do |t|
     t.text "title", null: false
@@ -59,6 +59,20 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_29_003242) do
     t.datetime "updated_at", precision: nil
     t.index ["assetable_type", "assetable_id"], name: "idx_redactor_assetable"
     t.index ["assetable_type", "type", "assetable_id"], name: "idx_redactor_assetable_type"
+  end
+
+  create_table "revisions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "revisable_type", null: false
+    t.bigint "revisable_id", null: false
+    t.text "title"
+    t.text "navigation_title"
+    t.text "summary"
+    t.text "body"
+    t.boolean "draft", default: true
+    t.index ["draft"], name: "index_revisions_on_draft"
+    t.index ["revisable_type", "revisable_id"], name: "index_revisions_on_revisable"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

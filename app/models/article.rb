@@ -1,11 +1,15 @@
 # A blog article. Attached to Pages of type "blog".
 #
-class Article < ActsLikePage
-
+class Article < Editable
   mount_uploader :article_hero_image, ArticleHeroImageUploader
 
   belongs_to :page
-  default_scope -> { order( :created_at => :desc ) }
+
+  default_scope -> { order(created_at: :desc) }
+
+  scope :for_navigation, -> {
+    where(id: Revision.published.where(revisable_type: 'Article').select(:revisable_id))
+  }
 
   before_validation do
     generate_unique_slug() if self.slug.blank? # see ApplicationRecord

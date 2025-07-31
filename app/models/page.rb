@@ -1,26 +1,27 @@
-class Page < ActsLikePage
-
+class Page < Editable
   belongs_to :page, optional: true
   has_many :pages
+  has_many :articles, dependent: :destroy
 
   alias_method :children, :pages
   alias_method :parent,   :page
 
-  has_many :articles, dependent: :destroy
+  acts_as_list :scope => :page
+  default_scope -> { order( position: :asc ) }
+
+  scope :top_level, -> { where( page_id: nil ) }
+  scope :for_navigation, -> {
+    where(hidden: false)
+    .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
+  }
 
   before_validation do
     generate_unique_slug() if self.slug.blank? # see ApplicationRecord
   end
 
-  acts_as_list :scope => :page
-
   validates_presence_of :title
-  validates_presence_of :body, :unless => :is_blog_type?
+  validates_presence_of :body, unless: :is_blog_type?
   validates_uniqueness_of :slug
-
-  default_scope -> { order( :position => :asc ) }
-  scope :top_level, -> { where( :page_id => nil  ) }
-  scope :for_navigation, -> { where( :hidden => false ) }
 
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BLOG         = 'blog'

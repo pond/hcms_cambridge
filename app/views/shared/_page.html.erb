@@ -5,9 +5,9 @@
 %>
 <% if page.is_blog_type? %>
 
-  <% if page.articles.any? %>
+  <% if page.articles.for_navigation.any? %>
     <section class="blog-articles">
-      <% page.articles.each do | article | %>
+      <% page.articles.for_navigation.each do | article | %>
         <article class="article">
           <%= link_to page_article_path(page_id: page.id, id: article.id), class: 'article-link' do %>
             <img class="article-hero-image" src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
