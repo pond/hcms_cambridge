@@ -1,8 +1,9 @@
 <%
-  # Render with locals 'page' giving the Page to render and 'revision' giving
-  # the Revision of that article that should be shown:
+  # Render with locals 'page' giving the Page to render, with delegation set up
+  # to pull data from an appropriate Revision (by default - published, falling
+  # back the only unpublished revision if nothing is published).
   #
-  #   render partial: 'shared/page', locals: { page: @page, revision: @revision }
+  #   render partial: 'shared/page', locals: { page: @page }
 %>
 <% if page.is_blog_type? %>
 

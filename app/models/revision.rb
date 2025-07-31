@@ -60,20 +60,9 @@ class Revision < ApplicationRecord
     end
   end
 
-  # Finds the assumed-only record that's in a published state and returns it,
-  # using no memoisation and potentially a DB query each time. Returns +nil+ if
-  # there is no published revision. See also ::published_revision_in_array
+  # Is this revision 'current' but not 'published'?
   #
-  # Call via a relation, e.g. via "page.revisions.published_revision_by_scope".
-  #
-  def self.published_revision
-    published.first
-  end
-
-  # Analogous to ::published_revision, but for the current Revision; should
-  # never return +nil+ (unless data is broken!).
-  #
-  def self.current_revision
-    current.first
+  def current_draft?
+    current? && ! published?
   end
 end

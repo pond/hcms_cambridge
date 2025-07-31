@@ -18,12 +18,12 @@
 
     <div class="pure-menu pure-menu-horizontal">
       <ul class="pure-menu-list">
-        <% Page.top_level.for_navigation.each do | top_level_page | %>
+        <% Page.top_level.for_navigation.includes(:revisions, {children_for_navigation: :revisions}).each do | top_level_page | %>
           <%
             nav_list_classes = %w{pure-menu-item pure-menu-allow-hover}
-            nav_list_classes << 'pure-menu-has-children' if top_level_page.children.for_navigation.present?
+            nav_list_classes << 'pure-menu-has-children' if top_level_page.children_for_navigation.any?
 
-            if content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.page.try(:id))
+            if content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.parent.try(:id))
               nav_list_classes << 'current'
             end
           %>

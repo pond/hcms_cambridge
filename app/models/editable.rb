@@ -3,22 +3,42 @@ class Editable < ApplicationRecord
 
   IS_INTEGER = /\A\d+\z/
 
-  has_many :revisions, as: :revisable, dependent: :destroy
+  has_many :revisions, as: :revisable, autosave: true, dependent: :destroy
 
-  # Delegation is usually obtuse! In this case, it is even more thorny - you
-  # should only use this for forms. Allowing a form to act upon a single model
-  # class and just delegating certain properties down into a Revision makes
-  # life simpler everywhere else.
+  # Delegation:
   #
-  # * When presenting a form, we always edit whatever is currently published if
-  #   it exists, else whatever is the most recent draft revision.
+  # * If this record is generic, then we read from whatever is published by
+  #   default, but if that's missing, go for a current draft. Read-only.
   #
-  # * When submitting the form, we want to write through to a new draft.
+  # * If the record is using an overridden revision, read from that.
   #
-  Revision::REVISABLE_ATTRIBUTES.each do | revisable_attribute |
-    delegate revisable_attribute, to: :current_revision
-    delegate "#{revisable_attribute}=", to: :draft_revision
+  # * If the record is intended for editing, we reverse read order; continue on
+  #   a current draft, or fall back to reading from the current published copy.
+  #   For writing, we write into the current unpublished draft or build a new
+  #   one if need be.
+  #
+  after_initialize do
+    @read_revision_for_delegation = self.published_revision || self.current_revision
+    @write_revision_for_delegation = nil
   end
+
+  def use_revision!(revision)
+    @read_revision_for_delegation = revision
+    return self
+  end
+
+  def for_edit!
+    @read_revision_for_delegation = self.current_revision || self.published_revision || self.draft_revision
+    @write_revision_for_delegation = self.draft_revision
+    return self
+  end
+
+  Revision::REVISABLE_ATTRIBUTES.each do | revisable_attribute |
+    delegate revisable_attribute, to: :@read_revision_for_delegation
+    delegate "#{revisable_attribute}=", to: :@write_revision_for_delegation
+  end
+
+  delegate :published=, to: :@write_revision_for_delegation
 
   # ===========================================================================
   # LIFECYCLE
@@ -40,7 +60,12 @@ class Editable < ApplicationRecord
     self.published = true if publish # (don't change to "false" if already "true")
 
     result.successful = self.save()
-    result.published  = true if publish && result.successful
+
+    if result.successful
+      result.published = true if publish
+      self.revisions.reload
+      @current_revision = @published_revision = @draft_revision = nil
+    end
 
     return result
   end
@@ -55,27 +80,23 @@ class Editable < ApplicationRecord
   # prevailing revision ID in force.
   #
   def published_revision
-    unless defined? @published_revision
-      @published_revision = self.revisions.published_revision
-    end
-
-    @published_revision
+    @published_revision ||= self.revisions.load.find(&:published)
   end
 
   # The current revision for reading in an edit form. Memoised.
   #
   def current_revision
-    unless defined? @current_revision
-      @current_revision = self.revisions.current_revision
-    end
-
-    @current_revision
+    @current_revision ||= self.revisions.load.find(&:current)
   end
 
-  # Returns a new Revision that represents a new writeable draft. Memoised.
+  # Returns a new Revision that represents a writeable draft. Memoised.
   #
   def draft_revision
-    @current_draft_revision ||= self.revisions.build
+    @draft_revision ||= begin
+      revision = self.current_revision
+      revision = self.revisions.build(current: true) if revision.nil? || revision.published
+      revision
+    end
   end
 
   # Uses the title to generate a slug, making sure it is unique.
@@ -123,6 +144,10 @@ class Editable < ApplicationRecord
   end
 
   def is_article?
+    false
+  end
+
+  def appears_in_navigation?
     false
   end
 end

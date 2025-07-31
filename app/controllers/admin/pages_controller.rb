@@ -6,7 +6,9 @@ class Admin::PagesController < ApplicationController
   # Via Devise
   before_action :authenticate_admin_user!
 
-  before_action :set_page, only: [:show, :edit, :update, :destroy]
+  before_action :get_page,            only: [:show, :destroy]
+  before_action :get_editable_page,   only: [:edit, :update]
+  before_action :build_editable_page, only: [:new,  :create]
 
   public
 
@@ -17,10 +19,8 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/1
     def show
-      @revision = if params.key?(:revision)
-        @page.revisions.find(params[:revision])
-      else
-        @page.published_revision
+      if params.key?(:revision)
+        @page.use_revision! @page.revisions.find(params[:revision])
       end
 
       @form_model = @page&.form_class&.new
@@ -28,7 +28,6 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/new
     def new
-      @page = Page.new
     end
 
     # GET /admin/pages/1/edit
@@ -37,14 +36,13 @@ class Admin::PagesController < ApplicationController
 
     # POST /admin/pages
     def create
-      @page  = Page.new
       result = @page.persist!(self.page_params(), publish: params[:publish].present?)
 
       if result.successful
         if result.published
           redirect_to [:admin, @page], notice: 'New page published.'
         else
-          redirect_to [:admin, @page, {revision: @page.current_draft_revision.id}], notice: 'New draft page created.'
+          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'New draft page created.'
         end
       else
         render :new
@@ -58,16 +56,14 @@ class Admin::PagesController < ApplicationController
       if result.successful
         if @page.previous_changes.has_key?('raw_editor')
           if result.published
-            redirect_to [:edit, :admin, @page], notice: 'Editing style altered and other changes, if any, published.'
+            redirect_to [:edit, :admin, @page], notice: 'Editor selection altered and other changes, if any, published.'
           else
-            redirect_to [:edit, :admin, @page], notice: 'Editing style altered.'
+            redirect_to [:edit, :admin, @page], notice: 'Editor selection altered.'
           end
         elsif result.published
           redirect_to [:admin, @page], notice: 'Page changes published.'
-        elsif @page.current_revision.previously_new_record?
-          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'New draft revision created.'
         else
-          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'Draft revision updated.'
+          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'Changes saved as draft.'
         end
       else
         render :edit
@@ -78,7 +74,7 @@ class Admin::PagesController < ApplicationController
     def destroy
       @page.destroy
       respond_to do | format |
-        format.html { redirect_to admin_pages_url, notice: 'Page was successfully destroyed.' }
+        format.html { redirect_to admin_pages_url, notice: 'Page deleted.' }
       end
     end
 
@@ -93,8 +89,16 @@ class Admin::PagesController < ApplicationController
       end
     end
 
-    def set_page
-      @page = Page.find_by_id_or_slug!( params[ :id ] )
+    def get_page
+      @page = Page.find_by_id_or_slug!(params[:id])
+    end
+
+    def get_editable_page
+      self.get_page.for_edit!
+    end
+
+    def build_editable_page
+      @page = Page.new.for_edit!
     end
 
     def page_params

@@ -18,6 +18,17 @@ module ApplicationHelper
     l(local_time, format: formatter)
   end
 
+  # Render a boolean-like thing as 'yes/no' text in a span that can include a
+  # given yes/no HTML class used to modify the presentation style.
+  #
+  def apphelp_boolean(boolean, yes_class: 'boolean_yes', no_class: 'boolean_no')
+    if boolean
+      tag.span(t('misc.yes'), class: yes_class)
+    else
+      tag.span(t('misc.no'), class: no_class)
+    end
+  end
+
   # Writes out a label with required/optional hint if necessary and using I18n
   # that defaults to "label/<attrname>" as a model's human attribute name for
   # the label. This allows more descriptive label text, without e.g. validation

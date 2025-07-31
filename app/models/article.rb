@@ -8,13 +8,7 @@ class Article < Editable
   default_scope -> { order(created_at: :desc) }
 
   scope :for_navigation, -> {
-    base_page_query   = unscope(:order)
-    revision_subquery = Revision.published.where(revisable_type: 'Article').select(:revisable_id)
-
-    with_published_revisions = base_page_query.    where(id: revision_subquery)
-    with_no_revisions        = base_page_query.where.not(id: revision_subquery)
-
-    from("(#{with_published_revisions.to_sql} UNION #{with_no_revisions.to_sql}) AS articles").order(created_at: :desc)
+    where(id: Revision.published.where(revisable_type: 'Article').select(:revisable_id))
   }
 
   before_validation do
@@ -26,5 +20,9 @@ class Article < Editable
 
   def is_article?
     true
+  end
+
+  def appears_in_navigation?
+    self.revisions.any?(:published)
   end
 end

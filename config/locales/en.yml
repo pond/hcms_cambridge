@@ -101,6 +101,8 @@ en:
         blank: "must be provided"
 
   misc:
+    "yes": "Yes"
+    "no": "No"
     required: "(required)"
     optional: "(optional)"
 

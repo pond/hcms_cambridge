@@ -4,8 +4,10 @@ class Admin::ArticlesController < ApplicationController
 
   # Via Devise
   before_action :authenticate_admin_user!
-  before_action :set_page
-  before_action :set_article, only: [:show, :edit, :update, :destroy]
+  before_action :get_page
+  before_action :get_article,            only: [:show, :destroy]
+  before_action :get_editable_article,   only: [:edit, :update]
+  before_action :build_editable_article, only: [:new,  :create]
 
   public
 
@@ -16,16 +18,13 @@ class Admin::ArticlesController < ApplicationController
 
     # GET /admin/pages/<page_id>/articles/<id>
     def show
-      @revision = if params.key?(:revision)
-        @article.revisions.find(params[:revision])
-      else
-        @article.published_revision
+      if params.key?(:revision)
+        @article.use_revision! @page.revisions.find(params[:revision])
       end
     end
 
     # GET /admin/pages/<page_id>/articles/new
     def new
-      @article = Article.new(page_id: @page.id)
     end
 
     # GET /admin/pages/<page_id>/articles/edit/<id>
@@ -34,45 +33,37 @@ class Admin::ArticlesController < ApplicationController
 
     # POST /admin/pages/<page_id>/articles
     def create
-      @article         = Article.new( article_params )
-      @article.page_id = @page.id
+      result = @article.persist!(self.article_params(), publish: params[:publish].present?)
 
-      respond_to do | format |
-        if @article.save
-          format.html do
-            redirect_to(
-              admin_page_article_url( page_id: @page.id, id: @article.id ),
-              notice: 'Article was successfully created.'
-            )
-          end
+      if result.successful
+        if result.published
+          redirect_to [:admin, @page, @article], notice: 'New article published.'
         else
-          format.html { render :new }
+          redirect_to [:admin, @page, @article, {revision: @article.current_draft_revision.id}], notice: 'New draft article created.'
         end
+      else
+        render :new
       end
     end
 
     # PATCH/PUT //admin/pages/<page_id>/articles/<id>
     def update
-      respond_to do | format |
-        if @article.update( article_params )
-          if @article.previous_changes.has_key?( 'raw_editor' )
-            format.html do
-              redirect_to(
-                edit_admin_page_article_url( page_id: @page.id, id: @article.id ),
-                notice: 'Editing style changed.'
-              )
-            end
+      result = @article.persist!(self.page_params(), publish: params[:publish].present?)
+
+      if result.successful
+        if @article.previous_changes.has_key?('raw_editor')
+          if result.published
+            redirect_to [:edit, :admin, @page, @article], notice: 'Editor selection altered and other changes, if any, published.'
           else
-            format.html do
-              redirect_to(
-                admin_page_article_url( page_id: @page.id, id: @article.id ),
-                notice: 'Article was successfully updated.'
-              )
-            end
+            redirect_to [:edit, :admin, @page, @article], notice: 'Editor selection altered.'
           end
+        elsif result.published
+          redirect_to [:admin, @page, @article], notice: 'Article changes published.'
         else
-          format.html { render :edit }
+          redirect_to [:admin, @page, @article, {revision: @page.current_revision.id}], notice: 'Changes saved as draft.'
         end
+      else
+        render :edit
       end
     end
 
@@ -84,7 +75,7 @@ class Admin::ArticlesController < ApplicationController
         format.html do
           redirect_to(
             admin_page_articles_url( page_id: @page.id ),
-            notice: 'Article was successfully destroyed.'
+            notice: 'Article deleted.'
           )
         end
       end
@@ -101,12 +92,20 @@ class Admin::ArticlesController < ApplicationController
       end
     end
 
-    def set_page
-      @page = Page.find_by_id_or_slug!( params[ :page_id ] )
+    def get_page
+      @page = Page.find_by_id_or_slug!(params[:page_id])
     end
 
-    def set_article
-      @article = Article.find_by_id_or_slug!( params[ :id ] )
+    def get_article
+      @article = Article.find_by_id_or_slug!(params[:id])
+    end
+
+    def get_editable_article
+      self.get_article.for_edit!
+    end
+
+    def build_editable_article
+      @article = @page.articles.build.for_edit!
     end
 
     def article_params

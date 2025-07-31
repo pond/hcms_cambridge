@@ -9,8 +9,8 @@
   <% if page.first? %>
     &nbsp;
   <% else %>
-    <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
-    <%= f.submit( '↑', :name => 'higher' ) %>
+    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
+    <%= f.submit('↑', name: 'higher') %>
     <% end %>
   <% end %>
 </td>
@@ -18,11 +18,11 @@
   <% if page.last? %>
     &nbsp;
   <% else %>
-    <%= form_for( page, :url => admin_move_page_path( page ) ) do | f | %>
-    <%= f.submit( '↓', :name => 'lower' ) %>
+    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
+    <%= f.submit('↓', name: 'lower') %>
     <% end %>
   <% end %>
 </td>
-<td><%= link_to 'Show',    [        :admin, page ] %></td>
-<td><%= link_to 'Edit',    [ :edit, :admin, page ] %></td>
-<td><%= link_to 'Destroy', [        :admin, page ], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %></td>
+<td><%= link_to 'Show',   [       :admin, page] %></td>
+<td><%= link_to 'Edit',   [:edit, :admin, page] %></td>
+<td><%= link_to 'Delete', [       :admin, page], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %></td>

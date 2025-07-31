@@ -52,6 +52,10 @@ main.admin {
   border-radius: 4px;
   box-shadow: 0 0 10px #fff;
 
+  a {
+    text-decoration: underline;
+  }
+
   table {
     border-collapse: collapse;
 
@@ -60,18 +64,45 @@ main.admin {
       padding-bottom: 5px;
     }
 
+    td {
+      padding-top: 3px;
+      padding-bottom: 3px;
+    }
+
     td.centre, th.centre {
       text-align: center;
     }
 
-    td {
-      border: 1px solid #888;
-      padding: 3px;
+    td, th {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+
+    tr:not(:first-child), tbody > tr:first-child {
+      border-top: 1px solid #888;
     }
 
     tr.odd          { background:         rgba( 255, 255, 255, 0.7 ); }
     tr.children     { background: darken( rgba( 210, 255, 210, 0.8 ), 10% ); font-style: italic; }
     tr.children.odd { background:         rgba( 210, 255, 210, 0.7 ); }
+  }
+
+  span.boolean_no {
+    font-weight: bold;
+  }
+
+  span.boolean_no_warn {
+    color: darkred;
+  }
+
+  span.boolean_yes_highlight, span.boolean_no_highlight {
+    font-weight: bold;
+    color: darkred;
+  }
+
+  div.field_with_errors div.redactor-box {
+    border: 1px dashed red;
+    margin-bottom: 10px;
   }
 }
 

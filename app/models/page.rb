@@ -1,23 +1,16 @@
 class Page < Editable
-  belongs_to :page, optional: true
-  has_many :pages
+  belongs_to :parent, class_name: 'Page', optional: true
+  has_many :children, class_name: 'Page'
+  has_many :children_for_navigation, -> { for_navigation }, class_name: 'Page'
   has_many :articles, dependent: :destroy
 
-  alias_method :children, :pages
-  alias_method :parent,   :page
-
-  acts_as_list :scope => :page
+  acts_as_list scope: :page
   default_scope -> { order(position: :asc) }
 
   scope :top_level, -> { where(page_id: nil) }
   scope :for_navigation, -> {
-    base_page_query   = where(hidden: false).unscope(:order)
-    revision_subquery = Revision.published.where(revisable_type: 'Page').select(:revisable_id)
-
-    with_published_revisions = base_page_query.    where(id: revision_subquery)
-    with_no_revisions        = base_page_query.where.not(id: revision_subquery)
-
-    from("(#{with_published_revisions.to_sql} UNION #{with_no_revisions.to_sql}) AS pages").order(position: :asc)
+    where(hidden: false)
+    .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
   }
 
   before_validation do
@@ -59,6 +52,10 @@ class Page < Editable
 
   def is_form_type?
     self.is_contact_form? || self.is_booking_form?
+  end
+
+  def appears_in_navigation?
+    ! self.hidden && self.revisions.any?(:published)
   end
 
   def is_contact_form?

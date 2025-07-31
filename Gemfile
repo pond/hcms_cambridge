@@ -64,8 +64,12 @@ gem 'acts_as_list', '~> 1.2'
 #
 gem 'phony', '~> 2.22'
 
+group :development do
+  gem 'web-console'
+  gem 'mailcatcher', '~> 0.10'
+end
+
 group :development, :test do
   gem 'debug'
   gem 'awesome_print'
-  gem 'mailcatcher', '~> 0.10'
 end

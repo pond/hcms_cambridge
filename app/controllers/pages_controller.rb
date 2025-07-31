@@ -9,7 +9,6 @@ class PagesController < ApplicationController
       @page = Page.find_by_id_or_slug!( params[ :id ] )
     end
 
-    @revision   = @page.published_revision
     @form_model = @page&.form_class&.new
   end
 end
