@@ -5,50 +5,77 @@ class Editable < ApplicationRecord
 
   has_many :revisions, as: :revisable, dependent: :destroy
 
-  # Delegate top-level title, body etc. methods down to the current revision.
+  # Delegation is usually obtuse! In this case, it is even more thorny - you
+  # should only use this for forms. Allowing a form to act upon a single model
+  # class and just delegating certain properties down into a Revision makes
+  # life simpler everywhere else.
+  #
+  # * When presenting a form, we always edit whatever is currently published if
+  #   it exists, else whatever is the most recent draft revision.
+  #
+  # * When submitting the form, we want to write through to a new draft.
   #
   Revision::REVISABLE_ATTRIBUTES.each do | revisable_attribute |
-    delegate revisable_attribute, to: :current_revision # (see method later in this file)
+    delegate revisable_attribute, to: :current_revision
+    delegate "#{revisable_attribute}=", to: :draft_revision
+  end
+
+  # ===========================================================================
+  # LIFECYCLE
+  # ===========================================================================
+
+  PersistenceResult = Struct.new(:successful, :published)
+
+  # Unless you have special requirements, you shouldn't normally just call
+  # standard persistence methods on an Editable, to save on boilerplate.
+  #
+  # This method cuts down on controller boilerplate accordingly; it assigns the
+  # given (safe / strong parameters) attributes and optionally publishes. The
+  # returned PersistenceResult explains the outcome.
+  #
+  def persist!(safe_attributes, publish:)
+    result = PersistenceResult.new(successful: false, published: false)
+
+    self.assign_attributes(safe_attributes)
+    self.published = true if publish # (don't change to "false" if already "true")
+
+    result.successful = self.save()
+    result.published  = true if publish && result.successful
+
+    return result
   end
 
   # ===========================================================================
   # UTILITIES
   # ===========================================================================
 
-  # The most recent non-draft revision. Revisions might be eager-loaded, so
-  # uses a Ruby-only check for small revisions, falling back to the database
-  # for larger revision counts.
+  # The published Revision. Might return +nil+. Memoised.
   #
-  # If there is no non-draft revision but there are revisions present, then we
-  # assume this editable item has no published aspect and return the most
-  # recent *draft* instead.
+  # This should be used for any editable "show"-like action without some other
+  # prevailing revision ID in force.
   #
-  # TODO: MIGRATE AND DELETE THIS:
-  # If all else fails, legacy inline data is used to construct a temporary
-  # Revision instance that's not persisted; this is returned.
-  #
-  # Compared with Revision::current_revision chained into a scope, this takes
-  # advantage of eager-loading **and memoises the result for this Page** (so
-  # beware changing Revisions and then referencing this method for the same
-  # instance of the owning page, as the result will not be updated).
+  def published_revision
+    unless defined? @published_revision
+      @published_revision = self.revisions.published_revision
+    end
+
+    @published_revision
+  end
+
+  # The current revision for reading in an edit form. Memoised.
   #
   def current_revision
-    @current_revision ||= if self.revisions.loaded? && self.revisions.size < 100
-      Revision.current_revision_in_array(self.revisions)
-    else
-      self.revisions.current_revision_by_scope()
-    end
-
-    if @current_revision.nil?
-      @current_revision = self.revisions.first # (order is created-at DESC by Revision default_scope)
-    end
-
-    if @current_revision.nil?
-      @current_revision = Revision.new(self.attributes.slice("created_at", "updated_at", *Revision::REVISABLE_ATTRIBUTES))
-      @current_revision.revisable  = self
+    unless defined? @current_revision
+      @current_revision = self.revisions.current_revision
     end
 
     @current_revision
+  end
+
+  # Returns a new Revision that represents a new writeable draft. Memoised.
+  #
+  def draft_revision
+    @current_draft_revision ||= self.revisions.build
   end
 
   # Uses the title to generate a slug, making sure it is unique.

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_205040) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_31_043258) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -70,8 +70,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_205040) do
     t.text "navigation_title"
     t.text "summary"
     t.text "body"
-    t.boolean "draft", default: true
-    t.index ["draft"], name: "index_revisions_on_draft"
+    t.boolean "published", default: false
+    t.boolean "current", default: false
+    t.index ["current"], name: "index_revisions_on_current"
+    t.index ["published"], name: "index_revisions_on_published"
     t.index ["revisable_type", "revisable_id"], name: "index_revisions_on_revisable"
   end
 

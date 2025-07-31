@@ -9,9 +9,11 @@ class AddRevisions < ActiveRecord::Migration[8.0]
       t.text :summary
       t.text :body
 
-      t.boolean :draft, default: true
+      t.boolean :published, default: false
+      t.boolean :current,   default: false
     end
 
-    add_index :revisions, :draft
+    add_index :revisions, :published
+    add_index :revisions, :current
   end
 end

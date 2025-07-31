@@ -7,12 +7,17 @@ class Page < Editable
   alias_method :parent,   :page
 
   acts_as_list :scope => :page
-  default_scope -> { order( position: :asc ) }
+  default_scope -> { order(position: :asc) }
 
-  scope :top_level, -> { where( page_id: nil ) }
+  scope :top_level, -> { where(page_id: nil) }
   scope :for_navigation, -> {
-    where(hidden: false)
-    .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
+    base_page_query   = where(hidden: false).unscope(:order)
+    revision_subquery = Revision.published.where(revisable_type: 'Page').select(:revisable_id)
+
+    with_published_revisions = base_page_query.    where(id: revision_subquery)
+    with_no_revisions        = base_page_query.where.not(id: revision_subquery)
+
+    from("(#{with_published_revisions.to_sql} UNION #{with_no_revisions.to_sql}) AS pages").order(position: :asc)
   }
 
   before_validation do

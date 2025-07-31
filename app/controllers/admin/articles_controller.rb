@@ -5,7 +5,7 @@ class Admin::ArticlesController < ApplicationController
   # Via Devise
   before_action :authenticate_admin_user!
   before_action :set_page
-  before_action :set_article, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_article, only: [:show, :edit, :update, :destroy]
 
   public
 
@@ -16,6 +16,11 @@ class Admin::ArticlesController < ApplicationController
 
     # GET /admin/pages/<page_id>/articles/<id>
     def show
+      @revision = if params.key?(:revision)
+        @article.revisions.find(params[:revision])
+      else
+        @article.published_revision
+      end
     end
 
     # GET /admin/pages/<page_id>/articles/new

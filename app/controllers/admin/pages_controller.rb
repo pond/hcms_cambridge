@@ -6,19 +6,24 @@ class Admin::PagesController < ApplicationController
   # Via Devise
   before_action :authenticate_admin_user!
 
-  before_action :set_page, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_page, only: [:show, :edit, :update, :destroy]
 
   public
 
     # GET /admin/pages
     def index
-      @pages = Page.top_level.all
+      @pages = Page.top_level.includes(:revisions).load
     end
 
     # GET /admin/pages/1
     def show
-      form_class  = @page&.form_class
-      @form_model = form_class.new unless form_class.nil?
+      @revision = if params.key?(:revision)
+        @page.revisions.find(params[:revision])
+      else
+        @page.published_revision
+      end
+
+      @form_model = @page&.form_class&.new
     end
 
     # GET /admin/pages/new
@@ -32,29 +37,40 @@ class Admin::PagesController < ApplicationController
 
     # POST /admin/pages
     def create
-      @page = Page.new( page_params )
+      @page  = Page.new
+      result = @page.persist!(self.page_params(), publish: params[:publish].present?)
 
-      respond_to do | format |
-        if @page.save
-          format.html { redirect_to [:admin, @page], notice: 'Page was successfully created.' }
+      if result.successful
+        if result.published
+          redirect_to [:admin, @page], notice: 'New page published.'
         else
-          format.html { render :new }
+          redirect_to [:admin, @page, {revision: @page.current_draft_revision.id}], notice: 'New draft page created.'
         end
+      else
+        render :new
       end
     end
 
     # PATCH/PUT /admin/pages/1
     def update
-      respond_to do | format |
-        if @page.update( page_params )
-          if @page.previous_changes.has_key?( 'raw_editor' )
-            format.html { redirect_to [ :edit, :admin, @page ], notice: 'Editing style changed.' }
+      result = @page.persist!(self.page_params(), publish: params[:publish].present?)
+
+      if result.successful
+        if @page.previous_changes.has_key?('raw_editor')
+          if result.published
+            redirect_to [:edit, :admin, @page], notice: 'Editing style altered and other changes, if any, published.'
           else
-            format.html { redirect_to [ :admin, @page ], notice: 'Page was successfully updated.' }
+            redirect_to [:edit, :admin, @page], notice: 'Editing style altered.'
           end
+        elsif result.published
+          redirect_to [:admin, @page], notice: 'Page changes published.'
+        elsif @page.current_revision.previously_new_record?
+          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'New draft revision created.'
         else
-          format.html { render :edit }
+          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'Draft revision updated.'
         end
+      else
+        render :edit
       end
     end
 

@@ -1,7 +1,8 @@
 <%
-  # Ensure a local "page" is set to the Page / AdminPage instance to render:
+  # Render with locals 'page' giving the Page to render and 'revision' giving
+  # the Revision of that article that should be shown:
   #
-  #   render :partial => 'shared/page', :locals => { :page => ... }
+  #   render partial: 'shared/page', locals: { page: @page, revision: @revision }
 %>
 <% if page.is_blog_type? %>
 
