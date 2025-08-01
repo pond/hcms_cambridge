@@ -3,19 +3,19 @@
 development:
   adapter: postgresql
   encoding: unicode
-  pool: 5
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   database: hcms_development
 
 test:
   adapter: postgresql
   encoding: unicode
-  pool: 5
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   database: hcms_test
 
 production:
   adapter: postgresql
   encoding: unicode
-  pool: 5
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   database: hcms_production
   username: hcms
   password: <%= ENV['HCMS_DATABASE_PASSWORD'] %>
