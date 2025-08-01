@@ -1,0 +1,51 @@
+<%
+  # Render with locals 'editable' giving the Editable subclass to examine (e.g.
+  # a Page) and 'form_path' giving the path to which a GET submission with
+  # parameter "revision" and value of a revision ID should be made, in order to
+  # show that specific revision.
+  #
+  #   render partial: 'shared/page', locals: { page: @page, form_path: admin_page_path(@page) }
+%>
+
+<% if user_signed_in? %>
+  <%
+    displayed_index = editable.revisions.index(editable.displayed_revision)
+    newer_revisions = editable.revisions.first(displayed_index)
+    older_revisions = editable.revisions.last(editable.revisions.size - displayed_index - 1)
+    container_class = if editable.displayed_revision.published
+      'publishing-published'
+    elsif editable.displayed_revision.current
+      'publishing-current'
+    else
+      'publishing-unpublished'
+    end
+  %>
+  <%= tag.div(id: 'publishing-info', class: container_class) do %>
+    <% if older_revisions.any? %>
+      <%= form_with(model: false, uri: form_path, method: :get) do | revisions_form | %>
+        <%= revisions_form.button('←', type: 'submit', name: 'revision', value: older_revisions.first.id) %>
+      <% end %>
+    <% end %>
+
+    <% if editable.revisions.size > 1 %>
+      <%= form_with(model: false, uri: form_path, method: :get) do | revisions_form | %>
+        <%=
+          revisions_form.collection_select(
+            :revision,
+            editable.revisions,
+            :id,
+            :display_name,
+            {selected: editable.displayed_revision.id},
+            {onchange: 'this.form.submit()'}
+          )
+        %>
+      <% end %>
+    <% end %>
+
+    <% if newer_revisions.any? %>
+      <%= form_with(model: false, uri: form_path, method: :get) do | revisions_form | %>
+        <%= revisions_form.button('→', type: 'submit', name: 'revision', value: newer_revisions.last.id) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

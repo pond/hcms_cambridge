@@ -16,11 +16,9 @@
 
     <footer>
       <% content_for :signed_in_cms_menu do %>
-        <% if @article.present? %>
-          <%= link_to 'Edit article', edit_admin_page_article_path( @page.id, id: @article.id ) %> |
-        <% end %>
+        <%= artshelp_edit_link_for(@article, params) %> |
         <%= link_to 'New blog article', new_admin_page_article_path() %> |
-        <%= link_to 'List articles', admin_page_articles_path %> |
+        <%= link_to 'List articles', admin_page_articles_path() %> |
         <%= link_to 'New page', new_admin_page_path() %>
       <% end %>
 

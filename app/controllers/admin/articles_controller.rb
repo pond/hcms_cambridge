@@ -8,6 +8,7 @@ class Admin::ArticlesController < ApplicationController
   before_action :get_article,            only: [:show, :destroy]
   before_action :get_editable_article,   only: [:edit, :update]
   before_action :build_editable_article, only: [:new,  :create]
+  before_action :check_for_revision,     only: [:show, :edit, :update]
 
   public
 
@@ -18,9 +19,6 @@ class Admin::ArticlesController < ApplicationController
 
     # GET /admin/pages/<page_id>/articles/<id>
     def show
-      if params.key?(:revision)
-        @article.use_revision! @page.revisions.find(params[:revision])
-      end
     end
 
     # GET /admin/pages/<page_id>/articles/new
@@ -39,7 +37,7 @@ class Admin::ArticlesController < ApplicationController
         if result.published
           redirect_to [:admin, @page, @article], notice: 'New article published.'
         else
-          redirect_to [:admin, @page, @article, {revision: @article.current_draft_revision.id}], notice: 'New draft article created.'
+          redirect_to [:admin, @page, @article, {revision: @article.current_revision.id}], notice: 'New draft article created.'
         end
       else
         render :new
@@ -48,7 +46,7 @@ class Admin::ArticlesController < ApplicationController
 
     # PATCH/PUT //admin/pages/<page_id>/articles/<id>
     def update
-      result = @article.persist!(self.page_params(), publish: params[:publish].present?)
+      result = @article.persist!(self.article_params(), publish: params[:publish].present?)
 
       if result.successful
         if @article.previous_changes.has_key?('raw_editor')
@@ -60,7 +58,7 @@ class Admin::ArticlesController < ApplicationController
         elsif result.published
           redirect_to [:admin, @page, @article], notice: 'Article changes published.'
         else
-          redirect_to [:admin, @page, @article, {revision: @page.current_revision.id}], notice: 'Changes saved as draft.'
+          redirect_to [:admin, @page, @article, {revision: @article.current_revision.id}], notice: 'Changes saved as draft.'
         end
       else
         render :edit
@@ -108,13 +106,23 @@ class Admin::ArticlesController < ApplicationController
       @article = @page.articles.build.for_edit!
     end
 
-    def article_params
-      params.require( :article ).permit( :title,
-                                         :slug,
-                                         :article_hero_image,
-                                         :summary,
-                                         :body,
-                                         :raw_editor )
+    def check_for_revision
+      if params.key?(:revision)
+        revision = @article.revisions.find(params[:revision])
+        @article.use_revision!(revision)
+      end
     end
 
+    def article_params
+      params
+        .require(:article)
+        .permit(
+          :title,
+          :slug,
+          :article_hero_image,
+          :summary,
+          :body,
+          :raw_editor
+        )
+    end
 end

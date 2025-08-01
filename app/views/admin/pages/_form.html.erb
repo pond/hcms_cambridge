@@ -1,4 +1,6 @@
 <%= form_with(model: [:admin, @page], builder: FormBuilderWithInlineErrors) do | f | %>
+  <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
+
   <div class="two_column">
     <div class="field">
       <%= apphelp_label(f, :title) %>
@@ -118,9 +120,7 @@
   </div>
 
   <div class="actions">
-    <p>
-      <%= f.button 'Save a draft', name: 'submit' %>
-      <%= f.button 'Publish page', name: 'publish', value: true %>
-    </p>
+    <%= f.button 'Save draft', name: 'submit' %>
+    <%= f.button 'Publish page', name: 'publish', value: true %>
   </div>
 <% end %>

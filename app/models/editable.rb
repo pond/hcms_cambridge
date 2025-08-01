@@ -10,26 +10,42 @@ class Editable < ApplicationRecord
   # * If this record is generic, then we read from whatever is published by
   #   default, but if that's missing, go for a current draft. Read-only.
   #
-  # * If the record is using an overridden revision, read from that.
-  #
   # * If the record is intended for editing, we reverse read order; continue on
   #   a current draft, or fall back to reading from the current published copy.
   #   For writing, we write into the current unpublished draft or build a new
   #   one if need be.
+  #
+  # * If the record is using an overridden revision, read from that and either
+  #   write to that if it was already chosen for writing, else clone it into a
+  #   new draft (so we can edit a published page, go back in history, edit a
+  #   revision and edit *that* which becomes a newest current-draft instead of
+  #   accidentally overwriting the apparently-abandoned one).
   #
   after_initialize do
     @read_revision_for_delegation = self.published_revision || self.current_revision
     @write_revision_for_delegation = nil
   end
 
-  def use_revision!(revision)
-    @read_revision_for_delegation = revision
-    return self
-  end
-
   def for_edit!
     @read_revision_for_delegation = self.current_revision || self.published_revision || self.draft_revision
     @write_revision_for_delegation = self.draft_revision
+    return self
+  end
+
+  def use_revision!(revision)
+    @read_revision_for_delegation = revision
+
+    # If using a revision on top of a writeable item, we assume this is could
+    # be an edit of anything, including published, current or historic. In all
+    # cases we want to make this a new current draft.
+    #
+    if @write_revision_for_delegation.present? && @write_revision_for_delegation != revision
+      @write_revision_for_delegation = self.revisions.build(
+        self.attributes.slice(*Revision::REVISABLE_ATTRIBUTES)
+        .merge(current: true)
+      )
+    end
+
     return self
   end
 
@@ -80,13 +96,13 @@ class Editable < ApplicationRecord
   # prevailing revision ID in force.
   #
   def published_revision
-    @published_revision ||= self.revisions.load.find(&:published)
+    @published_revision ||= self.revisions.find(&:published)
   end
 
   # The current revision for reading in an edit form. Memoised.
   #
   def current_revision
-    @current_revision ||= self.revisions.load.find(&:current)
+    @current_revision ||= self.revisions.find(&:current)
   end
 
   # Returns a new Revision that represents a writeable draft. Memoised.
@@ -97,6 +113,13 @@ class Editable < ApplicationRecord
       revision = self.revisions.build(current: true) if revision.nil? || revision.published
       revision
     end
+  end
+
+  # Returns whatever Revision is being used for reading (for any purpose) via
+  # delegation.
+  #
+  def displayed_revision
+    @read_revision_for_delegation
   end
 
   # Uses the title to generate a slug, making sure it is unique.

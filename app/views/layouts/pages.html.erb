@@ -18,17 +18,17 @@
       <% content_for :signed_in_cms_menu do %>
         <% if @page.is_a?(Page) %>
           <% if @page.is_blog_type? %>
-            <%= link_to 'New article', new_admin_page_article_path( page_id: @page.id ) %> |
-            <%= link_to 'List articles', admin_page_articles_path( page_id: @page.id ) %> |
-            <%= link_to 'Edit this page', [ :edit, :admin, @page ] %> |
+            <%= link_to 'New article', new_admin_page_article_path(page_id: @page.id) %> |
+            <%= link_to 'List articles', admin_page_articles_path(page_id: @page.id) %> |
+            <%= pageshelp_edit_link_for(@page, params) %> |
           <% else %>
-            <%= link_to 'Edit', [ :edit, :admin, @page ] %> |
-            <%= link_to 'New page', new_admin_page_path %> |
+            <%= pageshelp_edit_link_for(@page, params) %> |
+            <%= link_to 'New page', new_admin_page_path() %> |
           <% end %>
         <% else %>
-          <%= link_to 'New page', new_admin_page_path %> |
+          <%= link_to 'New page', new_admin_page_path() %> |
         <% end %>
-        <%= link_to 'List pages', admin_pages_path %> |
+        <%= link_to 'List pages', admin_pages_path() %>
       <% end %>
 
       <%= render partial: 'layouts/content_footer', locals: { content: @page } %>

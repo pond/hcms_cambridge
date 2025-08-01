@@ -26,15 +26,28 @@
             if content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.parent.try(:id))
               nav_list_classes << 'current'
             end
+
+            top_level_page_title_to_show = if top_level_page == @page
+              @page.displayed_revision.title
+            else
+              top_level_page.title
+            end
           %>
 
           <%= tag.li(class: nav_list_classes) do %>
-            <%= link_to(top_level_page.title, page_path(top_level_page.slug), class: 'pure-menu-link') %>
-            <% if top_level_page.children.for_navigation.present? %>
+            <%= link_to(top_level_page_title_to_show, page_path(top_level_page.slug), class: 'pure-menu-link') %>
+            <% if top_level_page.children_for_navigation.any? %>
               <ul class="pure-menu-children">
-                <% top_level_page.children.for_navigation.each do | child_page | %>
+                <% top_level_page.children_for_navigation.each do | child_page | %>
+                  <%
+                    child_page_title_to_show = if child_page == @page
+                      @page.displayed_revision.title
+                    else
+                      child_page.title
+                    end
+                  %>
                   <li class="pure-menu-item">
-                    <%= link_to(child_page.title, page_path(child_page.slug), class: 'pure-menu-link') %>
+                    <%= link_to(child_page_title_to_show, page_path(child_page.slug), class: 'pure-menu-link') %>
                   </li>
                 <% end %>
               </ul>

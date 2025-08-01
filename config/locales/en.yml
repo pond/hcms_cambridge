@@ -106,3 +106,8 @@ en:
     required: "(required)"
     optional: "(optional)"
 
+  models:
+    revision:
+      published: "Published"
+      current: "Draft (%{time})"
+      unpublished: "Old (%{time})"

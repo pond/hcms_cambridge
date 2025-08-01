@@ -9,6 +9,7 @@ class Admin::PagesController < ApplicationController
   before_action :get_page,            only: [:show, :destroy]
   before_action :get_editable_page,   only: [:edit, :update]
   before_action :build_editable_page, only: [:new,  :create]
+  before_action :check_for_revision,  only: [:show, :edit, :update]
 
   public
 
@@ -19,10 +20,6 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/1
     def show
-      if params.key?(:revision)
-        @page.use_revision! @page.revisions.find(params[:revision])
-      end
-
       @form_model = @page&.form_class&.new
     end
 
@@ -51,6 +48,7 @@ class Admin::PagesController < ApplicationController
 
     # PATCH/PUT /admin/pages/1
     def update
+      debugger
       result = @page.persist!(self.page_params(), publish: params[:publish].present?)
 
       if result.successful
@@ -101,9 +99,16 @@ class Admin::PagesController < ApplicationController
       @page = Page.new.for_edit!
     end
 
+    def check_for_revision
+      if params.key?(:revision)
+        revision = @page.revisions.find(params[:revision])
+        @page.use_revision!(revision)
+      end
+    end
+
     def page_params
       params
-        .require( :page )
+        .require(:page)
         .permit(
           :title,
           :slug,

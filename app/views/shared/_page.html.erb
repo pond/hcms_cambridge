@@ -5,6 +5,8 @@
   #
   #   render partial: 'shared/page', locals: { page: @page }
 %>
+<%= render partial: 'shared/editable_revisions', locals: { editable: page, form_path: admin_page_path(page) } %>
+
 <% if page.is_blog_type? %>
 
   <% if page.articles.for_navigation.any? %>

@@ -5,6 +5,8 @@
   #
   #   render partial: 'shared/article', locals: { article: @article }
 %>
+<%= render partial: 'shared/editable_revisions', locals: { editable: article, form_path: admin_page_article_path(article.page, article) } %>
+
 <article class="article">
   <section class='blog-header'>
     <div class="article-date-and-heading-container">

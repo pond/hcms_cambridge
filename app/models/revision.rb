@@ -65,4 +65,16 @@ class Revision < ApplicationRecord
   def current_draft?
     current? && ! published?
   end
+
+  # Human-friendly name intended for use when showing a Revision list / menu.
+  #
+  def display_name
+    if self.published
+      I18n.t('models.revision.published')
+    elsif self.current
+      I18n.t('models.revision.current', time: self.updated_at.to_fs(:short))
+    else
+      I18n.t('models.revision.unpublished', time: self.updated_at.to_fs(:short))
+    end
+  end
 end
