@@ -10,7 +10,6 @@ Rails.application.configure do
 
   # Eager load code on boot, to match Production.
   config.eager_load = true
-  config.autoload_lib(ignore: %w(assets tasks))
 
   # Show full error reports.
   config.consider_all_requests_local = true

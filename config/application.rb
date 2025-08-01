@@ -29,5 +29,7 @@ module Hcms
     #
     Rails.application.config.uk_org_pond_hcms = OpenStruct.new( YAML.load_file( Rails.root.join( 'config' ).join( 'config.yml' ) ) )
 
+    config.autoload_lib(ignore: %w(assets tasks))
+
   end
 end
