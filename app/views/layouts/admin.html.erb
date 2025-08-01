@@ -16,7 +16,7 @@
   <body>
     <header>
       <section class="header_content">
-        <img id="logo" alt="Logo" src="<%= image_path( 'logo' )%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
+        <img id="logo" alt="Logo" src="<%= image_path('logo.svg')%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
 
         <nav class="main_menu">
           <h1>Site administration</h1>
@@ -34,7 +34,7 @@
     <footer class="admin">
       <section class="footer_content">
         <% if user_signed_in? %>
-          <%= link_to('Log out', destroy_admin_user_session_path, method: :delete ) %>|
+          <%= link_to('Log out', destroy_admin_user_session_path, method: :delete) %>|
         <% end %>
         <%= link_to('Public site', root_path) %>
       </section>
