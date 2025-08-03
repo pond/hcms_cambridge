@@ -7,8 +7,10 @@
   </div>
 
   <div class="field">
-    <% hint = @minimum_password_length ? "#{@minimum_password_length} characters minimum" : nil %>
-    <%= apphelp_label(f, :password, hint: hint) %>
+    <%= apphelp_label(f, :password) %>
+    <% if @minimum_password_length %>
+      <em>(<%= @minimum_password_length %> characters minimum)</em><br>
+    <% end %>
     <%= f.password_field :password, autocomplete: "off" %>
   </div>
 

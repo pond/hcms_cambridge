@@ -35,10 +35,14 @@ module ApplicationHelper
   # errors including those longer strings.
   #
   # Falls back to standard I18n human attribute names if no label-specific form
-  # is found. Label text can be fully overridden with the "text" option.
+  # is found. Label text can be fully overridden with the "text" option. Hint
+  # text can be appended after everything else, via the "hint" option.
   #
-  # Options - :required/:optional => true to decorate label appropriately.
-  #           :text => "..." to override the label text.
+  # Options:
+  #
+  # * required:/optional: true to decorate label appropriately.
+  # * text: String to override the label text.
+  # * hint: String of hint text to append (after required/optional, if used).
   #
   def apphelp_label(form, attribute, options = {})
     model     = form.object
@@ -53,6 +57,10 @@ module ApplicationHelper
 
     if options[:optional]
       contents.concat(tag.span(t('misc.optional'), class: 'form_field_label_optional'))
+    end
+
+    if options[:hint].present?
+      contents.concat(tag.span(options[:hint], class: 'form_field_label_hint'))
     end
 
     form.label(attribute) { contents }

@@ -24,6 +24,9 @@ module Hcms
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
+    # Preserve the full timezone rather than offset of the receiver.
+    config.active_support.to_time_preserves_timezone = :zone
+
     # Load this here so it's available for config/environments/* - if we did this
     # instead in a config/initializers/* file, it wouldn't be executed in time.
     #

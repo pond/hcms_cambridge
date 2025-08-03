@@ -72,4 +72,47 @@ end
 group :development, :test do
   gem 'debug'
   gem 'awesome_print'
+
+  # Testing framework. Put here to avoid need for RAILS_ENV=test prefix on some
+  # generators and tasks.
+  #
+  #   https://rubygems.org/gems/rspec-rails
+  #
+  gem 'rspec-rails', '~> 8.0'
+  gem 'doggo',       '~> 1.4'
+
+  # Generate sort-of-realistic test data easily.
+  #
+  #   https://rubygems.org/gems/faker
+  #
+  gem 'faker', '~> 3.5'
+end
+
+group :test do
+
+  # Adds support for Capybara-driven system tests, with screenshots.
+  #
+  #   https://rubygems.org/gems/capybara
+  #   https://rubygems.org/gems/capybara-screenshot
+  #
+  gem 'capybara',            '~> 3.40'
+  gem 'capybara-screenshot', '~> 1.0'
+
+  # Headless Chrome driver for Capybara.
+  #
+  #   https://rubygems.org/gems/cuprite
+  #
+  gem 'cuprite', '~> 0.17'
+
+  # Fixture replacement.
+  #
+  #   https://rubygems.org/gems/factory_bot_rails
+  #
+  gem 'factory_bot_rails', '~> 6.5'
+
+  # Code coverage reporting.
+  #
+  #   https://rubygems.org/gems/simplecov
+  #
+  gem 'simplecov', '~> 0.22', require: false
 end

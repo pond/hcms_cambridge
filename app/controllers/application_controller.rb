@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   public
 
     # Prevent CSRF attacks by raising an exception.
-    protect_from_forgery :with => :exception
+    protect_from_forgery with: :exception
 
     # The Rails Redactor integration assumes Devise is in a default
     # route location, but it isn't; so we need some aliases.

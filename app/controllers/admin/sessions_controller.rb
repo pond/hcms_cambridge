@@ -9,7 +9,7 @@ class Admin::SessionsController < ::Devise::SessionsController
   # reduce the throughput possible for brute force attacks on the page.
   #
   def create
-    sleep(5)
+    sleep(4.5 + rand()) unless Rails.env.test?
     super
   end
 end

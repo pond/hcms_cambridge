@@ -9,14 +9,15 @@ class PagesController < ApplicationController
       if Page.none?
         redirect_to admin_pages_path() and return
       else
-        page_id = Page.home.id
+        page_id = Page.home.id.to_s
       end
     end
 
     if user_signed_in?
       redirect_to admin_page_path(id: page_id) and return
     else
-      @page = Page.find_by_id_or_slug!(page_id)
+      @page       = Page.find_by_id_or_slug!(page_id)
+      @form_model = @page.form_class&.new
     end
   end
 end

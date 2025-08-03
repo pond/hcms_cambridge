@@ -147,11 +147,19 @@ button[name="submit"] + button[name="publish"] {
   padding-left: 0.5em;
 }
 
-.form_field_label_optional {
+.form_field_label_optional, .form_field_label_hint {
   font-size: smaller;
   font-weight: normal;
   font-style: italic;
   padding-left: 0.5em;
+}
+
+.form_field_label_hint:before {
+  content: "(";
+}
+
+.form_field_label_hint:after {
+  content: ")";
 }
 
 header,

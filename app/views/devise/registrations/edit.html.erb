@@ -1,10 +1,8 @@
 <h2>Edit <%= resource_name.to_s.humanize %></h2>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= devise_error_messages! %>
-
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), builder: FormBuilderWithInlineErrors, html: { method: :put }) do |f| %>
   <div class="field">
-    <%= f.label :email %>
+    <%= apphelp_label(f, :email) %>
     <%= f.email_field :email, autofocus: true %>
   </div>
 
@@ -13,17 +11,17 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :password %> <i>(leave blank if you don't want to change it)</i>
+    <%= apphelp_label(f, :password, hint: "leave blank if you don't want to change it") %>
     <%= f.password_field :password, autocomplete: "off" %>
   </div>
 
   <div class="field">
-    <%= f.label :password_confirmation %>
+    <%= apphelp_label(f, :password_confirmation) %>
     <%= f.password_field :password_confirmation, autocomplete: "off" %>
   </div>
 
   <div class="field">
-    <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i>
+    <%= apphelp_label(f, :current_password, hint: "we need your current password to confirm your changes") %>
     <%= f.password_field :current_password, autocomplete: "off" %>
   </div>
 

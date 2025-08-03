@@ -48,6 +48,7 @@ class Admin::PagesController < ApplicationController
 
     # PATCH/PUT /admin/pages/1
     def update
+      debugger
       result = @page.persist!(self.page_params(), publish: params[:publish].present?)
 
       if result.successful
