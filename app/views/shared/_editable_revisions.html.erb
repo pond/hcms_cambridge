@@ -40,6 +40,8 @@
           )
         %>
       <% end %>
+    <% else %>
+      <%= editable.revisions.first.display_name %>
     <% end %>
 
     <% if newer_revisions.any? %>

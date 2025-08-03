@@ -1,8 +1,13 @@
 # A polymorphic relation attached to any Editable (e.g. Page, Article) which
 # defines a revision of the contents of that Editable thing.
 #
-# If using this model, use a "has_many" association with a name of "revisions".
+# If using this model, use a "has_many" association with a name of "revisions",
+# usually with autosave and dependent-destroy thus:
 #
+#   has_many :revisions, as: :revisable, autosave: true, dependent: :destroy
+#
+# Note that:
+
 # * In any collection owned by the Editable, only one item can ever be
 #   published (visible on the public-facing site). Otherwise, items are
 #   unpublished (historic or future). We thus support arbitrary rollback to any

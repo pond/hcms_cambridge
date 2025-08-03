@@ -2,6 +2,8 @@
 // Variables: If you change anything, restart the server for it to take effect
 //////////////////////////////////////////////////////////////////////////////
 
+// Dimensions
+
 $container_width: 1400px;
 $content_width: 1400px;
 
@@ -16,7 +18,24 @@ $content_width_narrow: $content_width / 2;
 //
 $content_width_mobile: 95vw;
 
-$nav_base_colour: #332d18;
-$nav_visited_colour: #534d38;
-$head_foot_background_colour: rgba(235, 234, 224, .5);
+// Font metrics
+
+$primary_font_family: "Noto Serif", serif;
+$primary_font_weight: normal;
+$secondary_font_family: "Akshar", sans-serif;
+$secondary_font_weight: 300;
+
+$base_font_size: 18px;
+$base_paragraph_line_height: 30px;
+$h1_font_weight: 700;
+
+// Colours
+
+$base_background: white;
+$base_colour: black;
+$h1_and_figure_colour: #525252;
+$nav_link_base_colour: #332d18;
+$nav_link_visited_colour: #534d38;
+
+$head_foot_background: rgba(235, 234, 224, .5);
 $head_foot_border_colour: #cbc9ae;
