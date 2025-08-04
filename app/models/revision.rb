@@ -58,7 +58,7 @@ class Revision < ApplicationRecord
       .where.not(id: self.id)
       .update_all(current: false, updated_at: self.updated_at)
 
-    if self.published?
+    if self.published
       self.revisable.revisions.published
         .where.not(id: self.id)
         .update_all(published: false, updated_at: self.updated_at)
@@ -68,7 +68,7 @@ class Revision < ApplicationRecord
   # Is this revision 'current' but not 'published'?
   #
   def current_draft?
-    current? && ! published?
+    self.current && ! self.published
   end
 
   # Human-friendly name intended for use when showing a Revision list / menu.

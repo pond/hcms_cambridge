@@ -13,13 +13,7 @@ class Page < Editable
     .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
   }
 
-  before_validation do
-    generate_unique_slug() if self.slug.blank? # see ApplicationRecord
-  end
-
-  validates_presence_of :title
   validates_presence_of :body, unless: :is_blog_type?
-  validates_uniqueness_of :slug
 
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BLOG         = 'blog'

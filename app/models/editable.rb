@@ -5,6 +5,13 @@ class Editable < ApplicationRecord
 
   has_many :revisions, as: :revisable, autosave: true, dependent: :destroy
 
+  before_validation do
+    generate_unique_slug() if self.slug.blank? # see ApplicationRecord
+  end
+
+  validates_presence_of :title
+  validates_uniqueness_of :slug
+
   # Delegation:
   #
   # * If this record is generic, then we read from whatever is published by

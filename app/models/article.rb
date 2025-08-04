@@ -11,12 +11,7 @@ class Article < Editable
     where(id: Revision.published.where(revisable_type: 'Article').select(:revisable_id))
   }
 
-  before_validation do
-    generate_unique_slug() if self.slug.blank? # see ApplicationRecord
-  end
-
-  validates_presence_of :title, :slug, :article_hero_image, :summary, :body
-  validates_uniqueness_of :slug
+  validates_presence_of :article_hero_image, :summary, :body
 
   def is_article?
     true
