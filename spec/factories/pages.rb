@@ -15,10 +15,6 @@ FactoryBot.define do
       navigation_title { Faker::Lorem.sentence.chomp(".") }
     end
 
-    trait :child do
-      association :parent
-    end
-
     trait :contact_form do
       page_type { Page::PAGE_TYPE_CONTACT_FORM }
     end
@@ -28,7 +24,7 @@ FactoryBot.define do
     end
 
     trait :blog do
-      page_type { Page::PAGE_TYPE_BOOKING_BLOG }
+      page_type { Page::PAGE_TYPE_BLOG }
     end
 
     trait :with_menu do

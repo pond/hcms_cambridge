@@ -9,7 +9,7 @@ FactoryBot.define do
       end
     end
 
-    trait :for_blog_article do
+    trait :for_article do
       summary { Faker::Lorem.paragraph }
     end
   end

@@ -50,6 +50,12 @@
   <% end %>
   <%= f.error_markup_for(:body) %>
 
+  <p style="color: #800">
+    <strong>Note:</strong> Only the page title, summary text and body text
+    (where relevant) save into drafts; changes to the thumbnail image are
+    always saved and "published" immediately.
+  </p>
+
   <div class="actions">
     <%= f.button 'Save draft', name: 'submit' %>
     <%= f.button 'Publish article', name: 'publish', value: true %>

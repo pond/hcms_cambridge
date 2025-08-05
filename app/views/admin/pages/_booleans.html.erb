@@ -1,7 +1,7 @@
 <%
   any_published    = page.revisions.any?(&:published?)
   active_draft     = page.current_revision.present? && ! page.current_revision.published
-  in_navigation    = page.appears_in_navigation?
+  in_navigation    = page.for_navigation?
 
   published_markup = apphelp_boolean(any_published, no_class: 'boolean_no_highlight')
   draft_markup     = apphelp_boolean(active_draft, no_class: nil, yes_class: 'boolean_yes_highlight')

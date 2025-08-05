@@ -33,7 +33,7 @@
   <div class="two_column">
     <div class="field">
       <%= apphelp_label(f, :page_type) %>
-      <%= f.collection_select :page_type, ::Page::PAGE_TYPES, :internal_type, :human_text %>
+      <%= f.collection_select :page_type, ::PageType.types, :internal_name, :human_name %>
       <br>
       <small><em>
         You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
@@ -41,14 +41,18 @@
     </div>
 
     <div>
-      <% if Page.top_level.count > 0 %>
+      <% if Page.top_level.any? %>
         <div class="field">
           <%= apphelp_label(f, :page_id) %>
-          <%= f.collection_select :page_id,
-                                  Page.top_level_except( @page ),
-                                  :id,
-                                  :title,
-                                  :include_blank => 'Do not put into a menu' %>
+          <%=
+            f.collection_select(
+              :page_id,
+              Page.top_level_except(@page.id),
+              :id,
+              :title,
+              include_blank: 'Do not put into a menu'
+            )
+          %>
         </div>
       <% end %>
 
@@ -82,7 +86,7 @@
 
         <div class="field">
           <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
-          <%= f.text_area :form_selection_list_contents, :rows => 6, :cols => 40 %>
+          <%= f.text_area :form_selection_list_contents, rows: 6, cols: 40 %>
         </div>
       </div>
 
@@ -118,6 +122,13 @@
     <% end %>
     <%= f.error_markup_for(:body) %>
   </div>
+
+  <p style="color: #800">
+    <strong>Note:</strong> Only the page title, navigation title and body text
+    (where relevant) save into drafts. Other "metadata" like the position in the
+    menus, the "kind" of the page, hidden state and even the selection menu setup
+    for form pages will always save and be "published" immediately.
+  </p>
 
   <div class="actions">
     <%= f.button 'Save draft', name: 'submit' %>

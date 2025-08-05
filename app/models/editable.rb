@@ -213,7 +213,7 @@ class Editable < ApplicationRecord
     false
   end
 
-  def appears_in_navigation?
+  def for_navigation?
     false
   end
 end

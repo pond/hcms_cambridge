@@ -10,16 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_31_043258) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_05_043111) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "articles", force: :cascade do |t|
-    t.text "title", null: false
+    t.text "title"
     t.text "slug", null: false
     t.text "article_hero_image", null: false
-    t.text "summary", null: false
-    t.text "body", null: false
+    t.text "summary"
+    t.text "body"
     t.boolean "raw_editor", default: false, null: false
     t.bigint "page_id"
     t.datetime "created_at", precision: nil, null: false
@@ -29,8 +29,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_31_043258) do
   end
 
   create_table "pages", id: :serial, force: :cascade do |t|
-    t.text "title", default: "", null: false
-    t.text "body", default: "", null: false
+    t.text "title", default: ""
+    t.text "body", default: ""
     t.integer "page_id"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false

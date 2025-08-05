@@ -31,9 +31,6 @@ en:
       forms/booking: "Booking enquiry"
 
     attributes:
-      labels:
-        notes: "hello"
-
       forms/base:
         # Short forms for e.g. validation errors
         name: "Name"
@@ -107,6 +104,12 @@ en:
     optional: "(optional)"
 
   models:
+    page_type:
+      normal: "Normal"
+      contact_form: "Contact form"
+      booking_form: "Booking form"
+      blog: "Blog container"
+
     revision:
       published: "Published"
       current: "Draft (%{time})"

@@ -17,7 +17,7 @@ class Article < Editable
     true
   end
 
-  def appears_in_navigation?
-    self.revisions.any?(:published)
+  def for_navigation?
+    self.published_revision.present?
   end
 end
