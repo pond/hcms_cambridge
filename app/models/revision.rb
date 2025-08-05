@@ -74,12 +74,14 @@ class Revision < ApplicationRecord
   # Human-friendly name intended for use when showing a Revision list / menu.
   #
   def display_name
+    updated_at_in_configured_time_zone = TimeZoneHelp.in_configured_time_zone(self.updated_at || Time.now)
+
     if self.published
       I18n.t('models.revision.published')
     elsif self.current
-      I18n.t('models.revision.current', time: self.updated_at.to_fs(:short))
+      I18n.t('models.revision.current', time: updated_at_in_configured_time_zone)
     else
-      I18n.t('models.revision.unpublished', time: self.updated_at.to_fs(:short))
+      I18n.t('models.revision.unpublished', time: updated_at_in_configured_time_zone)
     end
   end
 end

@@ -10,12 +10,7 @@ module ApplicationHelper
   end
 
   def apphelp_human_time(datetime)
-    time_zone    = Rails.application.config.uk_org_pond_hcms.time_zone || 'London'
-    current_year = Time.now.in_time_zone(time_zone).year
-    local_time   = datetime.in_time_zone(time_zone)
-    formatter    = current_year == local_time.year ? :short_no_year : :short
-
-    l(local_time, format: formatter)
+    TimeZoneHelp.in_configured_time_zone(datetime)
   end
 
   # Render a boolean-like thing as 'yes/no' text in a span that can include a
