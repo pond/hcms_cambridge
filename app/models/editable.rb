@@ -12,56 +12,92 @@ class Editable < ApplicationRecord
   validates_presence_of :title
   validates_uniqueness_of :slug
 
-  # Delegation:
+  # ============================================================================
+  # DELEGATION
+  # ============================================================================
   #
-  # * If this record is generic, then we read from whatever is published by
-  #   default, but if that's missing, go for a current draft. Read-only.
+  # Various methods to read or write "revisable" attributes are delegated down
+  # to Revision instances.
   #
-  # * If the record is intended for editing, we reverse read order; continue on
-  #   a current draft, or fall back to reading from the current published copy.
-  #   For writing, we write into the current unpublished draft or build a new
-  #   one if need be.
+  # * By default, an Editable record is set up for reading:
   #
-  # * If the record is using an overridden revision, read from that and either
-  #   write to that if it was already chosen for writing, else clone it into a
-  #   new draft (so we can edit a published page, go back in history, edit a
-  #   revision and edit *that* which becomes a newest current-draft instead of
-  #   accidentally overwriting the apparently-abandoned one).
+  #   - Attribute reads use a published revision in favour of an unpublished
+  #     current revision.
   #
-  after_initialize do
-    @read_revision_for_delegation = self.published_revision || self.current_revision
-    @write_revision_for_delegation = nil
-  end
-
-  def for_edit!
-    @read_revision_for_delegation = self.current_revision || self.published_revision || self.draft_revision
-    @write_revision_for_delegation = self.draft_revision
-    return self
-  end
-
-  def use_revision!(revision)
-    @read_revision_for_delegation = revision
-
-    # If using a revision on top of a writeable item, we assume this is could
-    # be an edit of anything, including published, current or historic. In all
-    # cases we want to make this a new current draft.
-    #
-    if @write_revision_for_delegation.present? && @write_revision_for_delegation != revision
-      @write_revision_for_delegation = self.revisions.build(
-        self.attributes.slice(*Revision::REVISABLE_ATTRIBUTES)
-        .merge(current: true)
-      )
+  #   - Attempts to write delegated attributes will result in an error.
+  #
+  # * If #for_edit! is invoked just after the Editable is instantiated, then
+  #   the record sets itself up for an editing context.
+  #
+  #   - Attribute reads use the current unpublished revision if there is one,
+  #     else a published record, else for brand new records, a blank draft.
+  #
+  #   - Writes go to that current unpublished revision or the blank draft.
+  #
+  # * If #use_revision! is invoked then reads come from a specific given
+  #   Revision, with an intent-to-edit assumption. Calling #for_edit! after
+  #   #use_revision! is harmless but unnecessary.
+  #
+  #   - Attribute reads use the given revision.
+  #
+  #   - Writes will use the given revision if it is an unpublished, current
+  #     draft; those usually only appear at the "end of the chain" and it makes
+  #     sense to just continue editing that one. For all other cases, writes
+  #     go to a new, unsaved, unpublished current draft.
+  #
+  def read_revision_for_delegation
+    if @use_revision.present? # See #use_revision!
+      @use_revision
+    elsif @for_edit == true # See #for_edit!
+      self.current_revision || self.published_revision || self.draft_revision
+    else
+      self.published_revision || self.current_revision
     end
+  end
 
-    return self
+  def write_revision_for_delegation
+    if @use_revision.present?
+      if self.draft_revision != @use_revision # (self.draft_revision memoises into @draft_revision)
+        self.revisions.each { | revision | revision.current = false }
+        @draft_revision = self.revisions.build(
+          self
+            .attributes
+            .slice(*Revision::REVISABLE_ATTRIBUTES)
+            .merge(current: true)
+        )
+      end
+      @draft_revision
+    elsif @for_edit == true
+      self.draft_revision
+    else
+      nil
+    end
   end
 
   Revision::REVISABLE_ATTRIBUTES.each do | revisable_attribute |
-    delegate revisable_attribute, to: :@read_revision_for_delegation
-    delegate "#{revisable_attribute}=", to: :@write_revision_for_delegation
+    delegate revisable_attribute, to: :read_revision_for_delegation
+    delegate "#{revisable_attribute}=", to: :write_revision_for_delegation
   end
 
-  delegate :published=, to: :@write_revision_for_delegation
+  delegate :published=, to: :write_revision_for_delegation
+
+  # See #read_revision_for_delegation documentation for details.
+  #
+  # Returns 'self' for convenience.
+  #
+  def for_edit!
+    @for_edit = true
+    return self
+  end
+
+  # See #read_revision_for_delegation documentation for details.
+  #
+  # Returns 'self' for convenience.
+  #
+  def use_revision!(revision)
+    @use_revision = revision
+    return self
+  end
 
   # ===========================================================================
   # LIFECYCLE
@@ -123,10 +159,10 @@ class Editable < ApplicationRecord
   end
 
   # Returns whatever Revision is being used for reading (for any purpose) via
-  # delegation.
+  # delegation. Memoised.
   #
   def displayed_revision
-    @read_revision_for_delegation
+    @displayed_revision ||= self.read_revision_for_delegation
   end
 
   # Uses the title to generate a slug, making sure it is unique.
@@ -144,13 +180,13 @@ class Editable < ApplicationRecord
     self.slug = slug_base + suffix
   end
 
-  # Find an instance by ID or slug.
+  # Find an instance by ID (expressed as an Integer or String) or slug.
   #
-  def self.find_by_id_or_slug!( thing )
-    if IS_INTEGER.match?( thing )
-      self.find( thing )
+  def self.find_by_id_or_slug!(thing)
+    if thing.is_a?(Integer) || IS_INTEGER.match?(thing.to_s)
+      self.find(thing)
     else
-      self.find_by_slug!( thing )
+      self.find_by_slug!(thing)
     end
   end
 
