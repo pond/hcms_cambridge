@@ -57,6 +57,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_043111) do
     t.integer "height"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
+    t.string "custom_file_name"
     t.index ["assetable_type", "assetable_id"], name: "idx_redactor_assetable"
     t.index ["assetable_type", "type", "assetable_id"], name: "idx_redactor_assetable_type"
   end

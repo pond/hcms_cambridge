@@ -53,8 +53,9 @@ $(document).on('ready page:load', function() {
         'table',
         'image',
         'video',
+        'file',
         'widget',
-        'properties',
+        // 'properties',
         'line',
         'spacer',
 

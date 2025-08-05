@@ -16,6 +16,18 @@ div.redactor-container {
   padding: 3px 3px 0 3px;
   border-radius: 3px;
   margin-bottom: 5px;
+
+  .redactor-toolbar-external {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    a.re-button {
+      margin: 0 !important;
+      text-decoration: none;
+    }
+  }
 }
 
 .redactor_container {

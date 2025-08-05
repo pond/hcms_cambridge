@@ -7,11 +7,11 @@
 $container_width: 1400px;
 $content_width: 1400px;
 
-$container_width_mid: $container_width / 1.5;
-$content_width_mid: $content_width / 1.5;
+$container_width_mid: 980px;
+$content_width_mid: 980px;
 
-$container_width_narrow: $container_width / 2;
-$content_width_narrow: $content_width / 2;
+$container_width_narrow: 700px;
+$content_width_narrow: 700px;
 
 // For mobile, container is always viewport width and content MUST be expressed
 // in "vw".

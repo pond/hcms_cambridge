@@ -35,7 +35,7 @@
           %>
 
           <%= tag.li(class: nav_list_classes) do %>
-            <%= link_to(top_level_page_title_to_show, page_path(top_level_page.slug), class: 'pure-menu-link') %>
+            <%= link_to(top_level_page_title_to_show, page_path(id: top_level_page.slug), class: 'pure-menu-link') %>
             <% if top_level_page.children_for_navigation.any? %>
               <ul class="pure-menu-children">
                 <% top_level_page.children_for_navigation.each do | child_page | %>
@@ -47,7 +47,7 @@
                     end
                   %>
                   <li class="pure-menu-item">
-                    <%= link_to(child_page_title_to_show, page_path(child_page.slug), class: 'pure-menu-link') %>
+                    <%= link_to(child_page_title_to_show, page_path(id: child_page.slug), class: 'pure-menu-link') %>
                   </li>
                 <% end %>
               </ul>

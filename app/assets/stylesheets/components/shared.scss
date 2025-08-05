@@ -578,8 +578,6 @@ nav {
   }
 
   main, .redactor-box.redactor-styles-on {
-    background-size: $container_width_mid 100%;
-
     iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
       @include widescreen_video_block_mid;
     }
