@@ -90,13 +90,28 @@ main.admin {
       padding-right: 5px;
     }
 
-    tr:not(:first-child), tbody > tr:first-child {
+    td:first-child, th:first-child {
+      padding-left: 10px;
+    }
+
+    td:last-child, th:last-child {
+      padding-right: 10px;
+    }
+
+    tbody > tr {
       border-top: 1px solid #888;
     }
 
-    tr.odd          { background:         rgba( 255, 255, 255, 0.7 ); }
-    tr.children     { background: darken( rgba( 210, 255, 210, 0.8 ), 10% ); font-style: italic; }
-    tr.children.odd { background:         rgba( 210, 255, 210, 0.7 ); }
+    tbody > tr:last-child {
+      border-bottom: 1px solid #888;
+    }
+
+    tr { height: 50px; }
+
+    tr.even          { background: rgb( 255, 255, 255 ); }
+    tr.odd           { background: rgb( 250, 250, 250 ); }
+    tr.children.even { background: rgb( 210, 255, 210 ); font-style: italic; }
+    tr.children.odd  { background: rgb( 210, 245, 210 ); }
   }
 
   span.boolean_no {
