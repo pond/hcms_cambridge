@@ -25,3 +25,35 @@ input[type='submit'] {
 input[type='submit']:hover {
   background: #ddd;
 }
+
+section.main_content table {
+  border-collapse: collapse;
+
+  tbody {
+    tr { border-top: 1px solid #888; }
+  }
+
+  td:not(:first-child) {
+    border-left: 1px solid #ccc;
+  }
+
+  tbody tr:nth-child(odd) {
+    background: #f8f8f8;
+  }
+
+  thead th {
+    text-align: left; // (Redactor's editor styles assume this)
+  }
+
+  th, td {
+    padding: 3px 5px !important;
+  }
+
+  td:first-child, th:first-child {
+    padding-left: 10px;
+  }
+
+  td:last-child, th:last-child {
+    padding-right: 10px;
+  }
+}
