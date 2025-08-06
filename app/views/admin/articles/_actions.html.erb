@@ -5,6 +5,10 @@
   #     article: Article model instance
   #   }
 %>
-<td><%= link_to 'Show',   [       :admin, article.page, article] %></td>
-<td><%= link_to 'Edit',   [:edit, :admin, article.page, article] %></td>
-<td><%= link_to 'Delete', [       :admin, article.page, article], method: :delete, data: { confirm: apphelp_destroy_confirm(article) } %></td>
+<td style="padding-right: 1em">
+  <%= link_to 'Show',   [       :admin, article.page, article] %>
+  <%= link_to 'Edit',   [:edit, :admin, article.page, article] %>
+</td>
+<td>
+  <%= link_to 'Delete', [       :admin, article.page, article], method: :delete, data: { confirm: apphelp_destroy_confirm(article) } %>
+</td>

@@ -23,6 +23,13 @@
     <% end %>
   <% end %>
 </td>
-<td><%= link_to 'Show',   [       :admin, page] %></td>
-<td><%= link_to 'Edit',   [:edit, :admin, page] %></td>
-<td><%= link_to 'Delete', [       :admin, page], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %></td>
+<td style="padding-right: 1em">
+  <%= link_to 'Show',   [       :admin, page] %>
+  <%= link_to 'Edit',   [:edit, :admin, page] %>
+  <% if page.is_blog_type? %>
+    <%= link_to 'Articles', [:admin, page, :articles] %>
+  <% end %>
+</td>
+<td>
+  <%= link_to 'Delete', [:admin, page], method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %>
+</td>

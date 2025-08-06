@@ -925,4 +925,15 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List pages",     href: admin_pages_path())
     end
   end
+
+  xcontext "lists" do
+    xcontext "display" do
+    end # 'context "display" do'
+
+    xcontext "actions" do
+    end # 'context "actions" do'
+
+    xcontext "ordering" do
+    end # 'context "ordering" do'
+  end # 'context "lists" do'"
 end
