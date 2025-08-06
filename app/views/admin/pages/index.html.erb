@@ -4,11 +4,11 @@
   <thead>
     <tr>
       <th>Title</th>
-      <th class="centre" colspan="2">Move</th>
-      <th class="centre" colspan="3">Actions</th>
       <th class="centre">Published?</th>
       <th class="centre">Has draft?</th>
-      <th class="centre">In navigation bar?</th>
+      <th class="centre">Show in menu?</th>
+      <th class="centre" colspan="2">Move</th>
+      <th class="centre" colspan="3">Actions</th>
     </tr>
   </thead>
 
@@ -17,16 +17,16 @@
 
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= page.title %></td>
-        <%= render partial: 'actions', locals: { page: page } %>
         <%= render partial: 'booleans', locals: { page: page } %>
+        <%= render partial: 'actions', locals: { page: page } %>
       </tr>
 
       <% page.children.each do | child_page | %>
 
         <tr class="children <%= cycle( 'even', 'odd' ) %>">
           <td>&mdash; <%= child_page.title %></td>
-          <%= render partial: 'actions', locals: { page: child_page } %>
           <%= render partial: 'booleans', locals: { page: child_page } %>
+          <%= render partial: 'actions', locals: { page: child_page } %>
         </tr>
 
       <% end %>

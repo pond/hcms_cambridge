@@ -4,6 +4,8 @@
   <thead>
     <tr>
       <th>Title</th>
+      <th class="centre">Published?</th>
+      <th class="centre">Has draft?</th>
       <th class="centre" colspan="3">Actions</th>
     </tr>
   </thead>
@@ -12,7 +14,8 @@
 <% @articles.each do | article | %>
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= article.title %></td>
-        <%= render :partial => 'actions', :locals => { :article => article } %>
+        <%= render partial: 'booleans', locals: { article: article } %>
+        <%= render partial: 'actions', locals: { article: article } %>
       </tr>
 <% end %>
   </tbody>
@@ -21,4 +24,5 @@
 <br>
 
 <%= link_to 'New blog article', new_admin_page_article_path() %> |
-<%= link_to 'Visit blog page', [ :admin, @page ] %>
+<%= link_to 'Visit blog page', [ :admin, @page ] %> |
+<%= link_to 'List pages', admin_pages_path() %>

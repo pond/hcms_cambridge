@@ -1,13 +1,10 @@
 <%
   # Render with:
   #
-  #   render :partial => 'actions', :locals => {
-  #     :article => Article model instance
+  #   render partial: 'actions', locals: {
+  #     article: Article model instance
   #   }
-  #
-  page_id = article.page.id
 %>
-
-<td><%= link_to 'Show',      admin_page_article_path(page_id: page_id, id: article.id) %></td>
-<td><%= link_to 'Edit', edit_admin_page_article_path(page_id: page_id, id: article.id) %></td>
-<td><%= link_to 'Delete',    admin_page_article_path(page_id: page_id, id: article.id), method: :delete, data: { confirm: apphelp_destroy_confirm(article) } %></td>
+<td><%= link_to 'Show',   [       :admin, article.page, article] %></td>
+<td><%= link_to 'Edit',   [:edit, :admin, article.page, article] %></td>
+<td><%= link_to 'Delete', [       :admin, article.page, article], method: :delete, data: { confirm: apphelp_destroy_confirm(article) } %></td>
