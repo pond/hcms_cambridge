@@ -59,11 +59,11 @@
     <% if page.is_booking_form? %>
       <p>
         <%= apphelp_label(f, :date) %>
-        <%= date_field_tag :date, '', :placeholder => (Date.today + 2.days).strftime('%-d %b %Y'), :min => Date.today + 2.days %>
+        <%= f.date_field :date, placeholder: (Date.current + 2.days).strftime('%-d %b %Y'), min: Date.current + 2.days %>
       </p>
       <p>
         <%= apphelp_label(f, :time) %>
-        <%= time_field_tag :time, '', :placeholder => '10:00', :min => Time.parse('10:00'), :step => 60.minutes %>
+        <%= f.time_field :time, min: '10:00', max: '19:00', step: 60.minutes %>
       </p>
     <% end %>
     <% unless page.form_selection_list_contents.strip.blank? %>
@@ -92,7 +92,7 @@
 
     <p>
       <% if page.is_booking_form? %>
-        <%= submit_tag 'Send booking enquiry' %>
+        <%= submit_tag 'Send enquiry' %>
       <% else %>
         <%= submit_tag 'Send message' %>
       <% end %>

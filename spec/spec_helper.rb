@@ -136,7 +136,16 @@ def spechelp_use_chrome
     },
   )
 
-  helper_logout_via_cookie_clearing()
+  spechelp_log_out_via_cookie_clearing()
+end
+
+# Verify that there's a particular message of a given type in the flash.
+#
+# +type+::    Type of flash, e.g. :notice, :alert
+# +message+:: Message expected to be present - uses substring match
+#
+def spechelp_check_flash(type, message)
+  expect(page).to have_css("section.messages p.#{type}", text: message)
 end
 
 # Like Capybara "select(something, from: "identifier"), but where "something" is
@@ -156,6 +165,28 @@ def spechelp_unselect(value, from:)
   find(:css, "select[id='#{ from }'] option[value='#{ value }']").unselect_option()
 end
 
+# Fill the given text into the Redactor rich text editor.
+#
+def spechelp_fill_in_redactor(body)
+  editor = find(:css, ".redactor_container .redactor-in")
+  editor.click()
+
+  # Wait for input focus to be assigned before "typing".
+  #
+  expect(page).to have_css(".redactor_container .redactor-in:focus")
+
+  # Strange race condition; even waiting for the container to have-text
+  # "body", fast execution fails with the body being empty. The only
+  # way around this that I could find was a hacky sleep via go-slow.
+  #
+  editor.send_keys(body)
+
+  # Must wait for those keys to be processed by Redactor and written to
+  # the hidden textarea field for the page body.
+  #
+  expect(page).to have_field("page_body", visible: false, with: /#{body}/)
+end
+
 # Given a String which might contain HTML or entities, return the plain text
 # equivalent with tags stripped and entities converted to characters.
 #
@@ -168,4 +199,40 @@ end
 def spechelp_strip_markup(rich_text)
   plain_text = CGI.unescapeHTML(ActionView::Base.full_sanitizer.sanitize(rich_text))
   return plain_text.strip()
+end
+
+# Log in via UI navigation. Pass a user (else one is made by default factory).
+# The logged in User is returned, for convenience.
+#
+def spechelp_log_in(user = nil)
+  user ||= create(:user)
+
+  visit(new_admin_user_session_path())
+
+  fill_in("admin_user_email",    with: user.email)
+  fill_in("admin_user_password", with: Constants::DEFAULT_VALID_PASSWORD)
+  click_on("Log in")
+
+  expect(page).to have_current_path(admin_pages_path())
+  expect(page).to have_css("section.messages p.notice", text: "Signed in")
+
+  return user
+end
+
+# Log out via hackery rather than via navigating the UI, for speed.
+#
+def spechelp_log_out_via_cookie_clearing
+  if Capybara.current_session.driver.respond_to?(:clear_cookies) # Headless Chrome
+    Capybara.current_session.driver.clear_cookies()
+  else
+    browser = Capybara.current_session.driver.browser
+
+    if browser.respond_to?(:clear_cookies) # Rack driver
+      browser.clear_cookies()
+    elsif browser.respond_to?(:manage) && browser.manage.respond_to?(:delete_all_cookies) # Selenium driver
+      browser.manage.delete_all_cookies()
+    else
+      raise "Cannot clear cookes with this driver"
+    end
+  end
 end

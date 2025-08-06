@@ -52,6 +52,12 @@ gem 'carrierwave',     '~> 3.1'
 gem 'mini_magick',     '~> 5.3'
 gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branch: 'feature/fix-js'
 
+# Mail sending via MailGun.
+#
+#   https://rubygems.org/gems/mailgun-ruby
+#
+gem 'mailgun-ruby', '~> 1.3'
+
 # Orderable pages.
 #
 #   https://rubygems.org/gems/acts_as_list

@@ -4,9 +4,7 @@ FactoryBot.define do
     body  { "<p>#{Faker::Lorem.paragraph}</p>" }
 
     trait :for_page do
-      trait :with_nav_title do
-        navigation_title { Faker::Lorem.sentence.chomp(".") }
-      end
+      navigation_title { Faker::Lorem.sentence.chomp(".") }
     end
 
     trait :for_article do

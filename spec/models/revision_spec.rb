@@ -133,13 +133,13 @@ RSpec.describe Revision, type: :model do
     it "current draft if 'current' but not 'published'" do
       revision = Revision.new(published: false, current: true, updated_at: Time.now - 1.day)
 
-      expect(revision.display_name).to eql(I18n.t('models.revision.current', time: revision.updated_at.to_fs(:short)))
+      expect(revision.display_name).to eql(I18n.t('models.revision.current', time: TimeZoneHelp.in_configured_time_zone(revision.updated_at)))
     end
 
     it "unused if neither 'current' nor 'published'" do
       revision = Revision.new(published: false, current: false, updated_at: Time.now - 1.day)
 
-      expect(revision.display_name).to eql(I18n.t('models.revision.unpublished', time: revision.updated_at.to_fs(:short)))
+      expect(revision.display_name).to eql(I18n.t('models.revision.unpublished', time: TimeZoneHelp.in_configured_time_zone(revision.updated_at)))
     end
   end
 end

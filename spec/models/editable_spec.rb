@@ -38,12 +38,14 @@ RSpec.describe Editable, type: :model do
 
       editable.save! # (should succeed)
 
-      other_editable = Page.new(revisions: [Revision.new(current: true, title:, body:)])
-      other_editable.validate
+      2.upto(5) do |number|
+        other_editable = Page.new(revisions: [Revision.new(current: true, title:, body:)])
+        other_editable.validate
 
-      expect(other_editable.slug).to eql("quick-brown-fox-2")
+        expect(other_editable.slug).to eql("quick-brown-fox-#{number}")
 
-      other_editable.save! # (should succeed)
+        other_editable.save! # (should succeed)
+      end
     end
 
     it "allows a specific slug to be specified" do
@@ -194,7 +196,7 @@ RSpec.describe Editable, type: :model do
           expect(editable.revisions.map(&:published)).to eql([false, true, false])
           expect(editable.revisions.map(&:title    )).to eql([title, title + "-2", title + "-3"])
 
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           expect(editable.revisions.map(&:title)).to eql([new_title, title + "-2", title + "-3"]) # Wrote to Current revision
         end
@@ -211,7 +213,7 @@ RSpec.describe Editable, type: :model do
           editable.revisions << build(:revision, :for_page, published: false, title: title + "-3")
           editable.revisions.each { |revision| revision.current = false }
 
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           # The write accessor use above meant a new Current draft was added.
           #
@@ -224,7 +226,7 @@ RSpec.describe Editable, type: :model do
           editable  = Page.new.for_edit!
           new_title = SecureRandom.uuid
 
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           expect(editable.title                    ).to eql(new_title)
           expect(editable.revisions.size           ).to eql(1)
@@ -264,7 +266,7 @@ RSpec.describe Editable, type: :model do
           editable.revisions << build(:revision, :for_page, published: false, title: title + "-3")
 
           editable.use_revision!(editable.revisions.first) # This is the current, unpublished record
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           expect(editable.revisions.map(&:current  )).to eql([true,  false, false])
           expect(editable.revisions.map(&:published)).to eql([false, true,  false])
@@ -280,7 +282,7 @@ RSpec.describe Editable, type: :model do
           editable.revisions << build(:revision, :for_page, published: false, title: title + "-3")
 
           editable.use_revision!(editable.revisions.second) # This is the published record
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           # Expect to see a new current, unpublished draft. We haven't saved
           # anything yet so might expect the first revision to still be marked
@@ -300,7 +302,7 @@ RSpec.describe Editable, type: :model do
           editable.revisions << build(:revision, :for_page, published: false, title: title + "-3")
 
           editable.use_revision!(editable.revisions.last) # This is neither published nor current
-          editable.title = new_title
+          editable.assign_attributes(title: new_title, body: SecureRandom.uuid)
 
           expect(editable.revisions.map(&:current  )).to eql([false, false, false, true ])
           expect(editable.revisions.map(&:published)).to eql([false, true,  false, false])

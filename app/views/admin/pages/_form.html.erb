@@ -45,6 +45,11 @@
         <div class="field">
           <%= apphelp_label(f, :page_id) %>
           <%=
+            # Hidden pages *are* included so that you can assemble a tree of
+            # new page items that don't appear in the menu bar until they're
+            # all finished and the top-level parent is unhidden. Drafts can do
+            # the same thing, but user workflow preferences differ.
+            #
             f.collection_select(
               :page_id,
               Page.top_level_except(@page.id),

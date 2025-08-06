@@ -57,16 +57,7 @@ class Editable < ApplicationRecord
 
   def write_revision_for_delegation
     if @use_revision.present?
-      if self.draft_revision != @use_revision # (self.draft_revision memoises into @draft_revision)
-        self.revisions.each { | revision | revision.current = false }
-        @draft_revision = self.revisions.build(
-          self
-            .attributes
-            .slice(*Revision::REVISABLE_ATTRIBUTES)
-            .merge(current: true)
-        )
-      end
-      @draft_revision
+      self.draft_revision(overriding_current: @use_revision)
     elsif @for_edit == true
       self.draft_revision
     else
@@ -150,10 +141,29 @@ class Editable < ApplicationRecord
 
   # Returns a new Revision that represents a writeable draft. Memoised.
   #
-  def draft_revision
+  # The optional "overriding_current" named parameter is used to override a
+  # source of attributes for the case when a blank draft is built, which will
+  # also, if the revision presently marked "current" differs from it, also
+  # provoke generation of a new draft based on that item.
+  #
+  def draft_revision(overriding_current: nil)
     @draft_revision ||= begin
       revision = self.current_revision
-      revision = self.revisions.build(current: true) if revision.nil? || revision.published
+
+      if revision.nil? || revision.published || (overriding_current.present? && overriding_current != revision)
+        self.revisions.each { | revision | revision.current = false }
+        revision = if overriding_current.present?
+          self.revisions.build(
+            overriding_current
+              .attributes
+              .slice(*Revision::REVISABLE_ATTRIBUTES)
+              .merge(current: true)
+          )
+        else
+          self.revisions.build(current: true)
+        end
+      end
+
       revision
     end
   end
@@ -168,7 +178,9 @@ class Editable < ApplicationRecord
   # Uses the title to generate a slug, making sure it is unique.
   #
   def generate_unique_slug
-    slug_base = (self.title || '').parameterize
+    return if self.title.blank?
+
+    slug_base = self.title.parameterize
     suffix    = ''
     counter   = 2
 

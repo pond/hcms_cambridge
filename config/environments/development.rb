@@ -35,12 +35,21 @@ Rails.application.configure do
   # For Devise messages.
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
-  # For Mailcatcher - https://mailcatcher.me.
-  config.action_mailer.delivery_method       = :smtp
-  config.action_mailer.smtp_settings         = { :address => "localhost", :port => 1025 }
-  config.action_mailer.perform_caching       = false
-  config.action_mailer.perform_deliveries    = true
-  config.action_mailer.raise_delivery_errors = true
+  if ENV['MAILGUN_API_KEY'].present?
+    # For MailGun - visit Heroku, go to app resources, open Mailgun from there
+    config.action_mailer.delivery_method  = :mailgun
+    config.action_mailer.mailgun_settings = {
+      api_key: ENV['MAILGUN_API_KEY'],
+      domain:  ENV['MAILGUN_DOMAIN']
+    }
+  else
+    # For Mailcatcher - https://mailcatcher.me.
+    config.action_mailer.delivery_method       = :smtp
+    config.action_mailer.smtp_settings         = { :address => "localhost", :port => 1025 }
+    config.action_mailer.perform_caching       = false
+    config.action_mailer.perform_deliveries    = true
+    config.action_mailer.raise_delivery_errors = true
+  end
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

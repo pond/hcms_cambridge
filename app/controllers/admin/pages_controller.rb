@@ -33,38 +33,22 @@ class Admin::PagesController < ApplicationController
 
     # POST /admin/pages
     def create
-      result = @page.persist!(self.page_params(), publish: params[:publish].present?)
-
-      if result.successful
-        if result.published
-          redirect_to [:admin, @page], notice: 'New page published.'
-        else
-          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'New draft page created.'
-        end
-      else
-        render :new
-      end
+      handle_form_submission(
+        page:              @page,
+        render_on_fail:    :new,
+        draft_message:     'New draft page created.',
+        published_message: 'New page published.'
+      )
     end
 
     # PATCH/PUT /admin/pages/1
     def update
-      result = @page.persist!(self.page_params(), publish: params[:publish].present?)
-
-      if result.successful
-        if @page.previous_changes.has_key?('raw_editor')
-          if result.published
-            redirect_to [:edit, :admin, @page], notice: 'Editor selection altered and other changes, if any, published.'
-          else
-            redirect_to [:edit, :admin, @page], notice: 'Editor selection altered.'
-          end
-        elsif result.published
-          redirect_to [:admin, @page], notice: 'Page changes published.'
-        else
-          redirect_to [:admin, @page, {revision: @page.current_revision.id}], notice: 'Changes saved as draft.'
-        end
-      else
-        render :edit
-      end
+      handle_form_submission(
+        page:              @page,
+        render_on_fail:    :edit,
+        draft_message:     'Changes saved as draft.',
+        published_message: 'Page changes published.'
+      )
     end
 
     # DELETE /admin/pages/1
@@ -102,6 +86,33 @@ class Admin::PagesController < ApplicationController
       if params.key?(:revision)
         revision = @page.revisions.find(params[:revision])
         @page.use_revision!(revision)
+      end
+    end
+
+    # Used by #create and #update; internal API, see callers for examples.
+    #
+    def handle_form_submission(
+      page:,
+      render_on_fail:,
+      draft_message:,
+      published_message:
+    )
+      result = page.persist!(self.page_params(), publish: params[:publish].present?)
+
+      if result.successful
+        if page.previous_changes.has_key?('raw_editor')
+          if result.published
+            redirect_to([:edit, :admin, page], notice: 'Editor selection altered and other changes, if any, published.')
+          else
+            redirect_to([:edit, :admin, page], notice: 'Editor selection altered.')
+          end
+        elsif result.published
+          redirect_to([:admin, page], notice: published_message)
+        else
+          redirect_to([:admin, page, {revision: page.current_revision.id}], notice: draft_message)
+        end
+      else
+        render(render_on_fail)
       end
     end
 
