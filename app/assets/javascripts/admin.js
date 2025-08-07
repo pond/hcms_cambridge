@@ -23,6 +23,12 @@ $(document).on('ready page:load', function() {
 
     if (selectedPageType.endsWith('_form')) {
       $('.is-form-fields').slideDown();
+
+      if (selectedPageType == 'booking_form') {
+        $('.is-booking-fields').slideDown();
+      } else {
+        $('.is-booking-fields').slideUp();
+      }
     } else {
       $('.is-form-fields').slideUp();
     }

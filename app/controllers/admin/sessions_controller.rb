@@ -4,12 +4,21 @@ class Admin::SessionsController < ::Devise::SessionsController
   # Via Devise
   before_action :authenticate_admin_user!
 
-  # By sleeping a few seconds before any sign-in attempt, we delay humans
-  # wanting to sign in, but not very much; more importantly, we dramatically
-  # reduce the throughput possible for brute force attacks on the page.
+  # Sleep a little to reduce brute force attack throughput, along with a bigger
+  # sleep for bad credentials. Randomisation to thwart timing attack attempts.
   #
   def create
-    sleep(4.5 + rand()) unless Rails.env.test?
-    super
+    sleep(0.5 + rand()) unless Rails.env.test?
+
+    # The 'ensure' catches Warden bailing out early because of bad credentials
+    # when we call 'super'.
+    #
+    begin
+      super
+    ensure
+      unless admin_user_signed_in? || Rails.env.test?
+        sleep(3.5 + rand())
+      end
+    end
   end
 end

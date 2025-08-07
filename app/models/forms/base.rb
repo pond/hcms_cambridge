@@ -2,8 +2,9 @@ module Forms
   class Base
     include ActiveModel::API
 
-    attr_accessor :name, :email, :phone, :menu_selection
+    attr_accessor :page, :name, :email, :phone, :menu_selection
 
+    validates :page,  presence: true
     validates :name,  presence: true
     validates :email, presence: true
     validates :email, allow_blank: true, format: URI::MailTo::EMAIL_REGEXP

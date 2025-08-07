@@ -1,0 +1,19 @@
+<%= @page.title.upcase %>
+
+You have received a new booking enquiry.
+
+From:           <%= @name %>
+E-mail address: <%= @email %>
+Phone number:   <%= @phone.presence || 'Not given' %>
+
+<% unless Rails.application.config.uk_org_pond_hcms.booking_hide_date %>
+Preferred date: <%= @date.presence || 'None specified' %>
+Preferred time: <%= @time.presence || 'None specified' %>
+<% end %>
+<% unless @menu.blank? %>
+<%= @page.form_selection_list_label.presence || 'Menu selection' %>: <%= @menu %>
+
+<% end %>
+Other notes:
+
+<%= @notes.presence || 'None' %>

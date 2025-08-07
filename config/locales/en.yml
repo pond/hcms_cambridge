@@ -88,6 +88,7 @@ en:
         page_id: "Put into a menu under which page?"
         page_type: "What kind of page is this going to be?"
         hidden: "Hidden from the navigation bar?"
+        hide_date_and_time: "Hide option to choose a specific date and time?"
         raw_editor: "Use the low-level HTML editor?"
         body: "Main page text"
         form_selection_list_label: "Selection menu title"
@@ -108,7 +109,7 @@ en:
       normal: "Normal"
       contact_form: "Contact form"
       booking_form: "Booking form"
-      blog: "Blog container"
+      blog: "Blog"
 
     revision:
       published: "Published"

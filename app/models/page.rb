@@ -22,9 +22,9 @@ class Page < Editable
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
   ORDERED_PAGE_TYPES     = [
     PAGE_TYPE_NORMAL,
-    PAGE_TYPE_BLOG,
     PAGE_TYPE_BOOKING_FORM,
     PAGE_TYPE_CONTACT_FORM,
+    PAGE_TYPE_BLOG,
   ]
 
   def self.home

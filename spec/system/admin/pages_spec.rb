@@ -2,6 +2,7 @@ require "spec_helper.rb"
 
 RSpec.describe "Admin - pages" do
   before :each do
+    allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
     spechelp_log_in()
   end
 
@@ -35,7 +36,7 @@ RSpec.describe "Admin - pages" do
 
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing draft", href: edit_admin_page_path(Page.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New page",               href: new_admin_page_path())
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List pages",             href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Administration",         href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing draft")
 
@@ -280,7 +281,7 @@ RSpec.describe "Admin - pages" do
           expect(page).to have_field("page_form_selection_list_label")
           expect(page).to have_field("page_form_selection_list_contents")
 
-          select("Blog container", from: "page_page_type")
+          select("Blog", from: "page_page_type")
 
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
@@ -309,7 +310,7 @@ RSpec.describe "Admin - pages" do
           p = create(:page, :blog)
           visit(edit_admin_page_path(p))
 
-          expect(page).to     have_select("page_page_type", selected: "Blog container")
+          expect(page).to     have_select("page_page_type", selected: "Blog")
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
@@ -832,8 +833,29 @@ RSpec.describe "Admin - pages" do
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
 
+      expect(page).to have_field("forms_contact_name")
+      expect(page).to have_field("forms_contact_email")
+      expect(page).to have_field("forms_contact_phone")
       expect(page).to have_css('label[for="forms_contact_menu_selection"]', text: "Select a number")
       expect(page).to have_select("forms_contact_menu_selection", with_options: ["One", "Two", "Three"])
+      expect(page).to have_field("forms_contact_message")
+      expect(page).to have_button("Send message")
+    end
+
+    it "supports having no menu" do
+      p = create(:page, :contact_form)
+      visit(edit_admin_page_path(p))
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "Page changes published")
+
+      expect(page).to     have_field("forms_contact_name")
+      expect(page).to     have_field("forms_contact_email")
+      expect(page).to     have_field("forms_contact_phone")
+      expect(page).to_not have_css('label[for="forms_contact_menu_selection"]')
+      expect(page).to_not have_select("forms_contact_menu_selection")
+      expect(page).to     have_field("forms_contact_message")
+      expect(page).to     have_button("Send message")
     end
   end # "context "contact forms" do"
 
@@ -854,6 +876,8 @@ RSpec.describe "Admin - pages" do
       spechelp_fill_in_redactor(body)
       select("Booking form", from: "page_page_type")
       fill_in("page_form_selection_list_contents", with: "One\nTwo\nThree")
+
+      expect(page).to have_unchecked_field(:page_hide_date_and_time)
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "New page published")
@@ -884,8 +908,64 @@ RSpec.describe "Admin - pages" do
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
 
+      expect(page).to have_field("forms_booking_name")
+      expect(page).to have_field("forms_booking_email")
+      expect(page).to have_field("forms_booking_phone")
       expect(page).to have_css('label[for="forms_booking_menu_selection"]', text: "Select a number")
       expect(page).to have_select("forms_booking_menu_selection", with_options: ["One", "Two", "Three"])
+      expect(page).to have_field("forms_booking_date")
+      expect(page).to have_field("forms_booking_time")
+      expect(page).to have_field("forms_booking_notes")
+      expect(page).to have_button("Send enquiry")
+    end
+
+    it "supports having no menu" do
+      p = create(:page, :booking_form)
+      visit(edit_admin_page_path(p))
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "Page changes published")
+
+      expect(page).to     have_field("forms_booking_name")
+      expect(page).to     have_field("forms_booking_email")
+      expect(page).to     have_field("forms_booking_phone")
+      expect(page).to_not have_css('label[for="forms_booking_menu_selection"]')
+      expect(page).to_not have_select("forms_booking_menu_selection")
+      expect(page).to     have_field("forms_booking_date")
+      expect(page).to     have_field("forms_booking_time")
+      expect(page).to     have_field("forms_booking_notes")
+      expect(page).to     have_button("Send enquiry")
+    end
+
+    it "uses the default date-time hiding setting", js: true do
+      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(true)
+
+      visit(new_admin_page_path())
+      select("Booking form", from: "page_page_type")
+
+      expect(page).to have_checked_field(:page_hide_date_and_time)
+    end
+
+    it "can change the date/time hiding" do
+      p = create(:page, :booking_form)
+      visit(edit_admin_page_path(p))
+
+      check("page_hide_date_and_time")
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "Page changes published")
+
+      expect(p.reload.hide_date_and_time).to eql(true)
+
+      expect(page).to     have_field("forms_booking_name")
+      expect(page).to     have_field("forms_booking_email")
+      expect(page).to     have_field("forms_booking_phone")
+      expect(page).to_not have_css('label[for="forms_booking_menu_selection"]')
+      expect(page).to_not have_select("forms_booking_menu_selection")
+      expect(page).to_not have_field("forms_booking_date")
+      expect(page).to_not have_field("forms_booking_time")
+      expect(page).to     have_field("forms_booking_notes")
+      expect(page).to     have_button("Send enquiry")
     end
   end # "context "booking forms" do"
 
@@ -901,7 +981,7 @@ RSpec.describe "Admin - pages" do
 
       fill_in("page_title", with: title)
       fill_in("page_navigation_title", with: navigation_title)
-      select("Blog container", from: "page_page_type")
+      select("Blog", from: "page_page_type")
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "New page published")
@@ -922,7 +1002,7 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New article",    href: new_admin_page_article_path(page_id: p.id))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",  href: admin_page_articles_path(page_id: p.id))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit blog page", href: edit_admin_page_path(p))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List pages",     href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Administration", href: admin_pages_path())
     end
   end
 

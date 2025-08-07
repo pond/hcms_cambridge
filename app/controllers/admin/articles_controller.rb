@@ -31,38 +31,22 @@ class Admin::ArticlesController < ApplicationController
 
     # POST /admin/pages/<page_id>/articles
     def create
-      result = @article.persist!(self.article_params(), publish: params[:publish].present?)
-
-      if result.successful
-        if result.published
-          redirect_to [:admin, @page, @article], notice: 'New article published.'
-        else
-          redirect_to [:admin, @page, @article, {revision: @article.current_revision.id}], notice: 'New draft article created.'
-        end
-      else
-        render :new
-      end
+      handle_form_submission(
+        article:           @article,
+        render_on_fail:    :new,
+        draft_message:     'New draft article created.',
+        published_message: 'New article published.'
+      )
     end
 
     # PATCH/PUT //admin/pages/<page_id>/articles/<id>
     def update
-      result = @article.persist!(self.article_params(), publish: params[:publish].present?)
-
-      if result.successful
-        if @article.previous_changes.has_key?('raw_editor')
-          if result.published
-            redirect_to [:edit, :admin, @page, @article], notice: 'Editor selection altered and other changes, if any, published.'
-          else
-            redirect_to [:edit, :admin, @page, @article], notice: 'Editor selection altered.'
-          end
-        elsif result.published
-          redirect_to [:admin, @page, @article], notice: 'Article changes published.'
-        else
-          redirect_to [:admin, @page, @article, {revision: @article.current_revision.id}], notice: 'Changes saved as draft.'
-        end
-      else
-        render :edit
-      end
+      handle_form_submission(
+        article:           @article,
+        render_on_fail:    :edit,
+        draft_message:     'Changes saved as draft.',
+        published_message: 'Article changes published.'
+      )
     end
 
     # DELETE /admin/pages/<page_id>/articles/<id>
@@ -110,6 +94,33 @@ class Admin::ArticlesController < ApplicationController
       if params.key?(:revision)
         revision = @article.revisions.find(params[:revision])
         @article.use_revision!(revision)
+      end
+    end
+
+    # Used by #create and #update; internal API, see callers for examples.
+    #
+    def handle_form_submission(
+      article:,
+      render_on_fail:,
+      draft_message:,
+      published_message:
+    )
+      result = article.persist!(self.article_params(), publish: params[:publish].present?)
+
+      if result.successful
+        if article.previous_changes.has_key?('raw_editor')
+          if result.published
+            redirect_to([:edit, :admin, article.page, article], notice: 'Editor selection altered and other changes, if any, published.')
+          else
+            redirect_to([:edit, :admin, article.page, article], notice: 'Editor selection altered.')
+          end
+        elsif result.published
+          redirect_to(admin_page_article_path(article.page.slug, article.slug), notice: published_message)
+        else
+          redirect_to(admin_page_article_path(article.page.slug, article.slug, revision: article.current_revision.id), notice: draft_message)
+        end
+      else
+        render(render_on_fail)
       end
     end
 

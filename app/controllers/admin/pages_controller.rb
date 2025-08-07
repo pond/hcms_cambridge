@@ -25,6 +25,7 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/new
     def new
+      @page.hide_date_and_time = Rails.application.config.uk_org_pond_hcms.booking_hide_date
     end
 
     # GET /admin/pages/1/edit
@@ -107,9 +108,9 @@ class Admin::PagesController < ApplicationController
             redirect_to([:edit, :admin, page], notice: 'Editor selection altered.')
           end
         elsif result.published
-          redirect_to([:admin, page], notice: published_message)
+          redirect_to(admin_page_path(page.slug), notice: published_message)
         else
-          redirect_to([:admin, page, {revision: page.current_revision.id}], notice: draft_message)
+          redirect_to(admin_page_path(page.slug, revision: page.current_revision.id), notice: draft_message)
         end
       else
         render(render_on_fail)
@@ -130,6 +131,7 @@ class Admin::PagesController < ApplicationController
           :page_type,
           :form_selection_list_contents,
           :form_selection_list_label,
+          :hide_date_and_time,
         )
     end
 end

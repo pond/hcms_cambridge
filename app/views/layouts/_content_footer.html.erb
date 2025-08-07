@@ -5,6 +5,12 @@
   <nav class="cms_menu">
     <% if user_signed_in? %>
       <%= content_for :signed_in_cms_menu %>
+      | <%= link_to('Log out', destroy_admin_user_session_path, method: :delete) %>
+    <% elsif Rails.application.config.uk_org_pond_hcms.hide_contact_info %>
+      <% first_contact_page = Page.where(page_type: Page::PAGE_TYPE_CONTACT_FORM).first %>
+      <% if first_contact_page.present? %>
+        <%= link_to('Contact us', page_path(first_contact_page.slug)) %>
+      <% end %>
     <% else %>
       <% if Rails.application.config.uk_org_pond_hcms.contact_tel_human.present? %>
         <%= link_to Rails.application.config.uk_org_pond_hcms.contact_tel_human, "tel:#{ Rails.application.config.uk_org_pond_hcms.contact_tel_full }" %> |

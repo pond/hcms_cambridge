@@ -13,7 +13,7 @@
     <section class="blog-articles">
       <% page.articles.for_navigation.each do | article | %>
         <article class="article">
-          <%= link_to page_article_path(page_id: page.id, id: article.id), class: 'article-link' do %>
+          <%= link_to page_article_path(page_id: page.slug, id: article.slug), class: 'article-link' do %>
             <img class="article-hero-image" src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
             <div class="article-date-and-heading-container">
               <h4 class="article-heading"><%= article.title %></h4>
@@ -56,7 +56,7 @@
       <%= f.telephone_field :phone %>
     </p>
     <hr>
-    <% if page.is_booking_form? %>
+    <% if page.is_booking_form? && ! page.hide_date_and_time %>
       <p>
         <%= apphelp_label(f, :date) %>
         <%= f.date_field :date, placeholder: (Date.current + 2.days).strftime('%-d %b %Y'), min: Date.current + 2.days %>

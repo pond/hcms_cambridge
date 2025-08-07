@@ -1,26 +1,30 @@
-<p>You have received a booking enquiry.</p>
+<h1><%= @page.title %></h1>
+<h2>New booking enquiry</h2>
 
 <dl>
-  <dt><strong>Name</strong></dt>
+  <dt>From</dt>
   <dd><%= @name %></dd>
 
-  <dt><strong>E-mail address</strong></dt>
+  <dt>E-mail address</dt>
   <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
 
-  <dt><strong>Phone number</strong></dt>
-  <dd><%= @phone %></dd>
+  <dt>Phone number</dt>
+  <dd><%= @phone.presence || 'Not given' %></dd>
 
-  <dt><strong>Date</strong></dt>
-  <dd><%= @date %></dd>
+  <% unless Rails.application.config.uk_org_pond_hcms.booking_hide_date %>
+    <dt>Date</dt>
+    <dd><%= @date.presence || 'None specified' %></dd>
 
-  <dt><strong>Preferred time</strong></dt>
-  <dd><%= @time %></dd>
-
-  <% unless @menu.blank? %>
-    <dt><strong>Menu selection</strong></dt>
-    <dd><%= @menu %></dd>
+    <dt>Preferred time</dt>
+    <dd><%= @time.presence || 'None specified' %></dd>
   <% end %>
 
-  <dt><strong>Other notes</strong></dt>
-  <dd><%= @notes.blank? ? 'None' : simple_format(@notes) %></dd>
+  <% unless @menu.blank? %>
+    <dt><%= @page.form_selection_list_label.presence || 'Menu selection' %></dt>
+    <dd><%= @menu %></dd>
+  <% end %>
 </dl>
+
+<h2>Other notes</h2>
+
+<%= simple_format(@notes.presence || 'None') %>

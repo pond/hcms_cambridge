@@ -70,7 +70,7 @@
   </div>
 
   <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
-    <div class="is-form-fields"style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
+    <div class="is-form-fields" style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
       <hr>
       <p>
         The published page will contain a form which lets users send enquiries.
@@ -92,6 +92,12 @@
         <div class="field">
           <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
           <%= f.text_area :form_selection_list_contents, rows: 6, cols: 40 %>
+        </div>
+      </div>
+
+      <div class="field is-booking-fields" style="display: <%= @page.is_booking_form? ? 'block' : 'none' %>">
+        <div class="checkbox">
+          <%= f.check_box :hide_date_and_time %> <%= f.label :hide_date_and_time %>
         </div>
       </div>
 

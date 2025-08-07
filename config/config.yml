@@ -4,15 +4,17 @@ country_dial_code: '64'
 site_name:         'Wine Sentience'
 logo_w:            '160'
 logo_h:            '160'
-footer_summary:    "<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand"
 
+mail_domain:       'winesentience.com'
+booking_email:     'ahodgkin@gmail.com' # 'stephen@winesentience.com'
+contact_email:     'ahodgkin@gmail.com' # 'stephen@winesentience.com'
+contact_tel_human: '021 488 855'
+contact_tel_full:  '+6421488855'
+
+booking_hide_date: true # (by default, but you can change it when editing booking pages)
+
+footer_summary:    "<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand"
+hide_contact_info: true
 facebook:          ''
 twitter:           '' # 'https://x.com/WineSentience/'
 instagram:         'https://www.instagram.com/winesentience/'
-
-mail_domain:       'winesentience.com'
-contact_email:     'stephen@winesentience.com'
-contact_tel_human: '' # '021 488 855'
-contact_tel_full:  '' # '+6421488855'
-
-booking_email:     'stephen@winesentience.com'

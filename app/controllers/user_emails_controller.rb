@@ -12,7 +12,8 @@ class UserEmailsController < ApplicationController
       .require(form_class.model_name.param_key)
       .permit(form_class.permitted_params)
 
-    @form_model = form_class.new(safe_params)
+    @form_model      = form_class.new(safe_params)
+    @form_model.page = @page
 
     unless @form_model.valid?
       flash[:alert] = "There were problems with the information you gave"
@@ -31,14 +32,11 @@ class UserEmailsController < ApplicationController
     # rendered raw on the page (we want to add HTML to it sometimes).
 
     unless success
-      flash[:alert] = "Sorry! The reCaptcha challenge wasn't happy with the response. Please try again or contact us by phone for assistance."
+      flash[:alert] = "Sorry! The anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
 
       render 'pages/show'
       return
     end
-
-    @page = OpenStruct.new
-    @page.title = "#{form_kind.capitalize} sent"
 
     if @page.is_booking_form?
       BookingMailer.booking_email(@form_model).deliver()
@@ -46,6 +44,6 @@ class UserEmailsController < ApplicationController
       ContactMailer.contact_email(@form_model).deliver()
     end
 
-    @message = "Your #{ form_kind } has been sent. We'll get back to you as soon as we can."
+    redirect_to(root_path, notice: "Your #{ form_kind } has been sent. We'll get back to you as soon as we can.")
   end
 end

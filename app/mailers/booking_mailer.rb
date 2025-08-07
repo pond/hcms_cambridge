@@ -1,7 +1,8 @@
 class BookingMailer < ApplicationMailer
   default to: Rails.application.config.uk_org_pond_hcms.booking_email
 
-  def booking_email( params )
+  def booking_email(params)
+    @page  = params.page
     @name  = params.name
     @email = params.email
     @phone = params.phone
@@ -13,7 +14,7 @@ class BookingMailer < ApplicationMailer
     mail(
       to:      Rails.application.config.uk_org_pond_hcms.booking_email,
       from:    @email,
-      subject: "#{Rails.application.config.uk_org_pond_hcms.site_name} web site booking request"
+      subject: "[#{Rails.application.config.uk_org_pond_hcms.site_name}] \"#{@page.title}\" - booking enquiry"
     )
   end
 end

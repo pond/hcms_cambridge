@@ -1,0 +1,15 @@
+<%= @page.title.upcase %>
+
+You have received a new message.
+
+From:           <%= @name %>
+E-mail address: <%= @email %>
+Phone number:   <%= @phone.presence || 'Not given' %>
+
+<% unless @menu.blank? %>
+<%= @page.form_selection_list_label.presence || "Menu selection" %>: <%= @menu %>
+
+<% end %>
+Message:
+
+<%= @message.presence || 'None' %>
