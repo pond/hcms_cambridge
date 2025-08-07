@@ -419,6 +419,7 @@ GEM
     sqlite3 (1.7.3)
       mini_portile2 (~> 2.8.0)
     ssrf_filter (1.3.0)
+    stackprof (0.2.27)
     stringio (3.1.7)
     thin (1.8.2)
       daemons (~> 1.0, >= 1.0.9)
@@ -493,6 +494,7 @@ DEPENDENCIES
   sentry-rails
   sentry-ruby
   simplecov (~> 0.22)
+  stackprof
   uglifier
   web-console
 

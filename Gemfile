@@ -72,10 +72,12 @@ gem 'phony', '~> 2.22'
 
 # Monitoring and alerting.
 #
+# * https://rubygems.org/gems/stackprof
 #   https://rubygems.org/gems/sentry-ruby
 #   https://rubygems.org/gems/sentry-rails
 #   https://rubygems.org/gems/browser
 #
+gem 'stackprof'
 gem 'sentry-ruby'
 gem 'sentry-rails'
 gem 'browser'
