@@ -59,11 +59,11 @@
     <% if page.is_booking_form? && ! page.hide_date_and_time %>
       <p>
         <%= apphelp_label(f, :date) %>
-        <%= f.date_field :date, placeholder: (Date.current + 2.days).strftime('%-d %b %Y'), min: Date.current + 2.days %>
+        <%= f.date_field :date, min: Date.current + 2.days %>
       </p>
       <p>
         <%= apphelp_label(f, :time) %>
-        <%= f.time_field :time, min: '10:00', max: '19:00', step: 60.minutes %>
+        <%= f.time_field :time, min: '10:00', max: '19:00', step: 30.minutes %>
       </p>
     <% end %>
     <% unless page.form_selection_list_contents.strip.blank? %>
@@ -81,6 +81,7 @@
       <p>
         <%= apphelp_label(f, :message) %>
         <%= f.text_area :message, rows: 8, cols: 80 %>
+        <%= f.error_markup_for(:message) %>
       </p>
     <% end %>
 

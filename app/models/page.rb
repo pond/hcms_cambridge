@@ -28,7 +28,7 @@ class Page < Editable
   ]
 
   def self.home
-    Page.top_level.reorder(created_at: :asc).first
+    Page.top_level.reorder(created_at: :asc).first # (whether or not it yet has a published revision)
   end
 
   def is_normal_type?

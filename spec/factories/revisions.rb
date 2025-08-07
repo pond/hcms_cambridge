@@ -1,7 +1,14 @@
 FactoryBot.define do
   factory :revision, class: Revision do
-    title { Faker::Lorem.sentence.chomp(".") }
-    body  { "<p>#{Faker::Lorem.paragraph}</p>" }
+    body { "<p>#{Faker::Lorem.paragraph}</p>" }
+
+    title do
+      begin
+        available_title = Faker::Lorem.sentence.chomp(".")
+      end while Revision.unscoped.where(title: available_title).any?
+
+      available_title
+    end
 
     trait :for_page do
       navigation_title { Faker::Lorem.sentence.chomp(".") }

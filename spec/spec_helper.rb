@@ -46,6 +46,7 @@ end
 #
 Capybara.configure do |config|
   config.always_include_port = true
+  config.default_normalize_ws = true # ("have_text..." will squish whitespace arising from markup into single spaces)
 end
 
 # https://github.com/mattheworiordan/capybara-screenshot#better-looking-html-screenshots
@@ -213,7 +214,12 @@ def spechelp_log_in(user = nil)
   fill_in("admin_user_password", with: Constants::DEFAULT_VALID_PASSWORD)
   click_on("Log in")
 
-  expect(page).to have_current_path(admin_pages_path())
+  if Page.none?
+    expect(page).to have_current_path(admin_pages_path())
+  else
+    expect(page).to have_current_path(admin_page_path(Page.home))
+  end
+
   expect(page).to have_css("section.messages p.notice", text: "Signed in")
 
   return user
@@ -235,4 +241,35 @@ def spechelp_log_out_via_cookie_clearing
       raise "Cannot clear cookes with this driver"
     end
   end
+end
+
+# Call after an e-mail should have been delivered. Returns a Data object with
+# members "email" (raw object), "text" (decoded text), "html" (decoded HTML).
+# Expects one message with two parts, one text, one HTML.
+#
+def spechelp_decode_multipart
+  perform_enqueued_jobs() # (from ActiveJob::TestHelper)
+
+  expect(ActionMailer::Base.deliveries.count).to eq(1)
+
+  email = ActionMailer::Base.deliveries.last
+
+  expect(email).to be_multipart()
+  expect(email.parts.size).to eql(2)
+
+  text_part = email.parts.find { |part| part.content_type.include?('text/plain') }
+  html_part = email.parts.find { |part| part.content_type.include?('text/html') }
+
+  expect(text_part).to be_present
+  expect(html_part).to be_present
+
+  return(
+    Data
+      .define(:email, :text, :html)
+      .new(
+        email: email,
+        text:  text_part.body.decoded,
+        html:  html_part.body.decoded
+      )
+  )
 end

@@ -85,6 +85,10 @@ main.admin {
       text-align: center;
     }
 
+    td.admin_actions {
+      text-wrap: nowrap;
+    }
+
     td, th {
       padding-left: 5px;
       padding-right: 5px;

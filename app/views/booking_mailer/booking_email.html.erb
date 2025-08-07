@@ -6,12 +6,12 @@
   <dd><%= @name %></dd>
 
   <dt>E-mail address</dt>
-  <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
+  <dd><%= link_to(@email, "mailto:#{@email}") %></dd>
 
   <dt>Phone number</dt>
-  <dd><%= @phone.presence || 'Not given' %></dd>
+  <dd><%= @phone.present? ? link_to(@phone, "tel:#{@phone}") : 'Not given' %></dd>
 
-  <% unless Rails.application.config.uk_org_pond_hcms.booking_hide_date %>
+  <% unless @page.hide_date_and_time %>
     <dt>Date</dt>
     <dd><%= @date.presence || 'None specified' %></dd>
 

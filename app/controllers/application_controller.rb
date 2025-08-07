@@ -5,6 +5,9 @@ class ApplicationController < ActionController::Base
     # Prevent CSRF attacks by raising an exception.
     protect_from_forgery with: :exception
 
+    # Ad-hoc page visit counting.
+    after_action :record_page_impression
+
     # The Rails Redactor integration assumes Devise is in a default
     # route location, but it isn't; so we need some aliases.
     alias :current_user :current_admin_user
@@ -20,6 +23,35 @@ class ApplicationController < ActionController::Base
 
     def redactor3_current_user
       current_admin_user # devise user helper
+    end
+
+  private
+
+    def record_page_impression
+      return unless request.get? && response.successful?
+      return if     request.xhr? || response.redirect?
+
+      return if user_signed_in? # Don't record admin user (site owner) meanderings!
+
+      browser = Browser.new(request.user_agent, accept_language: request.env["HTTP_ACCEPT_LANGUAGE"].presence)
+      return if browser.bot?
+
+      PageImpression.record!(request.path)
+
+      # Or record to Sentry via e.g.:
+      #
+      # Sentry.capture_message(
+      #   "Page visit: #{request.path}",
+      #   level: :info,
+      #   extra: {
+      #     controller: controller_name,
+      #     action: action_name,
+      #   },
+      #   tags: {
+      #     page: "#{controller_name}##{action_name}",
+      #     path: request.path
+      #   }
+      # )
     end
 
 end

@@ -74,9 +74,11 @@ gem 'phony', '~> 2.22'
 #
 #   https://rubygems.org/gems/sentry-ruby
 #   https://rubygems.org/gems/sentry-rails
+#   https://rubygems.org/gems/browser
 #
 gem 'sentry-ruby'
 gem 'sentry-rails'
+gem 'browser'
 
 group :development do
   gem 'web-console'

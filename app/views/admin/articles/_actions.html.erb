@@ -5,10 +5,10 @@
   #     article: Article model instance
   #   }
 %>
-<td style="padding-right: 1em">
+<td class="admin_actions" style="padding-right: 1em">
   <%= link_to 'Show', admin_page_article_path(article.page.slug, article.slug) %>
   <%= link_to 'Edit', edit_admin_page_article_path(article.page, article) %>
 </td>
-<td>
+<td class="admin_actions">
   <%= link_to 'Delete', admin_page_article_path(article.page, article), method: :delete, data: { confirm: apphelp_destroy_confirm(article) } %>
 </td>

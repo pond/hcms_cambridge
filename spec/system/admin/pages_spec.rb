@@ -36,7 +36,7 @@ RSpec.describe "Admin - pages" do
 
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing draft", href: edit_admin_page_path(Page.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New page",               href: new_admin_page_path())
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Administration",         href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("All pages",              href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing draft")
 
@@ -113,19 +113,10 @@ RSpec.describe "Admin - pages" do
       end
 
       it "offers a parent selector when there are top-level parents, hidden or otherwise" do
-        page_1 = create(:page, hidden: true  )
+        page_1 = create(:page, hidden: true  ); page_1.revisions.first.update!(published: true)
         page_2 = create(:page                )
         page_3 = create(:page                ); page_3.revisions.first.update!(published: true)
-        page_4 = create(:page, parent: page_4); page_4.revisions.first.update!(published: true)
-
-        # Ensure unique titles. Faker "Lorem Ipsum" can repeat itself.
-        #
-        Revision.all.each { |revision| revision.update!(title: SecureRandom.uuid) }
-
-        page_1 = Page.find(page_1.id)
-        page_2 = Page.find(page_2.id)
-        page_3 = Page.find(page_3.id)
-        page_4 = Page.find(page_4.id)
+        page_4 = create(:page, parent: page_3); page_4.revisions.first.update!(published: true)
 
         visit(new_admin_page_path())
 
@@ -151,7 +142,7 @@ RSpec.describe "Admin - pages" do
       end
 
       it "creates top-level items by default" do
-        p = create(:page)
+        p = create(:page) # (don't overwrite Capybara's "page" method!)
         p.revisions.first.update!(title: SecureRandom.uuid, published: true)
 
         visit(new_admin_page_path())
@@ -1002,18 +993,165 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New article",    href: new_admin_page_article_path(page_id: p.id))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",  href: admin_page_articles_path(page_id: p.id))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit blog page", href: edit_admin_page_path(p))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Administration", href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("All pages",      href: admin_pages_path())
     end
   end
 
   context "lists" do
     context "display" do
+      it "shows parents and children" do
+        page_1 = create(:page, hidden: true  ); page_1.revisions.first.update!(published: true) # Not in menu because is hidden
+        page_2 = create(:page                ) # Not in menu because is only a draft
+        page_3 = create(:page                ); page_3.revisions.first.update!(published: true)
+        page_4 = create(:page, parent: page_3); page_4.revisions.first.update!(published: true)
+        page_5 = create(:page, :blog         ); page_5.revisions.first.update!(published: true)
+
+        page_3.revisions << build(:revision, :for_page)
+        page_3.save!
+
+        visit(admin_pages_path())
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+        row_4 = find(:css, "table tbody > tr:nth-child(4)")
+        row_5 = find(:css, "table tbody > tr:nth-child(5)")
+
+        # Title / Published? / Draft? / In menu? / Actions
+        #
+        expect(row_1).to have_text("#{page_1.title} No Yes No Show Edit Delete", exact: true)
+        expect(row_2).to have_text("#{page_2.title} No Yes No Show Edit Delete", exact: true)
+        expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show Edit Delete", exact: true)
+        expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show Edit Delete", exact: true) # "— " prefix for is-child
+        expect(row_5).to have_text("#{page_5.title} Yes No Yes Show Edit Articles Delete", exact: true)
+
+        # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
+        # arrows, 7 - main actions, 8 - delete action.
+        #
+        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes", href: admin_page_path(page_1.id, revision: page_1.revisions.last.id))
+        expect(row_2.find(:css, "> td:nth-child(7)")).to have_link("Show", href: admin_page_path(page_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit", href: edit_admin_page_path(page_3.id))
+        expect(row_4.find(:css, "> td:nth-child(8)")).to have_link("Delete", href: admin_page_path(page_4.id))
+        expect(row_5.find(:css, "> td:nth-child(7)")).to have_link("Articles", href: admin_page_articles_path(page_5.id))
+      end
     end # 'context "display" do'
 
     context "actions" do
+      it "deletes with confirmation", js: true do
+        p = create(:page)
+
+        visit(admin_pages_path())
+
+        accept_confirm do
+          find(:css, "table tbody tr td:last-child").click_link("Delete")
+        end
+
+        spechelp_check_flash(:notice, "Page deleted")
+
+        expect(Page.exists?(p.id)).to eql(false)
+      end
     end # 'context "actions" do'
 
     context "ordering" do
+      it "moves pages up and down" do
+        page_1 = create(:page)
+        page_2 = create(:page)
+        page_3 = create(:page)
+
+        # Self-checks.
+        #
+        expect(page_1.position).to eql(1)
+        expect(page_2.position).to eql(2)
+        expect(page_3.position).to eql(3)
+
+        visit(admin_pages_path())
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+
+        expect(row_1).to have_text(page_1.title)
+        expect(row_2).to have_text(page_2.title)
+        expect(row_3).to have_text(page_3.title)
+
+        expect(row_1).to_not have_button("↑")
+        expect(row_1).to     have_button("↓")
+        expect(row_2).to     have_button("↑")
+        expect(row_2).to     have_button("↓")
+        expect(row_3).to     have_button("↑")
+        expect(row_3).to_not have_button("↓")
+
+        row_2.click_button("↑")
+
+        expect(page_1.reload.position).to eql(2)
+        expect(page_2.reload.position).to eql(1)
+        expect(page_3.reload.position).to eql(3)
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+
+        expect(row_1).to have_text(page_2.title)
+        expect(row_2).to have_text(page_1.title)
+        expect(row_3).to have_text(page_3.title)
+
+        expect(row_1).to_not have_button("↑")
+        expect(row_1).to     have_button("↓")
+        expect(row_2).to     have_button("↑")
+        expect(row_2).to     have_button("↓")
+        expect(row_3).to     have_button("↑")
+        expect(row_3).to_not have_button("↓")
+      end
+
+      it "moves pages down" do
+        page_1 = create(:page)
+        page_2 = create(:page)
+        page_3 = create(:page)
+
+        # Self-checks.
+        #
+        expect(page_1.position).to eql(1)
+        expect(page_2.position).to eql(2)
+        expect(page_3.position).to eql(3)
+
+        visit(admin_pages_path())
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+
+        expect(row_1).to have_text(page_1.title)
+        expect(row_2).to have_text(page_2.title)
+        expect(row_3).to have_text(page_3.title)
+
+        expect(row_1).to_not have_button("↑")
+        expect(row_1).to     have_button("↓")
+        expect(row_2).to     have_button("↑")
+        expect(row_2).to     have_button("↓")
+        expect(row_3).to     have_button("↑")
+        expect(row_3).to_not have_button("↓")
+
+        row_1.click_button("↓")
+
+        expect(page_1.reload.position).to eql(2)
+        expect(page_2.reload.position).to eql(1)
+        expect(page_3.reload.position).to eql(3)
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+
+        expect(row_1).to have_text(page_2.title)
+        expect(row_2).to have_text(page_1.title)
+        expect(row_3).to have_text(page_3.title)
+
+        expect(row_1).to_not have_button("↑")
+        expect(row_1).to     have_button("↓")
+        expect(row_2).to     have_button("↑")
+        expect(row_2).to     have_button("↓")
+        expect(row_3).to     have_button("↑")
+        expect(row_3).to_not have_button("↓")
+      end
     end # 'context "ordering" do'
   end # 'context "lists" do'"
 end

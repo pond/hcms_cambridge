@@ -9,7 +9,7 @@
   <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
 
   <dt>Phone number</dt>
-  <dd><%= @phone.presence || 'Not given' %></dd>
+  <dd><%= @phone.present? ? link_to(@phone, "tel:#{@phone}") : 'Not given' %></dd>
 
   <% unless @menu.blank? %>
     <dt><%= @page.form_selection_list_label.presence || 'Menu selection' %></dt>

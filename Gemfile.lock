@@ -93,6 +93,7 @@ GEM
     benchmark (0.4.1)
     bigdecimal (3.2.2)
     bindex (0.8.1)
+    browser (6.2.0)
     builder (3.3.0)
     capybara (3.40.0)
       addressable
@@ -463,6 +464,7 @@ PLATFORMS
 DEPENDENCIES
   acts_as_list (~> 1.2)
   awesome_print
+  browser
   capybara (~> 3.40)
   capybara-screenshot (~> 1.0)
   carrierwave (~> 3.1)

@@ -22,10 +22,10 @@
           <%
             nav_list_classes = %w{pure-menu-item pure-menu-allow-hover}
             nav_list_classes << 'pure-menu-has-children' if top_level_page.children_for_navigation.any?
-
-            if content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.parent.try(:id))
-              nav_list_classes << 'current'
-            end
+            nav_list_classes << 'current' if (
+              (content.is_a?(Article) && (top_level_page.id == content.page_id)) ||
+              (content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.parent.try(:id)))
+            )
 
             top_level_page_title_to_show = if top_level_page == @page
               @page.displayed_revision.title
