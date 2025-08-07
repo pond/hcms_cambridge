@@ -36,6 +36,11 @@ class Revision < ApplicationRecord
   scope :published, -> { where(published: true ) }
   scope :current,   -> { where(current:   true ) }
 
+  # These just help with tests and aren't expected to be used otherwise.
+  #
+  scope :for_pages,    -> { where(revisable_type: 'Page') }
+  scope :for_articles, -> { where(revisable_type: 'Article') }
+
   # Columns (as Strings) which can be merged in from owning records. Might be
   # used to e.g. create a Revision temporarily from a Page's revisable
   # attributes - title, body and navigation_title.

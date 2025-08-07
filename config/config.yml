@@ -6,8 +6,8 @@ logo_w:            '160'
 logo_h:            '160'
 
 mail_domain:       'winesentience.com'
-booking_email:     'ahodgkin@gmail.com' # 'stephen@winesentience.com'
-contact_email:     'ahodgkin@gmail.com' # 'stephen@winesentience.com'
+booking_email:     'stephen@winesentience.com'
+contact_email:     'stephen@winesentience.com'
 contact_tel_human: '021 488 855'
 contact_tel_full:  '+6421488855'
 

@@ -9,6 +9,6 @@ FactoryBot.define do
     association :page
 
     raw_editor         { false }
-    article_hero_image { Rack::Test::UploadedFile.new(Rails.root.join('spec', 'fixtures', 'example.jpg')) }
+    article_hero_image { Rack::Test::UploadedFile.new(Rails.root.join("spec", "fixtures", "example.jpg")) }
   end
 end

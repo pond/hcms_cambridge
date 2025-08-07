@@ -168,7 +168,7 @@ end
 
 # Fill the given text into the Redactor rich text editor.
 #
-def spechelp_fill_in_redactor(body)
+def spechelp_fill_in_redactor(body, for_type: 'page')
   editor = find(:css, ".redactor_container .redactor-in")
   editor.click()
 
@@ -185,7 +185,7 @@ def spechelp_fill_in_redactor(body)
   # Must wait for those keys to be processed by Redactor and written to
   # the hidden textarea field for the page body.
   #
-  expect(page).to have_field("page_body", visible: false, with: /#{body}/)
+  expect(page).to have_field("#{for_type}_body", visible: false, with: /#{body}/)
 end
 
 # Given a String which might contain HTML or entities, return the plain text

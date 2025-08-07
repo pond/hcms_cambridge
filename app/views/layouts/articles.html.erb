@@ -17,9 +17,9 @@
     <footer>
       <% content_for :signed_in_cms_menu do %>
         <%= artshelp_edit_link_for(@article, params) %> |
-        <%= link_to 'New blog article', new_admin_page_article_path() %> |
-        <%= link_to 'List articles', admin_page_articles_path() %> |
-        <%= link_to 'New page', new_admin_page_path() %>
+        <%= link_to 'New blog article', new_admin_page_article_path(@article.page) %> |
+        <%= link_to 'List articles',    admin_page_articles_path(@article.page) %> |
+        <%= link_to 'All pages',        admin_pages_path() %>
       <% end %>
 
       <%= render partial: 'layouts/content_footer', locals: { content: @page } %>

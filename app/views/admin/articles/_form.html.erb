@@ -19,7 +19,8 @@
 
   <div class="field">
     <%= apphelp_label(f, :summary) %>
-    <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %><br>
+    <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+    <%= f.error_markup_for(:summary) %><br>
     <small><em>A brief, plain text (no styling) summary used in the list of blog articles</em></small>
   </div>
 

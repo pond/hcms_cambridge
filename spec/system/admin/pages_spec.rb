@@ -215,7 +215,7 @@ RSpec.describe "Admin - pages" do
           # easier than trying to simulate drag & drop - and we're here to test
           # our upload handling, not Redactor's UI implementation.
           #
-          image_path = Rails.root.join('spec', 'fixtures', 'example.jpg')
+          image_path = Rails.root.join("spec", "fixtures", "example.jpg")
           attach_file('file', image_path, make_visible: true)
         end
 
@@ -1040,6 +1040,8 @@ RSpec.describe "Admin - pages" do
       it "deletes with confirmation", js: true do
         p = create(:page)
 
+        expect(Revision.count).to eql(1) # (self-check)
+
         visit(admin_pages_path())
 
         accept_confirm do
@@ -1049,6 +1051,7 @@ RSpec.describe "Admin - pages" do
         spechelp_check_flash(:notice, "Page deleted")
 
         expect(Page.exists?(p.id)).to eql(false)
+        expect(Revision.count).to be_zero
       end
     end # 'context "actions" do'
 
