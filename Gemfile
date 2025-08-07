@@ -70,6 +70,14 @@ gem 'acts_as_list', '~> 1.2'
 #
 gem 'phony', '~> 2.22'
 
+# Monitoring and alerting.
+#
+#   https://rubygems.org/gems/sentry-ruby
+#   https://rubygems.org/gems/sentry-rails
+#
+gem 'sentry-ruby'
+gem 'sentry-rails'
+
 group :development do
   gem 'web-console'
   gem 'mailcatcher', '~> 0.10'

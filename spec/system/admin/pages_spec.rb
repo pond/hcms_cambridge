@@ -1006,14 +1006,14 @@ RSpec.describe "Admin - pages" do
     end
   end
 
-  xcontext "lists" do
-    xcontext "display" do
+  context "lists" do
+    context "display" do
     end # 'context "display" do'
 
-    xcontext "actions" do
+    context "actions" do
     end # 'context "actions" do'
 
-    xcontext "ordering" do
+    context "ordering" do
     end # 'context "ordering" do'
   end # 'context "lists" do'"
 end
