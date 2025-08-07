@@ -2,10 +2,22 @@
 # will be either a page fetch where the path equates to slug,
 
 class RedirectionsController < ApplicationController
+
+  after_action :create_page_impression
+
   def show
     path = params[:path]
 
-    if path.start_with?('blog/')
+    if path == 'blog' || path == 'blog/'
+      first_blog_page = Page.find_by_page_type(Page::PAGE_TYPE_BLOG)
+
+      if first_blog_page.nil?
+        render_not_found()
+      else
+        redirect_to page_path(id: first_blog_page.slug)
+      end
+
+    elsif path.start_with?('blog/')
       article_slug = path.split('/').last # Strip off e.g. dates - "https://.../blog/2025/08/04/some-slug-here"
       article      = Article.find_by_slug(article_slug)
 
@@ -14,6 +26,7 @@ class RedirectionsController < ApplicationController
       else
         redirect_to page_article_path(page_id: article.page.slug, id: article.slug)
       end
+
     else
       probable_page_slug = path
       page               = Page.find_by_slug(probable_page_slug)
@@ -26,6 +39,10 @@ class RedirectionsController < ApplicationController
     end
   end
 
+  # ============================================================================
+  # PRIVATE INSTANCE METHODS
+  # ============================================================================
+  #
   private
 
     def render_not_found
@@ -34,4 +51,19 @@ class RedirectionsController < ApplicationController
         format.any  { head :not_found }
       end
     end
+
+    # Called indiscriminately on after-action. Helps us analyse any missing
+    # pages that hit the redirections controller but result in 404.
+    #
+    def create_page_impression
+      PageImpression.create!(
+        path:       request.path,
+        referrer:   request.referrer,
+        controller: controller_name,
+        action:     action_name,
+        params:     params.to_unsafe_hash.except('controller', 'action'),
+        status:     response.status
+      )
+    end
+
 end

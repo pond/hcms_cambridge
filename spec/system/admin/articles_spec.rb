@@ -165,6 +165,7 @@ RSpec.describe "Admin - articles" do
           expect(page).to have_css('input[name="file"][type="file"]', visible: false)
 
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+          find(".upload-redactor-box").click()
           attach_file('file', image_path, make_visible: true)
         end
 
@@ -189,6 +190,55 @@ RSpec.describe "Admin - articles" do
         expect(Redactor3Rails::Asset.first.data_content_type).to eql("image/jpeg")
       end
 
+      it "Redactor file uploads work" do
+        visit(new_admin_page_article_path(@page))
+
+        title   = "Quick Brown Fox"
+        summary = "Jumps Over The"
+        body    = "Lazy Dog"
+
+        fill_in("article_title",   with: title)
+        fill_in("article_summary", with: summary)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file('article_article_hero_image', image_path)
+
+        editor = find(:css, ".redactor_container .redactor-in")
+        editor.click()
+
+        find(:css, "#redactor_toolbar a.re-button.re-file").click()
+
+        within(".redactor-modal-box") do
+          expect(page).to have_css(".redactor-modal-header", text: "File")
+          expect(page).to have_css('input[name="file"][type="file"]', visible: false)
+
+          file_path = Rails.root.join("spec", "fixtures", "example.pdf")
+
+          find(".upload-redactor-box").click()
+          attach_file('file', file_path, make_visible: true)
+          fill_in("modal-file-title", with: "Example PDF file")
+        end
+
+        expect(page).to     have_field("article_body", visible: false, with: /example\.pdf/)
+        expect(page).to_not have_css(".redactor-modal-box")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft article created")
+
+        expect(Article.first.title  ).to eql(title)
+        expect(Article.first.slug   ).to eql(title.parameterize)
+        expect(Article.first.summary).to eql(summary)
+        expect(Article.first.body   ).to include('/example.pdf" data-file="')
+        expect(Article.first.body   ).to include(">Example PDF file</a>")
+
+        expect(Article.first.revisions.size           ).to eql(1)
+        expect(Article.first.revisions.first.current  ).to eql(true)
+        expect(Article.first.revisions.first.published).to eql(false)
+
+        expect(Redactor3Rails::Asset.count                  ).to eql(1)
+        expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
+        expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
+      end
     end # "context "dynamic behaviour", js: true do"
   end # "context "creation" do"
 
@@ -389,52 +439,57 @@ RSpec.describe "Admin - articles" do
     end # "context "navigation with many revisions" do"
 
     it "can roll back and edit, creating a new draft after a published revision" do
-      visit(admin_page_article_path(@page, article))
+      visit(new_admin_page_article_path(@page))
 
-      title = "Quick Brown Fox"
-      body  = "<p>Lazy Dog</p>"
+      title   = "Quick Brown Fox"
+      summary = "Jumps Over The"
+      body    = "<p>Lazy Dog</p>"
 
-      fill_in("article_title", with: title)
-      fill_in("article_body",  with: body)
+      fill_in("article_title",   with: title)
+      fill_in("article_summary", with: summary)
+      fill_in("article_body",    with: body)
 
-      click_on("Publish page")
-      spechelp_check_flash(:notice, "New page published")
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file('article_article_hero_image', image_path)
 
-      expect(    Page.count).to eql(1)
-      expect(Revision.count).to eql(1)
+      click_on("Publish article")
+      spechelp_check_flash(:notice, "New article published")
 
-      find(:css, "section.footer_content nav.cms_menu").click_on("Edit")
+      expect(              Article.count).to eql(1)
+      expect(Revision.for_articles.count).to eql(1)
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit article")
 
       fill_in("article_title", with: title + " 2")
 
-      click_on("Publish page")
-      spechelp_check_flash(:notice, "Page changes published")
+      click_on("Publish article")
+      spechelp_check_flash(:notice, "Article changes published")
 
-      expect(    Page.count).to eql(1)
-      expect(Revision.count).to eql(2)
+      expect(              Article.count).to eql(1)
+      expect(Revision.for_articles.count).to eql(2)
 
-      expect(Revision.pluck(:published)).to eql([true, false])
-      expect(Revision.pluck(:current  )).to eql([true, false])
+      expect(Revision.for_articles.pluck(:published)).to eql([true, false])
+      expect(Revision.for_articles.pluck(:current  )).to eql([true, false])
 
       within "#publishing-info" do
         click_on("←")
       end
 
-      find(:css, "section.footer_content nav.cms_menu").click_on("Edit using this revision")
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit using this article revision")
 
       expect(page).to have_field("article_title", with: title) # (without the newer revision's " 2" appended)
 
       fill_in("article_title", with: title + " 3")
 
-      click_on("Publish page")
-      spechelp_check_flash(:notice, "Page changes published")
+      click_on("Publish article")
+      spechelp_check_flash(:notice, "Article changes published")
 
-      expect(    Page.count).to eql(1)
-      expect(Revision.count).to eql(3)
+      expect(              Article.count).to eql(1)
+      expect(Revision.for_articles.count).to eql(3)
 
-      expect(Revision.pluck(:title    )).to eql([title + " 3", title + " 2", title])
-      expect(Revision.pluck(:published)).to eql([true, false, false])
-      expect(Revision.pluck(:current  )).to eql([true, false, false])
+      expect(Revision.for_articles.pluck(:title    )).to eql([title + " 3", title + " 2", title])
+      expect(Revision.for_articles.pluck(:published)).to eql([true, false, false])
+      expect(Revision.for_articles.pluck(:current  )).to eql([true, false, false])
     end
 
     # Copy-paste of the above test, but note the second edit is saved as a
@@ -710,9 +765,11 @@ RSpec.describe "Admin - articles" do
 
         # Title / Published? / Draft? / In menu? / Actions
         #
-        expect(row_1).to have_text("#{article_3.title} No Yes Show Edit Delete", exact: true)
+        # Note reverse order - created-at DESC sorting.
+        #
+        expect(row_1).to have_text("#{article_3.title} Yes Yes Show Edit Delete", exact: true)
         expect(row_2).to have_text("#{article_2.title} Yes No Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{article_1.title} Yes Yes Show Edit Delete", exact: true)
+        expect(row_3).to have_text("#{article_1.title} No Yes Show Edit Delete", exact: true)
 
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
@@ -722,10 +779,16 @@ RSpec.describe "Admin - articles" do
         expect(row_3.find(:css, "> td:nth-child(4)")).to have_link("Edit", href: edit_admin_page_article_path(page_id: @page.id, id: article_1.id))
       end
 
-      xit "links to the blog page" do
+      it "links to the blog page" do
+        visit(admin_page_articles_path(@page))
+
+        expect(page).to have_link("Visit blog page", href: admin_page_path(@page.slug))
       end
 
-      xit "links to the main 'all pages' list" do
+      it "links to the main 'all pages' list" do
+        visit(admin_page_articles_path(@page))
+
+        expect(page).to have_link('Go back to "All pages" list', href: admin_pages_path())
       end
     end # 'context "display" do'
 

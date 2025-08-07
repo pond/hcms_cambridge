@@ -216,6 +216,7 @@ RSpec.describe "Admin - pages" do
           # our upload handling, not Redactor's UI implementation.
           #
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+          find(".upload-redactor-box").click()
           attach_file('file', image_path, make_visible: true)
         end
 
@@ -241,6 +242,52 @@ RSpec.describe "Admin - pages" do
         expect(Redactor3Rails::Asset.count                  ).to eql(1)
         expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.jpg")
         expect(Redactor3Rails::Asset.first.data_content_type).to eql("image/jpeg")
+      end
+
+      it "Redactor file uploads work" do
+        visit(new_admin_page_path())
+
+        title            = "Quick Brown Fox"
+        navigation_title = "Jumps Over The"
+        body             = "Lazy Dog"
+
+        fill_in("page_title",            with: title)
+        fill_in("page_navigation_title", with: navigation_title)
+
+        editor = find(:css, ".redactor_container .redactor-in")
+        editor.click()
+
+        find(:css, "#redactor_toolbar a.re-button.re-file").click()
+
+        within(".redactor-modal-box") do
+          expect(page).to have_css(".redactor-modal-header", text: "File")
+          expect(page).to have_css('input[name="file"][type="file"]', visible: false)
+
+          file_path = Rails.root.join("spec", "fixtures", "example.pdf")
+
+          find(".upload-redactor-box").click()
+          attach_file('file', file_path, make_visible: true)
+          fill_in("modal-file-title", with: "Example PDF file")
+        end
+
+        expect(page).to     have_field("page_body", visible: false, with: /example\.pdf/)
+        expect(page).to_not have_css(".redactor-modal-box")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft page created")
+
+        expect(Page.first.title           ).to eql(title)
+        expect(Page.first.navigation_title).to eql(navigation_title)
+        expect(Page.first.body            ).to include('/example.pdf" data-file="')
+        expect(Page.first.body            ).to include(">Example PDF file</a>")
+
+        expect(Page.first.revisions    ).to match_array(Revision.all)
+        expect(Revision.first.current  ).to eql(true)
+        expect(Revision.first.published).to eql(false)
+
+        expect(Redactor3Rails::Asset.count                  ).to eql(1)
+        expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
+        expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
       end
 
       context "page type" do
@@ -1019,7 +1066,7 @@ RSpec.describe "Admin - pages" do
 
         # Title / Published? / Draft? / In menu? / Actions
         #
-        expect(row_1).to have_text("#{page_1.title} No Yes No Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{page_1.title} Yes No No Show Edit Delete", exact: true)
         expect(row_2).to have_text("#{page_2.title} No Yes No Show Edit Delete", exact: true)
         expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show Edit Delete", exact: true)
         expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show Edit Delete", exact: true) # "— " prefix for is-child
@@ -1028,8 +1075,8 @@ RSpec.describe "Admin - pages" do
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
         #
-        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes", href: admin_page_path(page_1.id, revision: page_1.revisions.last.id))
-        expect(row_2.find(:css, "> td:nth-child(7)")).to have_link("Show", href: admin_page_path(page_2.slug))
+        expect(row_1.find(:css, "> td:nth-child(7)")).to have_link("Show", href: admin_page_path(page_1.slug))
+        expect(row_2.find(:css, "> td:nth-child(3)")).to have_link("Yes", href: admin_page_path(page_2.id, revision: page_2.revisions.last.id))
         expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit", href: edit_admin_page_path(page_3.id))
         expect(row_4.find(:css, "> td:nth-child(8)")).to have_link("Delete", href: admin_page_path(page_4.id))
         expect(row_5.find(:css, "> td:nth-child(7)")).to have_link("Articles", href: admin_page_articles_path(page_5.id))

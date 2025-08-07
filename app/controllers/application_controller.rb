@@ -33,10 +33,17 @@ class ApplicationController < ActionController::Base
 
       return if user_signed_in? # Don't record admin user (site owner) meanderings!
 
-      browser = Browser.new(request.user_agent, accept_language: request.env["HTTP_ACCEPT_LANGUAGE"].presence)
+      browser = Browser.new(request.user_agent, accept_language: request.env['HTTP_ACCEPT_LANGUAGE'].presence)
       return if browser.bot?
 
-      PageImpression.record!(request.path)
+      PageImpression.create!(
+        path:       request.path,
+        referrer:   request.referrer,
+        controller: controller_name,
+        action:     action_name,
+        params:     params.to_unsafe_hash.except('controller', 'action'),
+        status:     response.status
+      )
 
       # Or record to Sentry via e.g.:
       #

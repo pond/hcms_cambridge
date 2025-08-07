@@ -31,6 +31,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_07_045139) do
   create_table "page_impressions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "path", null: false
+    t.text "referrer"
+    t.text "controller", null: false
+    t.text "action", null: false
+    t.jsonb "params", null: false
+    t.integer "status", null: false
     t.index ["path"], name: "index_page_impressions_on_path"
   end
 
