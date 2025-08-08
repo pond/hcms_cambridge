@@ -1687,6 +1687,7 @@ $R.opts = {
     removeScript: true,
     removeNewLines: false,
     removeComments: true,
+    removeDataRedactorTypes: true,
     replaceTags: {
         'b': 'strong',
         'i': 'em',
@@ -6848,7 +6849,7 @@ $R.add('class', 'cleaner.figure', {
         var $node = $R.dom(node);
         var type = $node.attr('data-redactor-type');
         var removed = ['image', 'widget', 'line', 'video', 'code', 'form', 'table'];
-        if (type && removed.indexOf(type) !== -1)
+        if (this.opts.removeDataRedactorTypes && type && removed.indexOf(type) !== -1)
         {
             $node.removeAttr('data-redactor-type');
         }
