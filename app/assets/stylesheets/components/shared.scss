@@ -49,8 +49,12 @@ hr {
 }
 
 figcaption {
+  margin-top: 0.5em;
   font-style: italic;
   font-size: 80%;
+  text-transform: uppercase;
+  display: inline-block;
+  width: 80%;
   color: $h1_and_figure_colour;
 }
 
@@ -787,6 +791,10 @@ nav {
   figure {
     float: none !important;
     margin: 10px auto !important;
+
+    figcaption {
+      width: 100%;
+    }
   }
 
   div.two_column {
