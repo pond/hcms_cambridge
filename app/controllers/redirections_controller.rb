@@ -9,12 +9,12 @@ class RedirectionsController < ApplicationController
     path = params[:path]
 
     if path == 'blog' || path == 'blog/'
-      first_blog_page = Page.find_by_page_type(Page::PAGE_TYPE_BLOG)
+      first_blog_page = Page.order(created_at: :asc).where(page_type: Page::PAGE_TYPE_BLOG).first
 
       if first_blog_page.nil?
         render_not_found()
       else
-        redirect_to page_path(id: first_blog_page.slug)
+        redirect_to page_path(id: first_blog_page.slug), status: :moved_permanently
       end
 
     elsif path.start_with?('blog/')
@@ -24,17 +24,17 @@ class RedirectionsController < ApplicationController
       if article.nil?
         render_not_found()
       else
-        redirect_to page_article_path(page_id: article.page.slug, id: article.slug)
+        redirect_to page_article_path(page_id: article.page.slug, id: article.slug), status: :moved_permanently
       end
 
     else
       probable_page_slug = path
       page               = Page.find_by_slug(probable_page_slug)
 
-      if article.nil?
+      if page.nil?
         render_not_found()
       else
-        redirect_to page_path(id: page.slug)
+        redirect_to page_path(id: page.slug), status: :moved_permanently
       end
     end
   end

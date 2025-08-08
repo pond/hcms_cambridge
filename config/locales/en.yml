@@ -22,8 +22,8 @@
 en:
   time:
     formats:
-      short: "%B %-d %Y, %k:%M%P"
-      short_no_year: "%B %-d, %H:%M"
+      short: "%b %-d %Y, %-l:%M%P"
+      short_no_year: "%b %-d, %-l:%M%P"
 
   activemodel:
     models:
@@ -36,6 +36,7 @@ en:
         path: "Path"
         count: "Hit count"
         success: "Success?"
+        referrers: "Referrals"
 
       forms/base:
         # Short forms for e.g. validation errors

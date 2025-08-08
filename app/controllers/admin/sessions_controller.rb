@@ -1,8 +1,8 @@
 class Admin::SessionsController < ::Devise::SessionsController
   layout 'admin'
 
-  # Via Devise
-  before_action :authenticate_admin_user!
+  before_action :authenticate_admin_user! # (via Devise)
+  skip_after_action :record_page_impression
 
   # Sleep a little to reduce brute force attack throughput, along with a bigger
   # sleep for bad credentials. Randomisation to thwart timing attack attempts.

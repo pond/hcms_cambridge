@@ -7,14 +7,21 @@
 
   <dt><%= Admin::Statistic.human_attribute_name(:success) %><td>
   <dd>
-    <% status_codes = PageImpression.where(path: @statistic.source.path).distinct.pluck(:status).sort.join(', ') %>
-    <%= tag.code(status_codes) %>
+    <%
+      status_codes = PageImpression
+        .unscope(:order)
+        .where(path: @statistic.source.path)
+        .distinct
+        .pluck(:status)
+        .sort
+    %>
+    <%= tag.code(status_codes.join(', ')) %>
     <% if status_codes.size > 1 %>
       (mixed)
     <% elsif status_codes.first < 400 %>
-      Yes
+      (yes)
     <% else %>
-      No
+      (no)
     <% end %>
   </dd>
 

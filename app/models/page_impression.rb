@@ -24,4 +24,5 @@
 # for vulnerabilities.
 #
 class PageImpression < ApplicationRecord
+  default_scope -> { order(id: :asc) }
 end

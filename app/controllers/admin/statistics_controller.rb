@@ -4,10 +4,13 @@ class Admin::StatisticsController < ApplicationController
   before_action :authenticate_admin_user! # (via Devise)
 
   def index
-    statistics = {}
-    batch_size = 1000
-    start_id   = PageImpression.first.id
-    end_id     = PageImpression.last.id
+    statistics  = {}
+    @statistics = []
+    batch_size  = 1000
+    start_id    = PageImpression.first&.id
+    end_id      = PageImpression.last&.id
+
+    return if start_id.nil?
 
     # Yes, this is inefficient but it does work in parameterised pagination via
     # the batch size and ID ranges. We don't expect a huge number of discrete
@@ -37,14 +40,14 @@ class Admin::StatisticsController < ApplicationController
   #
   def show
     page_impression = PageImpression.find(params[:id])
-    page_impression = PageImpression.where(path: page_impression.path).order(id: :asc).last # Switch to most recent on same path
+    page_impression = PageImpression.where(path: page_impression.path).last # Switch to most recent on same path
 
     @statistic = generate_statistic_for(page_impression, including_count: true)
     @referrers = PageImpression
       .where(path: page_impression.path)
       .where.not(referrer: [nil, ""])
       .group(:referrer)
-      .order(Arel.sql('COUNT(*) ASC, referrer ASC'))
+      .reorder(Arel.sql('COUNT(*) DESC, referrer ASC'))
       .pluck(:referrer, Arel.sql('COUNT(*)'))
       .to_h
   end
@@ -63,9 +66,9 @@ class Admin::StatisticsController < ApplicationController
           end
           location = "#{model_class.model_name.human} - #{instance.title}" if instance.title.present?
         end
-        location ||= "#{model_class&.model_name&.human || controller.capitalize} - #{page_impression.action}"
+        location ||= "#{model_class&.model_name&.human || controller.capitalize} - #{mapped_action page_impression.action}"
       else
-        location = page_impression.controller.capitalize
+        location = "#{page_impression.controller&.capitalize} - #{mapped_action page_impression.action}"
       end
 
       Admin::Statistic.new(
@@ -74,6 +77,16 @@ class Admin::StatisticsController < ApplicationController
         count:    including_count ? PageImpression.where(path: page_impression.path).count : 0,
         success:  (page_impression.status < 400),
       )
+    end
+
+    def mapped_action(action)
+      if action.blank?
+        'none'
+      elsif action == 'index'
+        'list'
+      else
+        action
+      end
     end
 
 end
