@@ -6,9 +6,14 @@ class RedirectionsController < ApplicationController
   after_action :create_page_impression
 
   def show
-    path = params[:path]
+    path = params[:path] || ''
+    path.chomp!('.htm')
+    path.chomp!('.html')
 
-    if path == 'blog' || path == 'blog/'
+    if File.extname(path).present?
+      render_not_found()
+
+    elsif path == 'blog' || path == 'blog/'
       first_blog_page = Page.order(created_at: :asc).where(page_type: Page::PAGE_TYPE_BLOG).first
 
       if first_blog_page.nil?

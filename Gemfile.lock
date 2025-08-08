@@ -295,6 +295,7 @@ GEM
     pg (1.6.1-x86_64-darwin)
     pg (1.6.1-x86_64-linux)
     pg (1.6.1-x86_64-linux-musl)
+    phonelib (0.10.11)
     phony (2.22.3)
     pp (0.6.2)
       prettyprint
@@ -483,6 +484,7 @@ DEPENDENCIES
   mini_magick (~> 5.3)
   ostruct
   pg
+  phonelib (~> 0.10)
   phony (~> 2.22)
   puma
   rails (>= 8, < 9)

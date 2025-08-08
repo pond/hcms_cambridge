@@ -1,5 +1,5 @@
 time_zone:         'Pacific/Auckland'
-country_dial_code: '64'
+country_code:      'NZ' # ISO 3166 alpha-2
 
 site_name:         'Wine Sentience'
 logo_w:            '160'

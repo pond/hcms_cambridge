@@ -66,9 +66,9 @@ gem 'acts_as_list', '~> 1.2'
 
 # Phone number validation.
 #
-#   https://rubygems.org/gems/phony
+#   https://rubygems.org/gems/phonelib
 #
-gem 'phony', '~> 2.22'
+gem 'phonelib', '~> 0.10'
 
 # Monitoring and alerting.
 #

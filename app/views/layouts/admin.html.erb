@@ -37,7 +37,7 @@
         <%= link_to('Pages', admin_pages_path()) %> |
         <%= link_to('Statistics', admin_statistics_path()) %> |
         <% if user_signed_in? %>
-          <%= link_to('Log out', destroy_admin_user_session_path(), method: :delete) %> |
+          <%= link_to('Log out', destroy_admin_user_session_path(), method: :delete) %>
         <% end %>
       </section>
     </footer>

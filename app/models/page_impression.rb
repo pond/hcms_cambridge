@@ -25,4 +25,6 @@
 #
 class PageImpression < ApplicationRecord
   default_scope -> { order(id: :asc) }
+
+  def title; end # This is for tests only
 end

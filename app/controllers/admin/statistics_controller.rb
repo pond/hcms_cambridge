@@ -3,6 +3,11 @@ class Admin::StatisticsController < ApplicationController
 
   before_action :authenticate_admin_user! # (via Devise)
 
+  # These can be found by ID or slug and, for "show", their titles are used in
+  # the UI instead of a generic value based on controller name and action.
+  #
+  SUPPORTED_FINDABLE_CLASSES = [Page, Article]
+
   def index
     statistics  = {}
     @statistics = []
@@ -55,20 +60,15 @@ class Admin::StatisticsController < ApplicationController
   private
 
     def generate_statistic_for(page_impression, including_count: false)
-      if page_impression.controller == 'pages' || page_impression.controller == 'articles'
+      location = "#{page_impression.controller.humanize} - #{mapped_action(page_impression.action)}"
+
+      if page_impression.action == 'show' && page_impression.params.key?("id")
         model_class = page_impression.controller.classify.safe_constantize
 
-        if page_impression.action == 'show' && model_class.present? && page_impression.params.key?("id")
-          instance = if model_class.respond_to?(:find_by_id_or_slug!)
-            model_class.find_by_id_or_slug!(page_impression.params["id"]) rescue nil
-          else
-            model_class.find(page_impression.params["id"])
-          end
-          location = "#{model_class.model_name.human} - #{instance.title}" if instance.title.present?
+        if SUPPORTED_FINDABLE_CLASSES.include?(model_class)
+          instance = model_class.find_by_id_or_slug!(page_impression.params["id"]) rescue nil
+          location = "#{model_class.model_name.human} - #{instance.title}" if instance.present?
         end
-        location ||= "#{model_class&.model_name&.human || controller.capitalize} - #{mapped_action page_impression.action}"
-      else
-        location = "#{page_impression.controller&.capitalize} - #{mapped_action page_impression.action}"
       end
 
       Admin::Statistic.new(
@@ -80,9 +80,7 @@ class Admin::StatisticsController < ApplicationController
     end
 
     def mapped_action(action)
-      if action.blank?
-        'none'
-      elsif action == 'index'
+      if action == 'index'
         'list'
       else
         action

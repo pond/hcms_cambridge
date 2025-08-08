@@ -23,5 +23,7 @@ Rails.application.routes.draw do
     devise_for :users
   end
 
-  match '*path', to: 'redirections#show', via: :all, constraints: { format: :html }
+  get '*path', to: 'redirections#show', format: false, constraints: lambda { | req |
+    req.format.html? && ! req.xhr?
+  }
 end

@@ -28,7 +28,7 @@
         <% else %>
           <%= link_to 'New page', new_admin_page_path() %> |
         <% end %>
-        <%= link_to 'All pages', admin_pages_path() %>
+        <%= link_to 'Page management', admin_pages_path() %>
       <% end %>
 
       <%= render partial: 'layouts/content_footer', locals: { content: @page } %>

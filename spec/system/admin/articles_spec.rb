@@ -49,8 +49,7 @@ RSpec.describe "Admin - articles" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing article draft", href: edit_admin_page_article_path(Page.first, Article.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New blog article",               href: new_admin_page_article_path(Page.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",                  href: admin_page_articles_path(Page.first))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("All pages",                      href: admin_pages_path())
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Log out",                        href: destroy_admin_user_session_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",                href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing article draft")
 

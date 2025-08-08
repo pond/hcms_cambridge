@@ -36,7 +36,7 @@ RSpec.describe "Admin - pages" do
 
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing draft", href: edit_admin_page_path(Page.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New page",               href: new_admin_page_path())
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("All pages",              href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",        href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing draft")
 
@@ -1037,10 +1037,10 @@ RSpec.describe "Admin - pages" do
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
 
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New article",    href: new_admin_page_article_path(page_id: p.id))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",  href: admin_page_articles_path(page_id: p.id))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit blog page", href: edit_admin_page_path(p))
-      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("All pages",      href: admin_pages_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("New article",     href: new_admin_page_article_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",   href: admin_page_articles_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit blog page",  href: edit_admin_page_path(p))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management", href: admin_pages_path())
     end
   end
 

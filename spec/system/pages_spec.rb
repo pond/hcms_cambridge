@@ -201,6 +201,14 @@ RSpec.describe "Pages" do
   end # 'context "normal pages" do'
 
   context "contact forms" do
+    around :each do | example |
+      old_country_code = Phonelib.default_country
+      Phonelib.default_country = "NZ"
+      example.run()
+    ensure
+      Phonelib.default_country = old_country_code
+    end
+
     before :each do
       allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
 
@@ -225,9 +233,24 @@ RSpec.describe "Pages" do
       expect(page).to have_css("div.field_error_messages", text: "E-mail address must be provided")
       expect(page).to have_css("div.field_error_messages", text: "Message must be provided")
 
+      fill_in("forms_contact_phone", with: "123")
+      click_on("Send message")
+
+      expect(page).to have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
+      fill_in("forms_contact_phone", with: "021 000 000") # Given enforced NZ dial prefix, that's reasonable...
+      click_on("Send message")
+
+      expect(page).to_not have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
+      fill_in("forms_contact_phone", with: "07855 000 000") # ...but this is not, as that's UK format (+44)
+      click_on("Send message")
+
+      expect(page).to have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
       fill_in("forms_contact_name",    with: "Fred Flintstone")
       fill_in("forms_contact_email",   with: "fred@example.com")
-      fill_in("forms_contact_phone",   with: "+64 020 000 000")
+      fill_in("forms_contact_phone",   with: "+64 21 000 000")
       fill_in("forms_contact_message", with: "Quick Brown Fox")
 
       click_on("Send message")
@@ -241,12 +264,12 @@ RSpec.describe "Pages" do
 
       expect(delivered.text).to include("Fred Flintstone")
       expect(delivered.text).to include("fred@example.com")
-      expect(delivered.text).to include("+64 020 000 000")
+      expect(delivered.text).to include("+64 21 000 000")
       expect(delivered.text).to include("Quick Brown Fox")
 
       expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
       expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<dd><a href=\"tel:+64 020 000 000\">+64 020 000 000</a></dd>")
+      expect(delivered.html).to include("<dd><a href=\"tel:+64 21 000 000\">+64 21 000 000</a></dd>")
       expect(delivered.html).to include("<p>Quick Brown Fox</p>")
     end
 
@@ -357,6 +380,14 @@ RSpec.describe "Pages" do
   end # 'context "contact forms" do'
 
   context "booking forms" do
+    around :each do | example |
+      old_country_code = Phonelib.default_country
+      Phonelib.default_country = "NZ"
+      example.run()
+    ensure
+      Phonelib.default_country = old_country_code
+    end
+
     before :each do
       allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
 
@@ -383,9 +414,24 @@ RSpec.describe "Pages" do
       expect(page).to have_css("div.field_error_messages", text: "Name must be provided")
       expect(page).to have_css("div.field_error_messages", text: "E-mail address must be provided")
 
+      fill_in("forms_booking_phone", with: "123")
+      click_on("Send enquiry")
+
+      expect(page).to have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
+      fill_in("forms_booking_phone", with: "021 000 000") # Given enforced NZ dial prefix, that's reasonable...
+      click_on("Send enquiry")
+
+      expect(page).to_not have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
+      fill_in("forms_booking_phone", with: "07855 000 000") # ...but this is not, as that's UK format (+44)
+      click_on("Send enquiry")
+
+      expect(page).to have_css("div.field_error_messages", text: "Telephone number format not recognised")
+
       fill_in("forms_booking_name",  with: "Fred Flintstone")
       fill_in("forms_booking_email", with: "fred@example.com")
-      fill_in("forms_booking_phone", with: "+64 020 000 000")
+      fill_in("forms_booking_phone", with: "+64 021 000 000") # (note intentional "+64 0...", which should be accepted)
       fill_in("forms_booking_date",  with: "20/01/#{Date.today.year + 2}")
       fill_in("forms_booking_time",  with: "11:30")
       fill_in("forms_booking_notes", with: "Quick Brown Fox")
@@ -401,14 +447,14 @@ RSpec.describe "Pages" do
 
       expect(delivered.text).to include("Fred Flintstone")
       expect(delivered.text).to include("fred@example.com")
-      expect(delivered.text).to include("+64 020 000 000")
+      expect(delivered.text).to include("+64 021 000 000")
       expect(delivered.text).to include("20/01/#{Date.today.year + 2}")
       expect(delivered.text).to include("11:30")
       expect(delivered.text).to include("Quick Brown Fox")
 
       expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
       expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<dd><a href=\"tel:+64 020 000 000\">+64 020 000 000</a></dd>")
+      expect(delivered.html).to include("<dd><a href=\"tel:+64 021 000 000\">+64 021 000 000</a></dd>")
       expect(delivered.html).to include("<dt>Date</dt>")
       expect(delivered.html).to include("<dd>20/01/#{Date.today.year + 2}</dd>")
       expect(delivered.html).to include("<dt>Preferred time</dt>")

@@ -72,8 +72,11 @@ en:
       models:
         forms/contact:
           attributes:
-            phone:
-              format: "format not recognised; try adding the country code in front, e.g. \"64\" for NZ"
+            phone: &phone
+              invalid: "format not recognised; try adding the country code in front, e.g. \"+64\" for NZ or \"+44\" for the UK"
+        forms/booking:
+          attributes:
+            phone: *phone
 
   activerecord:
     models:

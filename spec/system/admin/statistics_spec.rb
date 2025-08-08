@@ -141,7 +141,7 @@ RSpec.describe "Admin - statistics" do
       PageImpression.create!(
         path:       "/foo-401",
         controller: "testone",
-        action:     "testtwo",
+        action:     "index",
         params:     {},
         status:     401
       )
@@ -178,7 +178,7 @@ RSpec.describe "Admin - statistics" do
       expect(table.find(:css, "tr:nth-child(1)")).to have_text("Article - #{@article_2.title} #{page_article_path(@page_2.slug, @article_2.slug)} Yes 2 Show", exact: true)
       expect(table.find(:css, "tr:nth-child(2)")).to have_text("Page - #{@page_1.title} #{page_path(@page_1.slug)} Yes 3 Show", exact: true)
       expect(table.find(:css, "tr:nth-child(3)")).to have_text("Testone - testtwo /foo-150 Yes 1 Show", exact: true)
-      expect(table.find(:css, "tr:nth-child(4)")).to have_text("Testone - testtwo /foo-401 No 1 Show", exact: true)
+      expect(table.find(:css, "tr:nth-child(4)")).to have_text("Testone - list /foo-401 No 1 Show", exact: true)
       expect(table.find(:css, "tr:nth-child(5)")).to have_text("Testone - testtwo /foo-450-and-500 No 2 Show", exact: true)
     end
 
@@ -203,14 +203,14 @@ RSpec.describe "Admin - statistics" do
       PageImpression.create!(
         path:       "/foo-401",
         controller: "testone",
-        action:     "testtwo",
+        action:     "edit",
         params:     {},
         status:     401
       )
 
       visit(admin_statistic_path(PageImpression.first))
 
-      expect(find(:css, "section.main_content h1")).to have_text("Testone - testtwo")
+      expect(find(:css, "section.main_content h1")).to have_text("Testone - edit")
       expect(find(:css, "section.main_content dl")).to have_text(PageImpression.first.path)
       expect(find(:css, "section.main_content dl")).to have_text("401 (no)")
       expect(find(:css, "section.main_content dl")).to have_text("Referrals None recorded")
@@ -253,6 +253,20 @@ RSpec.describe "Admin - statistics" do
       expect(find(:css, "section.main_content dl")).to have_text(PageImpression.first.path)
       expect(find(:css, "section.main_content dl")).to have_text("200 (yes)")
       expect(find(:css, "section.main_content dl")).to have_text("Referrals URL Number of referrals Aardvark 2 Zebra 1")
+    end
+
+    it "humanises a controller title" do
+      PageImpression.create!(
+        path:       "/page_impression/1",
+        controller: "page_impressions",
+        action:     "show",
+        params:     {"id" => 1},
+        status:     200
+      )
+
+      visit(admin_statistic_path(PageImpression.first))
+
+      expect(find(:css, "section.main_content h1")).to have_text("Page impressions - show")
     end
   end # 'context "navigation" do'
 end
