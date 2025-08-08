@@ -88,7 +88,7 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     awesome_print (1.9.2)
-    base64 (0.2.0)
+    base64 (0.3.0)
     bcrypt (3.1.20)
     benchmark (0.4.1)
     bigdecimal (3.2.2)
@@ -183,8 +183,8 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
-    fog-aws (3.32.0)
-      base64 (~> 0.2.0)
+    fog-aws (3.33.0)
+      base64 (>= 0.2, < 0.4)
       fog-core (~> 2.6)
       fog-json (~> 1.1)
       fog-xml (~> 0.1)
@@ -296,7 +296,6 @@ GEM
     pg (1.6.1-x86_64-linux)
     pg (1.6.1-x86_64-linux-musl)
     phonelib (0.10.11)
-    phony (2.22.3)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -485,7 +484,6 @@ DEPENDENCIES
   ostruct
   pg
   phonelib (~> 0.10)
-  phony (~> 2.22)
   puma
   rails (>= 8, < 9)
   recaptcha (~> 5.20)
