@@ -9,6 +9,7 @@
 html, body {
   height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 body {
@@ -457,7 +458,6 @@ footer {
 }
 
 a {
-  padding: 1px;
   word-break: break-word;
   text-decoration: none;
   color: $nav_link_base_colour;
@@ -776,6 +776,7 @@ nav {
     }
 
     &.social_menu {
+      margin-top: 5px;
       a {
         padding-left: 0;
         font-size: 1.8em;
