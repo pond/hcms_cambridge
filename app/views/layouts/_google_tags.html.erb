@@ -1,13 +1,23 @@
 <%
-  google_ad_id = ENV['GOOGLE_AD_ID']
-  unless google_ad_id.blank?
--%>
-<!-- Global site tag (gtag.js) - Google Ads: <%= google_ad_id %> -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-<%= google_ad_id %>"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-<%= google_ad_id %>');
-</script>
+  google_ad_id  = ENV['GOOGLE_AD_ID']
+  google_tag_id = ENV['GOOGLE_TAG_ID']
+%>
+<% unless google_ad_id.blank? %>
+  <!-- Global site tag (gtag.js) - Google Ads: <%= google_ad_id %> -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-<%= google_ad_id %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-<%= google_ad_id %>');
+  </script>
 <% end -%>
+<% unless google_tag_id.blank? %>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','<%= google_tag_id %>');</script>
+  <!-- End Google Tag Manager -->
+<% end %>
