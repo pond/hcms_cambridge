@@ -98,6 +98,46 @@ RSpec.describe "Pages" do
     end
   end # 'context "navigation" do'
 
+  context "header" do
+    before :each do
+      p = create(:page)
+      p.revisions.first.update!(published: true)
+    end
+
+    context "with GOOGLE_AD_ID defined" do
+      around :each do | example |
+        old_value = ENV["GOOGLE_AD_ID"]
+        ENV["GOOGLE_AD_ID"] = "XX-123456789-0"
+        example.run()
+      ensure
+        ENV["GOOGLE_AD_ID"] = old_value
+      end
+
+      it "includes Google scripting" do
+        visit(root_path())
+
+        expect(page).to have_css('script[src*="www.googletagmanager.com"]', visible: :all) # (to match with "page does not have CSS" test below)
+        expect(page).to have_css('script[src="https://www.googletagmanager.com/gtag/js?id=XX-123456789-0"]', visible: :all)
+      end
+    end # 'context "with GOOGLE_AD_ID defined" do'
+
+    context "with GOOGLE_AD_ID undefined" do
+      around :each do | example |
+        old_value = ENV["GOOGLE_AD_ID"]
+        ENV.delete("GOOGLE_AD_ID")
+        example.run()
+      ensure
+        ENV["GOOGLE_AD_ID"] = old_value
+      end
+
+      it "omits Google scripting" do
+        visit(root_path())
+
+        expect(page).to_not have_css('script[src*="www.googletagmanager.com"]', visible: :all)
+      end
+    end # 'context "with GOOGLE_AD_ID undefined" do'
+  end # 'context "header" do'
+
   context "footer" do
     before :each do
       create(:page)
