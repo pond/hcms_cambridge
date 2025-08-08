@@ -313,13 +313,18 @@ main, .redactor-box.redactor-styles-on {
    * acceptable ratio.
    */
 
-  iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
+  figure[data-redactor-type='video'] iframe {
     @include widescreen_video_block;
+    @include standard_shadow;
   }
 
-  iframe:not([src*='www.recaptcha.net']):not([title='widget']):not(.no_decorations) {
-    @include standard_shadow;
-    @include standard_spinner;
+  figure[data-redactor-type='widget'] {
+    img:not(.no_decorations), iframe:not(.no_decorations) {
+      @include standard_spinner;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   iframe[allowtransparency='true'], iframe.tickets {
