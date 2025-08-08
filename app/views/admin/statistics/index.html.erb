@@ -1,0 +1,30 @@
+<h1>Visitor statistics</h1>
+<h2>Summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th><%= Admin::Statistic.human_attribute_name(:location) %></th>
+      <th><%= Admin::Statistic.human_attribute_name(:path) %></th>
+      <th class="centre"><%= Admin::Statistic.human_attribute_name(:count) %></th>
+      <th class="centre"><%= Admin::Statistic.human_attribute_name(:success) %></th>
+      <th class="centre">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @statistics.each do | statistic | %>
+      <tr class="<%= cycle( 'even', 'odd' ) %>">
+        <td><%= statistic.location %></td>
+        <td><%= tag.code(statistic.source.path) %></td>
+        <td class="centre"><%= apphelp_boolean(statistic.success, no_class: 'boolean_no_highlight') %></td>
+        <td class="centre"><%= statistic.count %></td>
+        <td><%= link_to('Show', admin_statistic_path(statistic.source.id)) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'Go back to "All pages" list', admin_pages_path() %>

@@ -3,11 +3,11 @@ Rails.application.routes.draw do
 
   root 'pages#show'
 
-  resources :pages, only: [:show] do
-    resources :articles, only: [:show]
+  resources :pages, only: :show do
+    resources :articles, only: :show
   end
 
-  resources :by_titles, only: [:show]
+  resources :by_titles, only: :show
   post '/user_mails/:page_id', to: 'user_emails#create', as: :user_emails
 
   namespace :admin, path: 'hcms' do
@@ -18,9 +18,10 @@ Rails.application.routes.draw do
     end
 
     resources :move_pages, only: :update
+    resources :statistics, only: [:index, :show]
 
     devise_for :users
   end
 
-  match '*path', to: 'redirections#show', via: :all
+  match '*path', to: 'redirections#show', via: :all, constraints: { format: :html }
 end

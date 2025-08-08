@@ -31,6 +31,12 @@ en:
       forms/booking: "Booking enquiry"
 
     attributes:
+      admin/statistic:
+        location: "Location"
+        path: "Path"
+        count: "Hit count"
+        success: "Success?"
+
       forms/base:
         # Short forms for e.g. validation errors
         name: "Name"

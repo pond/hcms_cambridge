@@ -118,6 +118,20 @@ main.admin {
     tr.children.odd  { background: rgb( 210, 245, 210 ); }
   }
 
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    margin-bottom: 0.5em;
+  }
+
+  code {
+    font-size: 80%;
+    line-height: 150%;
+    font-family: "Menlo", monospace;
+  }
+
   span.boolean_no {
     font-weight: bold;
   }

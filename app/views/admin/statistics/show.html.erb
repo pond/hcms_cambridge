@@ -1,0 +1,49 @@
+<h1>Location &ldquo;<%= @statistic.location %>&rdquo;</h1>
+<h2>Statistics</h2>
+
+<dl>
+  <dt><%= Admin::Statistic.human_attribute_name(:path) %></dt>
+  <dd><%= tag.code(@statistic.source.path) %></dd>
+
+  <dt><%= Admin::Statistic.human_attribute_name(:success) %><td>
+  <dd>
+    <% status_codes = PageImpression.where(path: @statistic.source.path).distinct.pluck(:status).sort.join(', ') %>
+    <%= tag.code(status_codes) %>
+    <% if status_codes.size > 1 %>
+      (mixed)
+    <% elsif status_codes.first < 400 %>
+      Yes
+    <% else %>
+      No
+    <% end %>
+  </dd>
+
+  <dt><%= Admin::Statistic.human_attribute_name(:count) %></dt>
+  <dd><%= @statistic.count %></dd>
+
+  <dt><%= Admin::Statistic.human_attribute_name(:referrers) %></dt>
+  <dd>
+    <% if @referrers.empty? %>
+      None recorded
+    <% else %>
+      <table>
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>Number of referrals</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @referrers.each do | url, count | %>
+            <tr>
+              <td><%= tag.code(url) %></td>
+              <td><%= count %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </dd>
+</dl>
+
+<%= link_to 'Back', :back %>
