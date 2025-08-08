@@ -24,6 +24,7 @@ en:
     formats:
       short: "%b %-d %Y, %-l:%M%P"
       short_no_year: "%b %-d, %-l:%M%P"
+      date_only: "%b %-d %Y"
 
   activemodel:
     models:

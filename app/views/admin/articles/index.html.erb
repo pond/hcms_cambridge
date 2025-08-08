@@ -5,6 +5,7 @@
   <thead>
     <tr>
       <th>Title</th>
+      <th>Date</th>
       <th class="centre">Published?</th>
       <th class="centre">Has draft?</th>
       <th class="centre" colspan="2">Actions</th>
@@ -15,6 +16,7 @@
 <% @articles.each do | article | %>
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= article.title %></td>
+        <td><%= apphelp_human_time(article.created_at, date_only: true) %>
         <%= render partial: 'booleans', locals: { article: article } %>
         <%= render partial: 'actions', locals: { article: article } %>
       </tr>

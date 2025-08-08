@@ -1,6 +1,8 @@
 require "spec_helper.rb"
 
 RSpec.describe "Admin - articles" do
+  include ApplicationHelper
+
   before :each do
     allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
     spechelp_log_in()
@@ -766,16 +768,16 @@ RSpec.describe "Admin - articles" do
         #
         # Note reverse order - created-at DESC sorting.
         #
-        expect(row_1).to have_text("#{article_3.title} Yes Yes Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{article_2.title} Yes No Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{article_1.title} No Yes Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{article_3.title} #{apphelp_human_time(article_3.created_at, date_only: true)} Yes Yes Show Edit Delete", exact: true)
+        expect(row_2).to have_text("#{article_2.title} #{apphelp_human_time(article_2.created_at, date_only: true)} Yes No Show Edit Delete", exact: true)
+        expect(row_3).to have_text("#{article_1.title} #{apphelp_human_time(article_1.created_at, date_only: true)} No Yes Show Edit Delete", exact: true)
 
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
         #
-        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes", href: admin_page_article_path(@page, article_3, revision: article_3.revisions.last.id))
-        expect(row_2.find(:css, "> td:nth-child(4)")).to have_link("Show", href: admin_page_article_path(page_id: @page.slug, id: article_2.slug))
-        expect(row_3.find(:css, "> td:nth-child(4)")).to have_link("Edit", href: edit_admin_page_article_path(page_id: @page.id, id: article_1.id))
+        expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Yes", href: admin_page_article_path(@page, article_3, revision: article_3.revisions.last.id))
+        expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show", href: admin_page_article_path(page_id: @page.slug, id: article_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(5)")).to have_link("Edit", href: edit_admin_page_article_path(page_id: @page.id, id: article_1.id))
       end
 
       it "links to the blog page" do
