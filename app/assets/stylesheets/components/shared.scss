@@ -288,12 +288,12 @@ main, .redactor-box.redactor-styles-on {
   }
 
   figure {
-    margin: 0.5em 0; // (~align to top of text lines when floated)
+    margin: 0.4em 0 0.5em 0; // (~align to top of text lines when floated)
     padding: 0;
-    border-radius: 0.5em;
+    border-radius: 0.3em;
 
     > img {
-      border-radius: 0.5em;
+      border-radius: 0.3em;
     }
   }
 
