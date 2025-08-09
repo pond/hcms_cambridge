@@ -1863,6 +1863,7 @@ $R.lang['en'] = {
     "right": "Right",
     "center": "Center",
     "fill-width": "Fill width",
+    "override-width": "Set fixed width",
     "undo": "Undo",
     "redo": "Redo"
 };
@@ -16404,6 +16405,10 @@ $R.add('module', 'image', {
                             <option value="fill">## fill-width ##</option> \
                         </select> \
                     </div> \
+                    <div class="form-item form-item-overridewidth"> \
+                        <label for="modal-image-overridewidth">## override-width ##</label> \
+                        <input type="text" id="modal-image-overridewidth" name="overridewidth" aria-label="## override-width ##" /> \
+                    </div> \
                     <div class="form-item form-item-link"> \
                         <label for="modal-image-url">## link ##</label> \
                         <input type="text" id="modal-image-url" name="url" aria-label="## link ##" /> \
@@ -16805,7 +16810,8 @@ $R.add('module', 'image', {
     {
         var data = $form.getData();
         var imageData = {
-            title: data.title
+            title: data.title,
+            overridewidth: data.overridewidth
         };
 
         if (this.opts.imageLink) imageData.link = { url: data.url, target: data.target };
@@ -16892,7 +16898,8 @@ $R.add('module', 'image', {
 
         var imageData = this.$image.getData();
         var data = {
-            title: imageData.title
+            title: imageData.title,
+            overridewidth: imageData.overridewidth
         };
 
         // caption
@@ -17014,7 +17021,8 @@ $R.add('class', 'image.component', {
     },
     getData: function()
     {
-        var names = ['src', 'title', 'caption', 'align', 'link', 'id'];
+        // NB 'overridewidth' must appear before 'align' so it's read/set first
+        var names = ['src', 'title', 'caption', 'overridewidth', 'align', 'link', 'id'];
         var data = {};
 
         for (var i = 0; i < names.length; i++)
@@ -17108,6 +17116,44 @@ $R.add('class', 'image.component', {
 
         return $figcaption;
     },
+    _set_overridewidth: function(overridewidth)
+    {
+        var $el  = this;
+        var $img = this.find('img');
+
+        $img.removeAttr('width');
+        $img.removeAttr('height');
+
+        if (overridewidth) {
+            var cssWidth = overridewidth;
+
+            if (cssWidth.match(/\d$/)) {
+               cssWidth = cssWidth + 'px';
+            }
+
+            $el.css('width',     cssWidth);
+            $el.css('max-width', cssWidth);
+            $img.css('height',    'auto');
+            $img.attr('data-override-width', cssWidth);
+
+            if (cssWidth.endsWith('%')) {
+                $img.css('width',     '100%');
+                $img.css('max-width', '100%');
+            }
+            else {
+                $img.css('width',     cssWidth);
+                $img.css('max-width', cssWidth);
+            }
+        }
+        else {
+            $el.css('width',     '');
+            $el.css('max-width', '');
+            $img.css('width',     '');
+            $img.css('max-width', '');
+            $img.css('height',    '');
+            $img.removeAttr('data-override-width');
+        }
+    },
     _set_align: function(align)
     {
         var imageFloat = '';
@@ -17134,56 +17180,53 @@ $R.add('class', 'image.component', {
         }
         else
         {
-            var width = $img.width() + 'px';
+            // IMPORTANT: Runs after _set_overridewidth, modifying that result
+            //
+            var overrideWidth = $img.attr('data-override-width');
+            var width         = overrideWidth || ($img.width() + 'px');
+
+            $img.attr('data-align', align);
 
             switch (align)
             {
-
                 case 'left':
-                    imageFloat = 'left';
+                    imageFloat       = 'left';
                     imageMarginRight = this.opts.imageFloatMargin;
                 break;
                 case 'right':
-                    imageFloat = 'right';
-                    imageMarginLeft = this.opts.imageFloatMargin;
+                    imageFloat       = 'right';
+                    imageMarginLeft  = this.opts.imageFloatMargin;
                 break;
                 case 'center':
-                    textAlign = 'center';
-                    imageMarginLeft = 'auto';
+                    width            = overrideWidth;
+                    textAlign        = 'center';
+                    imageMarginLeft  = 'auto';
                     imageMarginRight = 'auto';
+                break;
                 case 'fill':
-                    width = '100%';
-                    imageMarginLeft = '0';
+                    this._set_overridewidth('100%');
+
+                    width            = '100%';
+                    imageMarginLeft  = '0';
                     imageMarginRight = '0';
+                break;
+                case 'none':
+                    width            = overrideWidth;
                 break;
             }
 
-            $el.css({ 'float': imageFloat, width: width, maxWidth: width, 'margin-left': imageMarginLeft, 'margin-right': imageMarginRight, 'text-align': textAlign });
+            $el.css({
+                'float':        imageFloat,
+                'width':        width,
+                'maxWidth':     width,
+                'margin-left':  imageMarginLeft,
+                'margin-right': imageMarginRight,
+                'text-align':   textAlign
+            });
+
             $el.attr('rel', $el.attr('style'));
 
-            if (align === 'none') {
-                $el.css('max-width', '');
-                $el.css('width', '');
-            }
-
-            if (align === 'center')
-            {
-                $el.css('max-width', '');
-                $el.css('width', '');
-                $figcaption.css('text-align', 'center');
-            }
-            else
-            {
-                $figcaption.css('text-align', '');
-            }
-
-            if (align === 'fill') {
-               $img.css({width: width});
-            }
-            else
-            {
-               $img.css({width: ''});
-            }
+            $figcaption.css('text-align', (align === 'center') ? 'center' : '');
         }
     },
     _set_link: function(data)
@@ -17236,6 +17279,12 @@ $R.add('class', 'image.component', {
             return $figcaption.html();
         }
     },
+    _get_overridewidth: function()
+    {
+        var $img = this.find('img');
+
+        return $img.attr('data-override-width');
+    },
     _get_align: function()
     {
         var align = '';
@@ -17256,9 +17305,11 @@ $R.add('class', 'image.component', {
         {
             align = (this.css('text-align') === 'center') ? 'center' : this.css('float');
 
-            if (align === 'none' && this.find('img').css('width') === this.css('width'))
+            if (align === 'none')
             {
-               align = 'fill';
+                var $img = this.find('img');
+
+                align = $img.attr('data-align') || 'none';
             }
         }
 
