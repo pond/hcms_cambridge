@@ -49,5 +49,26 @@
         <%= revisions_form.button('→', type: 'submit', name: 'revision', value: newer_revisions.last.id) %>
       <% end %>
     <% end %>
+
+    <% if editable.displayed_revision.published %>
+      <%
+        share_path = if editable.is_a?(Page)
+          page_path(editable.slug)
+        elsif editable.is_a?(Article)
+          page_article_path(editable.page.slug, editable.slug)
+        else
+          nil
+        end
+
+        share_link = if share_path.nil?
+          nil
+        else
+          "https://www.#{Rails.application.config.uk_org_pond_hcms.mail_domain}#{share_path}"
+        end
+      %>
+      <% if share_link.present? %>
+        <button class="share_link" onclick="navigator.clipboard.writeText('<%= j(share_link) %>');"><i class="fa fa-copy"></i></button>
+      <% end %>
+    <% end %>
   <% end %>
 <% end %>
