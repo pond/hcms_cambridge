@@ -10,8 +10,13 @@ The version herein has been hand-modified to provide a couple of new features:
 
 * Removal of the "data-redactor-type" attribute on <figure> containers is now optional, so that rendered pages can use these data attributes in CSS selectors if they don't mind that information being included in the published output.
 
+* Links can have custom CSS classes added via the UI.
+
+* Images have a "fill width" option for 'alignment'.
+
 For diffs, see:
 
 * https://github.com/pond/hcms_cambridge/commit/0a5319454b42862b1aff54fbce5670d9be83f8ea
 * https://github.com/pond/hcms_cambridge/commit/42297c6d8410d8614c75c3ac33608a6e4cde4c1f#diff-0aaf847aad29ef4c5dbeeb71daf4502b73a1d8634541f3a2df8074ff46132f4d
 * https://github.com/pond/hcms_cambridge/commit/41a962b6631b80864725c3c4a8d8d09cea5f2f61
+* https://github.com/pond/hcms_cambridge/commit/e66f76f317aed5ef83b033760731442d140483cf
