@@ -486,6 +486,29 @@ a.article-link:hover div.article-summary {
   text-decoration: none !important;
 }
 
+a.bold_button {
+  display: inline-block;
+  box-sizing: border-box;
+  padding: 16px 20px 14px 20px;
+  border-radius: 3px;
+  line-height: 1;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 90%;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: #fff;
+  background-color: #282828;
+  transition: 0.2s opacity linear;
+}
+
+a.bold_button:hover {
+  opacity: 0.8;
+  text-decoration: none;
+  color: #fff;
+}
+
 nav {
   a, a:visited {
     color: $nav_link_base_colour;
