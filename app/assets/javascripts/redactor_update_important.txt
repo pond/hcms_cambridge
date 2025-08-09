@@ -12,7 +12,7 @@ The version herein has been hand-modified to provide a couple of new features:
 
 * Links can have custom CSS classes added via the UI.
 
-* Images have a "fill width" option for 'alignment'.
+* Images have a "fill width" option for 'alignment' and a fixed override width (as a CSS specifier, e.g. 700px or 50%) can be specified.
 
 For diffs, see:
 
@@ -20,3 +20,4 @@ For diffs, see:
 * https://github.com/pond/hcms_cambridge/commit/42297c6d8410d8614c75c3ac33608a6e4cde4c1f#diff-0aaf847aad29ef4c5dbeeb71daf4502b73a1d8634541f3a2df8074ff46132f4d
 * https://github.com/pond/hcms_cambridge/commit/41a962b6631b80864725c3c4a8d8d09cea5f2f61
 * https://github.com/pond/hcms_cambridge/commit/e66f76f317aed5ef83b033760731442d140483cf
+* https://github.com/pond/hcms_cambridge/commit/e14edc7406b7cafa8328dba1a0da3a23809604ea
