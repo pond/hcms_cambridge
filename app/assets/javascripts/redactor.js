@@ -1824,6 +1824,7 @@ $R.lang['en'] = {
     "lists": "Lists",
     "link-insert": "Insert Link",
     "link-edit": "Edit Link",
+    "link-class": "Custom style class",
     "link-in-new-tab": "Open link in new tab",
     "unlink": "Unlink",
     "cancel": "Cancel",
@@ -1861,6 +1862,7 @@ $R.lang['en'] = {
     "left": "Left",
     "right": "Right",
     "center": "Center",
+    "fill-width": "Fill width",
     "undo": "Undo",
     "redo": "Redo"
 };
@@ -12978,6 +12980,10 @@ $R.add('module', 'link', {
                     <label for="modal-link-text">## text ##</label> \
                     <input type="text" id="modal-link-text" name="text"> \
                 </div> \
+                <div class="form-item"> \
+                    <label for="modal-link-class">## link-class ##</label> \
+                    <input type="text" id="modal-link-class" name="class"> \
+                </div> \
                 <div class="form-item form-item-title"> \
                     <label for="modal-link-title">## title ##</label> \
                     <input type="text" id="modal-link-title" name="title"> \
@@ -13255,6 +13261,7 @@ $R.add('module', 'link', {
 
             if (data.text && isTextChanged) linkData.text = data.text;
             if (data.url) linkData.url = data.url;
+            if (data.class) linkData.class = data.class;
             if (data.title !== undefined) linkData.title = data.title;
             if (data.target !== undefined) linkData.target = data.target;
 
@@ -13390,6 +13397,7 @@ $R.add('module', 'link', {
         var data = {
             url: linkData.url,
             text: linkData.text,
+            class: linkData.class,
             title: linkData.title,
             target: (this.opts.linkTarget || linkData.target)
         };
@@ -13425,7 +13433,7 @@ $R.add('class', 'link.component', {
     },
     getData: function()
     {
-        var names = ['url', 'text', 'target', 'title'];
+        var names = ['url', 'text', 'class', 'target', 'title'];
         var data = {};
 
         for (var i = 0; i < names.length; i++)
@@ -13473,6 +13481,10 @@ $R.add('class', 'link.component', {
     {
         return this._getContext().text();
     },
+    _get_class: function()
+    {
+        return this.attr('class');
+    },
     _getContext: function()
     {
         return this._findDeepestChild(this).element;
@@ -13494,6 +13506,11 @@ $R.add('class', 'link.component', {
     {
         if (!title || title === '') this.removeAttr('title');
         else this.attr('title', title);
+    },
+    _set_class: function(klass)
+    {
+        if (!klass || klass === '') this.removeAttr('class');
+        else this.attr('class', klass);
     },
     _set_url: function(url)
     {
@@ -16384,6 +16401,7 @@ $R.add('module', 'image', {
                             <option value="left">## left ##</option> \
                             <option value="center">## center ##</option> \
                             <option value="right">## right ##</option> \
+                            <option value="fill">## fill-width ##</option> \
                         </select> \
                     </div> \
                     <div class="form-item form-item-link"> \
@@ -17116,7 +17134,7 @@ $R.add('class', 'image.component', {
         }
         else
         {
-            var width = $img.width();
+            var width = $img.width() + 'px';
 
             switch (align)
             {
@@ -17133,10 +17151,14 @@ $R.add('class', 'image.component', {
                     textAlign = 'center';
                     imageMarginLeft = 'auto';
                     imageMarginRight = 'auto';
+                case 'fill':
+                    width = '100%';
+                    imageMarginLeft = '0';
+                    imageMarginRight = '0';
                 break;
             }
 
-            $el.css({ 'float': imageFloat, width: width + 'px', maxWidth: width + 'px', 'margin-left': imageMarginLeft, 'margin-right': imageMarginRight, 'text-align': textAlign });
+            $el.css({ 'float': imageFloat, width: width, maxWidth: width, 'margin-left': imageMarginLeft, 'margin-right': imageMarginRight, 'text-align': textAlign });
             $el.attr('rel', $el.attr('style'));
 
             if (align === 'none') {
@@ -17153,6 +17175,14 @@ $R.add('class', 'image.component', {
             else
             {
                 $figcaption.css('text-align', '');
+            }
+
+            if (align === 'fill') {
+               $img.css({width: width});
+            }
+            else
+            {
+               $img.css({width: ''});
             }
         }
     },
@@ -17225,6 +17255,11 @@ $R.add('class', 'image.component', {
         else
         {
             align = (this.css('text-align') === 'center') ? 'center' : this.css('float');
+
+            if (align === 'none' && this.find('img').css('width') === this.css('width'))
+            {
+               align = 'fill';
+            }
         }
 
         return align;
