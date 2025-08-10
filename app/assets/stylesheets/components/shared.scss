@@ -292,11 +292,13 @@ main, .redactor-box.redactor-styles-on {
     height: auto !important;
   }
 
-  img[align = 'right'] {
+  img[align = 'right'],
+  figure[align = 'right'] {
     margin: 0 10px 10px 0;
   }
 
-  img[align = 'left'] {
+  img[align = 'left'],
+  figure[align = 'left'], {
     margin: 0 0 10px 10px;
   }
 
