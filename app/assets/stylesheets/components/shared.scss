@@ -287,19 +287,7 @@ main, .redactor-box.redactor-styles-on {
     margin-bottom: 20px;
   }
 
-  figure {
-    margin: 0.4em 0 0.5em 0; // (~align to top of text lines when floated)
-    padding: 0;
-    border-radius: 0.3em;
-
-    > img {
-      border-radius: 0.3em;
-    }
-  }
-
   img {
-    @include standard_shadow;
-    @include standard_spinner;
     max-width: $content_width;
     height: auto !important;
   }
@@ -312,24 +300,17 @@ main, .redactor-box.redactor-styles-on {
     margin: 0 0 10px 10px;
   }
 
-  /* Redactor doesn't understand an iframe wrapped in any containers so
-   * we just have to make do with hard-coded sizes on an assumption of a
-   * 16:9 video inside any such frame, or something where 16:9 is an
-   * acceptable ratio.
-   */
+  img:not(.no_spinner), iframe:not(.no_no_spinner) {
+    @include standard_spinner;
+  }
 
-  figure[data-redactor-type='video'] iframe {
-    @include widescreen_video_block;
+  img:not(.no_shadow),      iframe:not(.no_shadow),
+  img:not(.no_decorations), iframe:not(.no_decorations) {
     @include standard_shadow;
   }
 
-  figure[data-redactor-type='widget'] {
-    img:not(.no_decorations), iframe:not(.no_decorations) {
-      @include standard_spinner;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
+  img.no_shadow, iframe.no_shadow {
+    @include no_shadow;
   }
 
   iframe[allowtransparency='true'], iframe.tickets {
@@ -369,8 +350,34 @@ main, .redactor-box.redactor-styles-on {
     overflow: hidden;
   }
 
-  img.no_shadow, iframe.no_shadow {
-    @include no_shadow;
+  /* Most Redactor object containers are usually <figure> */
+
+  figure {
+    margin: 0.4em 0 0.5em 0; // (~align to top of text lines when floated)
+    padding: 0;
+    border-radius: 0.3em;
+
+    > img, > a > img:only-child {
+      border-radius: 0.3em;
+    }
+  }
+
+  /* Redactor doesn't understand an iframe wrapped in any containers so
+   * we just have to make do with hard-coded sizes on an assumption of a
+   * 16:9 video inside any such frame, or something where 16:9 is an
+   * acceptable ratio.
+   */
+
+  figure[data-redactor-type='video'] iframe {
+    @include widescreen_video_block;
+    @include standard_shadow;
+  }
+
+  figure[data-redactor-type='widget'] {
+    > iframe {
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   .redactor-styles.redactor-in,
