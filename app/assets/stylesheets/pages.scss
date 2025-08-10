@@ -28,9 +28,14 @@ input[type='submit']:hover {
 
 section.main_content table {
   border-collapse: collapse;
+  width: 100%;
 
-  tbody {
-    tr { border-top: 1px solid #888; }
+  thead tr:last-child {
+    border-bottom: 1px solid #888;
+  }
+
+  tbody tr:not(:first-child) {
+    border-top: 1px solid #888;
   }
 
   td:not(:first-child) {
@@ -46,7 +51,7 @@ section.main_content table {
   }
 
   th, td {
-    padding: 3px 5px !important;
+    padding: 10px 20px !important;
   }
 
   td:first-child, th:first-child {
