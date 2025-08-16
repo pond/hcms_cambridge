@@ -300,7 +300,7 @@ main, .redactor-box.redactor-styles-on {
     margin: 0 0 10px 10px;
   }
 
-  img:not(.no_spinner), iframe:not(.no_no_spinner) {
+  img:not(.no_spinner), iframe:not(.no_spinner) {
     @include standard_spinner;
   }
 
