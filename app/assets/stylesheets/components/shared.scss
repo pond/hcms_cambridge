@@ -573,6 +573,8 @@ nav {
           }
 
           ul.pure-menu-children {
+            left: auto;
+            right: 0;
             text-align: left;
             border: 1px solid $head_foot_border_colour;
             border-radius: 5px;
