@@ -17146,6 +17146,8 @@ $R.add('class', 'image.component', {
             }
         }
         else {
+            $img.attr('width', $img.width());
+            $img.attr('height', $img.height());
             $el.css('width',     '');
             $el.css('max-width', '');
             $img.css('width',     '');
