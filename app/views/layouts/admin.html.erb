@@ -33,6 +33,8 @@
 
     <footer class="admin">
       <section class="footer_content">
+        <%= content_for :extra_footer_links %>
+
         <%= link_to('Public site', root_path()) %> |
         <%= link_to('Pages', admin_pages_path()) %> |
         <%= link_to('Statistics', admin_statistics_path()) %>

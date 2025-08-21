@@ -2,6 +2,8 @@
 //= require components/redactor
 //= require components/shared
 
+@import 'config/variables';
+
 body {
   background: #ccc;
 }
@@ -145,6 +147,10 @@ main.admin {
     color: darkred;
   }
 
+  code.statistic-path {
+    word-break: break-all;
+  }
+
   div.field_with_errors div.redactor-box {
     border: 1px dashed red;
     margin-bottom: 10px;
@@ -162,9 +168,27 @@ footer.admin {
   section.footer_content {
     justify-content: center;
     gap: 10px;
+
+    div.extra_footer_links {
+      margin-right: auto;
+    }
   }
 }
 
 label {
   font-weight: bold;
+}
+
+@media only screen and (max-width: $container_width_narrow + 20px) {
+  footer.admin {
+    section.footer_content {
+      display: block !important;
+      text-align: center;
+
+      div.extra_footer_links {
+        display: inline-block;
+        margin: 0 0 1em 1em;
+      }
+    }
+  }
 }
