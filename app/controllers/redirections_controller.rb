@@ -32,6 +32,9 @@ class RedirectionsController < ApplicationController
         redirect_to page_article_path(page_id: article.page.slug, id: article.slug), status: :moved_permanently
       end
 
+    elsif path.start_with?('whats-on/')
+      redirect_to page_path(id: 'private-tastings')
+
     else
       probable_page_slug = path
       page               = Page.find_by_slug(probable_page_slug)
