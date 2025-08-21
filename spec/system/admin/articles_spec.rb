@@ -54,6 +54,7 @@ RSpec.describe "Admin - articles" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",                href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing article draft")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       expect(page).to have_current_path(edit_admin_page_article_path(Page.first, Article.first))
       expect(page).to have_field("article_title", with: title)
@@ -92,6 +93,7 @@ RSpec.describe "Admin - articles" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit article")
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit article")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       expect(page).to have_current_path(edit_admin_page_article_path(Page.first, Article.first))
       expect(page).to have_field("article_title", with: title)
@@ -460,6 +462,7 @@ RSpec.describe "Admin - articles" do
       expect(Revision.for_articles.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit article")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       fill_in("article_title", with: title + " 2")
 
@@ -477,6 +480,7 @@ RSpec.describe "Admin - articles" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit using this article revision")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       expect(page).to have_field("article_title", with: title) # (without the newer revision's " 2" appended)
 
@@ -517,6 +521,7 @@ RSpec.describe "Admin - articles" do
       expect(Revision.for_articles.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit article")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       fill_in("article_title", with: title + " 2")
 
@@ -541,6 +546,7 @@ RSpec.describe "Admin - articles" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit article, ignoring current draft")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       expect(page).to have_field("article_title", with: title) # (without the newer revision's " 2" appended)
 
@@ -582,6 +588,7 @@ RSpec.describe "Admin - articles" do
       expect(Revision.for_articles.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit article")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       fill_in("article_title", with: title + " 2")
 
@@ -608,6 +615,7 @@ RSpec.describe "Admin - articles" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing article draft")
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       expect(page).to have_field("article_title", with: title + " 2")
 
@@ -707,6 +715,7 @@ RSpec.describe "Admin - articles" do
       expect(article.raw_editor).to eql(false) # (self-check)
 
       visit(edit_admin_page_article_path(@page, article))
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       check("article_raw_editor")
 
@@ -729,6 +738,7 @@ RSpec.describe "Admin - articles" do
       expect(article.raw_editor).to eql(false) # (self-check)
 
       visit(edit_admin_page_article_path(@page, article))
+      find(:css, "details > summary", text: "Expand to edit article attributes").click()
 
       check("article_raw_editor")
 
