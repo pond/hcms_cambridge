@@ -5,10 +5,14 @@ class RedirectionsController < ApplicationController
 
   after_action :create_page_impression
 
+  # Don't create a page impression record for these path extensions. They're
+  # typically from bot/fuzzer junk and by inspection we can see that they have
+  # no value in indicating a missed redirection that should be recorded.
+  #
+  IGNORE_EXTENSIONS = ['.php']
+
   def show
-    path = params[:path] || ''
-    path.chomp!('.htm')
-    path.chomp!('.html')
+    path = self.get_clean_path()
 
     if File.extname(path).present?
       render_not_found()
@@ -60,18 +64,39 @@ class RedirectionsController < ApplicationController
       end
     end
 
+    # Pull a clean path from params - no ".htm" or ".html" extension. Other
+    # extensions may be present, of course, depending on the request.
+    #
+    def get_clean_path
+      @path ||= begin
+        path = params[:path] || ''
+        path.chomp!('.htm')
+        path.chomp!('.html')
+        path
+      end
+    end
+
+    # Render *without* a page impression record?
+    #
+    def no_page_impression?
+      extension = File.extname(self.get_clean_path())
+      IGNORE_EXTENSIONS.include?(extension)
+    end
+
     # Called indiscriminately on after-action. Helps us analyse any missing
     # pages that hit the redirections controller but result in 404.
     #
     def create_page_impression
-      PageImpression.create!(
-        path:       request.path,
-        referrer:   request.referrer,
-        controller: controller_name,
-        action:     action_name,
-        params:     params.to_unsafe_hash.except('controller', 'action'),
-        status:     response.status
-      )
+      unless self.no_page_impression?
+        PageImpression.create!(
+          path:       request.path,
+          referrer:   request.referrer,
+          controller: controller_name,
+          action:     action_name,
+          params:     params.to_unsafe_hash.except('controller', 'action'),
+          status:     response.status
+        )
+      end
     end
 
 end

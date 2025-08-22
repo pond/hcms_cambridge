@@ -25,7 +25,10 @@ RSpec.describe "Redirections" do
       expect(page).to have_current_path(page_path(@page.slug))
     end
 
-    it "yields 404 with other extensions" do
+    it "yields 404 and records no page impressions with non-HTML requests" do
+      expect(PageImpression.count).to be_zero # (self-check)
+      expect_any_instance_of(RedirectionsController).to_not receive(:show)
+
       visit("/#{@page.slug}.png")
       expect(page.status_code).to eq(404)
 
@@ -37,12 +40,28 @@ RSpec.describe "Redirections" do
 
       visit("/#{@page.slug}.js")
       expect(page.status_code).to eq(404)
+
+      expect(PageImpression.count).to be_zero
     end
 
-    it "yields 404 if not found" do
-      visit("/missing-missing")
+    it "yields 404 and records a page impression with other requests if not found" do
+      expect(PageImpression.count).to be_zero # (self-check)
+      expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
 
+      visit("/missing-missing")
       expect(page.status_code).to eq(404)
+
+      expect(PageImpression.count).to eql(1)
+    end
+
+    it "yields 404 and records no page impression with 'ignore' extensions" do
+      expect(PageImpression.count).to be_zero # (self-check)
+      expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
+
+      visit("/#{@page.slug}.php")
+      expect(page.status_code).to eq(404)
+
+      expect(PageImpression.count).to be_zero
     end
   end
 
