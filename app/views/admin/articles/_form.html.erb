@@ -1,41 +1,45 @@
 <%= form_with(model: [:admin, @page, @article], builder: FormBuilderWithInlineErrors) do | f | %>
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
-  <div class="field">
-    <%= apphelp_label(f, :title) %>
-    <%= f.text_field :title %>
-  </div>
+  <details <%= @article.new_record? ? 'open' : '' %>>
+    <summary <%= @article.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit article attributes</summary>
 
-  <div class="field">
-    <%= apphelp_label(f, :article_hero_image) %>
-    <%= f.file_field :article_hero_image %>
-    <% if @article.persisted? %>
-      <br>
-      <small><em>
-        You only need to choose an image if changing the one that's already attached to the article
-      </em></small>
-    <% end %>
-  </div>
-
-  <div class="field">
-    <%= apphelp_label(f, :summary) %>
-    <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
-    <%= f.error_markup_for(:summary) %><br>
-    <small><em>A brief, plain text (no styling) summary used in the list of blog articles</em></small>
-  </div>
-
-  <div class="field">
-    <div class="checkbox">
-      <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+    <div class="field" <%= @article.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+      <%= apphelp_label(f, :title) %>
+      <%= f.text_field :title %>
     </div>
-    <small><em>
-      You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
-    </em></small>
-  </div>
 
-  <div class="field">
-    <%= apphelp_label(f, :body) %>
-  </div>
+    <div class="field">
+      <%= apphelp_label(f, :article_hero_image) %>
+      <%= f.file_field :article_hero_image %>
+      <% if @article.persisted? %>
+        <br>
+        <small><em>
+          You only need to choose an image if changing the one that's already attached to the article
+        </em></small>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :summary) %>
+      <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+      <%= f.error_markup_for(:summary) %><br>
+      <small><em>A brief, plain text (no styling) summary used in the list of blog articles</em></small>
+    </div>
+
+    <div class="field">
+      <div class="checkbox">
+        <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+      </div>
+      <small><em>
+        You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
+      </em></small>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :body) %>
+    </div>
+  </details>
 
   <% if @article.raw_editor %>
     <div class="redactor_container">
@@ -51,14 +55,13 @@
   <% end %>
   <%= f.error_markup_for(:body) %>
 
-  <p style="color: #800">
-    <strong>Note:</strong> Only the page title, summary text and body text
-    (where relevant) save into drafts; changes to the thumbnail image are
-    always saved and "published" immediately.
-  </p>
-
-  <div class="actions">
+  <div class="actions with_note">
     <%= f.button 'Save draft', name: 'submit' %>
     <%= f.button 'Publish article', name: 'publish', value: true %>
+    <div class="note">
+      Only the page title, summary text and body text (where relevant) save
+      into drafts; changes to the thumbnail image are always saved and
+      "published" immediately.
+    </diV>
   </div>
 <% end %>

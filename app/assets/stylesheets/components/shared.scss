@@ -111,7 +111,10 @@ input[type="file"] {
   font-size: 12pt;
 }
 
-input[type="file"]::-webkit-file-upload-button, input[type="submit"], button[name="submit"], button[name="publish"] {
+input[type="file"]::-webkit-file-upload-button,
+input[type="submit"],
+button[name="submit"],
+button[name="publish"] {
   font-size: 12pt;
   border: 1px solid #aaaaaa;
   border-radius: 4px;
@@ -122,7 +125,25 @@ input[type="file"]::-webkit-file-upload-button, input[type="submit"], button[nam
 
 div.actions {
   display: flex;
+  align-items: center;
   margin: 1em 0;
+  gap: 0.5em;
+
+  button, input {
+    white-space: nowrap;
+  }
+
+  &.with_note {
+    div.note {
+      color: #800;
+      font-size: 85%;
+
+      &:before {
+        content: "Note: ";
+        font-weight: bold;
+      }
+    }
+  }
 }
 
 button[name="submit"] {
@@ -131,10 +152,6 @@ button[name="submit"] {
 
 button[name="publish"] {
   box-shadow: 0 0 5px 0 orange;
-}
-
-button[name="submit"] + button[name="publish"] {
-  margin-left: 0.5em;
 }
 
 .field_with_errors {
@@ -766,6 +783,11 @@ nav {
   main, .redactor-box.redactor-styles-on {
     iframe:not([src*='www.recaptcha.net']):not([title='widget']) {
       @include widescreen_video_block_mobile;
+    }
+
+    div.actions {
+      flex-direction: column;
+      align-items: stretch;
     }
 
     img {

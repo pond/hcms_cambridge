@@ -1,7 +1,7 @@
 <h1>Visitor statistics</h1>
 <h2>Summary</h2>
 
-<table>
+<table width="100%">
   <thead>
     <tr>
       <th><%= Admin::Statistic.human_attribute_name(:location) %></th>
@@ -16,7 +16,7 @@
     <% @statistics.each do | statistic | %>
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= statistic.location %></td>
-        <td><%= tag.code(statistic.source.path) %></td>
+        <td><%= tag.code(statistic.source.path, class: 'statistic-path') %></td>
         <td class="centre"><%= apphelp_boolean(statistic.success, no_class: 'boolean_no_highlight') %></td>
         <td class="centre"><%= statistic.count %></td>
         <td><%= link_to('Show', admin_statistic_path(statistic.source.id)) %></td>

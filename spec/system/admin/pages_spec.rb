@@ -39,6 +39,7 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",        href: admin_pages_path())
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing draft")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       expect(page).to have_current_path(edit_admin_page_path(Page.first.id))
       expect(page).to have_field("page_title", with: title)
@@ -73,6 +74,7 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit")
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       expect(page).to have_current_path(edit_admin_page_path(Page.first.id))
       expect(page).to have_field("page_title", with: title)
@@ -329,6 +331,7 @@ RSpec.describe "Admin - pages" do
         it "shows contact form fields initially for contact form page types" do
           p = create(:page, :contact_form)
           visit(edit_admin_page_path(p))
+          find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
           expect(page).to have_select("page_page_type", selected: "Contact form")
           expect(page).to have_field("page_form_selection_list_label")
@@ -338,6 +341,7 @@ RSpec.describe "Admin - pages" do
         it "shows booking form fields initially for booking form page types" do
           p = create(:page, :booking_form)
           visit(edit_admin_page_path(p))
+          find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
           expect(page).to have_select("page_page_type", selected: "Booking form")
           expect(page).to have_field("page_form_selection_list_label")
@@ -347,6 +351,7 @@ RSpec.describe "Admin - pages" do
         it "hides non-blog fields initially for blog page types" do
           p = create(:page, :blog)
           visit(edit_admin_page_path(p))
+          find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
           expect(page).to     have_select("page_page_type", selected: "Blog")
           expect(page).to_not have_css(".redactor_container")
@@ -560,6 +565,7 @@ RSpec.describe "Admin - pages" do
       expect(Revision.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       fill_in("page_title", with: title + " 2")
 
@@ -577,6 +583,7 @@ RSpec.describe "Admin - pages" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit using this revision")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       expect(page).to have_field("page_title", with: title) # (without the newer revision's " 2" appended)
 
@@ -612,6 +619,7 @@ RSpec.describe "Admin - pages" do
       expect(Revision.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       fill_in("page_title", with: title + " 2")
 
@@ -636,6 +644,7 @@ RSpec.describe "Admin - pages" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit page, ignoring current draft")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       expect(page).to have_field("page_title", with: title) # (without the newer revision's " 2" appended)
 
@@ -672,6 +681,7 @@ RSpec.describe "Admin - pages" do
       expect(Revision.count).to eql(1)
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       fill_in("page_title", with: title + " 2")
 
@@ -698,6 +708,7 @@ RSpec.describe "Admin - pages" do
       end
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing draft")
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       expect(page).to have_field("page_title", with: title + " 2")
 
@@ -787,6 +798,7 @@ RSpec.describe "Admin - pages" do
       expect(p.raw_editor).to eql(false) # (self-check)
 
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       check("page_raw_editor")
 
@@ -809,6 +821,7 @@ RSpec.describe "Admin - pages" do
       expect(p.raw_editor).to eql(false) # (self-check)
 
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       check("page_raw_editor")
 
@@ -864,6 +877,7 @@ RSpec.describe "Admin - pages" do
     it "allows a menu title to be specified" do
       p = create(:page, :contact_form)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       fill_in("page_form_selection_list_label", with: "Select a number")
       fill_in("page_form_selection_list_contents", with: "One\nTwo\nThree")
@@ -883,6 +897,7 @@ RSpec.describe "Admin - pages" do
     it "supports having no menu" do
       p = create(:page, :contact_form)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
@@ -939,6 +954,7 @@ RSpec.describe "Admin - pages" do
     it "allows a menu title to be specified" do
       p = create(:page, :booking_form)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       fill_in("page_form_selection_list_label", with: "Select a number")
       fill_in("page_form_selection_list_contents", with: "One\nTwo\nThree")
@@ -960,6 +976,7 @@ RSpec.describe "Admin - pages" do
     it "supports having no menu" do
       p = create(:page, :booking_form)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
@@ -987,6 +1004,7 @@ RSpec.describe "Admin - pages" do
     it "can change the date/time hiding" do
       p = create(:page, :booking_form)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       check("page_hide_date_and_time")
 
@@ -1033,6 +1051,7 @@ RSpec.describe "Admin - pages" do
     it "shows the expected CMS options" do
       p = create(:page, :blog)
       visit(edit_admin_page_path(p))
+      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")

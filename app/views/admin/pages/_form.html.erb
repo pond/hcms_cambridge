@@ -1,124 +1,130 @@
 <%= form_with(model: [:admin, @page], builder: FormBuilderWithInlineErrors) do | f | %>
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
-  <div class="two_column">
-    <div class="field">
-      <%= apphelp_label(f, :title) %>
-      <%= f.text_field :title %>
-    </div>
+  <details <%= @page.new_record? ? 'open' : '' %>>
+    <summary <%= @page.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit page attributes</summary>
 
-    <div class="field">
-      <%= apphelp_label(f, :slug, optional: true) %>
-      <%= f.text_field :slug %>
-      <br>
-      <small><em>
-        <% if @page.persisted? %>
-          Beware if changing this &ndash; people may have bookmarked this page using its old slug
-        <% else %>
-          If left blank, the slug is generated automatically from the page title
-        <% end %>
-      </em></small>
-    </div>
-
-    <div class="field">
-      <%= apphelp_label(f, :navigation_title, optional: true) %>
-      <%= f.text_field :navigation_title %>
-      <br>
-      <small><em>
-        If this is the page currently being viewed, then this text is shown in the header area above the navigation links
-      </em></small>
-    </div>
-  </div>
-
-  <div class="two_column">
-    <div class="field">
-      <%= apphelp_label(f, :page_type) %>
-      <%= f.collection_select :page_type, ::PageType.types, :internal_name, :human_name %>
-      <br>
-      <small><em>
-        You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
-      </em></small>
-    </div>
-
-    <div>
-      <% if Page.top_level.any? %>
-        <div class="field">
-          <%= apphelp_label(f, :page_id) %>
-          <%=
-            # Hidden pages *are* included so that you can assemble a tree of
-            # new page items that don't appear in the menu bar until they're
-            # all finished and the top-level parent is unhidden. Drafts can do
-            # the same thing, but user workflow preferences differ.
-            #
-            f.collection_select(
-              :page_id,
-              Page.top_level_except(@page.id),
-              :id,
-              :title,
-              include_blank: 'Do not put into a menu'
-            )
-          %>
-        </div>
-      <% end %>
+    <div class="two_column" <%= @page.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+      <div class="field">
+        <%= apphelp_label(f, :title) %>
+        <%= f.text_field :title %>
+      </div>
 
       <div class="field">
-        <div class="checkbox">
-          <%= f.check_box :hidden %> <%= f.label :hidden %>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
-    <div class="is-form-fields" style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
-      <hr>
-      <p>
-        The published page will contain a form which lets users send enquiries.
-        Except for the settings below, all form fields are preset (not editable).
-      </p>
-
-      <div class="two_column">
-        <div class="field">
-          <%= apphelp_label(f, :form_selection_list_label, optional: true) %>
-          <%= f.text_field :form_selection_list_label %>
-          <br>
-          <small><em>
-            Define an optional menu presented in the booking form. Enter a label to show above
-            the menu and a list of item names, one per line. If the items list is empty, no
-            menu is offered.
-          </em></small>
-        </div>
-
-        <div class="field">
-          <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
-          <%= f.text_area :form_selection_list_contents, rows: 6, cols: 40 %>
-        </div>
-      </div>
-
-      <div class="field is-booking-fields" style="display: <%= @page.is_booking_form? ? 'block' : 'none' %>">
-        <div class="checkbox">
-          <%= f.check_box :hide_date_and_time %> <%= f.label :hide_date_and_time %>
-        </div>
-      </div>
-
-      <hr>
-      <p>
-        Page contents written into the main editing area below will always appear
-        <i>above</i> the enquiry form.
-      </p>
-    </div>
-
-    <div class="two_column">
-      <div class="field">
-        <div class="checkbox">
-          <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
-        </div>
+        <%= apphelp_label(f, :slug, optional: true) %>
+        <%= f.text_field :slug %>
+        <br>
         <small><em>
-          You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
+          <% if @page.persisted? %>
+            Beware if changing this &ndash; people may have bookmarked this page using its old slug
+          <% else %>
+            If left blank, the slug is generated automatically from the page title
+          <% end %>
+        </em></small>
+      </div>
+
+      <div class="field">
+        <%= apphelp_label(f, :navigation_title, optional: true) %>
+        <%= f.text_field :navigation_title %>
+        <br>
+        <small><em>
+          If this is the page currently being viewed, then this text is shown in the header area above the navigation links
         </em></small>
       </div>
     </div>
 
+    <div class="two_column">
+      <div class="field">
+        <%= apphelp_label(f, :page_type) %>
+        <%= f.collection_select :page_type, ::PageType.types, :internal_name, :human_name %>
+        <br>
+        <small><em>
+          You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
+        </em></small>
+      </div>
+
+      <div>
+        <% if Page.top_level.any? %>
+          <div class="field">
+            <%= apphelp_label(f, :page_id) %>
+            <%=
+              # Hidden pages *are* included so that you can assemble a tree of
+              # new page items that don't appear in the menu bar until they're
+              # all finished and the top-level parent is unhidden. Drafts can do
+              # the same thing, but user workflow preferences differ.
+              #
+              f.collection_select(
+                :page_id,
+                Page.top_level_except(@page.id),
+                :id,
+                :title,
+                include_blank: 'Do not put into a menu'
+              )
+            %>
+          </div>
+        <% end %>
+
+        <div class="field">
+          <div class="checkbox">
+            <%= f.check_box :hidden %> <%= f.label :hidden %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+      <div class="is-form-fields" style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
+        <hr>
+        <p>
+          The published page will contain a form which lets users send enquiries.
+          Except for the settings below, all form fields are preset (not editable).
+        </p>
+
+        <div class="two_column">
+          <div class="field">
+            <%= apphelp_label(f, :form_selection_list_label, optional: true) %>
+            <%= f.text_field :form_selection_list_label %>
+            <br>
+            <small><em>
+              Define an optional menu presented in the booking form. Enter a label to show above
+              the menu and a list of item names, one per line. If the items list is empty, no
+              menu is offered.
+            </em></small>
+          </div>
+
+          <div class="field">
+            <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
+            <%= f.text_area :form_selection_list_contents, rows: 6, cols: 40 %>
+          </div>
+        </div>
+
+        <div class="field is-booking-fields" style="display: <%= @page.is_booking_form? ? 'block' : 'none' %>">
+          <div class="checkbox">
+            <%= f.check_box :hide_date_and_time %> <%= f.label :hide_date_and_time %>
+          </div>
+        </div>
+
+        <hr>
+        <p>
+          Page contents written into the main editing area below will always appear
+          <i>above</i> the enquiry form.
+        </p>
+      </div>
+
+      <div class="two_column">
+        <div class="field">
+          <div class="checkbox">
+            <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+          </div>
+          <small><em>
+            You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
+          </em></small>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
     <% if @page.raw_editor %>
       <div class="redactor_container">
         <div class="redactor-box redactor-styles-on">
@@ -134,15 +140,14 @@
     <%= f.error_markup_for(:body) %>
   </div>
 
-  <p style="color: #800">
-    <strong>Note:</strong> Only the page title, navigation title and body text
-    (where relevant) save into drafts. Other "metadata" like the position in the
-    menus, the "kind" of the page, hidden state and even the selection menu setup
-    for form pages will always save and be "published" immediately.
-  </p>
-
-  <div class="actions">
+  <div class="actions with_note">
     <%= f.button 'Save draft', name: 'submit' %>
     <%= f.button 'Publish page', name: 'publish', value: true %>
+    <div class="note">
+      Only the page title, navigation title and body text (where relevant) save
+      into drafts. Other "metadata" like the position in the menus, the "kind"
+      of the page, hidden state and even the selection menu setup for form pages
+      will always save and be "published" immediately.
+    </diV>
   </div>
 <% end %>

@@ -1,6 +1,10 @@
-<h1>Editing Article</h1>
+<h1>Edit article &ldquo;<%= @article.title %>&rdquo;</h1>
 
 <%= render 'form' %>
 
-<%= link_to 'Show', admin_page_article_path(page_id: @page.slug, id: @article.slug) %> |
-<%= link_to 'Back', :back %>
+<% content_for :extra_footer_links do %>
+  <div class="extra_footer_links">
+    <%= link_to 'Show', admin_page_article_path(page_id: @page.slug, id: @article.slug) %> |
+    <%= link_to 'Back', :back %>
+  </div>
+<% end %>
