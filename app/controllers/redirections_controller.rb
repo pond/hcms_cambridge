@@ -9,7 +9,7 @@ class RedirectionsController < ApplicationController
   # typically from bot/fuzzer junk and by inspection we can see that they have
   # no value in indicating a missed redirection that should be recorded.
   #
-  IGNORE_EXTENSIONS = ['.php']
+  IGNORE_EXTENSIONS = ['.php', '.py', '.key']
 
   def show
     path = self.get_clean_path()
@@ -79,8 +79,10 @@ class RedirectionsController < ApplicationController
     # Render *without* a page impression record?
     #
     def no_page_impression?
-      extension = File.extname(self.get_clean_path())
-      IGNORE_EXTENSIONS.include?(extension)
+      path      = self.get_clean_path()
+      extension = File.extname(path)
+
+      IGNORE_EXTENSIONS.include?(extension) || path.start_with?('wp-')
     end
 
     # Called indiscriminately on after-action. Helps us analyse any missing

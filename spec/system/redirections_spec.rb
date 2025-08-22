@@ -54,14 +54,30 @@ RSpec.describe "Redirections" do
       expect(PageImpression.count).to eql(1)
     end
 
-    it "yields 404 and records no page impression with 'ignore' extensions" do
-      expect(PageImpression.count).to be_zero # (self-check)
-      expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
+    context "'ignore' extensions" do
+      RedirectionsController::IGNORE_EXTENSIONS.each do | ext |
+        it "yields 404 and records no page impression with '#{ext}'" do
+          expect(PageImpression.count).to be_zero # (self-check)
+          expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
 
-      visit("/#{@page.slug}.php")
-      expect(page.status_code).to eq(404)
+          visit("/#{@page.slug}#{ext}")
 
-      expect(PageImpression.count).to be_zero
+          expect(page.status_code).to eq(404)
+          expect(PageImpression.count).to be_zero
+        end
+      end
+    end
+
+    context "ignore paths" do
+      it "yields 404 and records no page impression with certain paths" do
+        expect(PageImpression.count).to be_zero # (self-check)
+        expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
+
+        visit("/wp-#{@page.slug}.html")
+
+        expect(page.status_code).to eq(404)
+        expect(PageImpression.count).to be_zero
+      end
     end
   end
 
