@@ -11,10 +11,20 @@ class RedirectionsController < ApplicationController
   #
   IGNORE_EXTENSIONS = ['.php', '.py', '.key']
 
+  # More specific redirections. These match the full path, or path prefix.
+  #
+  CUSTOM_MAPPINGS = {
+    'whats-on'           => 'previous-events',
+    'tastings-events'    => 'previous-events',
+    'tastings-education' => 'private-tastings',
+    'tastings-private'   => 'private-tastings',
+    'tasting-enquiry'    => 'private-tastings',
+  }
+
   def show
     path = self.get_clean_path()
 
-    if File.extname(path).present?
+    if File.extname(path).present? || path.start_with?('.')
       render_not_found()
 
     elsif path == 'blog' || path == 'blog/'
@@ -36,8 +46,8 @@ class RedirectionsController < ApplicationController
         redirect_to page_article_path(page_id: article.page.slug, id: article.slug), status: :moved_permanently
       end
 
-    elsif path.start_with?('whats-on/')
-      redirect_to page_path(id: 'private-tastings')
+    elsif (mapped_page = custom_redirection_for(path))
+      redirect_to page_path(id: mapped_page)
 
     else
       probable_page_slug = path
@@ -82,7 +92,21 @@ class RedirectionsController < ApplicationController
       path      = self.get_clean_path()
       extension = File.extname(path)
 
-      IGNORE_EXTENSIONS.include?(extension) || path.start_with?('wp-')
+      IGNORE_EXTENSIONS.include?(extension) || path.start_with?('wp-') || path.start_with?('.')
+    end
+
+    # Returns a custom mapping for the given path, else +nil+.
+    #
+    def custom_redirection_for(path)
+      CUSTOM_MAPPINGS.each do | match_path, mapped_page |
+        match_path_slash = "#{match_path}/"
+
+        if path == match_path || path == match_path_slash || path.start_with?(match_path_slash)
+          return mapped_page
+        end
+      end
+
+      nil
     end
 
     # Called indiscriminately on after-action. Helps us analyse any missing

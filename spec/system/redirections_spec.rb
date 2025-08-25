@@ -66,6 +66,21 @@ RSpec.describe "Redirections" do
           expect(PageImpression.count).to be_zero
         end
       end
+
+      it "yields 404 and records no page impression paths starting '.'" do
+        expect(PageImpression.count).to be_zero # (self-check)
+
+        visit("/.env")
+        expect(page.status_code).to eq(404)
+
+        visit("/.foo")
+        expect(page.status_code).to eq(404)
+
+        visit("/.ssh/hackery")
+        expect(page.status_code).to eq(404)
+
+        expect(PageImpression.count).to be_zero
+      end
     end
 
     context "ignore paths" do
@@ -77,6 +92,36 @@ RSpec.describe "Redirections" do
 
         expect(page.status_code).to eq(404)
         expect(PageImpression.count).to be_zero
+      end
+    end
+  end
+
+  context "custom mappings" do
+    before :each do
+      @private_tastings = create(:page, slug: 'private-tastings')
+      @private_tastings.revisions.first.update!(published: true)
+
+      @previous_events = create(:page, slug: 'previous-events')
+      @previous_events.revisions.first.update!(published: true)
+    end
+
+    RedirectionsController::CUSTOM_MAPPINGS.each do | match_path, mapped_page |
+      it "redirects #{match_path}" do
+        visit("/#{match_path}")
+
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
+      end
+
+      it "redirects #{match_path}/" do
+        visit("/#{match_path}/")
+
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
+      end
+
+      it "redirects #{match_path}/..." do
+        visit("/#{match_path}/foo-bar-baz")
+
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
       end
     end
   end
@@ -101,25 +146,25 @@ RSpec.describe "Redirections" do
     it "redirects to the first blog page by '/blog'" do
       visit("/blog")
 
-      expect(page).to have_current_path(page_path(@page.slug()))
+      expect(page).to have_current_path(page_path(@page.slug))
     end
 
     it "redirects to the first blog page by '/blog/'" do
       visit("/blog/")
 
-      expect(page).to have_current_path(page_path(@page.slug()))
+      expect(page).to have_current_path(page_path(@page.slug))
     end
 
     it "redirects to the first blog page by '/blog.htm'" do
       visit("/blog.htm")
 
-      expect(page).to have_current_path(page_path(@page.slug()))
+      expect(page).to have_current_path(page_path(@page.slug))
     end
 
     it "redirects to the first blog page by '/blog.htm'" do
       visit("/blog.html")
 
-      expect(page).to have_current_path(page_path(@page.slug()))
+      expect(page).to have_current_path(page_path(@page.slug))
     end
 
     it "yields 404 if there is no blog page" do
