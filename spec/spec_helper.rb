@@ -273,3 +273,12 @@ def spechelp_decode_multipart
       )
   )
 end
+
+# Wait for a default jQuery animation to complete.
+#
+# TODO: Currently, this a very simple implementation! Just assumes a 400ms
+# TODO: animation and near-immediate execution.
+#
+def spechelp_wait_for_animation
+  sleep 0.5 # (see TODO notes above!)
+end

@@ -855,6 +855,7 @@ RSpec.describe "Admin - pages" do
       fill_in("page_navigation_title", with: navigation_title)
       spechelp_fill_in_redactor(body)
       select("Contact form", from: "page_page_type")
+      spechelp_wait_for_animation()
       fill_in("page_form_selection_list_contents", with: "One\nTwo\nThree")
 
       click_on("Publish page")
@@ -928,6 +929,7 @@ RSpec.describe "Admin - pages" do
       fill_in("page_navigation_title", with: navigation_title)
       spechelp_fill_in_redactor(body)
       select("Booking form", from: "page_page_type")
+      spechelp_wait_for_animation()
       fill_in("page_form_selection_list_contents", with: "One\nTwo\nThree")
 
       expect(page).to have_unchecked_field(:page_hide_date_and_time)
@@ -1038,6 +1040,7 @@ RSpec.describe "Admin - pages" do
       fill_in("page_title", with: title)
       fill_in("page_navigation_title", with: navigation_title)
       select("Blog", from: "page_page_type")
+      spechelp_wait_for_animation()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "New page published")
