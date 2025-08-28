@@ -19,6 +19,10 @@ class RedirectionsController < ApplicationController
     'tastings-education' => 'private-tastings',
     'tastings-private'   => 'private-tastings',
     'tasting-enquiry'    => 'private-tastings',
+    'contact'            => 'contact-us',
+    'maison-vauron'      => 'contact-us',
+    'trade-portal'       => 'contact-us',
+    'our-team'           => 'home',
   }
 
   def show
@@ -92,8 +96,12 @@ class RedirectionsController < ApplicationController
       path      = self.get_clean_path()
       extension = File.extname(path)
 
+      # Referrers are almost always blank for bot spam, but they might also be
+      # blank for e.g. links in apps like Instagram or from e-mail clients. A
+      # trade-off between bot noise and real user interactions must be made.
+      #
       return (
-        request.referrer.blank?               ||
+        # request.referrer.blank?             || # If enabled, look for "RESTORE THIS" in "redirections_spec.rb" and uncomment the test
         IGNORE_EXTENSIONS.include?(extension) ||
         path.start_with?('wp-')               ||
         path.start_with?('.')

@@ -25,34 +25,59 @@ RSpec.describe "Redirections" do
       expect(page).to have_current_path(page_path(@page.slug))
     end
 
-    it "yields 404 and records no page impressions with non-HTML requests" do
-      expect(PageImpression.count).to be_zero # (self-check)
-      expect_any_instance_of(RedirectionsController).to_not receive(:show)
+    context "with a referrer header set" do
+      before :each do
+        page.driver.header("Referer", "http://searchengine.example.com")
+      end
 
-      visit("/#{@page.slug}.png")
-      expect(page.status_code).to eq(404)
+      it "yields 404 and records no page impressions with non-HTML requests" do
+        expect(PageImpression.count).to be_zero # (self-check)
+        expect_any_instance_of(RedirectionsController).to_not receive(:show)
 
-      visit("/#{@page.slug}.xml")
-      expect(page.status_code).to eq(404)
+        visit("/#{@page.slug}.png")
+        expect(page.status_code).to eq(404)
 
-      visit("/#{@page.slug}.txt")
-      expect(page.status_code).to eq(404)
+        visit("/#{@page.slug}.xml")
+        expect(page.status_code).to eq(404)
 
-      visit("/#{@page.slug}.js")
-      expect(page.status_code).to eq(404)
+        visit("/#{@page.slug}.txt")
+        expect(page.status_code).to eq(404)
 
-      expect(PageImpression.count).to be_zero
+        visit("/#{@page.slug}.js")
+        expect(page.status_code).to eq(404)
+
+        expect(PageImpression.count).to be_zero
+      end
+
+      it "yields 404 and records a page impression with other requests if not found" do
+        expect(PageImpression.count).to be_zero # (self-check)
+        expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
+
+        visit("/missing-missing")
+        expect(page.status_code).to eq(404)
+
+        expect(PageImpression.count).to eql(1)
+      end
     end
 
-    it "yields 404 and records a page impression with other requests if not found" do
-      expect(PageImpression.count).to be_zero # (self-check)
-      expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
-
-      visit("/missing-missing")
-      expect(page.status_code).to eq(404)
-
-      expect(PageImpression.count).to eql(1)
-    end
+    # RESTORE THIS if you elect to include "request.referrer.blank?" as a check
+    # in RedirectionsController#no_page_impression?
+    #
+    # context "without a referrer header set" do
+    #   before :each do
+    #     page.driver.header("Referer", nil)
+    #   end
+    #
+    #   it "yields 404, but records no page impression" do
+    #     expect(PageImpression.count).to be_zero # (self-check)
+    #     expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
+    #
+    #     visit("/missing-missing")
+    #     expect(page.status_code).to eq(404)
+    #
+    #     expect(PageImpression.count).to be_zero
+    #   end
+    # end
 
     context "'ignore' extensions" do
       RedirectionsController::IGNORE_EXTENSIONS.each do | ext |
@@ -97,31 +122,30 @@ RSpec.describe "Redirections" do
   end
 
   context "custom mappings" do
-    before :each do
-      @private_tastings = create(:page, slug: 'private-tastings')
-      @private_tastings.revisions.first.update!(published: true)
+    RedirectionsController::CUSTOM_MAPPINGS.each do | match_path, mapped_page_slug |
+      before :each do
+        if Page.find_by_slug(mapped_page_slug).nil?
+          mapped_page = create(:page, slug: mapped_page_slug)
+          mapped_page.revisions.first.update!(published: true)
+        end
+      end
 
-      @previous_events = create(:page, slug: 'previous-events')
-      @previous_events.revisions.first.update!(published: true)
-    end
-
-    RedirectionsController::CUSTOM_MAPPINGS.each do | match_path, mapped_page |
       it "redirects #{match_path}" do
         visit("/#{match_path}")
 
-        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page_slug).slug))
       end
 
       it "redirects #{match_path}/" do
         visit("/#{match_path}/")
 
-        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page_slug).slug))
       end
 
       it "redirects #{match_path}/..." do
         visit("/#{match_path}/foo-bar-baz")
 
-        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page).slug))
+        expect(page).to have_current_path(page_path(Page.find_by_slug(mapped_page_slug).slug))
       end
     end
   end

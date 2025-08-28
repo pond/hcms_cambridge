@@ -9,9 +9,12 @@ RSpec.describe "Admin - statistics" do
   end
 
   context "gathering", js: true do
+
     # One big test to save on spin-up time for headless Chrome.
     #
     it "records regular visits, redirection controller 302 and 404, ignores regular 404" do
+      old_headers = page.driver.headers # (see 'ensure' block at the end)
+
       visit(page_path(@page_1.slug)) # Visit, normal page, no referrer
       expect(page).to have_text(@page_1.navigation_title)
       expect(page).to have_css("footer")
@@ -46,6 +49,10 @@ RSpec.describe "Admin - statistics" do
 
       PageImpression.delete_all
 
+      # Hereafter, we'll process everything with a mock Referrer header.
+
+      page.driver.headers = { "Referer" => "http://searchengine.example.com" }
+
       # Redirection controller 301
 
       test_path = "/blog/2020/#{@article_1.slug}"
@@ -53,7 +60,7 @@ RSpec.describe "Admin - statistics" do
 
       expect(page).to have_text(spechelp_strip_markup @article_1.body)
       expect(page).to have_css("footer")
-      expect(PageImpression.count).to eql(2) # Redirect and article view
+      expect(PageImpression.count).to eql(2) # Redirection plus article view, since there was a Referrer
 
       pi = PageImpression.first
 
@@ -87,6 +94,9 @@ RSpec.describe "Admin - statistics" do
 
       expect(page.status_code).to eql(404)
       expect(PageImpression.count).to be_zero
+
+    ensure # Make sure any changes made above are reset
+      page.driver.headers = old_headers
     end
 
     it "does not record if signed in (or the act of sigining in)" do
