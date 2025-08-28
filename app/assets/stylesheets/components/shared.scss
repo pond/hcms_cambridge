@@ -72,6 +72,13 @@ form div.field {
   margin-bottom: 1em;
 }
 
+form div.field div.field-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+}
+
 form div.field div.checkbox {
   display: flex;
   flex-direction: row;
@@ -119,8 +126,7 @@ button[name="publish"] {
   border: 1px solid #aaaaaa;
   border-radius: 4px;
   padding: 5px 10px;
-  background-image: -webkit-gradient(linear, left bottom, left top, from(#d2d0d0), to(#f0f0f0));
-  background-image: -moz-linear-gradient(90deg, #d2d0d0 0%, #f0f0f0 100%);
+  background-image: linear-gradient(to top, #d2d0d0 0%, #f0f0f0 100%)
 }
 
 div.actions {

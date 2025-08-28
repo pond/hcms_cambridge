@@ -8,7 +8,27 @@
 
   <div class="field">
     <%= apphelp_label(f, :password) %>
-    <%= f.password_field :password, autocomplete: "off" %>
+
+    <div class="field-row">
+      <%= f.password_field :password, autocomplete: "off" %>
+      <button class="accessory" type="button" id="admin_user_password_toggle">👁️</button>
+      <script type="text/javascript">
+        const passwordInput = document.getElementById('admin_user_password');
+        const toggleButton = document.getElementById('admin_user_password_toggle');
+
+        toggleButton.addEventListener('click', function(event) {
+          if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleButton.textContent = '🔒';
+          } else {
+            passwordInput.type = 'password';
+            toggleButton.textContent = '👁️';
+          }
+
+          event.preventDefault();
+        });
+      </script>
+    </div>
   </div>
 
   <% if devise_mapping.rememberable? %>
