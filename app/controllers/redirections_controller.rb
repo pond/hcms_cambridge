@@ -92,7 +92,12 @@ class RedirectionsController < ApplicationController
       path      = self.get_clean_path()
       extension = File.extname(path)
 
-      IGNORE_EXTENSIONS.include?(extension) || path.start_with?('wp-') || path.start_with?('.')
+      return (
+        request.referrer.blank?               ||
+        IGNORE_EXTENSIONS.include?(extension) ||
+        path.start_with?('wp-')               ||
+        path.start_with?('.')
+      )
     end
 
     # Returns a custom mapping for the given path, else +nil+.
