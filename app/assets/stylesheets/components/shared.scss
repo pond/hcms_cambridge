@@ -571,7 +571,7 @@ nav {
       ul.pure-menu-list {
         li.pure-menu-item {
           a {
-            display: inline-block;
+            display: block;
             padding: 0;
             text-decoration: none;
             font-size: 25px;
@@ -610,6 +610,10 @@ nav {
           content: "/";
           font-weight: normal;
           padding: 0 15px;
+        }
+
+        > li.pure-menu-item:not(:first-child) > a:hover::before {
+          color: $nav_link_base_colour;
         }
       }
     }
