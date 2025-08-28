@@ -26,11 +26,12 @@ class Admin::StatisticsController < ApplicationController
     # sort in Ruby once the stats are compiled.
     #
     loop do
-      batch_query = PageImpression.where("id >= ? AND id < ?", start_id, start_id + batch_size)
+      batch_query = PageImpression.where("id >= ? AND id < ?", start_id, start_id + batch_size) # Default order is ID ASC
 
       batch_query.each do | page_impression |
         statistics[page_impression.path] ||= generate_statistic_for(page_impression)
         statistics[page_impression.path].count += 1
+        statistics[page_impression.path].success = (page_impression.status < 400) # Use the most recent success/failure
       end
 
       start_id += batch_size
