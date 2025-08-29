@@ -242,17 +242,23 @@ section.messages, div#error_explanation {
 }
 
 article.article {
-  section.blog-header {
+  section.article-header {
     border-top:    1px dotted #999;
     border-bottom: 1px dotted #999;
     margin-bottom: 20px;
   }
 
-  .article-date-and-heading-container {
+  .article-date-and-heading-container,
+  .article-summary-and-links-container {
     display: flex;
     justify-content: space-between;
+    gap: 5px;
     align-items: center;
     margin-top: 5px;
+  }
+
+  .article-summary-and-links-container {
+    align-items: start;
   }
 
   .article-date {
@@ -270,6 +276,18 @@ article.article {
     font-size: smaller;
     font-style: italic;
     margin-bottom: 1em;
+  }
+
+  .article-next-prev {
+    font-size: 18px;
+    line-height: 110%;
+    text-align: right;
+    text-wrap: nowrap;
+    margin-bottom: 1em;
+
+    a {
+      text-decoration: none;
+    }
   }
 }
 
@@ -502,7 +520,6 @@ footer {
 }
 
 a {
-  word-break: break-word;
   text-decoration: none;
   color: $nav_link_base_colour;
 }
@@ -511,7 +528,8 @@ a:visited {
   color: $nav_link_visited_colour;
 }
 
-a:not(.article-link):hover, a:hover div.article-date-and-heading-container {
+a:not(.article-link):hover,
+a:hover div.article-date-and-heading-container {
   color: lighten($nav_link_base_colour, 50%);
   text-decoration: underline;
 }
@@ -676,7 +694,8 @@ nav {
 
     section.blog-articles {
       article.article {
-        .article-date-and-heading-container {
+        .article-date-and-heading-container,
+        .article-summary-and-links-container {
           flex-wrap: wrap;
         }
 
@@ -816,6 +835,16 @@ nav {
         margin-left: 0;
       }
     }
+
+    article.article {
+      .article-summary-and-links-container {
+        align-items: center;
+
+        .article-next-prev {
+          text-wrap: wrap;
+        }
+      }
+    }
   }
 
   footer {
@@ -853,11 +882,15 @@ nav {
       }
     }
 
+    &.cms_menu {
+      font-size: 1.5em;
+    }
+
     &.social_menu {
       margin-top: 5px;
       a {
         padding-left: 0;
-        font-size: 1.8em;
+        font-size: 3em;
       }
     }
   }

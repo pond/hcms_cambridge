@@ -20,4 +20,22 @@ class Article < Editable
   def for_navigation?
     self.published_revision.present?
   end
+
+  # A newer article - next greater created_at. Assumes no two identical times.
+  #
+  def next
+    @next ||= self.class
+      .reorder(created_at: :asc)
+      .where('created_at > ?', self.created_at)
+      .first
+  end
+
+  # An older article - next lower created_at. Assumes no two identical times.
+  #
+  def prev
+    @prev ||= self.class
+      .reorder(created_at: :desc)
+      .where('created_at < ?', self.created_at)
+      .first
+  end
 end

@@ -96,6 +96,40 @@ RSpec.describe "Pages" do
       visit(page_article_path(p.slug, article.slug))
       expect(page).to have_current_path(admin_page_article_path(p.slug, article.slug)) # Redirected to admin
     end
+
+    it "offers older/newer links where relevant" do
+      p = create(:page, :blog)
+      p.revisions.first.update!(published: true)
+
+      article_1 = create(:article, page: p, created_at: Time.now - 2.weeks)
+      article_1.revisions.first.update!(published: true)
+
+      expect(page).to_not have_css("a[rel='older']")
+      expect(page).to_not have_css("a[rel='newer']")
+
+      visit(page_article_path(p.slug, article_1.slug))
+
+      article_2 = create(:article, page: p, created_at: Time.now - 1.week)
+      article_2.revisions.first.update!(published: true)
+
+      article_3 = create(:article, page: p, created_at: Time.now)
+      article_3.revisions.first.update!(published: true)
+
+      visit(page_article_path(p.slug, article_3.slug))
+
+      expect(page).to     have_css("a[rel='older'][href='#{page_article_path(page_id: p.slug, id: article_2.slug)}']")
+      expect(page).to_not have_css("a[rel='newer']")
+
+      visit(page_article_path(p.slug, article_2.slug))
+
+      expect(page).to have_css("a[rel='older'][href='#{page_article_path(page_id: p.slug, id: article_1.slug)}']")
+      expect(page).to have_css("a[rel='newer'][href='#{page_article_path(page_id: p.slug, id: article_3.slug)}']")
+
+      visit(page_article_path(p.slug, article_1.slug))
+
+      expect(page).to_not have_css("a[rel='older']")
+      expect(page).to     have_css("a[rel='newer'][href='#{page_article_path(page_id: p.slug, id: article_2.slug)}']")
+    end
   end # 'context "navigation" do'
 
   require_relative "shared_examples/footer_spec.rb"
