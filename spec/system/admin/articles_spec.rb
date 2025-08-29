@@ -793,7 +793,7 @@ RSpec.describe "Admin - articles" do
       it "links to the blog page" do
         visit(admin_page_articles_path(@page))
 
-        expect(page).to have_link("Visit blog page", href: admin_page_path(@page.slug))
+        expect(page).to have_link("View article grid", href: admin_page_path(@page.slug))
       end
 
       it "links to the main 'all pages' list" do
