@@ -1,7 +1,18 @@
-<h1>Blog &ldquo;<%= @page.title %>&rdquo;</h1>
-<h2>All articles</h2>
+<h1 id="admin-header-main">
+  Blog &ldquo;<%= @page.title %>&rdquo;
+</h1>
 
-<table>
+<div id="admin-header-with-nav">
+  <h2>All articles</h2>
+  <span>▶︎</span>
+  <nav>
+    <%= link_to 'New blog article',         new_admin_page_article_path(@page) %> |
+    <%= link_to 'Visit blog page',          admin_page_path(@page.slug) %> |
+    <%= link_to 'Back to "All pages" list', admin_pages_path() %>
+  </nav>
+</div>
+
+<table class="full_width">
   <thead>
     <tr>
       <th>Title</th>
@@ -13,19 +24,15 @@
   </thead>
 
   <tbody>
-<% @articles.each do | article | %>
+    <% @articles.each do | article | %>
+
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td><%= article.title %></td>
         <td><%= apphelp_human_time(article.created_at, date_only: true) %>
         <%= render partial: 'booleans', locals: { article: article } %>
         <%= render partial: 'actions', locals: { article: article } %>
       </tr>
-<% end %>
+
+    <% end %>
   </tbody>
 </table>
-
-<br>
-
-<%= link_to 'New blog article',            new_admin_page_article_path(@page) %> |
-<%= link_to 'Visit blog page',             admin_page_path(@page.slug) %> |
-<%= link_to 'Go back to "All pages" list', admin_pages_path() %>

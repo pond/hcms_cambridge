@@ -19,7 +19,18 @@
         <img id="logo" alt="Logo" src="<%= image_path('logo.svg')%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
 
         <nav class="main_menu">
-          <h1>Site administration</h1>
+          <h1 id="navigation_title">Site administration</h1>
+
+          <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+              <li class="pure-menu-item pure-menu-allow-hover">
+                <%= link_to('Pages', admin_pages_path(), class: 'pure-menu-link') %>
+              </li>
+              <li class="pure-menu-item pure-menu-allow-hover">
+                <%= link_to('Statistics', admin_statistics_path(), class: 'pure-menu-link') %>
+              </li>
+            </ul>
+          </div>
         </nav>
       </section>
     </header>
@@ -34,10 +45,7 @@
     <footer class="admin">
       <section class="footer_content">
         <%= content_for :extra_footer_links %>
-
-        <%= link_to('Public site', root_path()) %> |
-        <%= link_to('Pages', admin_pages_path()) %> |
-        <%= link_to('Statistics', admin_statistics_path()) %>
+        <%= link_to('Public site', root_path()) %>
         <% if user_signed_in? %>
           | <%= link_to('Log out', destroy_admin_user_session_path(), method: :delete) %>
         <% end %>

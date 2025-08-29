@@ -799,7 +799,7 @@ RSpec.describe "Admin - articles" do
       it "links to the main 'all pages' list" do
         visit(admin_page_articles_path(@page))
 
-        expect(page).to have_link('Go back to "All pages" list', href: admin_pages_path())
+        expect(page).to have_link('Back to "All pages" list', href: admin_pages_path())
       end
     end # 'context "display" do'
 

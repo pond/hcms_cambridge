@@ -121,9 +121,9 @@ RSpec.describe "Admin - statistics" do
       spechelp_log_in()
     end
 
-    it "can be reached via the admin footer" do
+    it "can be reached via main navigation" do
       visit(admin_pages_path())
-      find(:css, "footer").click_link("Statistics")
+      find(:css, "header").click_link("Statistics")
 
       expect(page).to have_current_path(admin_statistics_path())
       expect(find(:css, "section.main_content h1")).to have_text("Visitor statistics")
