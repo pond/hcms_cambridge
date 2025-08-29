@@ -26,6 +26,7 @@ class Article < Editable
   def next
     @next ||= self.class
       .reorder(created_at: :asc)
+      .where(page_id: self.page_id)
       .where('created_at > ?', self.created_at)
       .first
   end
@@ -35,6 +36,7 @@ class Article < Editable
   def prev
     @prev ||= self.class
       .reorder(created_at: :desc)
+      .where(page_id: self.page_id)
       .where('created_at < ?', self.created_at)
       .first
   end

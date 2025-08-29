@@ -104,10 +104,15 @@ RSpec.describe "Pages" do
       article_1 = create(:article, page: p, created_at: Time.now - 2.weeks)
       article_1.revisions.first.update!(published: true)
 
+      # No links when there's only one article
+
+      visit(page_article_path(p.slug, article_1.slug))
+
       expect(page).to_not have_css("a[rel='older']")
       expect(page).to_not have_css("a[rel='newer']")
 
-      visit(page_article_path(p.slug, article_1.slug))
+      # Use a total of three articles to test older/newer appearing or
+      # disappearing at each end of the chain
 
       article_2 = create(:article, page: p, created_at: Time.now - 1.week)
       article_2.revisions.first.update!(published: true)
@@ -129,6 +134,24 @@ RSpec.describe "Pages" do
 
       expect(page).to_not have_css("a[rel='older']")
       expect(page).to     have_css("a[rel='newer'][href='#{page_article_path(page_id: p.slug, id: article_2.slug)}']")
+
+      # Add a fourth, oldest article but in a new page. This should not appear
+      # in the other page's set of links (or vice versa).
+
+      p_other = create(:page, :blog)
+      p_other.revisions.first.update!(published: true)
+
+      article_4 = create(:article, page: p_other, created_at: Time.now - 3.weeks)
+      article_4.revisions.first.update!(published: true)
+
+      visit(page_article_path(p_other.slug, article_4.slug))
+
+      expect(page).to_not have_css("a[rel='older']")
+      expect(page).to_not have_css("a[rel='newer']")
+
+      visit(page_article_path(p.slug, article_1.slug))
+
+      expect(page).to_not have_css("a[rel='older']")
     end
   end # 'context "navigation" do'
 
