@@ -125,9 +125,13 @@ namespace :migrate do
         event_hero_image_url = event_body_image_url
       end
 
+      # Some known tidying up that's needed from old content.
+      #
       event_title.gsub!('&amp;amp;', '&')
       event_summary.gsub!('&amp;amp;', '&')
       event_description.gsub!('&amp;amp;', '&amp;')
+      event_description.gsub!(' class=""', '')
+      event_description.gsub!(' style="white-space:pre-wrap;"', '')
 
       yaml_data << {
         'slug'        => event_slug,
@@ -181,7 +185,15 @@ namespace :migrate do
 
     yaml_data.map!(&:with_indifferent_access)
 
+<<~STR
+<figure data-redactor-type="image" style="margin-left: auto; margin-right: auto; text-align: center;">
+  <img src="/system/redactor_assets/pictures/6/content_15304359_383068578701479_2344149891575656771_o.jpg.webp" data-image="6" width="800" height="534" data-align="center">
+  <figcaption style="text-align: center;">THIS IS A CAPTION</figcaption>
+</figure>
+STR
+
     ActiveRecord::Base.transaction do
+      user             = User.first
       blog_container   = Page.find_by_slug('previous-classes')
       blog_container ||= Page.new(
         hidden: true,
@@ -202,8 +214,12 @@ namespace :migrate do
         blog_container.save!
       end
 
+      blog_container.articles.destroy_all
+
       yaml_data.each do |event|
         next if Article.find_by_slug(event[:slug])
+
+        puts event[:title]
 
         article = blog_container.articles.build(
           created_at:         event[:date_time],
@@ -212,10 +228,38 @@ namespace :migrate do
           article_hero_image: File.open(File.join(output_image_path, event[:hero_image])),
         )
 
+        body = if event[:body_image] != event[:hero_image]
+          asset = Redactor3Rails::Image.create(
+            user:           user,
+            assetable:      user,
+            data_file_name: File.open(File.join(output_image_path, event[:body_image])),
+            created_at:     event[:date_time],
+            updated_at:     event[:date_time],
+          )
+          body = <<~STR
+            <figure data-redactor-type="image" style="text-align: center; margin-bottom: 1em;"><img src="#{asset.url}" data-image="#{asset.id}"></figure>
+          STR
+        else
+          ''
+        end
 
-        # STILL TO DO: Put main image at the top as if a Redactor upload
-        # and add e.g. place & address somewhere
+        body += event[:description]
 
+        body += <<~STR
+          <hr>
+          <ul>
+            <li><strong>Where:</strong> #{event[:place_name]}, #{event[:address]}</li>
+            <li><strong>When:</strong> #{event[:date_time].strftime("%A, #{event[:date_time].day.ordinalize} %B %I:%M%p")}
+        STR
+
+        if event[:price].blank?
+        else
+          price = event[:price]
+          price = '$' + price unless price.start_with?('$')
+          body << "<li><strong>Price:</strong> #{price}</li>"
+        end
+
+        body << '</ul>'
 
         article.revisions.build(
           created_at:       event[:date_time],
@@ -223,12 +267,13 @@ namespace :migrate do
           navigation_title: "Previous classes: #{event[:title]}",
           title:            event[:title],
           summary:          event[:summary],
-          body:             event[:description],
+          body:             body,
           published:        true,
           current:          true
         )
 
         blog_container.save!
+
       end
     end
 
