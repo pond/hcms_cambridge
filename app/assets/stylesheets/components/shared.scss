@@ -212,6 +212,9 @@ section.footer_suffix {
   @include content_metrics;
 }
 
+dl dt { font-weight: bold; }
+dl dd:not(:last-child) { margin-bottom: 1em; }
+
 header {
   background: $head_foot_background;
   border-bottom: 1px solid $head_foot_border_colour;
