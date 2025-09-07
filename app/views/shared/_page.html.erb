@@ -10,7 +10,7 @@
 <% if page.is_blog_type? %>
 
   <% if page.articles.for_navigation.any? %>
-    <section class="blog-articles">
+    <section class="blog-articles<%= page.poster_grid ? ' with-poster-grid' : ''%>">
       <% page.articles.for_navigation.each do | article | %>
         <article class="article">
           <%= link_to page_article_path(page_id: page.slug, id: article.slug), class: 'article-link' do %>

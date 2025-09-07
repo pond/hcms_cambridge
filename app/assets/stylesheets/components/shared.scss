@@ -308,6 +308,10 @@ section.blog-articles {
       border-radius: 0.5em;
     }
   }
+
+  &.with-poster-grid article.article img {
+    aspect-ratio: 2/3;
+  }
 }
 
 main, .redactor-box.redactor-styles-on {

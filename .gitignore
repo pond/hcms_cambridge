@@ -18,7 +18,7 @@ public/assets
 /public/system/redactor_assets/documents
 /public/system/redactor_assets/pictures
 
-## Environment normalisation:
+# Environment normalisation
 /.bundle
 /vendor/bundle
 
@@ -31,6 +31,10 @@ public/assets
 # macOS spam
 .DS_Store
 .nova
+
+# Migration temporary data
+config/old_events.yml
+config/old_event_images
 
 # if using bower-rails ignore default bower_components path bower.json files
 /vendor/assets/bower_components
