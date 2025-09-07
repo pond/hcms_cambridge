@@ -14,9 +14,9 @@ class RedirectionsController < ApplicationController
   # More specific redirections. These match the full path, or path prefix.
   #
   CUSTOM_MAPPINGS = {
-    'whats-on'           => 'previous-events',
+    'whats-on'           => 'previous-classes',
     'tastings-events'    => 'previous-events',
-    'tastings-education' => 'private-tastings',
+    'tastings-education' => 'previous-classes',
     'tastings-private'   => 'private-tastings',
     'tasting-enquiry'    => 'private-tastings',
     'contact'            => 'contact-us',
