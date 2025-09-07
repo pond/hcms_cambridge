@@ -217,9 +217,19 @@ STR
       blog_container.articles.destroy_all
 
       yaml_data.each do |event|
-        next if Article.find_by_slug(event[:slug])
-
         puts event[:title]
+
+        # Dedupe slugs
+        #
+        slug_count = 2
+        while Article.find_by_slug(event[:slug])
+          if event[:slug].match?(/-\d+$/)
+            event[:slug] = event[:slug].match(/^(.*)-\d+$/)[1]
+          end
+
+          event[:slug] = "#{event[:slug]}-#{slug_count}"
+          slug_count += 1
+        end
 
         article = blog_container.articles.build(
           created_at:         event[:date_time],
@@ -228,38 +238,63 @@ STR
           article_hero_image: File.open(File.join(output_image_path, event[:hero_image])),
         )
 
-        body = if event[:body_image] != event[:hero_image]
-          asset = Redactor3Rails::Image.create(
-            user:           user,
-            assetable:      user,
-            data_file_name: File.open(File.join(output_image_path, event[:body_image])),
-            created_at:     event[:date_time],
-            updated_at:     event[:date_time],
-          )
+        # Reusing the article image is very hard as the article isn't saved yet
+        # and can't be until we build a revision. It's a little wasteful to
+        # upload a poster image even when we already have it as the hero, but
+        # it's simpler and more reliable.
+        #
+        is_from_body        = event[:body_image] != event[:hero_image]
+        body_image_pathname = File.open(File.join(output_image_path, event[:body_image]))
+        body_image_asset    = Redactor3Rails::Image.create!(
+          user:       user,
+          assetable:  user,
+          data:       body_image_pathname,
+          created_at: event[:date_time],
+          updated_at: event[:date_time],
+        )
+
+        image  = MiniMagick::Image.open(body_image_pathname)
+        width  = image[:width]
+        height = image[:height]
+
+        body = if is_from_body # Assume landscape poster from old event body - fill width
           body = <<~STR
-            <figure data-redactor-type="image" style="text-align: center; margin-bottom: 1em;"><img src="#{asset.url}" data-image="#{asset.id}"></figure>
+            <figure class="no_shadow" data-redactor-type="image" style="width: 100%; text-align: centre; margin-bottom: 1em;"><img src="#{body_image_asset.url}" data-image="#{body_image_asset.id}" width="#{width}" height="#{height}" data-align="fill" style="width: 100%;"></figure>
           STR
-        else
-          ''
+        else # Assume portrait poster from old hero image - float right, width-constrained
+          max_width = 700
+
+          if width > max_width
+            height = (height * max_width) / width
+            width  = max_width
+          end
+
+          body = <<~STR
+            <figure data-redactor-type="image" style="float: right; max-width=#{max_width}px;"><img src="#{body_image_asset.url}" data-image="#{body_image_asset.id}" width="#{width}" height="#{height}" data-align="right"></figure>
+          STR
         end
 
-        body += event[:description]
+        location = "#{event[:place_name]}, #{event[:address]}"
+        location.gsub!('Wellington, Wellington', 'Wellington')
+        location.gsub!('Wellington, 6011', 'Wellington 6011')
 
         body += <<~STR
-          <hr>
-          <ul>
-            <li><strong>Where:</strong> #{event[:place_name]}, #{event[:address]}</li>
-            <li><strong>When:</strong> #{event[:date_time].strftime("%A, #{event[:date_time].day.ordinalize} %B %I:%M%p")}
+          #{event[:description]}
+          <dl>
+            <dt>Where</dt><dd>#{location}</dd>
+            <dt>When</dt><dd>#{event[:date_time].strftime("%A, #{event[:date_time].day.ordinalize} %B %I:%M%p")}
         STR
 
-        if event[:price].blank?
-        else
-          price = event[:price]
-          price = '$' + price unless price.start_with?('$')
-          body << "<li><strong>Price:</strong> #{price}</li>"
-        end
+        # Uncomment if old prices should be included.
+        #
+        # if event[:price].blank?
+        # else
+        #   price = event[:price]
+        #   price = '$' + price unless price.start_with?('$')
+        #   body << "<dt>Price</dt><dd>#{price}</dd>"
+        # end
 
-        body << '</ul>'
+        body << '</dl>'
 
         article.revisions.build(
           created_at:       event[:date_time],
@@ -272,8 +307,11 @@ STR
           current:          true
         )
 
-        blog_container.save!
-
+        begin
+          blog_container.save!
+        rescue => e
+          debugger
+        end
       end
     end
 
