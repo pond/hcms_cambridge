@@ -3,7 +3,7 @@ require "spec_helper.rb"
 RSpec.describe "Admin - statistics" do
   before :each do
     @page_1    = create(:page);                      @page_1.revisions.first.update!(published: true)
-    @page_2    = create(:page, :blog);               @page_2.revisions.first.update!(published: true)
+    @page_2    = create(:page, :blog, slug: 'blog'); @page_2.revisions.first.update!(published: true)
     @article_1 = create(:article, page: @page_2); @article_1.revisions.first.update!(published: true)
     @article_2 = create(:article, page: @page_2); @article_2.revisions.first.update!(published: true)
   end
@@ -73,7 +73,7 @@ RSpec.describe "Admin - statistics" do
 
       # Redirection controller 404
 
-      test_path = "/blog/#{SecureRandom.uuid}"
+      test_path = "/not-a-real-page/#{SecureRandom.uuid}"
       visit(test_path)
 
       expect(page.status_code).to eql(404)

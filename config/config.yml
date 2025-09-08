@@ -18,3 +18,24 @@ hide_contact_info: true
 facebook:          ''
 twitter:           '' # 'https://x.com/WineSentience/'
 instagram:         'https://www.instagram.com/winesentience/'
+
+# Custom redirections go here, for cases where a site has been migrated; blog
+# articles first (requested path base -> blog page's slug) - this tries to then
+# match the *last* part of the requested path against an article's slug -
+# followed by other custom maps (requested path base -> general page's slug).
+# Failing any matches here, the last part of the path ".../foo/bar" -> "bar")
+# is used to try and find a page by slug, else, 404.
+#
+blog_mappings:
+  'blog':               'blog'
+  'tastings-events':    'previous-events'
+  'tastings-education': 'previous-classes'
+  'whats-on':           'previous-classes'
+
+page_mappings:
+  'our-team':           'home'
+  'contact':            'contact-us'
+  'maison-vauron':      'contact-us'
+  'trade-portal':       'contact-us'
+  'tastings-private':   'private-tastings'
+  'tasting-enquiry':    'private-tastings'
