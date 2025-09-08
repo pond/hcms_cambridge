@@ -11,57 +11,26 @@ class RedirectionsController < ApplicationController
   #
   IGNORE_EXTENSIONS = ['.php', '.py', '.key']
 
-  # More specific redirections. These match the full path, or path prefix.
+  # Map a path or path prefix to the slug of a blog page. Within that, any
+  # remaining path segments are checked against article slugs, to redirect if
+  # possible to a specific article, else at least the overall blog.
   #
-  CUSTOM_MAPPINGS = {
-    'whats-on'           => 'previous-events',
-    'tastings-events'    => 'previous-events',
-    'tastings-education' => 'private-tastings',
-    'tastings-private'   => 'private-tastings',
-    'tasting-enquiry'    => 'private-tastings',
-    'contact'            => 'contact-us',
-    'maison-vauron'      => 'contact-us',
-    'trade-portal'       => 'contact-us',
-    'our-team'           => 'home',
-  }
+  BLOG_MAPPINGS = {} # Populated by #show calling #populate_constants!
+
+  # Other customised redirections. These match the full path, or path prefix.
+  #
+  PAGE_MAPPINGS = {} # Populated by #show calling #populate_constants!
 
   def show
-    path = self.get_clean_path()
+    self.populate_constants! if BLOG_MAPPINGS.blank?
 
-    if File.extname(path).present? || path.start_with?('.')
+    clean_request_path = self.get_clean_path()
+    redirection_path   = self.get_redirection_path(clean_request_path)
+
+    if redirection_path.nil?
       render_not_found()
-
-    elsif path == 'blog' || path == 'blog/'
-      first_blog_page = Page.order(created_at: :asc).where(page_type: Page::PAGE_TYPE_BLOG).first
-
-      if first_blog_page.nil?
-        render_not_found()
-      else
-        redirect_to page_path(id: first_blog_page.slug), status: :moved_permanently
-      end
-
-    elsif path.start_with?('blog/')
-      article_slug = path.split('/').last # Strip off e.g. dates - "https://.../blog/2025/08/04/some-slug-here"
-      article      = Article.find_by_slug(article_slug)
-
-      if article.nil?
-        render_not_found()
-      else
-        redirect_to page_article_path(page_id: article.page.slug, id: article.slug), status: :moved_permanently
-      end
-
-    elsif (mapped_page = custom_redirection_for(path))
-      redirect_to page_path(id: mapped_page)
-
     else
-      probable_page_slug = path
-      page               = Page.find_by_slug(probable_page_slug)
-
-      if page.nil?
-        render_not_found()
-      else
-        redirect_to page_path(id: page.slug), status: :moved_permanently
-      end
+      redirect_to(redirection_path, status: :moved_permanently)
     end
   end
 
@@ -78,6 +47,18 @@ class RedirectionsController < ApplicationController
       end
     end
 
+    # Lazy-populate the mapping constants via configuration data.
+    #
+    def populate_constants!
+      Rails.application.config.uk_org_pond_hcms.blog_mappings&.each do | path, blog_page_slug |
+        BLOG_MAPPINGS[path] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
+      end
+
+      Rails.application.config.uk_org_pond_hcms.page_mappings&.each do | path, other_page_slug |
+        PAGE_MAPPINGS[path] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
+      end
+    end
+
     # Pull a clean path from params - no ".htm" or ".html" extension. Other
     # extensions may be present, of course, depending on the request.
     #
@@ -87,6 +68,67 @@ class RedirectionsController < ApplicationController
         path.chomp!('.htm')
         path.chomp!('.html')
         path
+      end
+    end
+
+    # Based on (clean) request path (see #get_clean_path), return a redirection
+    # path that best matches it, or "nil" if no match is found.
+    #
+    def get_redirection_path(requested_path)
+
+      # NOTE EARLY EXITS throughout this whole method.
+      #
+      # First, bail out if matching immediate 404 conditions.
+      #
+      return nil if File.extname(requested_path).present? || requested_path.start_with?('.')
+
+      # Otherwise, chop up the path so "foo/" or "foo" give a single-item array
+      # of "foo", say, or "foo/bar/baz" yields those three items.
+      #
+      requested_path_segments = requested_path.split('/')
+
+      # Try blog pages next, for a possible match directly to a specific article.
+      #
+      BLOG_MAPPINGS.each do | blog_path, mapped_blog_page |
+        next if mapped_blog_page.nil? || requested_path_segments.first != blog_path
+
+        if requested_path_segments.size == 1 # No additional segments -> go to container
+          return page_path(id: mapped_blog_page.slug)
+        else # Any "date/month/year" style mid-path (or not), terminating in slug -> try article
+          possible_article_slug = requested_path_segments.last
+          matching_article      = mapped_blog_page.articles.find_by_slug(possible_article_slug)
+
+          if matching_article.nil?
+            return page_path(id: mapped_blog_page.slug)
+          else
+            return page_article_path(page_id: mapped_blog_page.slug, id: matching_article.slug)
+          end
+        end
+      end
+
+      # Now try the custom mappings for specific individual pages.
+      #
+      PAGE_MAPPINGS.each do | page_path, mapped_other_page |
+        if mapped_other_page.present? && requested_path_segments.first == page_path
+          return page_path(id: mapped_other_page.slug)
+        end
+      end
+
+      # Otherwise, see if there's an actual as-is slug match.
+      #
+      possible_slug = requested_path_segments.last
+      matching_page = Page.find_by_slug(possible_slug)
+
+      if matching_page.nil?
+        matching_article = Article.find_by_slug(possible_slug)
+
+        if matching_article.nil?
+          return nil
+        else
+          return page_article_path(page_id: matching_article.page.slug, id: matching_article.slug)
+        end
+      else
+        return page_path(id: matching_page.slug)
       end
     end
 
@@ -106,20 +148,6 @@ class RedirectionsController < ApplicationController
         path.start_with?('wp-')               ||
         path.start_with?('.')
       )
-    end
-
-    # Returns a custom mapping for the given path, else +nil+.
-    #
-    def custom_redirection_for(path)
-      CUSTOM_MAPPINGS.each do | match_path, mapped_page |
-        match_path_slash = "#{match_path}/"
-
-        if path == match_path || path == match_path_slash || path.start_with?(match_path_slash)
-          return mapped_page
-        end
-      end
-
-      nil
     end
 
     # Called indiscriminately on after-action. Helps us analyse any missing

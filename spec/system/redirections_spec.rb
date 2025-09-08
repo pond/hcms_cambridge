@@ -1,6 +1,13 @@
 require "spec_helper.rb"
 
 RSpec.describe "Redirections" do
+  before :each do
+    RedirectionsController.send(:remove_const, :BLOG_MAPPINGS)
+    RedirectionsController.send(:remove_const, :PAGE_MAPPINGS)
+    RedirectionsController.const_set(:BLOG_MAPPINGS, {})
+    RedirectionsController.const_set(:PAGE_MAPPINGS, {})
+  end
+
   context "to a page" do
     before :each do
       @page = create(:page)
@@ -23,6 +30,17 @@ RSpec.describe "Redirections" do
       visit("/#{@page.slug}.html")
 
       expect(page).to have_current_path(page_path(@page.slug))
+    end
+
+    it "checks articles too" do
+      blog_page = create(:page, :blog)
+      blog_page.revisions.first.update!(published: true)
+      article = create(:article, page: blog_page, slug: blog_page.slug + "-unique-article-slug")
+      article.revisions.first.update!(published: true)
+
+      visit("/#{article.slug}")
+
+      expect(page).to have_current_path(page_article_path(page_id: blog_page.slug, id: article.slug))
     end
 
     context "with a referrer header set" do
@@ -122,7 +140,7 @@ RSpec.describe "Redirections" do
   end
 
   context "custom mappings" do
-    RedirectionsController::CUSTOM_MAPPINGS.each do | match_path, mapped_page_slug |
+    Rails.application.config.uk_org_pond_hcms.page_mappings.each do | match_path, mapped_page_slug |
       before :each do
         if Page.find_by_slug(mapped_page_slug).nil?
           mapped_page = create(:page, slug: mapped_page_slug)
@@ -150,82 +168,66 @@ RSpec.describe "Redirections" do
     end
   end
 
-  context "to a blog container" do
-    before :each do
-      page_1 = create(:page, :blog, created_at: Time.now - 1.year)
-      page_1.revisions.first.update!(published: true)
+  context "blog mappings" do
+    Rails.application.config.uk_org_pond_hcms.blog_mappings.each do | match_path, mapped_blog_page_slug |
+      before :each do
+        if Page.find_by_slug(mapped_blog_page_slug).nil?
+          mapped_page = create(:page, :blog, slug: mapped_blog_page_slug)
+          mapped_page.revisions.first.update!(published: true)
+        end
+      end
 
-      article_1 = create(:article, page: page_1)
-      article_1.revisions.first.update!(published: true)
+      it "redirects #{match_path} to the blog container" do
+        blog = Page.find_by_slug(mapped_blog_page_slug)
+        visit("/#{match_path}")
 
-      page_2 = create(:page, :blog, created_at: Time.now)
-      page_2.revisions.first.update!(published: true)
+        expect(page).to have_current_path(page_path(blog.slug))
+      end
 
-      article_2 = create(:article, page: page_2)
-      article_2.revisions.first.update!(published: true)
+      it "redirects #{match_path}/ to the blog container" do
+        blog = Page.find_by_slug(mapped_blog_page_slug)
+        visit("/#{match_path}/")
 
-      @page = page_1 # (the older page)
-    end
+        expect(page).to have_current_path(page_path(blog.slug))
+      end
 
-    it "redirects to the first blog page by '/blog'" do
-      visit("/blog")
+      it "redirects #{match_path}/(maybe-others)/... to an article if one is found" do
+        blog = Page.find_by_slug(mapped_blog_page_slug)
 
-      expect(page).to have_current_path(page_path(@page.slug))
-    end
+        article = create(:article, page: blog, slug: "foo-bar-baz")
+        article.revisions.first.update!(published: true)
 
-    it "redirects to the first blog page by '/blog/'" do
-      visit("/blog/")
+        visit("/#{match_path}/foo-bar-baz")
+        expect(page).to have_current_path(page_article_path(page_id: blog.slug, id: "foo-bar-baz"))
 
-      expect(page).to have_current_path(page_path(@page.slug))
-    end
+        visit("/#{match_path}/2025/foo-bar-baz")
+        expect(page).to have_current_path(page_article_path(page_id: blog.slug, id: "foo-bar-baz"))
 
-    it "redirects to the first blog page by '/blog.htm'" do
-      visit("/blog.htm")
+        visit("/#{match_path}/2022/04/05/foo-bar-baz")
+        expect(page).to have_current_path(page_article_path(page_id: blog.slug, id: "foo-bar-baz"))
+      end
 
-      expect(page).to have_current_path(page_path(@page.slug))
-    end
+      it "redirects #{match_path}/(maybe-others)/... to the blog container if no article is found" do
+        blog = Page.find_by_slug(mapped_blog_page_slug)
 
-    it "redirects to the first blog page by '/blog.htm'" do
-      visit("/blog.html")
+        visit("/#{match_path}/foo-bar-baz")
+        expect(page).to have_current_path(page_path(blog.slug))
 
-      expect(page).to have_current_path(page_path(@page.slug))
-    end
+        visit("/#{match_path}/2025/foo-bar-baz")
+        expect(page).to have_current_path(page_path(blog.slug))
 
-    it "yields 404 if there is no blog page" do
-      Page.destroy_all
-      Article.destroy_all
+        visit("/#{match_path}/2022/04/05/foo-bar-baz")
+        expect(page).to have_current_path(page_path(blog.slug))
+      end
 
-      visit("/blog")
+      it "yields 404 if there is no blog page" do
+        Page.destroy_all
+        Article.destroy_all
 
-      expect(page.status_code).to eq(404)
-    end
-  end
+        visit("/#{match_path}")
 
-  context "to a blog article" do
-    before :each do
-      @page = create(:page, :blog)
-      @page.revisions.first.update!(published: true)
-
-      @article = create(:article, page: @page)
-      @article.revisions.first.update!(published: true)
-    end
-
-    it "redirects at '/blog/slug'" do
-      visit "/blog/#{@article.slug}"
-
-      expect(page).to have_current_path(page_article_path(@page.slug, @article.slug))
-    end
-
-    it "redirects at '/blog/yyyy/mm/dd/slug'" do
-      visit "/blog/2023/05/28/#{@article.slug}"
-
-      expect(page).to have_current_path(page_article_path(@page.slug, @article.slug))
-    end
-
-    it "yields 404 if no article is found" do
-      visit "/blog/missing-missing"
-
-      expect(page.status_code).to eq(404)
+        expect(page.status_code).to eq(404)
+      end
     end
   end
 end
