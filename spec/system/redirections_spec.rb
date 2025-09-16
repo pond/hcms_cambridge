@@ -71,7 +71,7 @@ RSpec.describe "Redirections" do
         expect(PageImpression.count).to be_zero # (self-check)
         expect_any_instance_of(RedirectionsController).to receive(:show).and_call_original
 
-        visit("/missing-missing")
+        visit("/pagelike-#{SecureRandom.uuid}")
         expect(page.status_code).to eq(404)
 
         expect(PageImpression.count).to eql(1)
@@ -99,11 +99,21 @@ RSpec.describe "Redirections" do
 
     context "'ignore' extensions" do
       RedirectionsController::IGNORE_EXTENSIONS.each do | ext |
-        it "yields 404 and records no page impression with '#{ext}'" do
+        it "yields 404 and records no page impression with '#{ext}' (natural case)" do
           expect(PageImpression.count).to be_zero # (self-check)
           expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
 
           visit("/#{@page.slug}#{ext}")
+
+          expect(page.status_code).to eq(404)
+          expect(PageImpression.count).to be_zero
+        end
+
+        it "yields 404 and records no page impression with '#{ext}' (upper case)" do
+          expect(PageImpression.count).to be_zero # (self-check)
+          expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
+
+          visit("/#{@page.slug}#{ext.upcase}")
 
           expect(page.status_code).to eq(404)
           expect(PageImpression.count).to be_zero
@@ -127,14 +137,51 @@ RSpec.describe "Redirections" do
     end
 
     context "ignore paths" do
-      it "yields 404 and records no page impression with certain paths" do
-        expect(PageImpression.count).to be_zero # (self-check)
-        expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
+      Rails.application.config.uk_org_pond_hcms.statistics_ignore.each do | section, list |
+        list.each do | item |
+          random = SecureRandom.uuid
+          case section
+            when 'match_exactly'
+              test_positive = item
+              test_negative = "#{item}#{random}"
+            when 'starts_with'
+              test_positive = "#{item}#{random}"
+              test_negative = "#{random}#{item}#{random}"
+            when 'found_anywhere'
+              test_positive = "#{random}#{item}#{random}"
+              test_negative = "#{random}#{item[...-1]}#{random}"
+          end
 
-        visit("/wp-#{@page.slug}.html")
+          it "yields 404 and records no page impression when matching in '#{section}' with '#{item}' (natural case)" do
+            expect(PageImpression.count).to be_zero # (self-check)
+            expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
 
-        expect(page.status_code).to eq(404)
-        expect(PageImpression.count).to be_zero
+            visit("/#{test_positive}.html")
+
+            expect(page.status_code).to eq(404)
+            expect(PageImpression.count).to be_zero
+          end
+
+          it "yields 404 and records no page impression when matching in '#{section}' with '#{item}' (upper case)" do
+            expect(PageImpression.count).to be_zero # (self-check)
+            expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
+
+            visit("/#{test_positive.upcase}.html")
+
+            expect(page.status_code).to eq(404)
+            expect(PageImpression.count).to be_zero
+          end
+
+          it "yields 404 and records no page impression without a match in '#{section}' with '#{item}'" do
+            expect(PageImpression.count).to be_zero # (self-check)
+            expect_any_instance_of(RedirectionsController).to receive(:show).at_least(:once).and_call_original
+
+            visit("/#{test_negative}.html")
+
+            expect(page.status_code).to eq(404)
+            expect(PageImpression.count).to eql(1)
+          end
+        end
       end
     end
   end

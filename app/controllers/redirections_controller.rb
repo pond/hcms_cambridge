@@ -5,12 +5,6 @@ class RedirectionsController < ApplicationController
 
   after_action :create_page_impression
 
-  # Don't create a page impression record for these path extensions. They're
-  # typically from bot/fuzzer junk and by inspection we can see that they have
-  # no value in indicating a missed redirection that should be recorded.
-  #
-  IGNORE_EXTENSIONS = ['.php', '.py', '.key']
-
   # Map a path or path prefix to the slug of a blog page. Within that, any
   # remaining path segments are checked against article slugs, to redirect if
   # possible to a specific article, else at least the overall blog.
@@ -20,6 +14,29 @@ class RedirectionsController < ApplicationController
   # Other customised redirections. These match the full path, or path prefix.
   #
   PAGE_MAPPINGS = {} # Populated by #show calling #populate_constants!
+
+  # Don't create a page impression record for these path extensions. They're
+  # typically from bot/fuzzer junk and by inspection we can see that they have
+  # no value in indicating a missed redirection that should be recorded.
+  #
+  IGNORE_EXTENSIONS = Set.new(%w{
+    .env
+    .ini
+    .key
+    .php
+    .php7
+    .php8
+    .py
+  })
+
+  # Used internally by the no-page-impression ignore system for configurable
+  # mappings in 'config.yml', mapping config sections to Ruby string methods.
+  #
+  STATS_IGNORE_METHODS = {
+    'match_exactly'  => :eql?,
+    'starts_with'    => :start_with?,
+    'found_anywhere' => :include?
+  }
 
   def show
     self.populate_constants! if BLOG_MAPPINGS.blank?
@@ -135,19 +152,29 @@ class RedirectionsController < ApplicationController
     # Render *without* a page impression record?
     #
     def no_page_impression?
-      path      = self.get_clean_path()
+      path      = self.get_clean_path().downcase
       extension = File.extname(path)
 
       # Referrers are almost always blank for bot spam, but they might also be
       # blank for e.g. links in apps like Instagram or from e-mail clients. A
       # trade-off between bot noise and real user interactions must be made.
       #
-      return (
+      early_exit = (
         # request.referrer.blank?             || # If enabled, look for "RESTORE THIS" in "redirections_spec.rb" and uncomment the test
-        IGNORE_EXTENSIONS.include?(extension) ||
-        path.start_with?('wp-')               ||
-        path.start_with?('.')
+        IGNORE_EXTENSIONS.include?(extension)
       )
+
+      return true if early_exit
+
+      Rails.application.config.uk_org_pond_hcms.statistics_ignore.each do |section, list|
+        matcher = STATS_IGNORE_METHODS[section]
+
+        list.each do | item |
+          return true if path.send(matcher, item)
+        end
+      end
+
+      return false
     end
 
     # Called indiscriminately on after-action. Helps us analyse any missing

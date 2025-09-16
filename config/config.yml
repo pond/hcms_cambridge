@@ -34,8 +34,51 @@ blog_mappings:
 
 page_mappings:
   'our-team':           'home'
+  'about':              'home'
   'contact':            'contact-us'
+  'the-hub':            'contact-us'
   'maison-vauron':      'contact-us'
   'trade-portal':       'contact-us'
   'tastings-private':   'private-tastings'
   'tasting-enquiry':    'private-tastings'
+  'cellar-door':        'private-tastings'
+  'giftcards':          'private-tastings'
+  'education':          'private-tastings'
+  'services':           'private-tastings'
+  'shop':               'private-tastings'
+  'nouvelle-2021':      'previous-events'
+  'umberground-2024':   'previous-events'
+
+# Do not generate statistics for paths starting with these prefixes that have
+# not matched other endpoints and fallen through to the redirection system.
+#
+statistics_ignore:
+  match_exactly:
+    - 'admin'
+    - 'assets'
+    - 'cgi-bin'
+    - 'components'
+    - 'files'
+    - 'images'
+    - 'local'
+    - 'login'
+    - 'php'
+    - 'plugins'
+    - 'modules'
+    - 'template'
+    - 'system'
+    - 'wordpress'
+    - 'wp'
+  starts_with:
+    - '.'
+    - 'wp-'
+    - 'admin/'
+    - 'assets/'
+    - 'login/'
+    - 'upload'
+    - 'vendor'
+  found_anywhere:
+    - 'phpinfo'
+    - '.env'
+    - '.php'
+    - '/wp-'
