@@ -341,14 +341,6 @@ main, .redactor-box.redactor-styles-on {
     height: auto !important;
   }
 
-  img[align = 'right'] {
-    margin: 0 10px 10px 0;
-  }
-
-  img[align = 'left'] {
-    margin: 0 0 10px 10px;
-  }
-
   img:not(.no_spinner), iframe:not(.no_spinner) {
     @include standard_spinner;
   }
@@ -398,27 +390,27 @@ main, .redactor-box.redactor-styles-on {
   /* Most Redactor object containers are usually <figure> */
 
   figure {
-    margin: 0.4em 0 0.5em 0; // (~align to top of text lines when floated)
+    margin: 0.4em 0 1em 0; // (~align to top of text lines when floated)
     padding: 0;
     border-radius: 0.3em;
+
+    &.float_left,
+    &[style*="float: left"],
+    &[style*="float:left"] {
+      float: left;
+      margin-right: 2em;
+    }
+
+    &.float_right,
+    &[style*="float: right"],
+    &[style*="float:right"] {
+      float: right;
+      margin-left: 2em;
+    }
 
     > img, > a > img:only-child {
       border-radius: 0.3em;
     }
-  }
-
-  figure.float_left,
-  figure[style*="float: left"],
-  figure[style*="float:left"] {
-    float: left;
-    margin-right: 0 10px 10px 0;
-  }
-
-  figure.float_right,
-  figure[style*="float: right"],
-  figure[style*="float:right"] {
-    float: right;
-    margin: 0 0 10px 10px;
   }
 
   /* Redactor doesn't understand an iframe wrapped in any containers so
@@ -695,7 +687,7 @@ nav {
       @include widescreen_video_block_mid;
     }
 
-    img {
+    figure, img {
       max-width: $content_width_mid !important;
       height: auto !important;
     }
@@ -766,7 +758,7 @@ nav {
       @include widescreen_video_block_narrow;
     }
 
-    img {
+    figure, img {
       max-width: $content_width_narrow !important;
       height: auto !important;
     }
@@ -827,7 +819,7 @@ nav {
       align-items: stretch;
     }
 
-    img {
+    figure, img {
       max-width: $content_width_mobile !important;
       height: auto !important;
     }

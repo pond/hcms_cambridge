@@ -22,7 +22,7 @@ $(document).on('ready page:load', function() {
       spellcheck:              true,
       minHeight:               '300px',
       maxHeight:               '80vh',
-      imageFloatMargin:        '1em',
+      imageFloatMargin:        null, // See "shared.scss" for margins on floated images
       toolbarExternal:         "#redactor_toolbar",
       removeDataRedactorTypes: false,
       plugins:         [
