@@ -38,7 +38,7 @@ class Admin::StatisticsController < ApplicationController
       break if start_id > end_id
     end
 
-    @statistics = statistics.values.sort_by { |statistic| [statistic.source.controller, statistic.source.path] }
+    @statistics = statistics.values.sort_by { |statistic| [-statistic.count, statistic.source.controller, statistic.source.path] }
   end
 
   # The ID for a 'show' action is a PageImpression ID which has its +path+ used
