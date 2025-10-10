@@ -56,6 +56,8 @@
           page_path(editable.slug)
         elsif editable.is_a?(Article)
           page_article_path(editable.page.slug, editable.slug)
+        elsif editable.is_a?(Event)
+          page_event_path(editable.page.slug, editable.slug)
         else
           nil
         end

@@ -255,6 +255,8 @@ GEM
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (5.26.0)
+    money (6.19.0)
+      i18n (>= 0.6.4, <= 2)
     multi_json (1.17.0)
     multipart-post (2.4.1)
     mustermann (3.0.4)
@@ -307,7 +309,7 @@ GEM
     puma (7.0.4)
       nio4r (~> 2.0)
     racc (1.8.1)
-    rack (2.2.19)
+    rack (2.2.20)
     rack-protection (3.2.0)
       base64 (>= 0.1.0)
       rack (~> 2.2, >= 2.2.4)
@@ -485,6 +487,7 @@ DEPENDENCIES
   mailcatcher (~> 0.10)
   mailgun-ruby (~> 1.3)
   mini_magick (~> 5.3)
+  money (~> 6.19)
   ostruct
   pg
   phonelib (~> 0.10)

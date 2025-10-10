@@ -40,6 +40,7 @@ class Revision < ApplicationRecord
   #
   scope :for_pages,    -> { where(revisable_type: 'Page') }
   scope :for_articles, -> { where(revisable_type: 'Article') }
+  scope :for_events,   -> { where(revisable_type: 'Event') }
 
   # Columns (as Strings) which can be merged in from owning records. Might be
   # used to e.g. create a Revision temporarily from a Page's revisable

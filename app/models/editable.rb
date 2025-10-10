@@ -225,6 +225,10 @@ class Editable < ApplicationRecord
     false
   end
 
+  def is_event?
+    false
+  end
+
   def for_navigation?
     false
   end

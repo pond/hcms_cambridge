@@ -121,6 +121,7 @@ en:
       contact_form: "Contact form"
       booking_form: "Booking form"
       blog: "Blog"
+      events: "Events"
 
     revision:
       published: "Published"

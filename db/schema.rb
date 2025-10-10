@@ -10,9 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_07_005807) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  # Custom types defined in this database.
+  # Note that some types may not work with other database engines. Be careful if changing database.
+  create_enum "order_status", ["new", "success", "payment_failed", "cancelled", "expired", "refunded"]
 
   create_table "articles", force: :cascade do |t|
     t.text "title"
@@ -26,6 +30,44 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_005807) do
     t.datetime "updated_at", precision: nil, null: false
     t.index ["page_id"], name: "index_articles_on_page_id"
     t.index ["slug"], name: "index_articles_on_slug", unique: true
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "title", null: false
+    t.text "slug", null: false
+    t.text "event_hero_image", null: false
+    t.text "summary", null: false
+    t.text "body", null: false
+    t.boolean "raw_editor", default: false, null: false
+    t.bigint "page_id"
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.integer "number_of_seats", null: false
+    t.integer "price_per_seat", null: false
+    t.text "currency", null: false
+    t.jsonb "upon_archiving"
+    t.boolean "archived", default: false, null: false
+    t.index ["archived"], name: "index_events_on_archived"
+    t.index ["page_id"], name: "index_events_on_page_id"
+    t.index ["slug"], name: "index_events_on_slug", unique: true
+  end
+
+  create_table "orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "event_id", null: false
+    t.text "name", null: false
+    t.text "email_address", null: false
+    t.text "phone_number"
+    t.text "notes"
+    t.integer "number_of_seats", null: false
+    t.integer "amount_owed", null: false
+    t.text "currency", null: false
+    t.enum "status", default: "new", null: false, enum_type: "order_status"
+    t.index ["event_id"], name: "index_orders_on_event_id"
+    t.index ["status"], name: "index_orders_on_status"
   end
 
   create_table "page_impressions", force: :cascade do |t|

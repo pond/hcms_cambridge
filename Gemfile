@@ -70,6 +70,12 @@ gem 'acts_as_list', '~> 1.2'
 #
 gem 'phonelib', '~> 0.10'
 
+# Currency parsing and formatting.
+#
+#   https://rubygems.org/gems/money
+#
+gem 'money', '~> 6.19'
+
 # Monitoring and alerting.
 #
 # * https://rubygems.org/gems/stackprof

@@ -245,15 +245,17 @@ section.messages, div#error_explanation {
   margin-bottom: 1em;
 }
 
-article.article {
-  section.article-header {
+article.article,
+article.event {
+  section.article-header,
+  section.event-header {
     border-top:    1px dotted #999;
     border-bottom: 1px dotted #999;
     margin-bottom: 20px;
   }
 
-  .article-date-and-heading-container,
-  .article-summary-and-links-container {
+  .article-date-and-heading-container,  .event-date-and-heading-container,
+  .article-summary-and-links-container, .event-summary-and-links-container {
     display: flex;
     justify-content: space-between;
     gap: 5px;
@@ -261,28 +263,28 @@ article.article {
     margin-top: 5px;
   }
 
-  .article-summary-and-links-container {
+  .article-summary-and-links-container, .event-summary-and-links-container {
     align-items: start;
   }
 
-  .article-date {
+  .article-date, .event-date {
     font-size: small;
     margin: 0;
     padding-left: 5px;
     text-align: right;
   }
 
-  .article-heading {
+  .article-heading, .event-heading {
     margin: 5px 0;
   }
 
-  .article-summary {
+  .article-summary, .event-summary {
     font-size: smaller;
     font-style: italic;
     margin-bottom: 1em;
   }
 
-  .article-next-prev {
+  .article-next-prev, .event-next-prev {
     font-size: 18px;
     line-height: 110%;
     text-align: right;
@@ -295,12 +297,14 @@ article.article {
   }
 }
 
-section.blog-articles {
+section.blog-articles,
+section.events {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1em;
 
-  article.article {
+  article.article,
+  article.event {
     img {
       width: 100%;
       height: auto;
@@ -310,7 +314,8 @@ section.blog-articles {
     }
   }
 
-  &.with-poster-grid article.article img {
+  &.with-poster-grid article.article img,
+  &.with-poster-grid article.event   img {
     aspect-ratio: 2/3;
   }
 }
@@ -528,18 +533,19 @@ a:visited {
   color: $nav_link_visited_colour;
 }
 
-a:not(.article-link):hover,
-a:hover div.article-date-and-heading-container {
+a:not(.article-link):not(.event-link):hover,
+a:hover div.article-date-and-heading-container,
+a:hover   div.event-date-and-heading-container {
   color: lighten($nav_link_base_colour, 50%);
   text-decoration: underline;
 }
 
-a.article-link:hover img {
+a.article-link:hover img, a.event-link:hover img {
   transition: transform 100ms;
   transform: scale(105%);
 }
 
-a.article-link:hover div.article-summary {
+a.article-link:hover div.article-summary, a.event-link:hover div.event-summary {
   color: lighten($nav_link_base_colour, 50%);
   text-decoration: none !important;
 }
@@ -693,14 +699,16 @@ nav {
       height: auto !important;
     }
 
-    section.blog-articles {
-      article.article {
-        .article-date-and-heading-container,
-        .article-summary-and-links-container {
+    section.blog-articles,
+    section.events {
+      article.article,
+      article.event {
+        .article-date-and-heading-container,  .event-date-and-heading-container,
+        .article-summary-and-links-container, .event-summary-and-links-container {
           flex-wrap: wrap;
         }
 
-        .article-date {
+        .article-date, .event-date {
           padding-left: 0;
           margin-bottom: 5px;
         }
@@ -764,10 +772,12 @@ nav {
       height: auto !important;
     }
 
-    section.blog-articles {
+    section.blog-articles,
+    section.events {
       grid-template-columns: 1fr 1fr;
 
-      article.article:only-child {
+      article.article:only-child,
+      article.event:only-child {
         margin-left: 0;
       }
     }
@@ -825,23 +835,29 @@ nav {
       height: auto !important;
     }
 
-    section.blog-articles {
+    section.blog-articles,
+    section.events {
       grid-template-columns: 1fr;
 
-      article.article {
+      article.article,
+      article.event {
         width: $content_width_mobile;
       }
 
-      article.article:only-child {
+      article.article:only-child,
+      article.event:only-child {
         margin-left: 0;
       }
     }
 
-    article.article {
-      .article-summary-and-links-container {
+    article.article,
+    article.event {
+      .article-summary-and-links-container,
+      .event-summary-and-links-container {
         align-items: center;
 
-        .article-next-prev {
+        .article-next-prev,
+        .event-next-prev {
           text-wrap: wrap;
         }
       }
