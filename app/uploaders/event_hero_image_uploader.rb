@@ -1,9 +1,9 @@
-class ArticleHeroImageUploader < CarrierWave::Uploader::Base
+class EventHeroImageUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
 
   # Override the directory where uploaded files will be stored.
   def store_dir
-    "system/redactor_assets/article_hero_images/#{model.id}"
+    "system/redactor_assets/event_hero_images/#{model.id}"
   end
 
   # Allow-list of extensions which are allowed to be uploaded.

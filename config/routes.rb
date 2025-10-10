@@ -5,6 +5,9 @@ Rails.application.routes.draw do
 
   resources :pages, only: :show do
     resources :articles, only: :show
+    resources :events, only: :show do
+      resources :orders
+    end
   end
 
   resources :by_titles, only: :show
@@ -15,6 +18,9 @@ Rails.application.routes.draw do
 
     resources :pages do
       resources :articles
+      resources :events do
+        resources :orders
+      end
     end
 
     resources :move_pages, only: :update

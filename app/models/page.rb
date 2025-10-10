@@ -2,7 +2,9 @@ class Page < Editable
   belongs_to :parent, class_name: 'Page', foreign_key: 'page_id', optional: true
   has_many :children, class_name: 'Page'
   has_many :children_for_navigation, -> { for_navigation }, class_name: 'Page'
+
   has_many :articles, dependent: :destroy
+  has_many :events,   dependent: :destroy
 
   acts_as_list scope: :page
   default_scope -> { order(position: :asc) }
@@ -18,6 +20,7 @@ class Page < Editable
 
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BLOG         = 'blog'
+  PAGE_TYPE_EVENTS       = 'events'
   PAGE_TYPE_BOOKING_FORM = 'booking_form'
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
   ORDERED_PAGE_TYPES     = [
@@ -25,6 +28,7 @@ class Page < Editable
     PAGE_TYPE_BOOKING_FORM,
     PAGE_TYPE_CONTACT_FORM,
     PAGE_TYPE_BLOG,
+    PAGE_TYPE_EVENTS
   ]
 
   def self.home
@@ -37,6 +41,10 @@ class Page < Editable
 
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
+  end
+
+  def is_events_type?
+    self.page_type == PAGE_TYPE_EVENTS
   end
 
   def is_form_type?
