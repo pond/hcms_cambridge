@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
     t.datetime "updated_at", null: false
     t.text "title", null: false
     t.text "slug", null: false
-    t.text "article_hero_image", null: false
+    t.text "event_hero_image", null: false
     t.text "summary", null: false
     t.text "body", null: false
     t.boolean "raw_editor", default: false, null: false
