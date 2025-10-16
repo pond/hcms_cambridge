@@ -35,7 +35,7 @@ module PagesHelper
     key = if page.is_blog_type?
       :blog
     elsif page.is_events_type?
-      :event
+      :events
     else
       :page
     end

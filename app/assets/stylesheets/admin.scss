@@ -185,6 +185,22 @@ main.admin {
     border-radius: 4px;
     background-image: linear-gradient(to top, #d2d0d0 0%, #f0f0f0 100%)
   }
+
+  .contains-form-element-with-help {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    details {
+      margin: 5px 0.5em;
+
+      dl {
+        font-size: smaller;
+      }
+    }
+  }
 }
 
 footer.admin {

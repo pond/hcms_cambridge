@@ -28,6 +28,8 @@
   <%= link_to 'Edit', edit_admin_page_path(page) %>
   <% if page.is_blog_type? %>
     <%= link_to 'Articles', admin_page_articles_path(page) %>
+  <% elsif page.is_events_type? %>
+    <%= link_to 'Events', admin_page_events_path(page) %>
   <% end %>
 </td>
 <td class="admin_actions">

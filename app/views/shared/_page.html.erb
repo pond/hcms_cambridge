@@ -25,8 +25,15 @@
       <% end %>
     </section>
   <% else %>
-    No articles have been written for this blog yet.
-    <%= link_to 'Write one now!', new_admin_page_article_path(page_id: page.id) %>
+    <p>
+      No articles have been written for this blog yet.
+    </p>
+
+    <% if current_user %>
+      <p>
+        <%= link_to 'Write new article', new_admin_page_article_path(page_id: page.id) %>
+      </p>
+    <% end %>
   <% end %>
 
 <% elsif page.is_events_type? %>
@@ -47,8 +54,15 @@
       <% end %>
     </section>
   <% else %>
-    There are no events scheduled for the near future, but please check back later!
-    <%= link_to 'Write one now!', new_admin_page_event_path(page_id: page.id) %>
+    <p>
+      There are no events scheduled for the near future, but please check back later!
+    </p>
+
+    <% if current_user %>
+      <p>
+        <%= link_to 'Add new event now', new_admin_page_event_path(page_id: page.id) %>
+      </p>
+    <% end %>
   <% end %>
 
 <% elsif page.is_form_type? %>

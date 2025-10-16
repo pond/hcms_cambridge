@@ -92,6 +92,18 @@ en:
         raw_editor: "Use the low-level HTML editor?"
         body: "Main article"
 
+      event:
+        title: "Title"
+        summary: "Brief summary"
+        event_hero_image: "Poster photo"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Event details"
+        starts_at: "Start date and time"
+        end_at: "Start date and time"
+        number_of_seats: "Number of seats available"
+        price_per_seat: "Price per seat"
+        currency: "Currency"
+
       page:
         title: "Page title"
         slug: "Path / 'slug'"

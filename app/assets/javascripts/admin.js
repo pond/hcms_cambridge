@@ -15,10 +15,10 @@ $(document).on('ready page:load', function() {
   function setVisibilities() {
     var selectedPageType = $('#page_page_type').children("option:selected").val();
 
-    if (selectedPageType == 'blog') {
-      $('.non-blog-fields').slideUp();
+    if (selectedPageType == 'blog' || selectedPageType == 'events') {
+      $('.non-blog-or-events-fields').slideUp();
     } else {
-      $('.non-blog-fields').slideDown();
+      $('.non-blog-or-events-fields').slideDown();
     }
 
     if (selectedPageType.endsWith('_form')) {

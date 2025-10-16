@@ -16,7 +16,7 @@ class Page < Editable
     .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
   }
 
-  validates_presence_of :body, unless: :is_blog_type?
+  validates_presence_of :body, unless: :can_omit_body?
 
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BLOG         = 'blog'
@@ -49,6 +49,10 @@ class Page < Editable
 
   def is_form_type?
     self.is_contact_form? || self.is_booking_form?
+  end
+
+  def can_omit_body?
+    self.is_blog_type? || self.is_events_type?
   end
 
   def for_navigation?

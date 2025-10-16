@@ -36,11 +36,39 @@
     <div class="two_column">
       <div class="field">
         <%= apphelp_label(f, :page_type) %>
-        <%= f.collection_select :page_type, ::PageType.types, :internal_name, :human_name %>
-        <br>
-        <small><em>
-          You must <strong>save</strong> then <strong>re-edit</strong> the page if you change this setting
-        </em></small>
+        <div class="contains-form-element-with-help">
+          <%= f.collection_select :page_type, ::PageType.types, :internal_name, :human_name %>
+          <details>
+            <summary>ℹ️</summary>
+            <dl>
+              <dt>Normal</dt>
+              <dd>A regular page with no special features.</dd>
+              <dt>Booking form</dt>
+              <dd>
+                A page that includes a form intended for "always-on" booking options, for
+                things like bespoke events held on a date and time requested by the customer.
+                Use the "Events" page kind for events scheduled on a fixed date and time.
+              </dd>
+              <dt>Contact form</dt>
+              <dd>A page that includes a "contact us" form for general purpose enquiries.</dd>
+              <dt>Blog</dt>
+              <dd>
+                A kind of container page with no body text of its own. Within it, you write
+                and publish articles which get listed automatically on the parent page, most
+                recent first. Each blog page holds its own distinct set of articles; you
+                can add as many separate blog collections as you want.
+              </dd>
+              <dt>Events</dt>
+              <dd>
+                A kind of container page with no body text of its own. You write details of
+                forthcoming events you are holding that are scheduled for a fixed date and
+                time, with addition and presentation similar to articles written for blogs.
+                Customers can order event tickets directly from each event page. As with
+                blogs, you can have as many separate event collections as you want.
+              </dd>
+            <dl>
+          </details>
+        </div>
       </div>
 
       <div>
@@ -72,11 +100,17 @@
       </div>
     </div>
 
-    <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+    <div class="non-blog-or-events-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
       <div class="is-form-fields" style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
         <hr>
         <p>
-          The published page will contain a form which lets users send enquiries.
+          This page will contain a form which lets users send enquiries. Contact
+          forms are for the generalised contact use cases you would expect. Booking
+          forms are intended for "always-on" offerings such as bespoke requested
+          private events. For fixed scheduled offerings, consider using an "Events"
+          kind of page instead of a booking form.
+        </p>
+        <p>
           Except for the settings below, all form fields are preset (not editable).
         </p>
 
@@ -124,7 +158,7 @@
     </div>
   </details>
 
-  <div class="non-blog-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+  <div class="non-blog-or-events-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
     <% if @page.raw_editor %>
       <div class="redactor_container">
         <div class="redactor-box redactor-styles-on">
@@ -145,9 +179,9 @@
     <%= f.button 'Publish page', name: 'publish', value: true %>
     <div class="note">
       Only the page title, navigation title and body text (where relevant) save
-      into drafts. Other "metadata" like the position in the menus, the "kind"
-      of the page, hidden state and even the selection menu setup for form pages
-      will always save and be "published" immediately.
+      into new revisions. <strong><em>All other changes</em> such as position in
+      menus, the "kind" of the page, or contact or booking form details are
+      always saved (effectively, "published") immediately.</strong>
     </diV>
   </div>
 <% end %>

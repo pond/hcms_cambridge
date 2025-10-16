@@ -2,8 +2,12 @@ module ApplicationHelper
   def apphelp_destroy_confirm(thing)
     message = 'Are you sure? This cannot be undone!'
 
-    if thing.is_a?(Page) && thing.is_blog_type? && thing.articles.for_navigation.any?
-      message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
+    if thing.is_a?(Page)
+      if thing.is_blog_type? && thing.articles.for_navigation.any?
+        message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
+      elsif thing.is_events_type? && thing.events.for_navigation.any?
+        message = "Are you sure? This page's listed events will be deleted too. This cannot be undone!"
+      end
     end
 
     message

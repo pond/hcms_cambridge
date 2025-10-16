@@ -1,0 +1,14 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'actions', locals: {
+  #     event: Event model instance
+  #   }
+%>
+<td class="admin_actions" style="padding-right: 1em">
+  <%= link_to 'Show', admin_page_event_path(event.page.slug, event.slug) %>
+  <%= link_to 'Edit', edit_admin_page_event_path(event.page, event) %>
+</td>
+<td class="admin_actions">
+  <%= link_to 'Delete', admin_page_event_path(event.page, event), method: :delete, data: { confirm: apphelp_destroy_confirm(event) } %>
+</td>

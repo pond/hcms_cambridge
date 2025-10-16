@@ -27,6 +27,10 @@ FactoryBot.define do
       page_type { Page::PAGE_TYPE_BLOG }
     end
 
+    trait :events do
+      page_type { Page::PAGE_TYPE_EVENTS }
+    end
+
     trait :with_menu do
       form_selection_list_contents { Faker::Lorem.words(number: 3).join("\n") }
       form_selection_list_label    { Faker::Lorem.question }

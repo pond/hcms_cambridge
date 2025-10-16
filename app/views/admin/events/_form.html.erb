@@ -1,0 +1,90 @@
+<%= form_with(model: [:admin, @page, @event], builder: FormBuilderWithInlineErrors) do | f | %>
+  <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
+
+  <details <%= @event.new_record? ? 'open' : '' %>>
+    <summary <%= @event.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit event attributes</summary>
+
+    <div class="field" <%= @event.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+      <%= apphelp_label(f, :title) %>
+      <%= f.text_field :title %>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :event_hero_image) %>
+      <%= f.file_field :event_hero_image %>
+      <% if @event.persisted? %>
+        <br>
+        <small><em>
+          You only need to choose an image if changing the one that's already attached to the event
+        </em></small>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :summary) %>
+      <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+      <%= f.error_markup_for(:summary) %><br>
+      <small><em>A brief, plain text (no styling) summary used in the list of events</em></small>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :starts_at) %>
+      <%= f.datetime_select :starts_at %>
+      <br>
+      <%= apphelp_label(f, :ends_at) %>
+      <%= f.datetime_select :ends_at %>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :number_of_seats) %>
+      <%= f.number_field :number_of_seats %>
+      <small><em>
+        (leave blank for unlimited / not counted)
+      </em></small>
+      <% if Rails.application.config.uk_org_pond_hcms.event_currency.present? %>
+        <%= apphelp_label(f, :price_per_seat) %>
+        <%= f.text_field :price_per_seat %>
+        <small><em>
+          (in <%= Rails.application.config.uk_org_pond_hcms.event_currency %>;
+          leave blank if the event is free of charge)
+        </em></small>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <div class="checkbox">
+        <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+      </div>
+      <small><em>
+        You must <strong>save</strong> then <strong>re-edit</strong> the event if you change this setting
+      </em></small>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :body) %>
+    </div>
+  </details>
+
+  <% if @event.raw_editor %>
+    <div class="redactor_container">
+      <div class="redactor-box redactor-styles-on">
+        <%= f.text_area :body, class: 'not_redactor', rows: 40, cols: 120 %>
+      </div>
+    </div>
+  <% else %>
+    <div class="redactor_container">
+      <div id="redactor_toolbar"></div>
+      <%= f.text_area :body, class: 'custom_redactor', rows: 40, cols: 120 %>
+    </div>
+  <% end %>
+  <%= f.error_markup_for(:body) %>
+
+  <div class="actions with_note">
+    <%= f.button 'Save draft', name: 'submit' %>
+    <%= f.button 'Publish event', name: 'publish', value: true %>
+    <div class="note">
+      Only the title, summary and event detail text save into revisions.
+      <strong><em>All other changes</em> always save permanently.</strong>
+    </diV>
+  </div>
+<% end %>

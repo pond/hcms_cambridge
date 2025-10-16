@@ -9,6 +9,16 @@ class Event < Editable
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
   }
 
+
+
+  # UPON ARCHIVING:
+  #
+  # - hide the page from navigation
+  # - keep the page as a historical item (make sure the view shows this clearly)
+  # - move the event into a blog as an article
+
+
+
   validates_presence_of %i{
     event_hero_image
     summary
