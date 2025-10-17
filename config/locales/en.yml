@@ -24,6 +24,7 @@ en:
     formats:
       short: "%b %-d %Y, %-l:%M%P"
       short_no_year: "%b %-d, %-l:%M%P"
+      time_only: "%-l:%M%P"
       date_only: "%b %-d %Y"
 
   activemodel:
@@ -98,11 +99,12 @@ en:
         event_hero_image: "Poster photo"
         raw_editor: "Use the low-level HTML editor?"
         body: "Event details"
+        location: "Location"
         starts_at: "Start date and time"
         ends_at: "End date and time"
         number_of_seats: "Number of seats available"
         price_per_seat: "Price per seat"
-        on_archive_action: "Action to take after event has taken place"
+        on_archive_action: "Once it has taken place"
 
       page:
         title: "Page title"
@@ -136,8 +138,8 @@ en:
       events: "Events"
 
     on_archive_action:
-      keep: "Keep in place as a past event"
-      hide: "Hide"
+      keep: "Keep on page as a past event"
+      hide: "Hide from page"
       move: "Move into a blog article"
 
     revision:

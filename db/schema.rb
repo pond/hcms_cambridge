@@ -43,6 +43,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
     t.datetime "ends_at", null: false
     t.integer "number_of_seats", null: false
     t.integer "price_per_seat", null: false
+    t.text "location"
     t.string "currency", limit: 3, null: false
     t.boolean "archived", default: false, null: false
     t.text "on_archive_action", default: "keep", null: false

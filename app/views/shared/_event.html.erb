@@ -11,7 +11,12 @@
   <section class="event-header">
     <div class="event-date-and-heading-container">
       <h2 class="event-heading"><%= event.title %></h2>
-      <div class="event-date"><%= apphelp_human_time(event.created_at) %></div>
+      <div class="event-date-and-location">
+        <%= evtshelp_datetime(event) %>
+        <% if event.location.present? %>
+          <address class="event-location"><%= event.location %></address>
+        <% end %>
+      </div>
     </div>
     <div class="event-summary-and-links-container">
       <div class="event-summary">
@@ -19,10 +24,13 @@
       </div>
       <div class="event-next-prev">
         <% if event.next %>
-          <%= link_to('◀︎', page_event_path(page_id: event.page.slug, id: event.next.slug), title: "Newer: #{event.next.title}", rel: "newer") %>
+          <%= link_to('◀︎', page_event_path(page_id: event.page.slug, id: event.next.slug), title: "Happening sooner: #{event.next.title}", rel: "newer") %>
         <% end %>
         <% if event.prev %>
-          <%= link_to('▶︎', page_event_path(page_id: event.page.slug, id: event.prev.slug), title: "Older: #{event.prev.title}", rel: "older") %>
+          <%= link_to('▶︎', page_event_path(page_id: event.page.slug, id: event.prev.slug), title: "Further away: #{event.prev.title}", rel: "older") %>
+        <% end %>
+        <% if event.price_per_seat > 0 %>
+          <%= link_to('Book seats', new_page_event_order_path(page_id: event.page_id, event_id: event.id), class: 'bold_button') %>
         <% end %>
       </div>
     </div>
@@ -30,5 +38,31 @@
 
   <section class="event-body">
     <%= event.body.html_safe() %>
+  </section>
+
+  <section class="event-meta">
+    <dl>
+      <dt>When<dt>
+      <dd><%= evtshelp_datetime(event) %></dd>
+      <% if event.location.present? %>
+        <dt>Where</dt>
+        <dd>
+          <%= event.location %>
+          (<%= link_to('map', "https://www.google.com/maps/search/?#{{api: 1, query: event.location}.to_query}", target: '_blank') %>)
+        </dd>
+      <% end %>
+      <% if event.number_of_seats > 0 %>
+        <dt>Seats</dt>
+        <dd>Limited seats available</dd>
+      <% end %>
+      <% if event.price_per_seat > 0 %>
+        <dt>Price</dt>
+        <dd>
+          <%= evtshelp_price(event) %>
+          &nbsp;
+          <%= link_to('Book seats', new_page_event_order_path(page_id: event.page_id, event_id: event.id), class: 'bold_button') %>
+        </dd>
+      <% end %>
+    </dl>
   </section>
 </article>

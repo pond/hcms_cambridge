@@ -276,11 +276,22 @@ article.event {
     align-items: start;
   }
 
-  .article-date, .event-date {
+  .article-date, .event-date-and-location {
     font-size: small;
     margin: 0;
     padding-left: 5px;
     text-align: right;
+  }
+
+  .event-date-and-location {
+    font-size: inherit;
+    font-weight: bold;
+
+    .event-location {
+      font-style: normal;
+      font-weight: normal;
+      font-size: small;
+    }
   }
 
   .article-heading, .event-heading {
@@ -717,7 +728,7 @@ nav {
           flex-wrap: wrap;
         }
 
-        .article-date, .event-date {
+        .article-date, .event-date-and-location {
           padding-left: 0;
           margin-bottom: 5px;
         }
@@ -869,6 +880,23 @@ nav {
         .event-next-prev {
           text-wrap: wrap;
         }
+      }
+    }
+
+    article.event {
+      div.event-date-and-heading-container,
+      div.event-summary-and-links-container,
+      div.event-date-and-location {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      div.event-next-prev {
+        display: none;
+      }
+
+      div.event-summary {
+        margin-top: 0.8em;
       }
     }
   }

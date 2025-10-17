@@ -19,8 +19,8 @@ class Event < Editable
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
   }
 
-  after_initialize do
-    tz_now = Time.now.in_time_zone(Rails.application.config.uk_org_pond_hcms.time_zone || 'UTC')
+  after_initialize(unless: :persisted?) do
+    tz_now = Time.current
 
     self.starts_at = tz_now.beginning_of_day +  9.hours
     self.ends_at   = tz_now.beginning_of_day + 17.hours
@@ -36,9 +36,9 @@ class Event < Editable
     currency
   }
 
-  validates :starts_at,         presence: true, comparison: { greater_than: -> { Time.now }, message: 'must be in the future' }
-  validates :ends_at,           presence: true, comparison: { greater_than: -> { Time.now }, message: 'must be in the future' }
-  validates :on_archive_action, presence: true,  inclusion: { in: ORDERED_ARCHIVING_ACTIONS, message: 'is not recognised'     }
+  validates :starts_at,         presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
+  validates :ends_at,           presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
+  validates :on_archive_action, presence: true,  inclusion: { in: ORDERED_ARCHIVING_ACTIONS,     message: 'is not recognised'     }
 
   def is_event?
     true
@@ -48,23 +48,27 @@ class Event < Editable
     self.published_revision.present?
   end
 
-  # A newer event - next greater created_at. Assumes no two identical times.
+  def collapse_metadata_in_form?
+    ! self.new_record? && self.valid?
+  end
+
+  # A closer event - next lower starts_at. Assumes no two identical times.
   #
   def next
     @next ||= self.class
-      .reorder(created_at: :asc)
+      .reorder(created_at: :desc)
       .where(page_id: self.page_id)
-      .where('created_at > ?', self.created_at)
+      .where('starts_at < ?', self.starts_at)
       .first
   end
 
-  # An older event - next lower created_at. Assumes no two identical times.
+  # A more distant event - next greater starts_at. Assumes no two identical times.
   #
   def prev
     @prev ||= self.class
-      .reorder(created_at: :desc)
+      .reorder(created_at: :asc)
       .where(page_id: self.page_id)
-      .where('created_at < ?', self.created_at)
+      .where('starts_at > ?', self.starts_at)
       .first
   end
 end

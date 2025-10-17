@@ -21,6 +21,10 @@ class Article < Editable
     self.published_revision.present?
   end
 
+  def collapse_metadata_in_form?
+    ! self.new_record? && self.valid?
+  end
+
   # A newer article - next greater created_at. Assumes no two identical times.
   #
   def next

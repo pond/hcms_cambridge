@@ -52,10 +52,6 @@ class Page < Editable
     self.is_contact_form? || self.is_booking_form?
   end
 
-  def can_omit_body?
-    self.is_blog_type? || self.is_events_type?
-  end
-
   def for_navigation?
     ! self.hidden && self.published_revision.present?
   end
@@ -76,5 +72,15 @@ class Page < Editable
     else
       nil
     end
+  end
+
+  def can_omit_body?
+    self.is_blog_type? || self.is_events_type?
+  end
+
+  def collapse_metadata_in_form?
+    ! self.new_record? &&
+    ! self.can_omit_body? &&
+    self.valid?
   end
 end

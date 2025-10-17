@@ -1,10 +1,10 @@
 <%= form_with(model: [:admin, @page, @event], builder: FormBuilderWithInlineErrors) do | f | %>
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
-  <details <%= @event.new_record? ? 'open' : '' %>>
-    <summary <%= @event.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit event attributes</summary>
+  <details <%= @event.collapse_metadata_in_form? ? '' : 'open' %>>
+    <summary <%= @event.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit event attributes</summary>
 
-    <div class="two_column" <%= @page.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+    <div class="two_column" <%= @event.collapse_metadata_in_form? ? 'style="margin-top: 1em"'.html_safe : '' %>>
       <div class="field_column">
         <div class="field">
           <%= apphelp_label(f, :title) %>
@@ -32,11 +32,35 @@
 
       <div class="field_column">
         <div class="field">
-          <%= apphelp_label(f, :starts_at) %>
-          <%= f.datetime_field :starts_at %>
-          <br>
-          <%= apphelp_label(f, :ends_at) %>
-          <%= f.datetime_field :ends_at %>
+          <%= apphelp_label(f, :location, hint: 'this is both shown as-is and used as a Google Maps search string') %>
+          <%= f.text_field :location %>
+        </div>
+
+        <div class="two_column">
+          <div class="field">
+            <%= apphelp_label(f, :starts_at) %>
+            <%= f.datetime_field :starts_at %>
+          </div>
+          <div class="field">
+            <%= apphelp_label(f, :ends_at) %>
+            <%= f.datetime_field :ends_at %>
+          </div>
+        </div>
+
+        <div class="two_column">
+          <div class="field">
+            <%= apphelp_label(f, :number_of_seats, hint: 'leave blank or set to zero if there is no limit') %>
+            <%= f.number_field :number_of_seats, min: 0, step: 1 %>
+          </div>
+
+          <% if Rails.application.config.uk_org_pond_hcms.currency.present? %>
+            <div class="field">
+              <%= apphelp_label(f, :price_per_seat, hint: 'leave blank or set to zero if free of charge') %>
+              <%= Money::Currency.new(Rails.application.config.uk_org_pond_hcms.currency).symbol %>
+              <%= f.text_field :price_per_seat, class: 'not_full_width_in_two_column' %>
+              <small><%= Rails.application.config.uk_org_pond_hcms.currency %></small>
+            </div>
+          <% end %>
         </div>
 
         <div class="field">
@@ -48,21 +72,9 @@
             <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
           </div>
         </div>
-
-        <div class="field">
-          <%= apphelp_label(f, :number_of_seats, hint: 'leave blank or set to zero if there is no limit') %>
-          <%= f.number_field :number_of_seats, min: 0, step: 1 %>
-        </div>
-
-        <% if Rails.application.config.uk_org_pond_hcms.currency.present? %>
-          <div class="field">
-            <%= apphelp_label(f, :price_per_seat, hint: "in #{Rails.application.config.uk_org_pond_hcms.currency}; leave blank or set to zero if free of charge") %>
-            <%= Money::Currency.new(Rails.application.config.uk_org_pond_hcms.currency).symbol %>
-            <%= f.text_field :price_per_seat, class: 'not_full_width_in_two_column' %>
-          </div>
-        <% end %>
       </div>
     </div>
+
 
     <div class="field">
       <div class="checkbox">

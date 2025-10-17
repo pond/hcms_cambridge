@@ -17,4 +17,25 @@ module EventsHelper
 
     return link_to(link_text, edit_admin_page_event_path(event.page, event, revision: revision_id))
   end
+
+  def evtshelp_datetime(event)
+    formatted_start = apphelp_human_time(event.starts_at)
+    formatted_end   = apphelp_human_time(event.ends_at, time_only: (event.starts_at.to_date == event.ends_at.to_date))
+
+    "#{formatted_start} until #{formatted_end}"
+  end
+
+  def evtshelp_price(event)
+    if Rails.application.config.uk_org_pond_hcms.currency.blank?
+      '&ndash;'.html_safe()
+    elsif event.price_per_seat.zero?
+      'Free'
+    else
+      parsed_amount = Money.from_cents(
+        event.price_per_seat,
+        Rails.application.config.uk_org_pond_hcms.currency
+      )
+      parsed_amount.format()
+    end
+  end
 end

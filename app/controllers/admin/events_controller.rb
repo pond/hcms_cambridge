@@ -115,6 +115,31 @@ class Admin::EventsController < ApplicationController
         on_archive_params[:blog_id] == blog.id if blog.present?
       end
 
+      [:number_of_seats, :price_per_seat].each do | attr |
+        safe_params[attr] = '0' if safe_params[attr].blank?
+      end
+
+      if Rails.application.config.uk_org_pond_hcms.currency.present?
+        parsed_amount = Money.from_amount(
+          safe_params[:price_per_seat].to_d,
+          Rails.application.config.uk_org_pond_hcms.currency
+        )
+        safe_params[:price_per_seat] = parsed_amount.cents
+      else
+        safe_params[:price_per_seat] = 0
+      end
+
+      [:starts_at, :ends_at].each do | attr |
+        tz_datetime = Time.use_zone(Rails.application.config.uk_org_pond_hcms.time_zone) do
+          Time.zone.parse(safe_params[attr]) rescue Time.current - 1.year
+        end
+
+        safe_params[attr] = tz_datetime
+      end
+
+      event.assign_attributes(safe_params)
+      debugger unless event.valid? && event.starts_at > Time.current
+
       result = event.persist!(safe_params, publish: params[:publish].present?)
 
       if result.successful
@@ -149,6 +174,7 @@ class Admin::EventsController < ApplicationController
           :ends_at,
           :number_of_seats,
           :price_per_seat,
+          :location,
 
           :on_archive_action,
           :on_archive_params_blog_id,

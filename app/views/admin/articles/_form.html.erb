@@ -1,10 +1,10 @@
 <%= form_with(model: [:admin, @page, @article], builder: FormBuilderWithInlineErrors) do | f | %>
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
-  <details <%= @article.new_record? ? 'open' : '' %>>
-    <summary <%= @article.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit article attributes</summary>
+  <details <%= @article.collapse_metadata_in_form? ? '' : 'open' %>>
+    <summary <%= @article.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit article attributes</summary>
 
-    <div class="field" <%= @article.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+    <div class="field" <%= @article.collapse_metadata_in_form? ? 'style="margin-top: 1em"'.html_safe : '' %>>
       <%= apphelp_label(f, :title) %>
       <%= f.text_field :title %>
     </div>

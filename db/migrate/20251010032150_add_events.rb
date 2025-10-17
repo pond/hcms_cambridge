@@ -18,6 +18,7 @@ class AddEvents < ActiveRecord::Migration[8.0]
       t.datetime :ends_at,         null: false
       t.integer  :number_of_seats, null: false # 0 -> unlimited
       t.integer  :price_per_seat,  null: false # 0 -> free
+      t.text     :location,        null: true  # Main description can include this instead
       t.string   :currency,        null: false, limit: 3
       t.boolean  :archived,        null: false, default: false, index: true
 
