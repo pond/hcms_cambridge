@@ -104,6 +104,7 @@ en:
         ends_at: "End date and time"
         number_of_seats: "Number of seats available"
         price_per_seat: "Price per seat"
+        event_state: "Ticket sales"
         on_archive_action: "Once it has taken place"
 
       page:
@@ -130,17 +131,23 @@ en:
     optional: "(optional)"
 
   models:
+    event_state:
+      presales: "Reservations only (pre-sale)"
+      reservee_purchases: "Purchase by reservation holders only"
+      public_purchases: "Open to general public"
+      archived: "Archived"
+
+    on_archive_action:
+      keep: "Keep on page as a past event"
+      hide: "Hide from page"
+      move: "Move into a blog article"
+
     page_type:
       normal: "Normal"
       contact_form: "Contact form"
       booking_form: "Booking form"
       blog: "Blog"
       events: "Events"
-
-    on_archive_action:
-      keep: "Keep on page as a past event"
-      hide: "Hide from page"
-      move: "Move into a blog article"
 
     revision:
       published: "Published"

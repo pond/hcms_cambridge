@@ -16,7 +16,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
-  create_enum "order_status", ["new", "success", "payment_failed", "cancelled", "expired", "refunded"]
+  create_enum "event_on_archive_actions", ["keep", "hide", "move"]
+  create_enum "event_states", ["presales", "reservee_purchases", "public_purchases", "archived"]
+  create_enum "order_states", ["new", "success", "payment_failed", "cancelled", "refunded"]
 
   create_table "articles", force: :cascade do |t|
     t.text "title"
@@ -45,12 +47,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
     t.integer "price_per_seat", null: false
     t.text "location"
     t.string "currency", limit: 3, null: false
-    t.boolean "archived", default: false, null: false
-    t.text "on_archive_action", default: "keep", null: false
+    t.enum "state", default: "presales", null: false, enum_type: "event_states"
+    t.enum "on_archive_action", default: "keep", null: false, enum_type: "event_on_archive_actions"
     t.jsonb "on_archive_params", default: {}, null: false
-    t.index ["archived"], name: "index_events_on_archived"
     t.index ["page_id"], name: "index_events_on_page_id"
     t.index ["slug"], name: "index_events_on_slug", unique: true
+    t.index ["state"], name: "index_events_on_state"
   end
 
   create_table "orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -63,9 +65,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
     t.text "notes"
     t.integer "number_of_seats", null: false
     t.integer "amount_owed", null: false
-    t.enum "status", default: "new", null: false, enum_type: "order_status"
+    t.enum "state", default: "new", null: false, enum_type: "order_states"
     t.index ["event_id"], name: "index_orders_on_event_id"
-    t.index ["status"], name: "index_orders_on_status"
+    t.index ["state"], name: "index_orders_on_state"
   end
 
   create_table "page_impressions", force: :cascade do |t|

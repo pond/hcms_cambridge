@@ -64,6 +64,11 @@
         </div>
 
         <div class="field">
+          <%= apphelp_label(f, :event_state) %>
+          <%= f.collection_select :event_state, ::EventState.types, :internal_name, :human_name %>
+        </div>
+
+        <div class="field">
           <%= apphelp_label(f, :on_archive_action) %>
           <%= f.collection_select :on_archive_action, ::OnArchiveAction.types, :internal_name, :human_name %>
 

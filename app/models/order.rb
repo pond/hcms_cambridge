@@ -3,7 +3,6 @@ class Order < ApplicationRecord
   ORDER_STATE_SUCCESS        = "success"
   ORDER_STATE_PAYMENT_FAILED = "payment_failed"
   ORDER_STATE_CANCELLED      = "cancelled"
-  ORDER_STATE_EXPIRED        = "expired"
   ORDER_STATE_REFUNDED       = "refunded"
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
@@ -14,7 +13,6 @@ class Order < ApplicationRecord
     ORDER_STATE_SUCCESS,
     ORDER_STATE_PAYMENT_FAILED,
     ORDER_STATE_CANCELLED,
-    ORDER_STATE_EXPIRED,
     ORDER_STATE_REFUNDED,
   ]
 
@@ -32,6 +30,6 @@ class Order < ApplicationRecord
   }
 
   after_initialize(unless: :persisted?) do
-    self.status = ORDER_STATE_NEW
+    self.state = ORDER_STATE_NEW
   end
 end

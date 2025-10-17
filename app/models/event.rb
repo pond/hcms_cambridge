@@ -1,8 +1,26 @@
 class Event < Editable
+  EVENT_STATE_PRESALES           = "presales"
+  EVENT_STATE_RESERVEE_PURCHASES = "reservee_purchases"
+  EVENT_STATE_PUBLIC_PURCHASES   = "public_purchases"
+  EVENT_STATE_ARCHIVED           = "archived"
+
+  # NB: This is backed by a PostgreSQL enum, so changes require corresponding
+  # migrations. Enum originally created by "20251010032150_add_events.rb".
+  #
+  EVENT_STATES = [
+    EVENT_STATE_PRESALES,
+    EVENT_STATE_RESERVEE_PURCHASES,
+    EVENT_STATE_PUBLIC_PURCHASES,
+    EVENT_STATE_ARCHIVED,
+  ]
+
   ON_ARCHIVE_KEEP = 'keep' # Ends up in 'past events' subsection on event page
   ON_ARCHIVE_HIDE = 'hide' # All revisions move into draft state
   ON_ARCHIVE_MOVE = 'move' # Convert and move to blog indicated by archive params
 
+  # NB: This is backed by a PostgreSQL enum, so changes require corresponding
+  # migrations. Enum originally created by "20251010032150_add_events.rb".
+  #
   ORDERED_ARCHIVING_ACTIONS = [
     ON_ARCHIVE_KEEP,
     ON_ARCHIVE_HIDE,
@@ -37,6 +55,7 @@ class Event < Editable
     self.ends_at   = tz_now.beginning_of_day + 17.hours
     self.currency  = Rails.application.config.uk_org_pond_hcms.currency
 
+    self.state             = EVENT_STATE_PRESALES
     self.on_archive_action = ON_ARCHIVE_KEEP
   end
 
