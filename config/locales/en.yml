@@ -99,10 +99,10 @@ en:
         raw_editor: "Use the low-level HTML editor?"
         body: "Event details"
         starts_at: "Start date and time"
-        end_at: "Start date and time"
+        ends_at: "End date and time"
         number_of_seats: "Number of seats available"
         price_per_seat: "Price per seat"
-        currency: "Currency"
+        on_archive_action: "Action to take after event has taken place"
 
       page:
         title: "Page title"
@@ -134,6 +134,11 @@ en:
       booking_form: "Booking form"
       blog: "Blog"
       events: "Events"
+
+    on_archive_action:
+      keep: "Keep in place as a past event"
+      hide: "Hide"
+      move: "Move into a blog article"
 
     revision:
       published: "Published"

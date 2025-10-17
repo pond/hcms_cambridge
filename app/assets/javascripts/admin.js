@@ -12,31 +12,54 @@
 //= require redactor_config.js
 
 $(document).on('ready page:load', function() {
-  function setVisibilities() {
-    var selectedPageType = $('#page_page_type').children("option:selected").val();
+  const pageTypeSelector = $('#page_page_type');
+  const eventOnArchiveSelector = $('#event_on_archive_action');
 
-    if (selectedPageType == 'blog' || selectedPageType == 'events') {
-      $('.non-blog-or-events-fields').slideUp();
-    } else {
-      $('.non-blog-or-events-fields').slideDown();
-    }
+  if (pageTypeSelector.length > 0) {
+    function setVisibilities() {
+      var selectedPageType = pageTypeSelector.children("option:selected").val();
 
-    if (selectedPageType.endsWith('_form')) {
-      $('.is-form-fields').slideDown();
-
-      if (selectedPageType == 'booking_form') {
-        $('.is-booking-fields').slideDown();
+      if (selectedPageType == 'blog' || selectedPageType == 'events') {
+        $('.non-blog-or-events-fields').slideUp();
       } else {
-        $('.is-booking-fields').slideUp();
+        $('.non-blog-or-events-fields').slideDown();
       }
-    } else {
-      $('.is-form-fields').slideUp();
+
+      if (selectedPageType.endsWith('_form')) {
+        $('.is-form-fields').slideDown();
+
+        if (selectedPageType == 'booking_form') {
+          $('.is-booking-fields').slideDown();
+        } else {
+          $('.is-booking-fields').slideUp();
+        }
+      } else {
+        $('.is-form-fields').slideUp();
+      }
     }
+
+    setVisibilities();
+
+    pageTypeSelector.change(function(event) {
+      setVisibilities();
+    });
   }
 
-  setVisibilities();
+  if (eventOnArchiveSelector.length > 0) {
+    function setVisibilities() {
+      var selectedOnArchiveAction = eventOnArchiveSelector.children("option:selected").val();
 
-  $('#page_page_type').change(function(event) {
+      if (selectedOnArchiveAction == 'move') {
+        $('#on-archive-action-move-fields').slideDown();
+      } else {
+        $('#on-archive-action-move-fields').slideUp();
+      }
+    }
+
     setVisibilities();
-  });
+
+    eventOnArchiveSelector.change(function(event) {
+      setVisibilities();
+    });
+  }
 });

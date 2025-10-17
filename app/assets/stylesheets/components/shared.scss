@@ -63,10 +63,11 @@ div.two_column {
   display: grid;
   grid-template-columns: 50fr 50fr;
   column-gap: 40px;
-}
 
-div.two_column input[type="text"] {
-  width: 100%;
+  input[type="text"]:not(.not_full_width_in_two_column),
+  textarea:not(.not_full_width_in_two_column) {
+    width: 100%;
+  }
 }
 
 form div.field {
@@ -95,6 +96,10 @@ input, select, button {
   margin: 5px 0;
 }
 
+select {
+  min-height: 36px;
+}
+
 input {
   border: 1px solid black;
   padding: 2px 5px;
@@ -117,6 +122,10 @@ select {
 
 input[type="file"] {
   font-size: 12pt;
+}
+
+input[type="number"] {
+  width: 5em;
 }
 
 input[type="file"]::-webkit-file-upload-button,

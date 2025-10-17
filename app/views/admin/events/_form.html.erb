@@ -4,51 +4,64 @@
   <details <%= @event.new_record? ? 'open' : '' %>>
     <summary <%= @event.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit event attributes</summary>
 
-    <div class="field" <%= @event.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
-      <%= apphelp_label(f, :title) %>
-      <%= f.text_field :title %>
-    </div>
+    <div class="two_column" <%= @page.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :title) %>
+          <%= f.text_field :title %>
+        </div>
 
-    <div class="field">
-      <%= apphelp_label(f, :event_hero_image) %>
-      <%= f.file_field :event_hero_image %>
-      <% if @event.persisted? %>
-        <br>
-        <small><em>
-          You only need to choose an image if changing the one that's already attached to the event
-        </em></small>
-      <% end %>
-    </div>
+        <div class="field">
+          <%= apphelp_label(f, :event_hero_image) %>
+          <%= f.file_field :event_hero_image %>
+          <% if @event.persisted? %>
+            <br>
+            <small><em>
+              You only need to choose an image if changing the one that's already attached to the event
+            </em></small>
+          <% end %>
+        </div>
 
-    <div class="field">
-      <%= apphelp_label(f, :summary) %>
-      <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
-      <%= f.error_markup_for(:summary) %><br>
-      <small><em>A brief, plain text (no styling) summary used in the list of events</em></small>
-    </div>
+        <div class="field">
+          <%= apphelp_label(f, :summary) %>
+          <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+          <%= f.error_markup_for(:summary) %><br>
+          <small><em>A brief, plain text (no styling) summary used in the list of events</em></small>
+        </div>
+      </div>
 
-    <div class="field">
-      <%= apphelp_label(f, :starts_at) %>
-      <%= f.datetime_select :starts_at %>
-      <br>
-      <%= apphelp_label(f, :ends_at) %>
-      <%= f.datetime_select :ends_at %>
-    </div>
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :starts_at) %>
+          <%= f.datetime_field :starts_at %>
+          <br>
+          <%= apphelp_label(f, :ends_at) %>
+          <%= f.datetime_field :ends_at %>
+        </div>
 
-    <div class="field">
-      <%= apphelp_label(f, :number_of_seats) %>
-      <%= f.number_field :number_of_seats %>
-      <small><em>
-        (leave blank for unlimited / not counted)
-      </em></small>
-      <% if Rails.application.config.uk_org_pond_hcms.event_currency.present? %>
-        <%= apphelp_label(f, :price_per_seat) %>
-        <%= f.text_field :price_per_seat %>
-        <small><em>
-          (in <%= Rails.application.config.uk_org_pond_hcms.event_currency %>;
-          leave blank if the event is free of charge)
-        </em></small>
-      <% end %>
+        <div class="field">
+          <%= apphelp_label(f, :on_archive_action) %>
+          <%= f.collection_select :on_archive_action, ::OnArchiveAction.types, :internal_name, :human_name %>
+
+          <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event::ON_ARCHIVE_MOVE ? 'block' : 'none' %>">
+            <%= f.label(:on_archive_params_blog_id, 'Move into which blog?') %>
+            <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
+          </div>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :number_of_seats, hint: 'leave blank or set to zero if there is no limit') %>
+          <%= f.number_field :number_of_seats, min: 0, step: 1 %>
+        </div>
+
+        <% if Rails.application.config.uk_org_pond_hcms.currency.present? %>
+          <div class="field">
+            <%= apphelp_label(f, :price_per_seat, hint: "in #{Rails.application.config.uk_org_pond_hcms.currency}; leave blank or set to zero if free of charge") %>
+            <%= Money::Currency.new(Rails.application.config.uk_org_pond_hcms.currency).symbol %>
+            <%= f.text_field :price_per_seat, class: 'not_full_width_in_two_column' %>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <div class="field">

@@ -1,10 +1,10 @@
 <%= form_with(model: [:admin, @page], builder: FormBuilderWithInlineErrors) do | f | %>
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
-  <details <%= @page.new_record? ? 'open' : '' %>>
-    <summary <%= @page.new_record? ? 'style="display: none"'.html_safe : ''%>>Expand to edit page attributes</summary>
+  <details <%= @page.new_record? || @page.can_omit_body? ? 'open' : '' %>>
+    <summary <%= @page.new_record? || @page.can_omit_body? ? 'style="display: none"'.html_safe : ''%>>Expand to edit page attributes</summary>
 
-    <div class="two_column" <%= @page.new_record? ? '' : 'style="margin-top: 1em"'.html_safe %>>
+    <div class="two_column" <%= @page.new_record? || @page.can_omit_body? ? '' : 'style="margin-top: 1em"'.html_safe %>>
       <div class="field">
         <%= apphelp_label(f, :title) %>
         <%= f.text_field :title %>
@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    <div class="non-blog-or-events-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+    <div class="non-blog-or-events-fields" style="display: <%= @page.can_omit_body? ? 'none' : 'block' %>">
       <div class="is-form-fields" style="display: <%= @page.is_form_type? ? 'block' : 'none' %>">
         <hr>
         <p>
@@ -158,7 +158,7 @@
     </div>
   </details>
 
-  <div class="non-blog-or-events-fields" style="display: <%= @page.is_blog_type? ? 'none' : 'block' %>">
+  <div class="non-blog-or-events-fields" style="display: <%= @page.can_omit_body? ? 'none' : 'block' %>">
     <% if @page.raw_editor %>
       <div class="redactor_container">
         <div class="redactor-box redactor-styles-on">

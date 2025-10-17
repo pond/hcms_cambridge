@@ -39,14 +39,14 @@
 <% elsif page.is_events_type? %>
 
   <% if page.events.for_navigation.any? %>
-    <section class="events<%= page.poster_grid ? ' with-poster-grid' : ''%>">
+    <section class="events with-poster-grid">
       <% page.events.for_navigation.each do | event | %>
         <article class="event">
           <%= link_to page_event_path(page_id: page.slug, id: event.slug), class: 'event-link' do %>
             <img class="event-hero-image" src="<%= event.event_hero_image.url %>" alt="<%= event.title %>">
             <div class="event-date-and-heading-container">
               <h4 class="event-heading"><%= event.title %></h4>
-              <div class="event-date"><%= apphelp_human_time(event.created_at) %></div>
+              <div class="event-date"><%= apphelp_human_time(event.starts_at) %></div>
             </div>
             <div class="event-summary"><%= event.summary %></div>
           <% end %>

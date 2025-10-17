@@ -35,20 +35,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
   create_table "events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "title", null: false
     t.text "slug", null: false
     t.text "event_hero_image", null: false
-    t.text "summary", null: false
-    t.text "body", null: false
     t.boolean "raw_editor", default: false, null: false
     t.bigint "page_id"
     t.datetime "starts_at", null: false
     t.datetime "ends_at", null: false
     t.integer "number_of_seats", null: false
     t.integer "price_per_seat", null: false
-    t.text "currency", null: false
-    t.jsonb "upon_archiving"
+    t.string "currency", limit: 3, null: false
     t.boolean "archived", default: false, null: false
+    t.text "on_archive_action", default: "keep", null: false
+    t.jsonb "on_archive_params", default: {}, null: false
     t.index ["archived"], name: "index_events_on_archived"
     t.index ["page_id"], name: "index_events_on_page_id"
     t.index ["slug"], name: "index_events_on_slug", unique: true

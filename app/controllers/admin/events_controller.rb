@@ -105,9 +105,17 @@ class Admin::EventsController < ApplicationController
       draft_message:,
       published_message:
     )
-      upon_archiving_choice = params[:event]&.delete(:upon_archiving)
+      safe_params               = self.event_params()
+      on_archive_action         = safe_params.delete(:on_archive_action)
+      on_archive_params         = {}
+      on_archive_params_blog_id = safe_params.delete(:on_archive_params_blog_id)
 
-      result = event.persist!(self.event_params(), publish: params[:publish].present?)
+      if on_archive_action == Event::ON_ARCHIVE_MOVE
+        blog = Page.blogs.find_by_id(on_archive_params_blog_id)
+        on_archive_params[:blog_id] == blog.id if blog.present?
+      end
+
+      result = event.persist!(safe_params, publish: params[:publish].present?)
 
       if result.successful
         if event.previous_changes.has_key?('raw_editor')
@@ -141,7 +149,9 @@ class Admin::EventsController < ApplicationController
           :ends_at,
           :number_of_seats,
           :price_per_seat,
-          :currency,
+
+          :on_archive_action,
+          :on_archive_params_blog_id,
         )
     end
 end

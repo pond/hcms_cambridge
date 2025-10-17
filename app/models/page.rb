@@ -1,4 +1,17 @@
 class Page < Editable
+  PAGE_TYPE_NORMAL       = 'normal'
+  PAGE_TYPE_BLOG         = 'blog'
+  PAGE_TYPE_EVENTS       = 'events'
+  PAGE_TYPE_BOOKING_FORM = 'booking_form'
+  PAGE_TYPE_CONTACT_FORM = 'contact_form'
+  ORDERED_PAGE_TYPES     = [
+    PAGE_TYPE_NORMAL,
+    PAGE_TYPE_BOOKING_FORM,
+    PAGE_TYPE_CONTACT_FORM,
+    PAGE_TYPE_BLOG,
+    PAGE_TYPE_EVENTS
+  ]
+
   belongs_to :parent, class_name: 'Page', foreign_key: 'page_id', optional: true
   has_many :children, class_name: 'Page'
   has_many :children_for_navigation, -> { for_navigation }, class_name: 'Page'
@@ -15,21 +28,9 @@ class Page < Editable
     where(hidden: false)
     .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
   }
+  scope :blogs, -> { where(page_type: PAGE_TYPE_BLOG) }
 
   validates_presence_of :body, unless: :can_omit_body?
-
-  PAGE_TYPE_NORMAL       = 'normal'
-  PAGE_TYPE_BLOG         = 'blog'
-  PAGE_TYPE_EVENTS       = 'events'
-  PAGE_TYPE_BOOKING_FORM = 'booking_form'
-  PAGE_TYPE_CONTACT_FORM = 'contact_form'
-  ORDERED_PAGE_TYPES     = [
-    PAGE_TYPE_NORMAL,
-    PAGE_TYPE_BOOKING_FORM,
-    PAGE_TYPE_CONTACT_FORM,
-    PAGE_TYPE_BLOG,
-    PAGE_TYPE_EVENTS
-  ]
 
   def self.home
     Page.top_level.reorder(created_at: :asc).first # (whether or not it yet has a published revision)
