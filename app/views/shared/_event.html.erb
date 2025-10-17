@@ -4,6 +4,8 @@
   # falling back the only unpublished revision if nothing is published).
   #
   #   render partial: 'shared/event', locals: { event: @event }
+
+  remaining_seat_count = event.seats_remaining || 0
 %>
 <%= render partial: 'shared/editable_revisions', locals: { editable: event, form_path: admin_page_event_path(event.page, event) } %>
 
@@ -29,8 +31,8 @@
         <% if event.prev %>
           <%= link_to('▶︎', page_event_path(page_id: event.page.slug, id: event.prev.slug), title: "Further away: #{event.prev.title}", rel: "older") %>
         <% end %>
-        <% if event.price_per_seat > 0 %>
-          <%= link_to('Book seats', new_page_event_order_path(page_id: event.page_id, event_id: event.id), class: 'bold_button') %>
+        <% if event.price_per_seat > 0 && remaining_seat_count > 0 %>
+          <%= link_to('Book seats', new_page_event_order_path(page_id: event.page.slug, event_id: event.slug), class: 'bold_button') %>
         <% end %>
       </div>
     </div>
@@ -53,14 +55,24 @@
       <% end %>
       <% if event.number_of_seats > 0 %>
         <dt>Seats</dt>
-        <dd>Limited seats available</dd>
+        <dd>
+          <% if remaining_seat_count > 5 %>
+            Limited seats available
+          <% elsif remaining_seat_count > 0 %>
+            Five or fewer seats remaining
+          <% else %>
+            Sorry, sold out!
+          <% end %>
+        </dd>
       <% end %>
       <% if event.price_per_seat > 0 %>
         <dt>Price</dt>
         <dd>
           <%= evtshelp_price(event) %>
-          &nbsp;
-          <%= link_to('Book seats', new_page_event_order_path(page_id: event.page_id, event_id: event.id), class: 'bold_button') %>
+          <% if remaining_seat_count > 0 %>
+            &nbsp;
+            <%= link_to('Book seats', new_page_event_order_path(page_id: event.page.slug, event_id: event.slug), class: 'bold_button') %>
+          <% end %>
         </dd>
       <% end %>
     </dl>

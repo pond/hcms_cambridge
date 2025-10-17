@@ -4,7 +4,8 @@ class Page < Editable
   PAGE_TYPE_EVENTS       = 'events'
   PAGE_TYPE_BOOKING_FORM = 'booking_form'
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
-  ORDERED_PAGE_TYPES     = [
+
+  ORDERED_PAGE_TYPES = [
     PAGE_TYPE_NORMAL,
     PAGE_TYPE_BOOKING_FORM,
     PAGE_TYPE_CONTACT_FORM,

@@ -272,8 +272,14 @@ article.event {
     margin-top: 5px;
   }
 
-  .article-summary-and-links-container, .event-summary-and-links-container {
+  .article-summary-and-links-container {
     align-items: start;
+    margin-bottom: 1em;
+  }
+
+  .event-summary-and-links-container {
+    align-items: center;
+    margin-bottom: 0.6em;
   }
 
   .article-date, .event-date-and-location {
@@ -301,7 +307,6 @@ article.event {
   .article-summary, .event-summary {
     font-size: smaller;
     font-style: italic;
-    margin-bottom: 1em;
   }
 
   .article-next-prev, .event-next-prev {
@@ -309,7 +314,6 @@ article.event {
     line-height: 110%;
     text-align: right;
     text-wrap: nowrap;
-    margin-bottom: 1em;
 
     a {
       text-decoration: none;

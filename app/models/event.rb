@@ -19,16 +19,6 @@ class Event < Editable
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
   }
 
-  after_initialize(unless: :persisted?) do
-    tz_now = Time.current
-
-    self.starts_at = tz_now.beginning_of_day +  9.hours
-    self.ends_at   = tz_now.beginning_of_day + 17.hours
-    self.currency  = Rails.application.config.uk_org_pond_hcms.currency
-
-    self.on_archive_action = ON_ARCHIVE_KEEP
-  end
-
   validates_presence_of %i{
     event_hero_image
     summary
@@ -39,6 +29,16 @@ class Event < Editable
   validates :starts_at,         presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
   validates :ends_at,           presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
   validates :on_archive_action, presence: true,  inclusion: { in: ORDERED_ARCHIVING_ACTIONS,     message: 'is not recognised'     }
+
+  after_initialize(unless: :persisted?) do
+    tz_now = Time.current
+
+    self.starts_at = tz_now.beginning_of_day +  9.hours
+    self.ends_at   = tz_now.beginning_of_day + 17.hours
+    self.currency  = Rails.application.config.uk_org_pond_hcms.currency
+
+    self.on_archive_action = ON_ARCHIVE_KEEP
+  end
 
   def is_event?
     true
@@ -70,5 +70,20 @@ class Event < Editable
       .where(page_id: self.page_id)
       .where('starts_at > ?', self.starts_at)
       .first
+  end
+
+  # An at-the-instant estimate; returns +nil+ if seat count is unlimited.
+  #
+  def seats_remaining
+    if self.number_of_seats.zero?
+      return nil
+    else
+      # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
+      orders = Order.where(event: self, status: [Order::ORDER_STATE_NEW, Order::ORDER_STATE_SUCCESS])
+      remaining = self.number_of_seats - orders.count
+      remaining = 0 if remaining < 0
+
+      return remaining
+    end
   end
 end

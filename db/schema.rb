@@ -63,7 +63,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
     t.text "notes"
     t.integer "number_of_seats", null: false
     t.integer "amount_owed", null: false
-    t.text "currency", null: false
     t.enum "status", default: "new", null: false, enum_type: "order_status"
     t.index ["event_id"], name: "index_orders_on_event_id"
     t.index ["status"], name: "index_orders_on_status"
