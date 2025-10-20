@@ -1,0 +1,16 @@
+<p>
+  Thanks for your interest in this event! Please check your booking details
+  below, then proceed to the payment page.
+</p>
+
+<%=
+  render(
+    partial: 'form',
+    locals: {
+      page: page,
+      event: event,
+      order: order,
+      button_text: 'Go to payment page'
+    }
+  )
+%>

@@ -73,8 +73,10 @@ gem 'phonelib', '~> 0.10'
 # Currency parsing and formatting.
 #
 #   https://rubygems.org/gems/money
+#   https://rubygems.org/gems/monetize
 #
-gem 'money', '~> 6.19'
+gem 'money',    '~> 6.19'
+gem 'monetize', '~> 1.13'
 
 # Monitoring and alerting.
 #

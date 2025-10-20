@@ -139,6 +139,11 @@ button[name="publish"] {
   background-image: linear-gradient(to top, #d2d0d0 0%, #f0f0f0 100%)
 }
 
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+}
+
 div.actions {
   display: flex;
   align-items: center;
@@ -557,7 +562,7 @@ a:visited {
   color: $nav_link_visited_colour;
 }
 
-a:not(.article-link):not(.event-link):hover,
+a:not(.article-link):not(.event-link):not(.bold_button):hover,
 a:hover div.article-date-and-heading-container,
 a:hover   div.event-date-and-heading-container {
   color: lighten($nav_link_base_colour, 50%);
@@ -588,13 +593,15 @@ a.bold_button {
   text-decoration: none;
   color: #fff;
   background-color: #282828;
-  transition: 0.2s opacity linear;
+  transition: opacity 0.2s ease-out,
+          text-shadow 0.2s ease-out;
 }
 
 a.bold_button:hover {
   opacity: 0.8;
   text-decoration: none;
   color: #fff;
+  text-shadow: 0 0 2px #fff;
 }
 
 nav {

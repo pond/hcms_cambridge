@@ -57,15 +57,26 @@
             <div class="field">
               <%= apphelp_label(f, :price_per_seat, hint: 'leave blank or set to zero if free of charge') %>
               <%= Money::Currency.new(Rails.application.config.uk_org_pond_hcms.currency).symbol %>
-              <%= f.text_field :price_per_seat, class: 'not_full_width_in_two_column' %>
+              <%=
+                parsed_amount = Money.from_cents(
+                  f.object.price_per_seat,
+                  Rails.application.config.uk_org_pond_hcms.currency
+                )
+
+                f.text_field(
+                  :price_per_seat,
+                  value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+                  class: 'not_full_width_in_two_column'
+                )
+              %>
               <small><%= Rails.application.config.uk_org_pond_hcms.currency %></small>
             </div>
           <% end %>
         </div>
 
         <div class="field">
-          <%= apphelp_label(f, :event_state) %>
-          <%= f.collection_select :event_state, ::EventState.types, :internal_name, :human_name %>
+          <%= apphelp_label(f, :state) %>
+          <%= f.collection_select :state, ::EventState.types, :internal_name, :human_name %>
         </div>
 
         <div class="field">

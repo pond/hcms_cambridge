@@ -120,8 +120,8 @@ class Admin::EventsController < ApplicationController
       end
 
       if Rails.application.config.uk_org_pond_hcms.currency.present?
-        parsed_amount = Money.from_amount(
-          safe_params[:price_per_seat].to_d,
+        parsed_amount = Monetize.parse(
+          safe_params[:price_per_seat],
           Rails.application.config.uk_org_pond_hcms.currency
         )
         safe_params[:price_per_seat] = parsed_amount.cents
@@ -170,6 +170,7 @@ class Admin::EventsController < ApplicationController
           :body,
           :raw_editor,
 
+          :state,
           :starts_at,
           :ends_at,
           :number_of_seats,

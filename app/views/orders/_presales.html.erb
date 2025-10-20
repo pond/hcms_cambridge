@@ -1,0 +1,17 @@
+<p>
+  This event is currently allowing reservations for seats. Closer to the date of
+  the event, reservation holders will be e-mailed with a request to confirm their
+  reservation by paying for the seats requested.
+</p>
+
+<%=
+  render(
+    partial: 'form',
+    locals: {
+      page: page,
+      event: event,
+      order: order,
+      button_text: 'Make initial reservation'
+    }
+  )
+%>

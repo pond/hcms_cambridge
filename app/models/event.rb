@@ -31,7 +31,7 @@ class Event < Editable
 
   belongs_to :page
 
-  default_scope -> { order(archived: :asc, starts_at: :asc) }
+  default_scope -> { order(starts_at: :asc) }
 
   scope :for_navigation, -> {
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
@@ -97,12 +97,11 @@ class Event < Editable
     if self.number_of_seats.zero?
       return nil
     else
-      # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
-      orders = Order.where(event: self, status: [Order::ORDER_STATE_NEW, Order::ORDER_STATE_SUCCESS])
-      remaining = self.number_of_seats - orders.count
-      remaining = 0 if remaining < 0
-
-      return remaining
+      @seats_remaining ||= begin
+        # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
+        orders = Order.where(event: self, state: [Order::ORDER_STATE_NEW, Order::ORDER_STATE_SUCCESS])
+        [0, self.number_of_seats - orders.count].max()
+      end
     end
   end
 end

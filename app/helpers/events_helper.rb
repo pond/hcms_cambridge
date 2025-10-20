@@ -38,4 +38,31 @@ module EventsHelper
       parsed_amount.format()
     end
   end
+
+  def evtshelp_booking_action_title(event)
+    case event.state
+      when Event::EVENT_STATE_PRESALES
+        "Reserve seats"
+      when Event::EVENT_STATE_RESERVEE_PURCHASES
+        "Confirm reservation"
+      when Event::EVENT_STATE_PUBLIC_PURCHASES
+        "Book seats"
+      else
+        nil
+    end
+  end
+
+  def evntshelp_booking_button(event)
+    return nil if event.price_per_seat.zero? # NOTE EARLY EXIT
+
+    if event.seats_remaining > 0
+      link_to(
+        evtshelp_booking_action_title(event),
+        new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),
+        class: 'bold_button'
+      )
+    else
+      link_to('Sold out', '#', class: 'bold_button disabled')
+    end
+  end
 end

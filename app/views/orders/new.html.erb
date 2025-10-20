@@ -1,49 +1,9 @@
 <div style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 1em;">
   <section class="order-form">
-    <h1>Book seats</h1>
+    <h1><%= evtshelp_booking_action_title(@event) || 'Event' %></h1>
     <h2><%= @event.title %></h2>
 
-    <%=
-      form_with(
-        model:   @order,
-        builder: FormBuilderWithInlineErrors,
-        url:     page_event_orders_path(page_id: @page.slug, event_id: @event.slug)
-      ) do | f |
-    %>
-      <p>
-        <%= apphelp_label(f, :name, required: true) %>
-        <%= f.text_field :name %>
-      </p>
-      <p>
-        <%= apphelp_label(f, :email_address, required: true, hint: "we'll send your receipt and event updates here") %>
-        <%= f.email_field :email_address %>
-      </p>
-      <p>
-        <%= apphelp_label(f, :phone, hint: 'optional') %>
-        <%= f.telephone_field :phone %>
-      </p>
-
-      <p>
-        <%= apphelp_label(f, :number_of_seats, required: true) %>
-        <%= f.number_field(:number_of_seats, min: 1) %>
-        at <strong><%= evtshelp_price(@event) %></strong> per seat <small>(<%= @event.currency %>)</small>
-      </p>
-
-      <p>
-        <%= apphelp_label(f, :notes) %>
-        <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes or questions etc.' %>
-      </p>
-
-      <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
-        <%= recaptcha_tags() %>
-      <% else %>
-        <%= recaptcha_v3(action: 'contact') %>
-      <% end %>
-
-      <p>
-        <%= submit_tag 'Go to payment page' %>
-      </p>
-    <% end %>
+    <%= render @event.state, locals: { page: @page, event: @event, order: @order } %>
   </section>
 
   <section class="events with-poster-grid" style="grid-template-columns: 1fr">
