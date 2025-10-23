@@ -1,16 +1,14 @@
-<div style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 1em;">
-  <section class="order-form">
+<article class="event-order-form-container">
+  <section class="event-order-form">
     <h1><%= evtshelp_booking_action_title(@event) || 'Event' %></h1>
     <h2><%= @event.title %></h2>
 
     <%= render partial: @event.state, locals: { foo: true, page: @page, event: @event, order: @order } %>
   </section>
 
-  <section class="events with-poster-grid" style="grid-template-columns: 1fr">
-    <article class="event">
-      <%= link_to page_event_path(page_id: @page.slug, id: @event.slug), class: 'event-link' do %>
-        <img class="event-hero-image" src="<%= @event.event_hero_image.url %>" alt="<%= @event.title %>">
-      <% end %>
-    </article>
+  <section class="event-order-poster">
+    <%= link_to page_event_path(page_id: @page.slug, id: @event.slug), style: "display: inline-block; margin-top: 30px;" do %>
+      <%= image_tag(@event.event_hero_image.url, alt: @event.title) %>
+    <% end %>
   </section>
-</div>
+</article>

@@ -284,7 +284,7 @@ article.event {
 
   .event-summary-and-links-container {
     align-items: center;
-    margin-bottom: 0.6em;
+    margin: 0.6em 0;
   }
 
   .article-date, .event-date-and-location {
@@ -492,6 +492,24 @@ main, .redactor-box.redactor-styles-on {
 
     & > img:last-child {
       margin-bottom: 35px !important;
+    }
+  }
+
+  article.event-order-form-container {
+    display: grid;
+    grid-template-columns: 70% 30%;
+    gap: 1em;
+
+    section.event-order-poster {
+      a {
+        display: inline-block;
+        margin-top: 30px; /* Assumes use of H1 at start of form and matches margin */
+
+        img {
+          width: 100%;
+          border-radius: 0.3em;
+        }
+      }
     }
   }
 }
@@ -906,6 +924,14 @@ nav {
 
       div.event-summary {
         margin-top: 0.8em;
+      }
+    }
+
+    article.event-order-form-container {
+      display: block;
+
+      section.event-order-poster {
+        display: none;
       }
     }
   }

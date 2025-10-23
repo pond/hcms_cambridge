@@ -107,7 +107,7 @@ class Event < Editable
     else
       @seats_remaining ||= begin
         # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
-        orders = Order.where(event: self, state: [Order.states[:new], Order.states[:successful]])
+        orders = Order.inflight.where(event: self)
         [0, self.number_of_seats - orders.count].max()
       end
     end
