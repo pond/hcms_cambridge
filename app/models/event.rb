@@ -1,31 +1,37 @@
 class Event < Editable
-  EVENT_STATE_PRESALES           = "presales"
-  EVENT_STATE_RESERVEE_PURCHASES = "reservee_purchases"
-  EVENT_STATE_PUBLIC_PURCHASES   = "public_purchases"
-  EVENT_STATE_ARCHIVED           = "archived"
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
   #
-  EVENT_STATES = [
-    EVENT_STATE_PRESALES,
-    EVENT_STATE_RESERVEE_PURCHASES,
-    EVENT_STATE_PUBLIC_PURCHASES,
-    EVENT_STATE_ARCHIVED,
-  ]
+  enum(
+    :state,
+    {
+      presales:           'presales',
+      reservee_purchases: 'reservee_purchases',
+      public_purchases:   'public_purchases',
+      archived:           'archived',
+    },
+    prefix:  true,
+    default: :presales,
+  )
 
-  ON_ARCHIVE_KEEP = 'keep' # Ends up in 'past events' subsection on event page
-  ON_ARCHIVE_HIDE = 'hide' # All revisions move into draft state
-  ON_ARCHIVE_MOVE = 'move' # Convert and move to blog indicated by archive params
+  STATES = self.states.keys
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
   #
-  ORDERED_ARCHIVING_ACTIONS = [
-    ON_ARCHIVE_KEEP,
-    ON_ARCHIVE_HIDE,
-    ON_ARCHIVE_MOVE
-  ]
+  enum(
+    :on_archive_action,
+    {
+      keep: 'keep', # Ends up in 'past events' subsection on event page
+      hide: 'hide', # All revisions move into draft state
+      move: 'move', # Convert and move to blog indicated by archive params
+    },
+    prefix:  true,
+    default: :keep,
+  )
+
+  ON_ARCHIVE_ACTIONS = self.on_archive_actions.keys
 
   mount_uploader :event_hero_image, EventHeroImageUploader
 
@@ -42,21 +48,23 @@ class Event < Editable
     summary
     body
     currency
+    starts_at
+    ends_at
+    state
+    on_archive_action
   }
 
-  validates :starts_at,         presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
-  validates :ends_at,           presence: true, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
-  validates :on_archive_action, presence: true,  inclusion: { in: ORDERED_ARCHIVING_ACTIONS,     message: 'is not recognised'     }
+  validates :starts_at,        comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
+  validates :ends_at,          comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
+  validates :state,             inclusion: { in: STATES,                        message: 'is not recognised'     }
+  validates :on_archive_action, inclusion: { in: ON_ARCHIVE_ACTIONS,            message: 'is not recognised'     }
 
   after_initialize(unless: :persisted?) do
     tz_now = Time.current
 
     self.starts_at = tz_now.beginning_of_day +  9.hours
     self.ends_at   = tz_now.beginning_of_day + 17.hours
-    self.currency  = Rails.application.config.uk_org_pond_hcms.currency
-
-    self.state             = EVENT_STATE_PRESALES
-    self.on_archive_action = ON_ARCHIVE_KEEP
+    self.currency  = Hcms.config.currency
   end
 
   def is_event?
@@ -99,7 +107,7 @@ class Event < Editable
     else
       @seats_remaining ||= begin
         # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
-        orders = Order.where(event: self, state: [Order::ORDER_STATE_NEW, Order::ORDER_STATE_SUCCESS])
+        orders = Order.where(event: self, state: [Order.states[:new], Order.states[:successful]])
         [0, self.number_of_seats - orders.count].max()
       end
     end

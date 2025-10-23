@@ -2,13 +2,31 @@ class Admin::EventsController < ApplicationController
 
   layout :determine_layout
 
-  # Via Devise
-  before_action :authenticate_admin_user!
+  before_action :authenticate_admin_user! # (via Devise)
   before_action :get_page
   before_action :get_event,            only: [:show, :destroy]
   before_action :get_editable_event,   only: [:edit, :update]
   before_action :build_editable_event, only: [:new,  :create]
   before_action :check_for_revision,   only: [:show, :edit, :update]
+
+  PERMITTED_EVENT_PARAMS = %i{
+    title
+    slug
+    event_hero_image
+    summary
+    body
+    raw_editor
+
+    state
+    starts_at
+    ends_at
+    number_of_seats
+    price_per_seat
+    location
+
+    on_archive_action
+    on_archive_params_blog_id
+  }
 
   public
 
@@ -119,10 +137,10 @@ class Admin::EventsController < ApplicationController
         safe_params[attr] = '0' if safe_params[attr].blank?
       end
 
-      if Rails.application.config.uk_org_pond_hcms.currency.present?
+      if Hcms.config.currency.present?
         parsed_amount = Monetize.parse(
           safe_params[:price_per_seat],
-          Rails.application.config.uk_org_pond_hcms.currency
+          Hcms.config.currency
         )
         safe_params[:price_per_seat] = parsed_amount.cents
       else
@@ -130,7 +148,7 @@ class Admin::EventsController < ApplicationController
       end
 
       [:starts_at, :ends_at].each do | attr |
-        tz_datetime = Time.use_zone(Rails.application.config.uk_org_pond_hcms.time_zone) do
+        tz_datetime = Time.use_zone(Hcms.config.time_zone) do
           Time.zone.parse(safe_params[attr]) rescue Time.current - 1.year
         end
 
@@ -160,25 +178,6 @@ class Admin::EventsController < ApplicationController
     end
 
     def event_params
-      params
-        .require(:event)
-        .permit(
-          :title,
-          :slug,
-          :event_hero_image,
-          :summary,
-          :body,
-          :raw_editor,
-
-          :state,
-          :starts_at,
-          :ends_at,
-          :number_of_seats,
-          :price_per_seat,
-          :location,
-
-          :on_archive_action,
-          :on_archive_params_blog_id,
-        )
+      return params.require(:event).permit(PERMITTED_EVENT_PARAMS)
     end
 end

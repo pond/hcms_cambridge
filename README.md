@@ -4,6 +4,18 @@ This is a _very simple_ content management system designed for small web sites. 
 
 HCMS source code is managed by Git and hosted by GitHub; site styling is done by modifying the Rails static CSS, static images and layout templates in the CMS using a branch off `master` or a fork.
 
+## Setup
+
+Install gems, set up the database and create a starting point home page.
+
+```shell
+bundle install
+bundle exec rake db:create db:migrate
+bundle exec rake setup:home
+```
+
+Now visit the site (e.g. visit `http://localhost:3000`) to see the default home page, proving that the application is working normally. Add `/hcms` to the URL to be given a login page, then follow the "sign up" link to create an admin account. Presently, only one account is supported.
+
 ## Route overview
 
 ### Admin
@@ -22,7 +34,7 @@ All other routes from `/` are for public page views.
 
 HCMS can be deployed to Heroku by-the-book:
 
-* https://devcenter.heroku.com/articles/getting-started-with-rails4
+* https://devcenter.heroku.com/articles/getting-started-with-rails8
 
 The free Heroku database offering is generally OK as HCMS is such a simple, stripped down, small scale site engine that it's hard to imagine getting anywhere near the (at time of writing) 10,000 row limit in the free plan. Even so, extra backup/resilience/uptime/rollback facilities in paid plans might be desirable.
 

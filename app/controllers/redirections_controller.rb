@@ -67,11 +67,11 @@ class RedirectionsController < ApplicationController
     # Lazy-populate the mapping constants via configuration data.
     #
     def populate_constants!
-      Rails.application.config.uk_org_pond_hcms.blog_mappings&.each do | path, blog_page_slug |
+      Hcms.config.blog_mappings&.each do | path, blog_page_slug |
         BLOG_MAPPINGS[path] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
       end
 
-      Rails.application.config.uk_org_pond_hcms.page_mappings&.each do | path, other_page_slug |
+      Hcms.config.page_mappings&.each do | path, other_page_slug |
         PAGE_MAPPINGS[path] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
       end
     end
@@ -166,7 +166,7 @@ class RedirectionsController < ApplicationController
 
       return true if early_exit
 
-      Rails.application.config.uk_org_pond_hcms.statistics_ignore.each do |section, list|
+      Hcms.config.statistics_ignore.each do |section, list|
         matcher = STATS_IGNORE_METHODS[section]
 
         list.each do | item |

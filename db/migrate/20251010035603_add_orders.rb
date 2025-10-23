@@ -1,6 +1,6 @@
 class AddOrders < ActiveRecord::Migration[8.0]
   def change
-    create_enum :order_states, Order::ORDER_STATES
+    create_enum :order_states, Order::STATES
 
     create_table :orders, id: :uuid do | t |
       t.timestamps null: false
@@ -14,7 +14,7 @@ class AddOrders < ActiveRecord::Migration[8.0]
       t.integer :number_of_seats, null: false
       t.integer :amount_owed,     null: false # integer smallest currency units
 
-      t.enum :state, enum_type: :order_states, null: false, default: Order::ORDER_STATE_NEW, index: :true
+      t.enum :state, enum_type: :order_states, null: false, default: Order.states[:new], index: :true
     end
   end
 end

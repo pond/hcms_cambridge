@@ -53,14 +53,14 @@
             <%= f.number_field :number_of_seats, min: 0, step: 1 %>
           </div>
 
-          <% if Rails.application.config.uk_org_pond_hcms.currency.present? %>
+          <% if Hcms.config.currency.present? %>
             <div class="field">
               <%= apphelp_label(f, :price_per_seat, hint: 'leave blank or set to zero if free of charge') %>
-              <%= Money::Currency.new(Rails.application.config.uk_org_pond_hcms.currency).symbol %>
+              <%= Money::Currency.new(Hcms.config.currency).symbol %>
               <%=
                 parsed_amount = Money.from_cents(
                   f.object.price_per_seat,
-                  Rails.application.config.uk_org_pond_hcms.currency
+                  Hcms.config.currency
                 )
 
                 f.text_field(
@@ -69,7 +69,7 @@
                   class: 'not_full_width_in_two_column'
                 )
               %>
-              <small><%= Rails.application.config.uk_org_pond_hcms.currency %></small>
+              <small><%= Hcms.config.currency %></small>
             </div>
           <% end %>
         </div>

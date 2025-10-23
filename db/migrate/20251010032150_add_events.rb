@@ -1,7 +1,7 @@
 class AddEvents < ActiveRecord::Migration[8.0]
   def change
-    create_enum :event_states,             Event::EVENT_STATES
-    create_enum :event_on_archive_actions, Event::ORDERED_ARCHIVING_ACTIONS
+    create_enum :event_states,             Event::STATES
+    create_enum :event_on_archive_actions, Event::ON_ARCHIVE_ACTIONS
 
     create_table :events do | t |
       t.timestamps null: false
@@ -24,9 +24,9 @@ class AddEvents < ActiveRecord::Migration[8.0]
       t.text     :location,        null: true  # Main description can include this instead
       t.string   :currency,        null: false, limit: 3
 
-      t.enum     :state, enum_type: :event_states, null: false, default: Event::EVENT_STATE_PRESALES, index: :true
+      t.enum     :state, enum_type: :event_states, null: false, default: Event.states[:presales], index: :true
 
-      t.enum     :on_archive_action, enum_type: :event_on_archive_actions, null: false, default: Event::ON_ARCHIVE_KEEP
+      t.enum     :on_archive_action, enum_type: :event_on_archive_actions, null: false, default: Event.on_archive_actions[:keep]
       t.jsonb    :on_archive_params,                                       null: false, default: {}
     end
   end

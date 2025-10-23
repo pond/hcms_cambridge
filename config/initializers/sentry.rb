@@ -30,7 +30,6 @@ if ENV['SENTRY_DSN'].present?
   end
 else
   Sentry.init do |config|
-    config.enable_tracing       = false
     config.enabled_environments = ['this_matches_none']
   end
 end

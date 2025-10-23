@@ -3,8 +3,7 @@ class Admin::PagesController < ApplicationController
   layout :determine_layout
   helper ::PagesHelper
 
-  # Via Devise
-  before_action :authenticate_admin_user!
+  before_action :authenticate_admin_user! # (via Devise)
 
   before_action :get_page,            only: [:show, :destroy]
   before_action :get_editable_page,   only: [:edit, :update]
@@ -25,7 +24,7 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/new
     def new
-      @page.hide_date_and_time = Rails.application.config.uk_org_pond_hcms.booking_hide_date
+      @page.hide_date_and_time = Hcms.config.hide_booking_date
     end
 
     # GET /admin/pages/1/edit

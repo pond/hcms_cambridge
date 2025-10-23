@@ -141,13 +141,13 @@ RSpec.describe "Pages" do
   context "footer" do
     before :each do
       create(:page)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(false)
+      allow(Hcms.config).to receive(:hide_contact_info).and_return(false)
     end
 
     it "shows telephone and e-mail" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+      allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+      allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+      allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
       visit(root_path())
       cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -157,9 +157,9 @@ RSpec.describe "Pages" do
     end
 
     it "handles absent telephone and e-mail" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return(nil)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("")
+      allow(Hcms.config).to receive(:contact_tel_human).and_return(nil)
+      allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
+      allow(Hcms.config).to receive(:contact_email    ).and_return("")
 
       visit(root_path())
       cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -168,9 +168,9 @@ RSpec.describe "Pages" do
     end
 
     it "shows social media" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("facebook-href")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return("twitter-href")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return("instagram-href")
+      allow(Hcms.config).to receive(:facebook ).and_return("facebook-href")
+      allow(Hcms.config).to receive(:twitter  ).and_return("twitter-href")
+      allow(Hcms.config).to receive(:instagram).and_return("instagram-href")
 
       visit(root_path())
       social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -181,9 +181,9 @@ RSpec.describe "Pages" do
     end
 
     it "handles absent social media" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return(" ")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return(nil)
+      allow(Hcms.config).to receive(:facebook ).and_return("")
+      allow(Hcms.config).to receive(:twitter  ).and_return(" ")
+      allow(Hcms.config).to receive(:instagram).and_return(nil)
 
       visit(root_path())
       social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -192,7 +192,7 @@ RSpec.describe "Pages" do
     end
 
     it "shows the footer summary" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("Summary text")
+      allow(Hcms.config).to receive(:footer_summary).and_return("Summary text")
 
       visit(root_path())
 
@@ -200,12 +200,12 @@ RSpec.describe "Pages" do
     end
 
     it "handles an absent footer summary" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("")
+      allow(Hcms.config).to receive(:footer_summary).and_return("")
       visit(root_path())
 
       expect(page).to_not have_css("footer section.footer_suffix")
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return(nil)
+      allow(Hcms.config).to receive(:footer_summary).and_return(nil)
       visit(root_path())
 
       expect(page).to_not have_css("footer section.footer_suffix")
@@ -213,11 +213,11 @@ RSpec.describe "Pages" do
 
     context "when asked to hide telephone and e-mail" do
       before :each do
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+        allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+        allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+        allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(true)
+        allow(Hcms.config).to receive(:hide_contact_info).and_return(true)
       end
 
       it "shows nothing by default" do
@@ -252,8 +252,8 @@ RSpec.describe "Pages" do
     before :each do
       allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email).and_return("contact@example.com")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:site_name    ).and_return("Site Under Test")
+      allow(Hcms.config).to receive(:contact_email).and_return("contact@example.com")
+      allow(Hcms.config).to receive(:site_name    ).and_return("Site Under Test")
     end
 
     it "display, validate and submit (no menu)" do
@@ -431,9 +431,9 @@ RSpec.describe "Pages" do
     before :each do
       allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_email    ).and_return("booking@example.com")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:site_name        ).and_return("Site Under Test")
+      allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
+      allow(Hcms.config).to receive(:booking_email    ).and_return("booking@example.com")
+      allow(Hcms.config).to receive(:site_name        ).and_return("Site Under Test")
     end
 
     it "display, validate and submit (no menu)" do

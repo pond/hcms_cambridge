@@ -26,29 +26,28 @@ module EventsHelper
   end
 
   def evtshelp_price(event)
-    if Rails.application.config.uk_org_pond_hcms.currency.blank?
+    if Hcms.config.currency.blank?
       '&ndash;'.html_safe()
     elsif event.price_per_seat.zero?
       'Free'
     else
       parsed_amount = Money.from_cents(
         event.price_per_seat,
-        Rails.application.config.uk_org_pond_hcms.currency
+        Hcms.config.currency
       )
       parsed_amount.format()
     end
   end
 
   def evtshelp_booking_action_title(event)
-    case event.state
-      when Event::EVENT_STATE_PRESALES
-        "Reserve seats"
-      when Event::EVENT_STATE_RESERVEE_PURCHASES
-        "Confirm reservation"
-      when Event::EVENT_STATE_PUBLIC_PURCHASES
-        "Book seats"
-      else
-        nil
+    if event.state_presales?
+      "Reserve seats"
+    elsif event.state_reservee_purchases?
+      "Confirm reservation"
+    elsif event.state_public_purchases?
+      "Book seats"
+    else
+      nil
     end
   end
 

@@ -16,4 +16,19 @@ class OrdersController < ApplicationController
 
     @order = Order.new(event: @event)
   end
+
+  def order_params
+    permitted_order_params = %i{
+      name
+      email_address
+      phone_number
+      number_of_seats
+    }
+
+    unless Hcms.config.hide_order_notes
+      permitted_order_params << :notes
+    end
+
+    return params.require(:order).permit(permitted_order_params)
+  end
 end

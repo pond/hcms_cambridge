@@ -2,7 +2,7 @@
 <html>
   <head>
     <%= render partial: 'layouts/content_preamble', locals: { content: @page } %>
-    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: <%= @page.title %></title>
+    <title><%= Hcms.config.site_name %>: <%= @page.title %></title>
   </head>
 
   <body>

@@ -28,10 +28,12 @@
     at <strong><%= evtshelp_price(event) %></strong> per seat <small>(<%= event.currency %>)</small>
   </p>
 
-  <p>
-    <%= apphelp_label(f, :notes) %>
-    <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes or questions etc.' %>
-  </p>
+  <% unless Hcms.config.hide_order_notes %>
+    <p>
+      <%= apphelp_label(f, :notes) %>
+      <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes or questions etc.' %>
+    </p>
+  <% end %>
 
   <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
     <%= recaptcha_tags() %>

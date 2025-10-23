@@ -3,8 +3,7 @@
 
 class Admin::MovePagesController < ApplicationController
 
-  # Via Devise
-  before_action :authenticate_admin_user!
+  before_action :authenticate_admin_user! # (via Devise)
 
   def update
     page = Page.find( params[ :id ] )

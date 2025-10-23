@@ -4,7 +4,7 @@ RSpec.describe "Admin - articles" do
   include ApplicationHelper
 
   before :each do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
+    allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
     spechelp_log_in()
 
     @page = create(:page, :blog)

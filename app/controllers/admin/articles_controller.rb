@@ -2,8 +2,7 @@ class Admin::ArticlesController < ApplicationController
 
   layout :determine_layout
 
-  # Via Devise
-  before_action :authenticate_admin_user!
+  before_action :authenticate_admin_user! # (via Devise)
   before_action :get_page
   before_action :get_article,            only: [:show, :destroy]
   before_action :get_editable_article,   only: [:edit, :update]

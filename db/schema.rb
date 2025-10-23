@@ -18,8 +18,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_035603) do
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "event_on_archive_actions", ["keep", "hide", "move"]
   create_enum "event_states", ["presales", "reservee_purchases", "public_purchases", "archived"]
-  create_enum "order_states", ["new", "success", "payment_failed", "cancelled", "refunded"]
-  create_enum "order_status", ["new", "success", "payment_failed", "cancelled", "expired", "refunded"]
+  create_enum "order_states", ["new", "successful", "payment_failed", "cancelled", "refunded"]
 
   create_table "articles", force: :cascade do |t|
     t.text "title"

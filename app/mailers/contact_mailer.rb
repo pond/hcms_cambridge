@@ -8,9 +8,9 @@ class ContactMailer < ApplicationMailer
     @message = params.message
 
     mail(
-      to:      Rails.application.config.uk_org_pond_hcms.contact_email,
+      to:      Hcms.config.contact_email,
       from:    @email,
-      subject: "[#{Rails.application.config.uk_org_pond_hcms.site_name}] \"#{@page.title}\" - message"
+      subject: "[#{Hcms.config.site_name}] \"#{@page.title}\" - message"
     )
   end
 end

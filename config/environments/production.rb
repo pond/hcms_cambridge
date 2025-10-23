@@ -62,7 +62,7 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "hcms_#{Rails.env}"
 
-  config.action_mailer.default_url_options = { host: Rails.application.config.uk_org_pond_hcms.mail_domain, port: 443 }
+  config.action_mailer.default_url_options = { host: Hcms.config.mail_domain, port: 443 }
 
   if ENV['MAILGUN_API_KEY'].present?
     # For MailGun - visit Heroku, go to app resources, open Mailgun from there
@@ -82,7 +82,7 @@ Rails.application.configure do
       :enable_starttls_auto => true,
       :user_name            => ENV[ 'SENDGRID_USERNAME' ],
       :password             => ENV[ 'SENDGRID_PASSWORD' ],
-      :domain               => Rails.application.config.uk_org_pond_hcms.mail_domain,
+      :domain               => Hcms.config.mail_domain,
       :authentication       => :plain
     }
   end

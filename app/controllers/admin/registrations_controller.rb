@@ -1,7 +1,7 @@
 class Admin::RegistrationsController < ::Devise::RegistrationsController
   layout 'admin'
 
-  before_action :authenticate_admin_user! # Via Devise
+  before_action :authenticate_admin_user! # (via Devise)
   before_action :check_if_admin_already_exists
 
   private

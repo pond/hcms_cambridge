@@ -3,7 +3,7 @@
     <h1><%= evtshelp_booking_action_title(@event) || 'Event' %></h1>
     <h2><%= @event.title %></h2>
 
-    <%= render @event.state, locals: { page: @page, event: @event, order: @order } %>
+    <%= render partial: @event.state, locals: { foo: true, page: @page, event: @event, order: @order } %>
   </section>
 
   <section class="events with-poster-grid" style="grid-template-columns: 1fr">

@@ -593,15 +593,13 @@ a.bold_button {
   text-decoration: none;
   color: #fff;
   background-color: #282828;
-  transition: opacity 0.2s ease-out,
-          text-shadow 0.2s ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
 a.bold_button:hover {
   opacity: 0.8;
   text-decoration: none;
   color: #fff;
-  text-shadow: 0 0 2px #fff;
 }
 
 nav {
