@@ -135,7 +135,7 @@ class Event < Editable
       return nil
     else
       @confirmed_seats_remaining ||= begin
-        orders = Order.inflight.where(event: self)
+        orders = Order.confirmed.where(event: self)
         self.number_of_seats - orders.sum(:number_of_seats)
       end
     end
