@@ -26,17 +26,10 @@ module EventsHelper
   end
 
   def evtshelp_price(event)
-    if Hcms.config.currency.blank?
-      '&ndash;'.html_safe()
-    elsif event.price_per_seat.zero?
-      'Free'
-    else
-      parsed_amount = Money.from_cents(
-        event.price_per_seat,
-        Hcms.config.currency
-      )
-      parsed_amount.format()
-    end
+    apphelp_money(
+      event.price_per_seat,
+      free_of_charge: event.free_of_charge?
+    )
   end
 
   def evtshelp_booking_action_title(event)
@@ -52,9 +45,9 @@ module EventsHelper
   end
 
   def evntshelp_booking_button(event)
-    return nil if event.price_per_seat.zero? # NOTE EARLY EXIT
+    return nil if event.free_of_charge? # NOTE EARLY EXIT
 
-    if event.seats_remaining > 0
+    if event.provisional_seats_remaining > 0
       link_to(
         evtshelp_booking_action_title(event),
         new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),
@@ -62,6 +55,20 @@ module EventsHelper
       )
     else
       link_to('Sold out', '#', class: 'bold_button disabled')
+    end
+  end
+
+  def evtshelp_seat_state_glyph(event)
+    if event.state_archived? || event.unrestricted_seating?
+      ''
+    elsif event.confirmed_seats_remaining < 0
+      '⚠️'
+    elsif event.confirmed_seats_remaining.zero?
+      '✅'
+    elsif event.confirmed_seats_remaining == event.number_of_seats
+      '🟠'
+    else
+      ''
     end
   end
 end

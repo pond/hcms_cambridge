@@ -8,7 +8,7 @@ class AddOrders < ActiveRecord::Migration[8.0]
       t.belongs_to :event, null: false
 
       t.text    :name,            null: false
-      t.text    :email_address,   null: false
+      t.text    :email,           null: false
       t.text    :phone_number,    null: true
       t.text    :notes,           null: true
       t.integer :number_of_seats, null: false

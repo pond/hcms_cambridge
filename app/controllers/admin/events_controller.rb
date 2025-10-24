@@ -32,7 +32,7 @@ class Admin::EventsController < ApplicationController
 
     # GET /admin/pages/<page_id>/events
     def index
-      @events = Event.where(page_id: @page.id)
+      @events = Event.where(page_id: @page.id).includes(:orders)
     end
 
     # GET /admin/pages/<page_id>/events/<id>
@@ -57,7 +57,7 @@ class Admin::EventsController < ApplicationController
       )
     end
 
-    # PATCH/PUT //admin/pages/<page_id>/events/<id>
+    # PATCH/PUT /admin/pages/<page_id>/events/<id>
     def update
       handle_form_submission(
         event:           @event,
@@ -69,16 +69,12 @@ class Admin::EventsController < ApplicationController
 
     # DELETE /admin/pages/<page_id>/events/<id>
     def destroy
-      @event.destroy
+      @event.destroy!
 
-      respond_to do | format |
-        format.html do
-          redirect_to(
-            admin_page_events_url( page_id: @page.id ),
-            notice: 'Event deleted.'
-          )
-        end
-      end
+      redirect_to(
+        admin_page_events_url( page_id: @page.id ),
+        notice: 'Event deleted.'
+      )
     end
 
   private
@@ -128,7 +124,7 @@ class Admin::EventsController < ApplicationController
       on_archive_params         = {}
       on_archive_params_blog_id = safe_params.delete(:on_archive_params_blog_id)
 
-      if on_archive_action == Event::ON_ARCHIVE_MOVE
+      if on_archive_action == Event.on_archive_actions[:move]
         blog = Page.blogs.find_by_id(on_archive_params_blog_id)
         on_archive_params[:blog_id] == blog.id if blog.present?
       end

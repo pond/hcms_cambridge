@@ -78,6 +78,12 @@ gem 'phonelib', '~> 0.10'
 gem 'money',    '~> 6.19'
 gem 'monetize', '~> 1.13'
 
+# Payments via Stripe.
+#
+#   https://rubygems.org/gems/stripe
+#
+gem 'stripe', '~> 17.0'
+
 # Monitoring and alerting.
 #
 # * https://rubygems.org/gems/stackprof

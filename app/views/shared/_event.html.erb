@@ -4,8 +4,6 @@
   # falling back the only unpublished revision if nothing is published).
   #
   #   render partial: 'shared/event', locals: { event: @event }
-
-  remaining_seat_count = event.seats_remaining || 0
 %>
 <%= render partial: 'shared/editable_revisions', locals: { editable: event, form_path: admin_page_event_path(event.page, event) } %>
 
@@ -44,6 +42,7 @@
     <dl>
       <dt>When<dt>
       <dd><%= evtshelp_datetime(event) %></dd>
+
       <% if event.location.present? %>
         <dt>Where</dt>
         <dd>
@@ -51,18 +50,20 @@
           (<%= link_to('map', "https://www.google.com/maps/search/?#{{api: 1, query: event.location}.to_query}", target: '_blank') %>)
         </dd>
       <% end %>
+
       <% if event.number_of_seats > 0 %>
         <dt>Seats</dt>
         <dd>
-          <% if event.seats_remaining > 5 %>
+          <% if event.confirmed_seats_remaining > 5 %>
             Limited seats available
-          <% elsif event.seats_remaining > 0 %>
+          <% elsif event.confirmed_seats_remaining > 0 %>
             Five or fewer seats remaining
           <% else %>
             Sorry, sold out!
           <% end %>
         </dd>
       <% end %>
+
       <% if event.price_per_seat > 0 %>
         <dt>Price</dt>
         <dd>

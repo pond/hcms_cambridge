@@ -1,9 +1,12 @@
 # A PORO used for e.g. the "collection_select" helper, which provides a set of
 # simple objects that return their internal and translated names.
 #
-class EventState
+class EventOnArchiveAction
   def self.types
-    Event::STATES.map { |type| self.new(type) }
+    actions = Event::ON_ARCHIVE_ACTIONS.dup
+    actions.delete(Event.on_archive_actions[:move]) if Page.blogs.count.zero?
+
+    actions.map { |type| self.new(type) }
   end
 
   def initialize(type)
@@ -15,6 +18,6 @@ class EventState
   end
 
   def human_name
-    I18n.t("models.event_state.#{@type}")
+    I18n.t("models.on_archive_action.#{@type}")
   end
 end

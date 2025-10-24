@@ -1,12 +1,14 @@
 <%
-  # Render with locals 'page', 'event' and 'order' holding the relevant
-  # ActiveRecord objects and 'button_text' for the submit button text.
+  # Render with locals 'order' holding the order ActiveRecord object (with event
+  # associated already) and 'button_text' for the submit button text.
 %>
 <%=
   form_with(
     model:   order,
     builder: FormBuilderWithInlineErrors,
-    url:     page_event_orders_path(page_id: page.slug, event_id: event.slug)
+    url:     order.new_record? ?
+             page_event_orders_path(page_id: order.event.page.slug, event_id: order.event.slug) :
+             page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug)
   ) do | f |
 %>
   <p>
@@ -14,24 +16,24 @@
     <%= f.text_field :name %>
   </p>
   <p>
-    <%= apphelp_label(f, :email_address, required: true, hint: "we'll send your receipt and event updates here") %>
-    <%= f.email_field :email_address %>
+    <%= apphelp_label(f, :email, required: true, hint: "we'll send your receipt and event updates here") %>
+    <%= f.email_field :email %>
   </p>
   <p>
-    <%= apphelp_label(f, :phone, hint: 'optional') %>
-    <%= f.telephone_field :phone %>
+    <%= apphelp_label(f, :phone_number, hint: 'optional') %>
+    <%= f.telephone_field :phone_number %>
   </p>
 
   <p>
     <%= apphelp_label(f, :number_of_seats, required: true) %>
     <%= f.number_field(:number_of_seats, min: 1) %>
-    at <strong><%= evtshelp_price(event) %></strong> per seat <small>(<%= event.currency %>)</small>
+    at <strong><%= evtshelp_price(order.event) %></strong> per seat <small>(<%= order.event.currency %>)</small>
   </p>
 
   <% unless Hcms.config.hide_order_notes %>
     <p>
       <%= apphelp_label(f, :notes) %>
-      <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes or questions etc.' %>
+      <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes, questions etc.' %>
     </p>
   <% end %>
 
@@ -42,6 +44,6 @@
   <% end %>
 
   <p>
-    <%= submit_tag(button_text) %>
+    <%= submit_tag(button_text, class: 'bold_button') %>
   </p>
 <% end %>

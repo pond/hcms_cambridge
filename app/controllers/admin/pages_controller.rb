@@ -53,10 +53,9 @@ class Admin::PagesController < ApplicationController
 
     # DELETE /admin/pages/1
     def destroy
-      @page.destroy
-      respond_to do | format |
-        format.html { redirect_to admin_pages_url, notice: 'Page deleted.' }
-      end
+      @page.destroy!
+
+      redirect_to(admin_pages_url(), notice: 'Page deleted.')
     end
 
   private

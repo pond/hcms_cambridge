@@ -43,6 +43,8 @@ class Event < Editable
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
   }
 
+  has_many :orders
+
   validates_presence_of %i{
     event_hero_image
     summary
@@ -99,16 +101,42 @@ class Event < Editable
       .first
   end
 
-  # An at-the-instant estimate; returns +nil+ if seat count is unlimited.
+  # Is the event free of charge?
   #
-  def seats_remaining
-    if self.number_of_seats.zero?
+  def free_of_charge?
+    self.price_per_seat.zero?
+  end
+
+  def unrestricted_seating?
+    self.number_of_seats.zero?
+  end
+
+  # An at-the-instant estimate; returns +nil+ if seat count is unlimited. Never
+  # returns less than zero otherwise.
+  #
+  def provisional_seats_remaining
+    if self.unrestricted_seating?
       return nil
     else
-      @seats_remaining ||= begin
-        # TODO: Created-at within expiry window for NEW status / expiry concept finalisation
+      @provisional_seats_remaining ||= begin
         orders = Order.inflight.where(event: self)
-        [0, self.number_of_seats - orders.count].max()
+        [0, self.number_of_seats - orders.sum(:number_of_seats)].max()
+      end
+    end
+  end
+
+  # An at-the-instant count based on reserved or paid orders only and will allow
+  # a negative return value if an event ends up oversubscribed (e.g. because the
+  # event was edited after orders had been placed). Returns +nil+ if seat count
+  # is unlimited.
+  #
+  def confirmed_seats_remaining
+    if self.unrestricted_seating?
+      return nil
+    else
+      @confirmed_seats_remaining ||= begin
+        orders = Order.inflight.where(event: self)
+        self.number_of_seats - orders.sum(:number_of_seats)
       end
     end
   end

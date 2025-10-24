@@ -1,0 +1,18 @@
+<h1>Details of order for &ldquo;<%= @order.event.title %>&rdquo;</h1>
+
+<p>
+  <%= evtshelp_datetime(@order.event) %>
+</p>
+
+<dl>
+  <dt>Order state</dt>
+  <dd><%= @order.human_state %></dd>
+  <dt>Customer name</dt>
+  <dd><%= @order.name %>
+  <dt>Customer e-mail address<dt>
+  <dd><code><%= mail_to(@order.email) %></code></dd>
+  <dt>Order first created at</dt>
+  <dd><%= apphelp_human_time(@order.created_at, date_only: false) %></dd>
+  <dt>Order most recently updated at</dt>
+  <dd><%= apphelp_human_time(@order.updated_at, date_only: false) %></dd>
+</dl>

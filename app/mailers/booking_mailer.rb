@@ -1,6 +1,4 @@
 class BookingMailer < ApplicationMailer
-  default to: Hcms.config.booking_email
-
   def booking_email(params)
     @page  = params.page
     @name  = params.name
@@ -12,7 +10,6 @@ class BookingMailer < ApplicationMailer
     @notes = params.notes
 
     mail(
-      to:      Hcms.config.booking_email,
       from:    @email,
       subject: "[#{Hcms.config.site_name}] \"#{@page.title}\" - booking enquiry"
     )

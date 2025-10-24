@@ -107,6 +107,12 @@ en:
         event_state: "Ticket sales"
         on_archive_action: "Once it has taken place"
 
+      order:
+        name: "Name"
+        email: "E-mail address"
+        number_of_seats: "Number of seats"
+        notes: "Any other notes?"
+
       page:
         title: "Page title"
         slug: "Path / 'slug'"
@@ -142,6 +148,17 @@ en:
       hide: "Hide from page"
       move: "Move into a blog article"
 
+    order_state:
+      new:            "In progress"
+      reserved:       "Reserved"
+      paid:           "Paid"
+      payment_failed: "Payment failed"
+      cancelled:      "Cancelled"
+      refunded:       "Refunded"
+
+      getting_older:  "Dormant"   # I18n for pseudo-state related to "new"
+      stale:          "Abandoned" # I18n for pseudo-state related to "new"
+
     page_type:
       normal: "Normal"
       contact_form: "Contact form"
@@ -153,3 +170,16 @@ en:
       published: "Published"
       current: "Draft (%{time})"
       unpublished: "Old (%{time})"
+
+  views:
+    orders:
+      seats:
+        one: "One seat"
+        other: "%{count} seats"
+      confirm:
+        reservation:
+          one: "Please confirm your reservation of one seat at “%{event_title}”."
+          other: "Please confirm your reservation of %{count} seats at “%{event_title}”."
+        booking:
+          one: "Please enter payment details for your booking for one seat at “%{event_title}”."
+          other: "Please enter payment details for your booking for %{count} seats at “%{event_title}”."

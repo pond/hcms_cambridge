@@ -81,9 +81,9 @@
 
         <div class="field">
           <%= apphelp_label(f, :on_archive_action) %>
-          <%= f.collection_select :on_archive_action, ::OnArchiveAction.types, :internal_name, :human_name %>
+          <%= f.collection_select :on_archive_action, ::EventOnArchiveAction.types, :internal_name, :human_name %>
 
-          <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event::ON_ARCHIVE_MOVE ? 'block' : 'none' %>">
+          <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event.on_archive_actions[:move] ? 'block' : 'none' %>">
             <%= f.label(:on_archive_params_blog_id, 'Move into which blog?') %>
             <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
           </div>

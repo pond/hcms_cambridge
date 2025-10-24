@@ -12,7 +12,8 @@ body {
   white-space: normal;
 }
 
-input[type='submit'] {
+              button:not(.bold_button),
+input[type='submit']:not(.bold_button) {
   font-size: 14pt;
   background: white;
   -webkit-border-radius: 4px;
@@ -22,8 +23,17 @@ input[type='submit'] {
   border: 1px solid #888;
 }
 
-input[type='submit']:hover {
+              button:not(.bold_button):hover,
+input[type='submit']:not(.bold_button):hover {
   background: #ddd;
+}
+
+button.confirm {
+  box-shadow: 0 0 3px #8f8;
+}
+
+button.cancel {
+  box-shadow: 0 0 3px #f88;
 }
 
 section.main_content table {

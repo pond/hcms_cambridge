@@ -64,4 +64,21 @@ module ApplicationHelper
 
     form.label(attribute) { contents }
   end
+
+  # Return an amount of money formatted for the global configured currency
+  # (when provided with a value expressed in 'cents', i.e. fractional units)
+  # with an optional support for 'free of charge' via the given boolean.
+  #
+  # Returns an en-dash HTML entity if there's no currency configured.
+  #
+  def apphelp_money(amount_in_cents, free_of_charge: false)
+    if Hcms.config.currency.blank?
+      '&ndash;'.html_safe()
+    elsif free_of_charge
+      'Free'
+    else
+      parsed_amount = Money.from_cents(amount_in_cents, Hcms.config.currency)
+      parsed_amount.format()
+    end
+  end
 end

@@ -38,7 +38,7 @@ class Admin::ArticlesController < ApplicationController
       )
     end
 
-    # PATCH/PUT //admin/pages/<page_id>/articles/<id>
+    # PATCH/PUT /admin/pages/<page_id>/articles/<id>
     def update
       handle_form_submission(
         article:           @article,
@@ -50,16 +50,12 @@ class Admin::ArticlesController < ApplicationController
 
     # DELETE /admin/pages/<page_id>/articles/<id>
     def destroy
-      @article.destroy
+      @article.destroy!
 
-      respond_to do | format |
-        format.html do
-          redirect_to(
-            admin_page_articles_url( page_id: @page.id ),
-            notice: 'Article deleted.'
-          )
-        end
-      end
+      redirect_to(
+        admin_page_articles_url( page_id: @page.id ),
+        notice: 'Article deleted.'
+      )
     end
 
   private

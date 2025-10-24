@@ -6,7 +6,12 @@ Rails.application.routes.draw do
   resources :pages, only: :show do
     resources :articles, only: :show
     resources :events, only: :show do
-      resources :orders
+      resources :orders do
+        member do
+          post :confirm_reservation
+          post :checkout
+        end
+      end
     end
   end
 

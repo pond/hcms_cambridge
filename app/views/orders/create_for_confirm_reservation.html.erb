@@ -1,0 +1,86 @@
+<article class="event-order-form-container">
+  <section class="event-order-form">
+    <h1><%= evtshelp_booking_action_title(@order.event) || 'Event' %></h1>
+    <h2><%= @order.event.title %></h2>
+
+    <p>
+      <%=
+        t(
+          'views.orders.confirm.reservation',
+          count: @order.number_of_seats,
+          event_title: @order.event.title
+        )
+      %>
+    </p>
+
+    <ul>
+      <li><%= evtshelp_datetime(@order.event) %></li>
+      <li><%= @order.event.location %></li>
+    </ul>
+
+    <% unless @order.event.free_of_charge? %>
+      <p>
+        You don't need to pay anything until closer to the event date.
+      </p>
+
+      <ul>
+        <li>
+          When it's time to pay, an e-mail will be sent to you at
+          <strong><%= @order.email %></code></strong>
+        </li>
+        <li>
+          The amount payable will be
+          <%= @order.number_of_seats %> &times;
+          <%= evtshelp_price(@order.event) %> &equals;
+          <strong><big>
+            <%= apphelp_money(@order.event.price_per_seat * @order.number_of_seats) %>
+          </big></strong>
+        </li>
+      </ul>
+    <% end %>
+
+    <div class="row-wide-column-small">
+      <%=
+        button_to(
+          '<strong>Confirm reservation</strong>'.html_safe(),
+          confirm_reservation_page_event_order_path(
+            page_id: @order.event.page.slug,
+            event_id: @order.event.slug,
+            id: @order.id
+          ),
+          { class: 'bold_button' }
+        )
+      %>
+
+      <%=
+        button_to(
+          'Amend details',
+          edit_page_event_order_path(
+            page_id: @order.event.page.slug,
+            event_id: @order.event.slug,
+            id: @order.id
+          ),
+          method: :get
+        )
+      %>
+
+      <%=
+        button_to(
+          'Cancel reservation',
+          page_event_order_path(
+            page_id: @order.event.page.slug,
+            event_id: @order.event.slug,
+            id: @order.id
+          ),
+          method: :delete,
+        )
+      %>
+    </div>
+  </section>
+
+  <section class="event-order-poster">
+    <%= link_to page_event_path(page_id: @order.event.page.slug, id: @order.event.slug) do %>
+      <%= image_tag(@order.event.event_hero_image.url, alt: @order.event.title) %>
+    <% end %>
+  </section>
+</article>

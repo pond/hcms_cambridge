@@ -107,6 +107,11 @@ main.admin {
 
     td.admin_actions {
       text-wrap: nowrap;
+
+      &.for_delete {
+        padding-left: 1em;
+        text-align: right;
+      }
     }
 
     td, th {

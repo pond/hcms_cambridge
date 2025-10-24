@@ -12,6 +12,6 @@ RSpec.describe User, type: :model do
 
   it "deletes" do
     u = create(:user)
-    u.destroy()
+    u.destroy!
   end
 end
