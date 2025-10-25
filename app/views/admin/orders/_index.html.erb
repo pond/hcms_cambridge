@@ -52,7 +52,7 @@
         <% if event.free_of_charge? %>
           &ndash;
         <% else %>
-          <%= apphelp_money(orders.sum(:amount_owed)) %>
+          <%= apphelp_money(orders.sum(:amount_owed), currency: event.currency) %>
         <% end %>
       </td>
       <td colspan="3">&nbsp;</td>

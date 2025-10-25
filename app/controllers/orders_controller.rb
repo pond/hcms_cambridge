@@ -25,6 +25,13 @@ class OrdersController < ApplicationController
   end
 
   # DELETE /pages/<page_id>/events/<event_id>/orders/<order_id>
+  #
+  # When the end user cancels an order that's in flight, it just gets deleted
+  # since there's no point keeping unfinished order records around the place.
+  # In the admin UI, cancellation changes the order object state to "cancelled"
+  # instead, because the end user might have a link to that order item and it
+  # would be surprising if the link just broke.
+  #
   def destroy
     @order.destroy!
 
@@ -41,7 +48,7 @@ class OrdersController < ApplicationController
       locked_order = Order.lock.find(@order.id)
 
       if locked_order.valid?
-        locked_order.state_reserved!
+        locked_order.state_reserve!
 
         notice = 'Thanks, your reservation has been made! '
 

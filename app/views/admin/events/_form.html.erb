@@ -60,7 +60,7 @@
               <%=
                 parsed_amount = Money.from_cents(
                   f.object.price_per_seat,
-                  Hcms.config.currency
+                  @event.currency
                 )
 
                 f.text_field(

@@ -1,12 +1,16 @@
 module ApplicationHelper
-  def apphelp_destroy_confirm(thing)
-    message = 'Are you sure? This cannot be undone!'
+  def apphelp_destroy_confirm(thing, override_message: nil)
+    if override_message.present?
+      message = override_message
+    else
+      message = 'Are you sure? This cannot be undone!'
 
-    if thing.is_a?(Page)
-      if thing.is_blog_type? && thing.articles.for_navigation.any?
-        message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
-      elsif thing.is_events_type? && thing.events.for_navigation.any?
-        message = "Are you sure? This page's listed events will be deleted too. This cannot be undone!"
+      if thing.is_a?(Page)
+        if thing.is_blog_type? && thing.articles.for_navigation.any?
+          message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
+        elsif thing.is_events_type? && thing.events.for_navigation.any?
+          message = "Are you sure? This page's listed events will be deleted too. This cannot be undone!"
+        end
       end
     end
 
@@ -65,19 +69,21 @@ module ApplicationHelper
     form.label(attribute) { contents }
   end
 
-  # Return an amount of money formatted for the global configured currency
-  # (when provided with a value expressed in 'cents', i.e. fractional units)
-  # with an optional support for 'free of charge' via the given boolean.
+  # Return an amount of money formatted for a given (default - globally
+  # configured) configured currency, for a value expressed in 'cents', i.e.
+  # fractional units) with an optional support for 'free of charge' via the
+  # given boolean.
   #
-  # Returns an en-dash HTML entity if there's no currency configured.
+  # Returns an en-dash HTML entity if there's no currency configured or given
+  # (specify via an ISO 3-letter code such as GBP or NZD).
   #
-  def apphelp_money(amount_in_cents, free_of_charge: false)
-    if Hcms.config.currency.blank?
+  def apphelp_money(amount_in_cents, currency: Hcms.config.currency, free_of_charge: false)
+    if currency.blank?
       '&ndash;'.html_safe()
     elsif free_of_charge
       'Free'
     else
-      parsed_amount = Money.from_cents(amount_in_cents, Hcms.config.currency)
+      parsed_amount = Money.from_cents(amount_in_cents, currency)
       parsed_amount.format()
     end
   end

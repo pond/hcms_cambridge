@@ -9,5 +9,22 @@
   <%= link_to 'Show', admin_page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id) %>
 </td>
 <td class="admin_actions for_delete">
-  <%= link_to 'Delete', admin_page_event_order_path(order.event.page, order.event, order), method: :delete, data: { confirm: apphelp_destroy_confirm(order) } %>
+  <%=
+    warning = 'Are you sure? This cannot be undone. If the customer has web links to the order, they will stop working if it is deleted.'
+
+    if order.may_cancel_state?
+      warning << "\n\nShowing the order details and then Cancelling it from there may be a better option."
+    end
+
+    link_to(
+      'Delete',
+      admin_page_event_order_path(
+        order.event.page,
+        order.event,
+        order
+      ),
+      method: :delete,
+      data:   { confirm: apphelp_destroy_confirm(order, override_message: warning) }
+    )
+  %>
 </td>

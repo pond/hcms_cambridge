@@ -1,7 +1,13 @@
 class Order < ApplicationRecord
+  include AASM
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
+  #
+  # Using 'enum' will cause Rails to generate a bunch of accessors which use
+  # "enum_state_" as a prefix, to avoid collision with an AASM state machine
+  # defined later, which uses "state_" as a prefix and should always be used
+  # in favour of the enum-defined methods to cause state changes and so-on.
   #
   enum(
     :state,
@@ -13,7 +19,7 @@ class Order < ApplicationRecord
       cancelled:      'cancelled',
       refunded:       'refunded',
     },
-    prefix:  true,
+    prefix:  'enum_state',
     default: :new
   )
 
@@ -103,6 +109,32 @@ class Order < ApplicationRecord
     end
   end
 
+  # Validation also rewrites the number in international or national format.
+  # The latter is friendly to humans, but does only have meaning in the context
+  # of the globally configured country code. If that were to change, there
+  # ideally would be a data migration to rewrite numbers to international so
+  # that they still made sense. In practice, we're unlikely to care about
+  # phone numbers on older orders and might even clear them out now and again
+  # to avoid unnecessary accumulation of unwanted PII.
+  #
+  validate :phone_number do |order|
+    if order.phone_number.present?
+      parsed = Phonelib.parse(self.phone_number)
+      if parsed.valid?
+        if parsed.countries.include?(Hcms.config.country_code)
+          self.phone_number = parsed.national
+        else
+          self.phone_number = parsed.international
+        end
+      else
+        self.errors.add(
+          :phone_number,
+          'seems to be invalid - if it is an international number, please include the country code'
+        )
+      end
+    end
+  end
+
   def human_state
     state_for_i18n = self.state
 
@@ -119,5 +151,42 @@ class Order < ApplicationRecord
     end
 
     OrderState.new(state_for_i18n).human_name
+  end
+
+  def payment_makes_sense? # (AASM guard)
+    self.event&.free_of_charge? == false
+  end
+
+  def reservation_makes_sense? # (AASM guard)
+    self.event&.state_presales? == true
+  end
+
+  aasm(:state, namespace: 'state') do
+    state :new, initial: true
+    state :reserved
+    state :payment_failed
+    state :paid
+    state :refunded
+    state :cancelled
+
+    event :reserve do
+      transitions from: :new, to: :reserved, guard: :reservation_makes_sense?
+    end
+
+    event :pay do
+      transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :payment_makes_sense?
+    end
+
+    event :cancel do
+      transitions from: [:new, :reserved, :payment_failed], to: :cancelled
+    end
+
+    event :refund do
+      transitions from: :paid, to: :refunded
+    end
+  end
+
+  def valid_events
+    self.aasm(:state).events
   end
 end

@@ -22,10 +22,10 @@
 en:
   time:
     formats:
-      short: "%b %-d %Y, %-l:%M%P"
-      short_no_year: "%b %-d, %-l:%M%P"
+      short: "%b %-d %Y (%A), %-l:%M%P"
+      short_no_year: "%b %-d (%A), %-l:%M%P"
       time_only: "%-l:%M%P"
-      date_only: "%b %-d %Y"
+      date_only: "%b %-d %Y (%A)"
 
   activemodel:
     models:
@@ -158,6 +158,12 @@ en:
 
       getting_older:  "Dormant"   # I18n for pseudo-state related to "new"
       stale:          "Abandoned" # I18n for pseudo-state related to "new"
+
+    order_state_aasm_events:
+      reserve: "Mark as 'reservation confirmed'"
+      pay:     "Mark as 'paid'"
+      cancel:  "Cancel order"
+      refund:  "Refund customer"
 
     page_type:
       normal: "Normal"

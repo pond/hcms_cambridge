@@ -133,10 +133,10 @@ class Admin::EventsController < ApplicationController
         safe_params[attr] = '0' if safe_params[attr].blank?
       end
 
-      if Hcms.config.currency.present?
+      if event.currency.present?
         parsed_amount = Monetize.parse(
           safe_params[:price_per_seat],
-          Hcms.config.currency
+          event.currency
         )
         safe_params[:price_per_seat] = parsed_amount.cents
       else

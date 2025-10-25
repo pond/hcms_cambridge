@@ -64,6 +64,12 @@ gem 'mailgun-ruby', '~> 1.3'
 #
 gem 'acts_as_list', '~> 1.2'
 
+# State machines.
+#
+#   https://rubygems.org/gems/aasm/
+#
+gem 'aasm', '~> 5.5'
+
 # Phone number validation.
 #
 #   https://rubygems.org/gems/phonelib

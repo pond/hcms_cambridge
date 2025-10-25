@@ -27,12 +27,36 @@ class Admin::OrdersController < ApplicationController
 
     # PATCH/PUT /admin/pages/<page_id>/events/<event_id>/orders/<id>
     def update
+      if params[:process] != 'state'
+        return bail_out_with('Unrecognised order change requested') # NOTE EARLY EXIT
+      end
+
+      all_events   = Order.aasm(:state).events.map(&:name).map(&:to_s)
+      order_events = @order.valid_events.map(&:name).map(&:to_s)
+      event_name   = params[:event]
+
+      if all_events.exclude?(event_name)
+        return bail_out_with('Unrecognised order change requested')
+      elsif order_events.exclude?(event_name)
+        return bail_out_with('That order cannot be changed in that way')
+      else
+        @order.send("#{event_name}_state!")
+      end
     end
 
     # DELETE /admin/pages/<page_id>/events/<event_id>/orders/<id>
+    #
+    # See notes on the public OrdersController#destroy about this; the admin UI
+    # usually doesn't delete orders, just maybe cancels them. But if the admin
+    # really wants to delete something, well - they can.
+    #
     def destroy
-      #@order.destroy!
-      #...
+      @order.destroy!
+
+      redirect_to(
+        page_event_path(page_id: @page.slug, id: @event.slug),
+        notice: "Order deleted - if the customer has any web links to this order, they will no longer work"
+      )
     end
 
   private
@@ -56,5 +80,22 @@ class Admin::OrdersController < ApplicationController
     #
     def get_order
       @order = Order.find_by_id(params[:id])
+    end
+
+    # Redirect to the order 'show' page with a given alert message if @order
+    # is set, else the index page with that message.
+    #
+    def bail_out_with(alert_message)
+      path = if @order.nil?
+        admin_page_event_orders_path(page_id: @page.slug, event_id: @event.slug)
+      else
+        admin_page_event_order_path(
+          page_id:  @order.event.page.slug,
+          event_id: @order.event.slug,
+          id:       @order.id
+        )
+      end
+
+      return redirect_to(path, alert: alert_message)
     end
 end

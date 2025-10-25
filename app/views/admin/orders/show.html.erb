@@ -11,8 +11,53 @@
   <dd><%= @order.name %>
   <dt>Customer e-mail address<dt>
   <dd><code><%= mail_to(@order.email) %></code></dd>
+  <dt>Customer phone number</dt>
+  <dd>
+    <% if @order.phone_number.blank? %>
+      Not given
+    <% else %>
+      <%= tag.code(link_to(@order.phone_number, "tel:#{@order.phone_number}")) %>
+    <% end %>
+  </dd>
   <dt>Order first created at</dt>
   <dd><%= apphelp_human_time(@order.created_at, date_only: false) %></dd>
   <dt>Order most recently updated at</dt>
   <dd><%= apphelp_human_time(@order.updated_at, date_only: false) %></dd>
+  <dt>Seats and price</dt>
+  <dd>
+    <%= @order.number_of_seats %> →
+    <% if @order.amount_owed.zero? %>
+      No charge
+    <% else %>
+      <%= apphelp_money(@order.amount_owed, currency: @event.currency) %>
+    <% end %>
+  </dd>
+  <% if @order.notes.present? %>
+    <dt>Other notes</dt>
+    <dd><%= @order.notes %></dd>
+  <% end %>
 </dl>
+
+<div class="row-wide-column-small">
+  <% if @order.valid_events.empty? %>
+    This order is in a finalised state and cannot be changed further.
+  <% else %>
+    <% @order.valid_events.each do | event | %>
+      <% if @order.send("may_#{event.name}_state?") %>
+        <%=
+          button_to(
+            t("models.order_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
+            admin_page_event_order_path(
+              page_id:  @order.event.page.slug,
+              event_id: @order.event.slug,
+              id:       @order.id,
+              process:  'state',
+              event:    event.name,
+            ),
+            { method: :patch },
+          )
+        %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

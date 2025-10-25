@@ -28,6 +28,7 @@ module EventsHelper
   def evtshelp_price(event)
     apphelp_money(
       event.price_per_seat,
+      currency:       event.currency,
       free_of_charge: event.free_of_charge?
     )
   end
@@ -36,7 +37,7 @@ module EventsHelper
     if event.state_presales?
       "Reserve seats"
     elsif event.state_reservee_purchases?
-      "Confirm reservation"
+      "Pay for reservation"
     elsif event.state_public_purchases?
       "Book seats"
     else
