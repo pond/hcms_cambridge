@@ -66,8 +66,10 @@ gem 'acts_as_list', '~> 1.2'
 
 # State machines.
 #
-#   https://rubygems.org/gems/aasm/
+#   https://rubygems.org/gems/after_commit_everywhere
+#   https://rubygems.org/gems/aasm
 #
+gem 'after_commit_everywhere', '~> 1.6'
 gem 'aasm', '~> 5.5'
 
 # Phone number validation.

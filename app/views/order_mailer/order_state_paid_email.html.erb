@@ -1,0 +1,26 @@
+<h1><%= @order.event.title %></h1>
+
+<p>
+  <% unless @order.amount_owed.zero? %>
+    Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
+  <% end %>
+  Your booking is confirmed. We look forward to seeing you!
+</p>
+
+<ul>
+  <li><%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %></li>
+  <li><%= evtshelp_datetime(@order.event) %></li>
+  <li><%= @order.event.location %></li>
+</ul>
+
+<p>
+  If there are any problems with the booking or you find you are unable to attend
+  for any reason, please get in touch:
+</p>
+
+<dl>
+  <dt>E-mail us</dt>
+  <dd>Just reply to this message</dd>
+  <dt>Call us</dt>
+  <dd><%= Hcms.config.contact_tel_human %></dd>
+</dl>

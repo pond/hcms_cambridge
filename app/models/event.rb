@@ -1,5 +1,22 @@
 class Event < Editable
 
+  mount_uploader :event_hero_image, EventHeroImageUploader
+
+  belongs_to :page
+  has_many :orders
+
+  after_initialize(unless: :persisted?) do
+    tz_now = Time.current
+
+    self.starts_at = tz_now.beginning_of_day +  9.hours
+    self.ends_at   = tz_now.beginning_of_day + 17.hours
+    self.currency  = Hcms.config.currency
+  end
+
+  # ============================================================================
+  # States
+  # ============================================================================
+
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
   #
@@ -33,9 +50,9 @@ class Event < Editable
 
   ON_ARCHIVE_ACTIONS = self.on_archive_actions.keys
 
-  mount_uploader :event_hero_image, EventHeroImageUploader
-
-  belongs_to :page
+  # ============================================================================
+  # Scopes
+  # ============================================================================
 
   default_scope -> { order(starts_at: :asc) }
 
@@ -43,7 +60,9 @@ class Event < Editable
     where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
   }
 
-  has_many :orders
+  # ============================================================================
+  # Validations
+  # ============================================================================
 
   validates_presence_of %i{
     event_hero_image
@@ -61,13 +80,9 @@ class Event < Editable
   validates :state,             inclusion: { in: STATES,                        message: 'is not recognised'     }
   validates :on_archive_action, inclusion: { in: ON_ARCHIVE_ACTIONS,            message: 'is not recognised'     }
 
-  after_initialize(unless: :persisted?) do
-    tz_now = Time.current
-
-    self.starts_at = tz_now.beginning_of_day +  9.hours
-    self.ends_at   = tz_now.beginning_of_day + 17.hours
-    self.currency  = Hcms.config.currency
-  end
+  # ============================================================================
+  # Overrides of Editable base class
+  # ============================================================================
 
   def is_event?
     true
@@ -80,6 +95,10 @@ class Event < Editable
   def collapse_metadata_in_form?
     ! self.new_record? && self.valid?
   end
+
+  # ============================================================================
+  # Navigation
+  # ============================================================================
 
   # A closer event - next lower starts_at. Assumes no two identical times.
   #
@@ -101,12 +120,18 @@ class Event < Editable
       .first
   end
 
+  # ============================================================================
+  # Miscellaneous
+  # ============================================================================
+
   # Is the event free of charge?
   #
   def free_of_charge?
     self.price_per_seat.zero?
   end
 
+  # Does the event have uncounted (effectively, unrestricted) seating?
+  #
   def unrestricted_seating?
     self.number_of_seats.zero?
   end

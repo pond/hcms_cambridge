@@ -152,8 +152,6 @@ class Admin::EventsController < ApplicationController
       end
 
       event.assign_attributes(safe_params)
-      debugger unless event.valid? && event.starts_at > Time.current
-
       result = event.persist!(safe_params, publish: params[:publish].present?)
 
       if result.successful

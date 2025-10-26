@@ -1,6 +1,12 @@
 class Order < ApplicationRecord
   include AASM
 
+  belongs_to :event
+
+  # ============================================================================
+  # States (see also AASM state machine definitions later)
+  # ============================================================================
+
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
   #
@@ -24,6 +30,10 @@ class Order < ApplicationRecord
   )
 
   STATES = self.states.keys
+
+  # ============================================================================
+  # Scopes
+  # ============================================================================
 
   STATE_LIST_SQL = <<~SQL
     CASE state
@@ -82,7 +92,9 @@ class Order < ApplicationRecord
   STALE_WINDOW = 3.days
   scope :stale, -> { where(state: self.states[:new], updated_at: ..STALE_WINDOW.ago) }
 
-  belongs_to :event
+  # ============================================================================
+  # Validations
+  # ============================================================================
 
   validates_presence_of %i{
     name
@@ -135,6 +147,10 @@ class Order < ApplicationRecord
     end
   end
 
+  # ============================================================================
+  # Utility functions
+  # ============================================================================
+
   def human_state
     state_for_i18n = self.state
 
@@ -153,13 +169,9 @@ class Order < ApplicationRecord
     OrderState.new(state_for_i18n).human_name
   end
 
-  def payment_makes_sense? # (AASM guard)
-    self.event&.free_of_charge? == false
-  end
-
-  def reservation_makes_sense? # (AASM guard)
-    self.event&.state_presales? == true
-  end
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': Main definition
+  # ============================================================================
 
   aasm(:state, namespace: 'state') do
     state :new, initial: true
@@ -169,24 +181,64 @@ class Order < ApplicationRecord
     state :refunded
     state :cancelled
 
-    event :reserve do
+    event :reserve, after_commit: :notify_is_reserved do
       transitions from: :new, to: :reserved, guard: :reservation_makes_sense?
     end
 
-    event :pay do
+    event :pay, after_commit: :notify_is_paid do
       transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :payment_makes_sense?
     end
 
-    event :cancel do
+    event :payment_failed, after_commit: :notify_payment_failed do
+      transitions from: [:new, :reserved], to: :payment_failed
+    end
+
+    event :cancel, after_commit: :notify_is_cancelled do
       transitions from: [:new, :reserved, :payment_failed], to: :cancelled
     end
 
-    event :refund do
+    event :refund, after_commit: :notify_is_refunded do
       transitions from: :paid, to: :refunded
     end
   end
 
   def valid_events
     self.aasm(:state).events
+  end
+
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': Guards
+  # ============================================================================
+
+  def payment_makes_sense? # (AASM guard)
+    self.event&.free_of_charge? == false
+  end
+
+  def reservation_makes_sense? # (AASM guard)
+    self.event&.state_presales? == true
+  end
+
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': After-commit handlers
+  # ============================================================================
+
+  def notify_is_reserved
+     OrderMailer.order_state_reserved_email(self).deliver_later()
+   end
+
+  def notify_is_paid
+     OrderMailer.order_state_paid_email(self).deliver_later()
+  end
+
+  def notify_payment_failed
+     OrderMailer.order_state_payment_failed_email(self).deliver_later()
+  end
+
+  def notify_is_cancelled
+     OrderMailer.order_state_cancelled_email(self).deliver_later()
+  end
+
+  def notify_is_refunded
+     OrderMailer.order_state_refunded_email(self).deliver_later()
   end
 end
