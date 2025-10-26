@@ -1,10 +1,9 @@
 <h1><%= @order.event.title %></h1>
 
 <p>
-  <% unless @order.amount_owed.zero? %>
-    Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
-  <% end %>
-  Your booking is confirmed. We look forward to seeing you!
+  Your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
+  has been refunded. Depending on your bank, it might take a few days for this to appear
+  in your account.
 </p>
 
 <ul>
@@ -14,8 +13,7 @@
 </ul>
 
 <p>
-  If there are any problems with the booking or you find you are unable to attend
-  for any reason, please get in touch:
+  If you have any questions about your refund, please get in touch:
 </p>
 
 <dl>

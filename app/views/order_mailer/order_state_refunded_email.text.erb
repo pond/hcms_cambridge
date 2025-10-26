@@ -1,0 +1,18 @@
+<%= @order.event.title.upcase %>
+
+<%
+  str = <<~TEXT.squish()
+    Your payment of #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}
+    has been refunded. Depending on your bank, it might take a few days for this to appear
+    in your account.
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+
+* <%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %>
+* <%= evtshelp_datetime(@order.event) %>
+* <%= @order.event.location %>
+
+If you have any questions about your refund, please get in touch:
+
+* E-mail us by replying to this message
+* Call us on <%= Hcms.config.contact_tel_human %>

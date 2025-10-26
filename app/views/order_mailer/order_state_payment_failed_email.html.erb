@@ -1,0 +1,25 @@
+<h1><%= @order.event.title %></h1>
+
+<p>
+  Unfortunately, <strong>there was a problem with your payment</strong> of
+  <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %> for
+  this event</strong> and your booking is not yet confirmed. To work out what
+  went wrong and how to resolve it, please get in touch:
+</p>
+
+<dl>
+  <dt>E-mail us</dt>
+  <dd>Just reply to this message</dd>
+  <dt>Call us</dt>
+  <dd><%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %></dd>
+</dl>
+
+<p>
+  The booking details are:
+</p>
+
+<ul>
+  <li><%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %></li>
+  <li><%= evtshelp_datetime(@order.event) %></li>
+  <li><%= @order.event.location %></li>
+</ul>

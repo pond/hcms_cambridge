@@ -1,10 +1,12 @@
 <h1><%= @order.event.title %></h1>
 
 <p>
+  Thank you for your reservation.
   <% unless @order.amount_owed.zero? %>
-    Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
+    Closer to the event, we will contact you on this e-mail address to finalise the
+    booking by paying <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
+    No payment is needed until then.
   <% end %>
-  Your booking is confirmed. We look forward to seeing you!
 </p>
 
 <ul>
@@ -14,8 +16,8 @@
 </ul>
 
 <p>
-  If there are any problems with the booking or you find you are unable to attend
-  for any reason, please get in touch:
+  If there are any problems with the reservation or you find you are unable to
+  attend for any reason, please get in touch:
 </p>
 
 <dl>

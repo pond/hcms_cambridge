@@ -1,0 +1,23 @@
+<%= @order.event.title.upcase %>
+
+Thank you for your reservation.
+<% unless @order.amount_owed.zero? %>
+
+<%
+  str = <<~TEXT.squish()
+    Closer to the event, we will contact you on this e-mail address to finalise the booking by
+    paying #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}. No payment
+    is needed until then.
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+<% end %>
+
+* <%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %>
+* <%= evtshelp_datetime(@order.event) %>
+* <%= @order.event.location %>
+
+If there are any problems with the reservation or you find you are unable to
+attend for any reason, please get in touch:
+
+* E-mail us by replying to this message
+* Call us on <%= Hcms.config.contact_tel_human %>
