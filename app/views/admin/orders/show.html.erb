@@ -5,8 +5,6 @@
 </p>
 
 <dl>
-  <dt>Order state</dt>
-  <dd><%= @order.human_state %></dd>
   <dt>Customer name</dt>
   <dd><%= @order.name %>
   <dt>Customer e-mail address<dt>
@@ -38,26 +36,39 @@
   <% end %>
 </dl>
 
-<div class="row-wide-column-small">
-  <% if @order.valid_events.empty? %>
-    This order is in a finalised state and cannot be changed further.
-  <% else %>
-    <% @order.valid_events.each do | event | %>
-      <% if @order.send("may_#{event.name}_state?") %>
-        <%=
-          button_to(
-            t("models.order_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
-            admin_page_event_order_path(
-              page_id:  @order.event.page.slug,
-              event_id: @order.event.slug,
-              id:       @order.id,
-              process:  'state',
-              event:    event.name,
-            ),
-            { method: :patch },
-          )
-        %>
+<div class="row-wide-column-small-container">
+  <div class="row-wide-column-small">
+    <span style="line-height: 150%; margin: 5px 0;">
+      Current state: <%= @order.human_state %>
+    </span>
+  </div>
+
+
+  <div class="row-wide-column-small">
+    <% if @order.valid_events.empty? %>
+      This order is in a finalised state and cannot be changed further.
+    <% else %>
+      <% @order.valid_events.each do | event | %>
+        <% next if event.name == :payment_failed %>
+        <% if @order.send("may_#{event.name}_state?") %>
+          <%=
+            button_to(
+              t("models.order_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
+              admin_page_event_order_path(
+                page_id:  @order.event.page.slug,
+                event_id: @order.event.slug,
+                id:       @order.id,
+                process:  'state',
+                event:    event.name,
+              ),
+              {
+                method: :patch,
+                data:   { confirm: 'Are you sure? This cannot be undone. The customer will be notified by e-mail.' }
+              }
+            )
+          %>
+        <% end %>
       <% end %>
     <% end %>
-  <% end %>
+  </div>
 </div>

@@ -36,7 +36,7 @@ module EventsHelper
   def evtshelp_booking_action_title(event)
     if event.state_presales?
       "Reserve seats"
-    elsif event.state_reservee_purchases?
+    elsif event.state_reserver_purchases?
       "Pay for reservation"
     elsif event.state_public_purchases?
       "Book seats"

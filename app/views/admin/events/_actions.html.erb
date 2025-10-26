@@ -4,11 +4,10 @@
   #   render partial: 'actions', locals: {
   #     event: Event model instance
   #   }
-
-  orders_decoration = "#{evtshelp_seat_state_glyph(event)} (#{event.orders.size})"
 %>
 <td class="admin_actions centre">
-  <%= link_to "View #{orders_decoration}", admin_page_event_orders_path(event.page.slug, event.slug) %>
+  <%= link_to "View (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
+  <%= evtshelp_seat_state_glyph(event) %>
 </td>
 <td class="admin_actions">
   <%= link_to 'Show', admin_page_event_path(event.page.slug, event.slug) %>

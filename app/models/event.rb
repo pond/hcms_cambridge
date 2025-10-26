@@ -1,4 +1,5 @@
 class Event < Editable
+  include AASM
 
   mount_uploader :event_hero_image, EventHeroImageUploader
 
@@ -14,21 +15,27 @@ class Event < Editable
   end
 
   # ============================================================================
-  # States
+  # Enumerations (see also any AASM state machine definition(s) later)
   # ============================================================================
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010032150_add_events.rb".
   #
+  # Using 'enum' will cause Rails to generate a bunch of accessors which use
+  # "enum_state_" as a prefix, to avoid collision with an AASM state machine
+  # defined later, which uses "state_" as a prefix and should always be used
+  # in favour of the enum-defined methods to cause state changes and so-on.
+  #
   enum(
     :state,
     {
       presales:           'presales',
-      reservee_purchases: 'reservee_purchases',
+      reserver_purchases: 'reserver_purchases',
       public_purchases:   'public_purchases',
       archived:           'archived',
+      cancelled:          'cancelled',
     },
-    prefix:  true,
+    prefix:  'enum_state',
     default: :presales,
   )
 
@@ -56,8 +63,14 @@ class Event < Editable
 
   default_scope -> { order(starts_at: :asc) }
 
+  scope :not_cancelled, -> {
+    where.not(state: Event.states[:cancelled])
+  }
+
   scope :for_navigation, -> {
-    where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
+    not_cancelled
+      .where(id: Revision.published.where(revisable_type: 'Event')
+      .select(:revisable_id))
   }
 
   # ============================================================================
@@ -162,6 +175,128 @@ class Event < Editable
       @confirmed_seats_remaining ||= begin
         orders = Order.confirmed.where(event: self)
         self.number_of_seats - orders.sum(:number_of_seats)
+      end
+    end
+  end
+
+  # ============================================================================
+  # Utility functions
+  # ============================================================================
+
+  def human_state
+    EventState.new(self.state).human_name
+  end
+
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': Main definition
+  # ============================================================================
+
+  aasm(:state, namespace: 'state') do
+    state :presales, initial: true
+    state :reserver_purchases
+    state :public_purchases
+    state :archived
+    state :cancelled
+
+    event :start_reserver_purchases, after_commit: :notify_reservers do
+      transitions from: :presales, to: :reserver_purchases, guard: :has_reservers?
+    end
+
+    event :start_public_purchases, after_commit: :cancel_reservations_and_notify_reservers do
+      transitions from: [:presales, :reserver_purchases], to: :public_purchases
+    end
+
+    event :archive do
+      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_concluded?
+    end
+
+    event :cancel, after_commit: :update_orders_for_cancellation do
+      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :cancelled
+    end
+  end
+
+  def valid_events
+    self.aasm(:state).events
+  end
+
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': Guards
+  # ============================================================================
+
+  def has_reservers?
+    self.orders.enum_state_reserved.any?
+  end
+
+  def has_concluded?
+    self.ends_at <= Time.current
+  end
+
+  # ============================================================================
+  # AASM STATE MACHINE namespace 'state': After-commit handlers
+  # ============================================================================
+
+  # Notify reservers that they can now make purchases via their magic link and
+  # that once public sales start, it becomes a free-for-all.
+  #
+  def notify_reservers
+    self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
+      EventMailer.event_state_reserver_purchases_email(self).deliver_later()
+    end
+  end
+
+  # Notify reservers that sales are now open to the public, so they need to
+  # confirm their booking via payment ASAP or risk losing the seat.
+  #
+  # If there seems to be an error with notification, the order state change is
+  # rolled back and an alert is sent out via Sentry.
+  #
+  def cancel_reservations_and_notify_reservers
+    self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
+      ActiveRecord::Base.transaction do
+        order.update!(state: Order.states[:new])
+        EventMailer.event_state_public_purchases_email(self).deliver()
+      rescue => e
+        Sentry.capture_exception(e)
+        raise ActiveRecord::Rollback
+      end
+    end
+  end
+
+  # The event has been cancelled. Run order updates for appropriate states and
+  # let the order model take care of notification e-mails.
+  #
+  def update_orders_for_cancellation
+
+    # People who've paid get refunded.
+    #
+    self.orders.enum_state_paid.each do |order|
+      ActiveRecord::Base.transaction do
+        order.refund_state!
+      rescue => e
+        Sentry.capture_exception(e)
+        raise ActiveRecord::Rollback
+      end
+    end
+
+    # People with reservations have those reservations cancelled.
+    #
+    self.orders.enum_state_reserved.each do |order|
+      ActiveRecord::Base.transaction do
+        order.cancel_state!
+      rescue => e
+        Sentry.capture_exception(e)
+        raise ActiveRecord::Rollback
+      end
+    end
+
+    # New orders get set to a cancelled state too, but without a notification
+    # e-mail since the order was never confirmed.
+    #
+    self.orders.enum_state_new.each do |order|
+      begin
+        order.update!(state: Order.states[:cancelled])
+      rescue => e
+        Sentry.capture_exception(e)
       end
     end
   end

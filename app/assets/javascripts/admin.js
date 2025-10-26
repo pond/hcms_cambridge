@@ -11,9 +11,10 @@
 //= require redactor_plugins/widget
 //= require redactor_config.js
 
-$(document).on('ready page:load', function() {
+$(document).ready(function() {
   const pageTypeSelector = $('#page_page_type');
   const eventOnArchiveSelector = $('#event_on_archive_action');
+  const buttonsWithConfirmsSelector = $('button[data-confirm]');
 
   if (pageTypeSelector.length > 0) {
     function setVisibilities() {
@@ -62,4 +63,14 @@ $(document).on('ready page:load', function() {
       setVisibilities();
     });
   }
+
+  buttonsWithConfirmsSelector.on('click', function(e) {
+    var warning = $(this).data('confirm');
+
+    if (!confirm(warning)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
 });

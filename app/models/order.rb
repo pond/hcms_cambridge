@@ -4,7 +4,7 @@ class Order < ApplicationRecord
   belongs_to :event
 
   # ============================================================================
-  # States (see also AASM state machine definitions later)
+  # Enumerations (see also any AASM state machine definition(s) later)
   # ============================================================================
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
@@ -197,7 +197,7 @@ class Order < ApplicationRecord
       transitions from: [:new, :reserved, :payment_failed], to: :cancelled
     end
 
-    event :refund, after_commit: :notify_is_refunded do
+    event :refund, after_commit: :refund_and_notify_is_refunded do
       transitions from: :paid, to: :refunded
     end
   end
@@ -223,22 +223,25 @@ class Order < ApplicationRecord
   # ============================================================================
 
   def notify_is_reserved
-     OrderMailer.order_state_reserved_email(self).deliver_later()
-   end
+    OrderMailer.order_state_reserved_email(self).deliver_later()
+  end
 
   def notify_is_paid
-     OrderMailer.order_state_paid_email(self).deliver_later()
+    OrderMailer.order_state_paid_email(self).deliver_later()
   end
 
   def notify_payment_failed
-     OrderMailer.order_state_payment_failed_email(self).deliver_later()
+    OrderMailer.order_state_payment_failed_email(self).deliver_later()
   end
 
   def notify_is_cancelled
-     OrderMailer.order_state_cancelled_email(self).deliver_later()
+    OrderMailer.order_state_cancelled_email(self).deliver_later()
   end
 
-  def notify_is_refunded
-     OrderMailer.order_state_refunded_email(self).deliver_later()
+  def refund_and_notify_is_refunded
+    if self.state_paid?
+      raise "Refund goes here!"
+    end
+    OrderMailer.order_state_refunded_email(self).deliver_later()
   end
 end

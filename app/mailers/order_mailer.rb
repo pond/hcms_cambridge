@@ -21,6 +21,9 @@ class OrderMailer < ApplicationMailer
     )
   end
 
+  # Note that cancellations could be at the user's behest or because the event
+  # itself got cancelled, so the subject line needs to allow for either.
+  #
   def order_state_cancelled_email(order)
     @order = order
 
@@ -41,6 +44,9 @@ class OrderMailer < ApplicationMailer
     )
   end
 
+  # Note that refunds could be at the user's behest or because the event
+  # itself got cancelled, so the subject line needs to allow for either.
+  #
   def order_state_refunded_email(order)
     @order = order
 

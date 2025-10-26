@@ -1,5 +1,10 @@
 <%= @order.event.title.upcase %>
 
+<% if @order.event.state_cancelled? %>
+Unfortunately, this event has been cancelled. We are very sorry for any
+disappointment or inconvenience this may cause.
+<% end %>
+
 <%
   str = <<~TEXT.squish()
     Your payment of #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}
@@ -12,7 +17,12 @@
 * <%= evtshelp_datetime(@order.event) %>
 * <%= @order.event.location %>
 
+<% if @order.event.state_cancelled? %>
+If you have any questions about the cancellation or your refund, please get
+in touch:
+<% else %>
 If you have any questions about your refund, please get in touch:
+<% end %>
 
 * E-mail us by replying to this message
 * Call us on <%= Hcms.config.contact_tel_human %>

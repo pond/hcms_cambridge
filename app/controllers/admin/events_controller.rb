@@ -32,7 +32,9 @@ class Admin::EventsController < ApplicationController
 
     # GET /admin/pages/<page_id>/events
     def index
-      @events = Event.where(page_id: @page.id).includes(:orders)
+      @events = Event
+        .where(page_id: @page.id)
+        .includes(:orders)
     end
 
     # GET /admin/pages/<page_id>/events/<id>
@@ -59,11 +61,32 @@ class Admin::EventsController < ApplicationController
 
     # PATCH/PUT /admin/pages/<page_id>/events/<id>
     def update
-      handle_form_submission(
-        event:           @event,
-        render_on_fail:    :edit,
-        draft_message:     'Changes saved as draft.',
-        published_message: 'Event changes published.'
+      if params[:process] != 'state'
+        handle_form_submission(
+          event:           @event,
+          render_on_fail:    :edit,
+          draft_message:     'Changes saved as draft.',
+          published_message: 'Event changes published.'
+        )
+
+        return # NOTE EARLY EXIT
+      end
+
+      all_events   = Event.aasm(:state).events.map(&:name).map(&:to_s)
+      valid_events = @event.valid_events.map(&:name).map(&:to_s)
+      event_name   = params[:event]
+
+      if all_events.exclude?(event_name)
+        return bail_out_with('Unrecognised event change requested')
+      elsif valid_events.exclude?(event_name)
+        return bail_out_with('That event cannot be changed in that way')
+      else
+        @event.send("#{event_name}_state!")
+      end
+
+      redirect_to(
+        admin_page_event_path(page_id: @event.page.slug, id: @event.slug),
+        notice: 'Event state updated. Any affected orders will have been updated accordingly too.'
       )
     end
 

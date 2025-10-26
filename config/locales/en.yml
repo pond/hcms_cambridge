@@ -105,7 +105,7 @@ en:
         number_of_seats: "Number of seats available"
         price_per_seat: "Price per seat"
         event_state: "Ticket sales"
-        on_archive_action: "Once it has taken place"
+        on_archive_action: "After it has taken place"
 
       order:
         name: "Name"
@@ -139,9 +139,16 @@ en:
   models:
     event_state:
       presales: "Reservations only (pre-sale)"
-      reservee_purchases: "Purchase by reservation holders only"
+      reserver_purchases: "Purchase by reservation holders only"
       public_purchases: "Open to general public"
       archived: "Archived"
+      cancelled: "Cancelled"
+
+    event_state_aasm_events:
+      start_reserver_purchases: "Ask reservation holders to pay"
+      start_public_purchases: "Open up for public purchases"
+      archive: "Archive"
+      cancel: "Cancel"
 
     on_archive_action:
       keep: "Keep on page as a past event"
@@ -149,21 +156,21 @@ en:
       move: "Move into a blog article"
 
     order_state:
-      new:            "In progress"
-      reserved:       "Reserved"
-      paid:           "Paid"
+      new: "In progress"
+      reserved: "Reserved"
+      paid: "Paid"
       payment_failed: "Payment failed"
-      cancelled:      "Cancelled"
-      refunded:       "Refunded"
+      cancelled: "Cancelled"
+      refunded: "Refunded"
 
-      getting_older:  "Dormant"   # I18n for pseudo-state related to "new"
-      stale:          "Abandoned" # I18n for pseudo-state related to "new"
+      getting_older: "Dormant" # I18n for pseudo-state related to "new"
+      stale: "Abandoned"       # I18n for pseudo-state related to "new"
 
     order_state_aasm_events:
       reserve: "Mark as 'reservation confirmed'"
-      pay:     "Mark as 'paid'"
-      cancel:  "Cancel order"
-      refund:  "Refund customer"
+      pay: "Mark as 'paid'"
+      cancel: "Cancel order"
+      refund: "Refund customer"
 
     page_type:
       normal: "Normal"

@@ -93,6 +93,14 @@ form div.field div.checkbox {
   align-items: baseline;
 }
 
+div.row-wide-column-small-container {
+  border: 1px solid $head_foot_border_colour;
+  background: $head_foot_background;
+  border-radius: 5px;
+  padding: 0.5em;
+  margin-bottom: 1em;
+}
+
 div.row-wide-column-small {
   display: flex;
   flex-direction: row;

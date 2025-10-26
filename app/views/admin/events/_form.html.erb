@@ -76,17 +76,54 @@
 
         <div class="field">
           <%= apphelp_label(f, :state) %>
-          <%= f.collection_select :state, ::EventState.types, :internal_name, :human_name %>
+          <% if f.object.new_record? %>
+            <%= f.collection_select :state, ::EventState.types, :internal_name, :human_name %>
+          <% else %>
+            <%=
+              f.collection_select(
+                :state,
+                [::EventState.new(f.object.state)],
+                :internal_name,
+                :human_name,
+                {},
+                disabled: true
+              )
+            %>
+            <br>
+            <small><em>
+              To change the state of the event,
+              <%= link_to('view the event', admin_page_event_path(page_id: f.object.page.slug, id: f.object.id)) %>
+              then use the action buttons at the top of the page.
+            </em></small>
+          <% end %>
         </div>
 
         <div class="field">
           <%= apphelp_label(f, :on_archive_action) %>
-          <%= f.collection_select :on_archive_action, ::EventOnArchiveAction.types, :internal_name, :human_name %>
+          <% if f.object.has_concluded? %>
+            <%=
+              f.collection_select(
+                :on_archive_action,
+                [::EventOnArchiveAction.new(f.object.on_archive_action)],
+                :internal_name,
+                :human_name,
+                {},
+                disabled: true
+              )
+            %>
+            <div id="on-archive-action-move-fields", style="display: none"></div>
+            <br>
+            <small><em>
+              Since the event has now concluded, this behaviour cannot be changed.
+            </em></small>
+          <% else %>
+            <%= f.collection_select :on_archive_action, ::EventOnArchiveAction.types, :internal_name, :human_name %>
 
-          <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event.on_archive_actions[:move] ? 'block' : 'none' %>">
-            <%= f.label(:on_archive_params_blog_id, 'Move into which blog?') %>
-            <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
-          </div>
+            <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event.on_archive_actions[:move] ? 'block' : 'none' %>">
+              <%= f.label(:on_archive_params_blog_id, 'Move into which blog?') %>
+              <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

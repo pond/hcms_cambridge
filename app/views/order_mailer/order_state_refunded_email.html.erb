@@ -1,5 +1,12 @@
 <h1><%= @order.event.title %></h1>
 
+<% if @order.event.state_cancelled? %>
+  <p>
+      Unfortunately, this event has been cancelled. We are very sorry for any
+      disappointment or inconvenience this may cause.
+  </p>
+<% end %>
+
 <p>
   Your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
   has been refunded. Depending on your bank, it might take a few days for this to appear
@@ -13,7 +20,12 @@
 </ul>
 
 <p>
-  If you have any questions about your refund, please get in touch:
+  <% if @order.event.state_cancelled? %>
+    If you have any questions about the cancellation or your refund, please get
+    in touch:
+  <% else %>
+    If you have any questions about your refund, please get in touch:
+  <% end %>
 </p>
 
 <dl>

@@ -32,12 +32,12 @@ class Admin::OrdersController < ApplicationController
       end
 
       all_events   = Order.aasm(:state).events.map(&:name).map(&:to_s)
-      order_events = @order.valid_events.map(&:name).map(&:to_s)
+      valid_events = @order.valid_events.map(&:name).map(&:to_s)
       event_name   = params[:event]
 
       if all_events.exclude?(event_name)
         return bail_out_with('Unrecognised order change requested')
-      elsif order_events.exclude?(event_name)
+      elsif valid_events.exclude?(event_name)
         return bail_out_with('That order cannot be changed in that way')
       else
         @order.send("#{event_name}_state!")

@@ -27,9 +27,9 @@
   <tbody>
     <% @events.each do | event | %>
 
-      <tr class="<%= cycle( 'even', 'odd' ) %>">
-        <td><%= event.title %></td>
-        <td><%= apphelp_human_time(event.starts_at, date_only: true) %>
+      <tr class="<%= cycle( 'even', 'odd' ) %> <%= "event-state-#{event.state}" %>">
+        <td id="event-title"><%= event.title %></td>
+        <td id="event-starts-at"><%= apphelp_human_time(event.starts_at, date_only: true) %>
         <%= render partial: 'booleans', locals: { event: event } %>
         <%= render partial: 'actions', locals: { event: event } %>
       </tr>
