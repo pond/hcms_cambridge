@@ -13,12 +13,7 @@
   in your account.
 </p>
 
-<ul>
-  <li><%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %></li>
-  <li><%= evtshelp_datetime(@order.event) %></li>
-  <li><%= @order.event.location %></li>
-</ul>
-
+<%= render partial: 'order', object: @order %>
 <p>
   <% if @order.event.state_cancelled? %>
     If you have any questions about the cancellation or your refund, please get
@@ -28,9 +23,5 @@
   <% end %>
 </p>
 
-<dl>
-  <dt>E-mail us</dt>
-  <dd>Just reply to this message</dd>
-  <dt>Call us</dt>
-  <dd><%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %></dd>
-</dl>
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

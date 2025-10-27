@@ -56,4 +56,30 @@ class OrderMailer < ApplicationMailer
       subject: "Refund confirmation for \"#{@order.event.title}\""
     )
   end
+
+  # Sent for Reserved orders when the event starts accepting reservation
+  # confirmation payments.
+  #
+  def event_state_reserver_purchases_email(order)
+    @order = order
+
+    mail(
+      to:      @order.email,
+      from:    Hcms.config.orders_email,
+      subject: "It's time to confirm your booking for \"#{@order.event.title}\""
+    )
+  end
+
+  # Sent for Reserved orders when the event starts accepting public payments,
+  # so the reservation is no longer guaranteed.
+  #
+  def event_state_public_purchases_email(order)
+    @order = order
+
+    mail(
+      to:      @order.email,
+      from:    Hcms.config.orders_email,
+      subject: "General sales now available for \"#{@order.event.title}\""
+    )
+  end
 end

@@ -1,6 +1,8 @@
 class Order < ApplicationRecord
   include AASM
 
+  has_secure_token()
+
   belongs_to :event
 
   # ============================================================================
@@ -89,7 +91,7 @@ class Order < ApplicationRecord
   # Related to the above, stale orders are in a "new" state and haven't been
   # touched in a few days. They're fair game for deletion.
   #
-  STALE_WINDOW = 3.days
+  STALE_WINDOW = 2.days
   scope :stale, -> { where(state: self.states[:new], updated_at: ..STALE_WINDOW.ago) }
 
   # ============================================================================
@@ -169,6 +171,34 @@ class Order < ApplicationRecord
     OrderState.new(state_for_i18n).human_name
   end
 
+  def token_expires_at
+    self.event.ends_at + 1.day
+  end
+
+  def customer_self_service_possible?
+    self.event.active? && (
+      self.state_new? || self.state_reserved? || self.state_paid?
+    )
+  end
+
+  def customer_can_pay_for_reservation?
+    ! self.event.has_started? &&
+    self.state_reserved? &&
+    (
+      self.event.state_reserver_purchases? ||
+      self.event.state_public_purchases?
+    )
+  end
+
+  def customer_can_pay_for_booking?
+    self.customer_can_pay_for_reservation? ||
+    (
+      ! self.event.has_started? &&
+      self.state_new? &&
+      self.event.state_public_purchases?
+    )
+  end
+
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Main definition
   # ============================================================================
@@ -197,13 +227,23 @@ class Order < ApplicationRecord
       transitions from: [:new, :reserved, :payment_failed], to: :cancelled
     end
 
-    event :refund, after_commit: :refund_and_notify_is_refunded do
+    event :refund, after_commit: :refund_and_notify_is_refunded, guard: :outside_no_refunds_window? do
+      transitions from: :paid, to: :refunded
+    end
+
+    event :force_refund, after_commit: :refund_and_notify_is_refunded, guard: :no_refunds_window_exists? do
       transitions from: :paid, to: :refunded
     end
   end
 
+  # The 'aasm(:state)' method on 'self' does not appear to take account of
+  # guards, only transition conditions. The method here only returns events
+  # the instance can *actually* use - at least, at the instant of calling.
+  #
   def valid_events
-    self.aasm(:state).events
+    Order.aasm(:state).events.filter do |event|
+      self.send("may_#{event.name}_state?")
+    end
   end
 
   # ============================================================================
@@ -216,6 +256,16 @@ class Order < ApplicationRecord
 
   def reservation_makes_sense? # (AASM guard)
     self.event&.state_presales? == true
+  end
+
+  def outside_no_refunds_window?
+    Hcms.config.no_refunds_window.zero? ||
+    Time.current < (self.event.starts_at - Hcms.no_refunds_window.days)
+  end
+
+  def inside_no_refunds_window?
+    ! Hcms.config.no_refunds_window.zero? &&
+    Time.current >= (self.event.starts_at - Hcms.no_refunds_window.days)
   end
 
   # ============================================================================

@@ -15,6 +15,9 @@ Rails.application.routes.draw do
     end
   end
 
+  get   'manage_order/:order_id/:token', controller: :orders_self_service, action: :edit, as: :manage_order
+  patch 'manage_order/:order_id/:token', controller: :orders_self_service, action: :update
+
   resources :by_titles, only: :show
   post '/user_mails/:page_id', to: 'user_emails#create', as: :user_emails
 

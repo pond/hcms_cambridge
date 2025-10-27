@@ -1,0 +1,19 @@
+<h1><%= @order.event.title %></h1>
+
+<p>
+  Thank you for your earlier reservation for &ldquo;<%= @order.event.title %>&rdquo;.
+  Reservations have now expired and the event is open for general sales. If you
+  still want to attend, please use the payment link below to book a place soon.
+</p>
+
+<p>
+  <strong><big><%= link_to('Pay now', ordershelp_magic_link(@order)) %></big></strong>
+</p>
+
+<%= render partial: 'order', object: @order, locals: {show_price: true} %>
+<p>
+  If you have are any questions, please get in touch:
+</p>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

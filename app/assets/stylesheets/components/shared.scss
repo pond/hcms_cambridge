@@ -107,6 +107,14 @@ div.row-wide-column-small {
   flex-wrap: nowrap;
   align-items: center;
   gap: 1em;
+
+  // Match input field height and padding to balance out line spacing.
+  //
+  span {
+    line-height: 150%;
+    margin: 5px 0;
+    flex-grow: 1;
+  }
 }
 
 input, select, button {

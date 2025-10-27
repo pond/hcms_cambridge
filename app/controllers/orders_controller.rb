@@ -41,14 +41,14 @@ class OrdersController < ApplicationController
     )
   end
 
-  # A rare, non-RESTful POST endpoint, nested by page and event ID or slug.
+  # A non-RESTful POST endpoint, nested by page and event ID or slug.
   #
   def confirm_reservation
     ActiveRecord::Base.transaction do
       locked_order = Order.lock.find(@order.id)
 
       if locked_order.valid?
-        locked_order.state_reserve!
+        locked_order.reserve_state!
 
         notice = 'Thanks, your reservation has been made! '
 
@@ -70,7 +70,8 @@ class OrdersController < ApplicationController
     end
   end
 
-  # A rare, non-RESTful POST endpoint, nested by page and event ID or slug.
+  # A non-RESTful POST endpoint, nested by page and event ID or slug.
+  #
   # The Stripe checkout flow kicks off here.
   #
   def checkout

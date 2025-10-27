@@ -1,0 +1,14 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+<%= word_wrap("Thank you for your earlier reservation for \"#{@order.event.title}\".", line_width: 78) %>
+
+Reservations have now expired and the event is open for general sales. If you
+still want to attend, please use the payment link below to book a place soon.
+
+  <%= ordershelp_magic_link(@order) %>
+
+If you have are any questions, please get in touch:
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

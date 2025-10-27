@@ -1,6 +1,6 @@
 <div class="row-wide-column-small-container">
   <%# Needed since 'show' uses the public site layout for events, not the admin layout %>
-  <%= javascript_include_tag 'admin' %>
+  <%= javascript_include_tag 'minimal' %>
 
   <div class="row-wide-column-small">
     <span style="line-height: 150%; margin: 5px 0;">
@@ -13,32 +13,32 @@
   <div class="row-wide-column-small">
     <strong>Actions:</strong>
     <% if @event.valid_events.empty? %>
-      This event is in a finalised state. No further actions are available.
+      <span>
+        This event is in a finalised state. No further actions are available.
+      </span>
     <% else %>
       <% @event.valid_events.each do | event | %>
-        <% if @event.send("may_#{event.name}_state?") %>
-          <%=
-            data = if event.name == :cancel
-              { confirm: 'Are you sure? This cannot be undone. Orders where appropriate will be cancelled or refunded, with customers notified by e-mail.' }
-            else
-              {}
-            end
+        <%=
+          data = if event.name == :cancel
+            { confirm: 'Are you sure? This cannot be undone. Orders where appropriate will be cancelled or refunded, with customers notified by e-mail.' }
+          else
+            {}
+          end
 
-            button_to(
-              t("models.event_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
-              admin_page_event_path(
-                page_id:  @event.page.slug,
-                event_id: @event.slug,
-                process:  'state',
-                event:    event.name,
-              ),
-              {
-                method: :patch,
-                data:   data
-              }
-            )
-          %>
-        <% end %>
+          button_to(
+            t("models.event_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
+            admin_page_event_path(
+              page_id:  @event.page.slug,
+              event_id: @event.slug,
+              process:  'state',
+              event:    event.name,
+            ),
+            {
+              method: :patch,
+              data:   data
+            }
+          )
+        %>
       <% end %>
     <% end %>
   </div>

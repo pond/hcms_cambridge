@@ -25,6 +25,8 @@ module EventsHelper
     "#{formatted_start} until #{formatted_end}"
   end
 
+  # Render the per-seat event price as a formatted string, with currency symbol.
+  #
   def evtshelp_price(event)
     apphelp_money(
       event.price_per_seat,

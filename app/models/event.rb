@@ -63,12 +63,8 @@ class Event < Editable
 
   default_scope -> { order(starts_at: :asc) }
 
-  scope :not_cancelled, -> {
-    where.not(state: Event.states[:cancelled])
-  }
-
   scope :for_navigation, -> {
-    not_cancelled
+    not_enum_state_cancelled
       .where(id: Revision.published.where(revisable_type: 'Event')
       .select(:revisable_id))
   }
@@ -207,7 +203,7 @@ class Event < Editable
     end
 
     event :archive do
-      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_concluded?
+      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_ended?
     end
 
     event :cancel, after_commit: :update_orders_for_cancellation do
@@ -215,8 +211,20 @@ class Event < Editable
     end
   end
 
+  # The 'aasm(:state)' method on 'self' does not appear to take account of
+  # guards, only transition conditions. The method here only returns events
+  # the instance can *actually* use - at least, at the instant of calling.
+  #
   def valid_events
-    self.aasm(:state).events
+    Event.aasm(:state).events.filter do |event|
+      self.send("may_#{event.name}_state?")
+    end
+  end
+
+  def active?
+    ! self.state_archived?  &&
+    ! self.state_cancelled? &&
+    ! self.has_ended?
   end
 
   # ============================================================================
@@ -227,7 +235,11 @@ class Event < Editable
     self.orders.enum_state_reserved.any?
   end
 
-  def has_concluded?
+  def has_started?
+    self.starts_at <= Time.current
+  end
+
+  def has_ended?
     self.ends_at <= Time.current
   end
 
@@ -240,7 +252,7 @@ class Event < Editable
   #
   def notify_reservers
     self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
-      EventMailer.event_state_reserver_purchases_email(self).deliver_later()
+      OrderMailer.event_state_reserver_purchases_email(order).deliver_later()
     end
   end
 
@@ -254,7 +266,7 @@ class Event < Editable
     self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
       ActiveRecord::Base.transaction do
         order.update!(state: Order.states[:new])
-        EventMailer.event_state_public_purchases_email(self).deliver()
+        OrderMailer.event_state_public_purchases_email(order).deliver()
       rescue => e
         Sentry.capture_exception(e)
         raise ActiveRecord::Rollback

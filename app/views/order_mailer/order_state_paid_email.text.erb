@@ -1,4 +1,5 @@
 <%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
 
 <% unless @order.amount_owed.zero? %>
 Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
@@ -6,12 +7,9 @@ Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @o
 <% end %>
 Your booking is confirmed. We look forward to seeing you!
 
-* <%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %>
-* <%= evtshelp_datetime(@order.event) %>
-* <%= @order.event.location %>
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: true) %>
+If there are any problems with the booking, please get in touch:
 
-If there are any problems with the booking or you find you are unable to attend
-for any reason, please get in touch:
-
-* E-mail us by replying to this message
-* Call us on <%= Hcms.config.contact_tel_human %>
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

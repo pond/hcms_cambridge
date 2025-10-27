@@ -1,0 +1,20 @@
+<h1><%= @order.event.title %></h1>
+
+<p>
+  Thank you for your earlier reservation for &ldquo;<%= @order.event.title %>&rdquo;.
+  If you still wish to attend, please lock in the booking by using the payment
+  link below. The same link can also be used to cancel the reservation if you've
+  changed your mind.
+</p>
+
+<p>
+  <strong><big><%= link_to('Pay now', ordershelp_magic_link(@order)) %></big></strong>
+</p>
+
+<%= render partial: 'order', object: @order, locals: {show_price: true} %>
+<p>
+  If you have are any questions, please get in touch:
+</p>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

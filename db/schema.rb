@@ -65,6 +65,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_10_035603) do
     t.integer "number_of_seats", null: false
     t.text "phone_number"
     t.enum "state", default: "new", null: false, enum_type: "order_states"
+    t.text "token", null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_orders_on_event_id"
     t.index ["state"], name: "index_orders_on_state"

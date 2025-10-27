@@ -1,0 +1,91 @@
+<%= javascript_include_tag 'minimal' %>
+
+<h1>Manage order for &ldquo;<%= @order.event.title %>&rdquo;</h1>
+
+<p>
+  <%= evtshelp_datetime(@order.event) %>
+</p>
+
+<dl>
+  <dt>Your name</dt>
+  <dd><%= @order.name %>
+  <dt>E-mail address<dt>
+  <dd><code><%= @order.email %></code></dd>
+  <% if @order.phone_number.present? %>
+    <dt>Phone number</dt>
+    <dd>
+      <%= tag.code(@order.phone_number) %>
+    </dd>
+  <% end %>
+  <dt>Seats and price</dt>
+  <dd>
+    <%= @order.number_of_seats %> →
+    <% if @order.amount_owed.zero? %>
+      No charge
+    <% else %>
+      <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
+    <% end %>
+  </dd>
+  <% if @order.notes.present? %>
+    <dt>Other notes</dt>
+    <dd><%= @order.notes %></dd>
+  <% end %>
+  <dt>Order state</dt>
+  <dd>
+    <%= @order.human_state %>
+    <% if @order.state_reserved? && @order.event.state_presales? %>
+      &ndash; the event is still only accepting reservations. When it becomes
+      possible to confirm the reservation through payment, you'll be contacted
+      by e-mail at the above address.
+    <% end %>
+  </dd>
+</dl>
+
+<div class="row-wide-column-small-container">
+  <div class="row-wide-column-small">
+    <% if @order.customer_self_service_possible? %>
+      <% if @order.may_pay_state? %>
+        <%=
+          button_to(
+           'Pay now',
+            manage_order_path(
+              order_id: @order.id,
+              token:    @order.token,
+              process:  'state',
+              event:    'pay',
+            ),
+            {
+              method: :patch,
+              class:  'bold_button',
+            }
+          )
+        %>
+      <% end %>
+      <% if @order.may_cancel_state? %>
+        <%=
+          button_to(
+            'Cancel',
+            manage_order_path(
+              order_id: @order.id,
+              token:    @order.token,
+              process:  'state',
+              event:    'cancel',
+            ),
+            {
+              method: :patch,
+              data:   { confirm: 'Are you sure you want to cancel?' }
+            }
+          )
+        %>
+    <% else %>
+      <span>
+        This order is in a finalised state. No further actions are available.
+        <br>
+        For help, please contact us by e-mail at
+        <%= mail_to(Hcms.config.orders_email) %> or by phone on
+        <%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %>.
+      </span>
+      <% end %>
+    <% end %>
+  </div>
+</div>

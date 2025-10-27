@@ -171,6 +171,7 @@ en:
       pay: "Mark as 'paid'"
       cancel: "Cancel order"
       refund: "Refund customer"
+      force_refund: "Ignore no-refunds period and refund customer"
 
     page_type:
       normal: "Normal"

@@ -9,20 +9,11 @@
   <% end %>
 </p>
 
-<ul>
-  <li><%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %></li>
-  <li><%= evtshelp_datetime(@order.event) %></li>
-  <li><%= @order.event.location %></li>
-</ul>
-
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: false) %>
 <p>
-  If there are any problems with the reservation or you find you are unable to
-  attend for any reason, please get in touch:
+  If there are any problems with the reservation, please get in touch:
 </p>
 
-<dl>
-  <dt>E-mail us</dt>
-  <dd>Just reply to this message</dd>
-  <dt>Call us</dt>
-  <dd><%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %></dd>
-</dl>
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

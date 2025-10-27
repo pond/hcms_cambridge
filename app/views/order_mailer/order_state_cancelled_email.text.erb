@@ -1,4 +1,5 @@
 <%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
 
 <% if @order.event.state_cancelled? %>
 Unfortunately, this event has been cancelled. We are very sorry for any
@@ -8,11 +9,8 @@ Your reservation for this event has been cancelled. We're sorry you could not
 attend this time, but hope to see you again in future.
 <% end %>
 
-* <%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %>
-* <%= evtshelp_datetime(@order.event) %>
-* <%= @order.event.location %>
-
+<%= render partial: 'order', object: @order %>
 If you have any questions about the cancellation, please get in touch:
 
-* E-mail us by replying to this message
-* Call us on <%= Hcms.config.contact_tel_human %>
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

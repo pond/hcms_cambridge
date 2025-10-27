@@ -54,8 +54,8 @@ class Admin::OrdersController < ApplicationController
       @order.destroy!
 
       redirect_to(
-        page_event_path(page_id: @page.slug, id: @event.slug),
-        notice: "Order deleted - if the customer has any web links to this order, they will no longer work"
+        admin_page_event_orders_path(page_id: @page.slug, id: @event.slug),
+        notice: "Order deleted. Customer web links to this order will no longer work."
       )
     end
 

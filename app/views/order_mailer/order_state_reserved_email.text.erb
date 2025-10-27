@@ -1,4 +1,5 @@
 <%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
 
 Thank you for your reservation.
 <% unless @order.amount_owed.zero? %>
@@ -12,12 +13,9 @@ Thank you for your reservation.
 %><%= word_wrap(str, line_width: 78) %>
 <% end %>
 
-* <%= I18n.t('views.orders.seats', count: @order.number_of_seats) %> to <%= @order.event.title %>
-* <%= evtshelp_datetime(@order.event) %>
-* <%= @order.event.location %>
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: true) %>
+If there are any problems with the reservation, please get in touch:
 
-If there are any problems with the reservation or you find you are unable to
-attend for any reason, please get in touch:
-
-* E-mail us by replying to this message
-* Call us on <%= Hcms.config.contact_tel_human %>
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

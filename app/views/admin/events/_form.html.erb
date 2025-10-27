@@ -100,7 +100,7 @@
 
         <div class="field">
           <%= apphelp_label(f, :on_archive_action) %>
-          <% if f.object.has_concluded? %>
+          <% if f.object.has_ended? %>
             <%=
               f.collection_select(
                 :on_archive_action,
