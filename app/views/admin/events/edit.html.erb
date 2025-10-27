@@ -1,5 +1,6 @@
 <h1>Edit event &ldquo;<%= @event.title %>&rdquo;</h1>
 
+<%= render partial: 'state_management', locals: { event: @event } %>
 <%= render 'form' %>
 
 <% content_for :extra_footer_links do %>
