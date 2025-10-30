@@ -27,6 +27,7 @@
   <h2>All Orders</h2>
   <span>▶︎</span>
   <nav>
+    <%= link_to 'Manually add order',       new_admin_page_event_order_path(page_id: @page.slug, event_id: @event.slug) %> |
     <%= link_to 'View events list',         admin_page_events_path(page_id: @page.slug) %> |
     <%= link_to 'Back to "All pages" list', admin_pages_path() %>
   </nav>

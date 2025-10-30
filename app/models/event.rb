@@ -63,10 +63,12 @@ class Event < Editable
 
   default_scope -> { order(starts_at: :asc) }
 
+  scope :not_hidden, -> { where(hidden: false) }
+
   scope :for_navigation, -> {
-    not_enum_state_cancelled
-      .where(id: Revision.published.where(revisable_type: 'Event')
-      .select(:revisable_id))
+      where(id: Revision.published.where(revisable_type: 'Event').select(:revisable_id))
+      .not_hidden
+      .not_enum_state_cancelled
   }
 
   # ============================================================================
@@ -74,7 +76,6 @@ class Event < Editable
   # ============================================================================
 
   validates_presence_of %i{
-    event_hero_image
     summary
     body
     currency
@@ -83,6 +84,8 @@ class Event < Editable
     state
     on_archive_action
   }
+
+  validates :event_hero_image, presence: true, on: :create
 
   validates :starts_at,        comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
   validates :ends_at,          comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
@@ -98,7 +101,7 @@ class Event < Editable
   end
 
   def for_navigation?
-    self.published_revision.present?
+    self.published_revision.present? && self.hidden == false
   end
 
   def collapse_metadata_in_form?
@@ -113,7 +116,8 @@ class Event < Editable
   #
   def next
     @next ||= self.class
-      .reorder(created_at: :desc)
+      .for_navigation
+      .reorder(starts_at: :desc)
       .where(page_id: self.page_id)
       .where('starts_at < ?', self.starts_at)
       .first
@@ -123,7 +127,8 @@ class Event < Editable
   #
   def prev
     @prev ||= self.class
-      .reorder(created_at: :asc)
+      .for_navigation
+      .reorder(starts_at: :asc)
       .where(page_id: self.page_id)
       .where('starts_at > ?', self.starts_at)
       .first
@@ -240,7 +245,7 @@ class Event < Editable
   end
 
   def has_ended?
-    self.ends_at <= Time.current
+    self.persisted? && self.ends_at <= Time.current
   end
 
   # ============================================================================

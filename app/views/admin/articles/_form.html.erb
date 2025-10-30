@@ -56,8 +56,8 @@
   <%= f.error_markup_for(:body) %>
 
   <div class="actions with_note">
-    <%= f.button 'Save draft', name: 'submit' %>
     <%= f.button 'Publish article', name: 'publish', value: true %>
+    <%= f.button 'Save draft', name: 'submit' %>
     <div class="note">
       Only the title, summary and article body text save in new revisions.
       <strong><em>All other changes</em> always save permanently.</strong>

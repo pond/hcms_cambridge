@@ -39,6 +39,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_10_035603) do
     t.string "currency", limit: 3, null: false
     t.datetime "ends_at", null: false
     t.text "event_hero_image", null: false
+    t.boolean "hidden", default: false, null: false
     t.text "location"
     t.integer "number_of_seats", null: false
     t.enum "on_archive_action", default: "keep", null: false, enum_type: "event_on_archive_actions"

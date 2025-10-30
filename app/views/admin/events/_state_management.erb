@@ -38,5 +38,39 @@
         %>
       <% end %>
     <% end %>
+
+    <span></span>
+
+    <% if action_name == 'show' %>
+      <%=
+        button_to(
+          'Edit event',
+          edit_admin_page_event_path(event.page, event),
+          { method: :get }
+        )
+      %>
+    <% else %>
+      <%=
+        button_to(
+          @event.hidden == true ? 'Make visible to everyone' : "Hide unless you've a link",
+          admin_page_event_path(
+            page_id:  event.page.slug,
+            event_id: event.slug,
+            process:  'toggle-hidden',
+          ),
+          { method: :patch }
+        )
+      %>
+      <%=
+        button_to(
+          'Manage orders',
+          admin_page_event_orders_path(
+            page_id:  event.page.slug,
+            event_id: event.slug,
+          ),
+          { method: :get }
+        )
+      %>
+    <% end %>
   </div>
 </div>

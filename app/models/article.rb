@@ -11,7 +11,8 @@ class Article < Editable
     where(id: Revision.published.where(revisable_type: 'Article').select(:revisable_id))
   }
 
-  validates_presence_of :article_hero_image, :summary, :body
+  validates_presence_of :summary, :body
+  validates :article_hero_image, presence: true, on: :create
 
   def is_article?
     true
@@ -29,6 +30,7 @@ class Article < Editable
   #
   def next
     @next ||= self.class
+      .for_navigation
       .reorder(created_at: :asc)
       .where(page_id: self.page_id)
       .where('created_at > ?', self.created_at)
@@ -39,6 +41,7 @@ class Article < Editable
   #
   def prev
     @prev ||= self.class
+      .for_navigation
       .reorder(created_at: :desc)
       .where(page_id: self.page_id)
       .where('created_at < ?', self.created_at)

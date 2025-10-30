@@ -14,7 +14,7 @@
       <div class="event-date-and-location">
         <%= evtshelp_datetime(event) %>
         <% if event.location.present? %>
-          <address class="event-location"><%= event.location %></address>
+          <address class="event-location"><%= evtshelp_location(event) %></address>
         <% end %>
       </div>
     </div>
@@ -45,10 +45,7 @@
 
       <% if event.location.present? %>
         <dt>Where</dt>
-        <dd>
-          <%= event.location %>
-          (<%= link_to('map', "https://www.google.com/maps/search/?#{{api: 1, query: event.location}.to_query}", target: '_blank') %>)
-        </dd>
+        <dd><%= evtshelp_location(event) %></dd>
       <% end %>
 
       <% if event.number_of_seats > 0 %>

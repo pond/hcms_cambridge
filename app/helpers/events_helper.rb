@@ -35,6 +35,15 @@ module EventsHelper
     )
   end
 
+  # Render the location with a map link.
+  #
+  def evtshelp_location(event)
+    link = link_to('map', "https://www.google.com/maps/search/?#{{api: 1, query: event.location}.to_query}", target: '_blank')
+    text = h(event.location)
+
+    "#{text} (#{link})".html_safe()
+  end
+
   def evtshelp_booking_action_title(event)
     if event.state_presales?
       "Reserve seats"

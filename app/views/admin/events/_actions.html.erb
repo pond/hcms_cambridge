@@ -6,8 +6,12 @@
   #   }
 %>
 <td class="admin_actions centre">
-  <%= link_to "View (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
-  <%= evtshelp_seat_state_glyph(event) %>
+  <% if event.revisions.any?(&:published?) %>
+    <%= link_to "View (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
+    <%= evtshelp_seat_state_glyph(event) %>
+  <% else %>
+    &ndash;
+  <% end %>
 </td>
 <td class="admin_actions">
   <%= link_to 'Show', admin_page_event_path(event.page.slug, event.slug) %>

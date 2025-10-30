@@ -99,6 +99,7 @@ en:
         event_hero_image: "Poster photo"
         raw_editor: "Use the low-level HTML editor?"
         body: "Event details"
+        hidden: "Only visible if you have the link to it?"
         location: "Location"
         starts_at: "Start date and time"
         ends_at: "End date and time"
@@ -140,7 +141,7 @@ en:
     event_state:
       presales: "Reservations only (pre-sale)"
       reserver_purchases: "Purchase by reservation holders only"
-      public_purchases: "Open to general public"
+      public_purchases: "Selling to general public"
       archived: "Archived"
       cancelled: "Cancelled"
 
@@ -148,7 +149,7 @@ en:
       start_reserver_purchases: "Ask reservation holders to pay"
       start_public_purchases: "Open up for public purchases"
       archive: "Archive"
-      cancel: "Cancel"
+      cancel: "Cancel event"
 
     on_archive_action:
       keep: "Keep on page as a past event"

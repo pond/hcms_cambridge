@@ -2,7 +2,7 @@
   <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
 
   <details <%= @event.collapse_metadata_in_form? ? '' : 'open' %>>
-    <summary <%= @event.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit event attributes</summary>
+    <summary <%= @event.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit other attributes</summary>
 
     <div class="two_column" <%= @event.collapse_metadata_in_form? ? 'style="margin-top: 1em"'.html_safe : '' %>>
       <div class="field_column">
@@ -74,28 +74,25 @@
           <% end %>
         </div>
 
-        <div class="field">
-          <%= apphelp_label(f, :state) %>
-          <% if f.object.new_record? %>
-            <%= f.collection_select :state, ::EventState.types, :internal_name, :human_name %>
-          <% else %>
-            <%=
-              f.collection_select(
-                :state,
-                [::EventState.new(f.object.state)],
-                :internal_name,
-                :human_name,
-                {},
-                disabled: true
-              )
+        <% if f.object.new_record? %>
+          <div class="field">
+            <%
+              presales = ::EventState.new(Event.states[:presales])
+              normal   = ::EventState.new(Event.states[:public_purchases])
+
+              [presales, normal].each do | radio_state |
             %>
-            <br>
-            <small><em>
-              To change the state of the event, use the action buttons at the
-              top of the page. <strong>If you made any other changes here,
-              publish (save) them first or they'll be lost.</strong>
-            </em></small>
-          <% end %>
+              <%= f.label "state_#{radio_state.internal_name}" do %>
+                <%= f.radio_button :state, radio_state.internal_name %> <%= radio_state.human_name %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="field">
+          <div class="checkbox">
+            <%= f.check_box :hidden %> <%= f.label :hidden %>
+          </div>
         </div>
 
         <div class="field">
@@ -128,7 +125,6 @@
       </div>
     </div>
 
-
     <div class="field">
       <div class="checkbox">
         <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
@@ -158,8 +154,8 @@
   <%= f.error_markup_for(:body) %>
 
   <div class="actions with_note">
-    <%= f.button 'Save draft', name: 'submit' %>
     <%= f.button 'Publish event', name: 'publish', value: true %>
+    <%= f.button 'Save draft', name: 'submit' %>
     <div class="note">
       Only the title, summary and event detail text save into revisions.
       <strong><em>All other changes</em> always save permanently.</strong>
