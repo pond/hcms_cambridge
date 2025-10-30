@@ -7,7 +7,7 @@
 %>
 <td class="admin_actions centre">
   <% if event.revisions.any?(&:published?) %>
-    <%= link_to "View (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
+    <%= link_to "Orders (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
     <%= evtshelp_seat_state_glyph(event) %>
   <% else %>
     &ndash;
