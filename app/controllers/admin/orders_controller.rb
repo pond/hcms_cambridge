@@ -19,6 +19,7 @@ class Admin::OrdersController < ApplicationController
 
     # GET /admin/pages/<page_id>/events/<event_id>/orders/new
     def new
+      @order = Order.new(event: @event)
     end
 
     # GET /admin/pages/<page_id>/events/<event_id>/orders/edit/<id>

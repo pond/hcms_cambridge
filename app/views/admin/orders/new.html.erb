@@ -1,0 +1,9 @@
+<h1>Manually add order</h1>
+
+<%= render partial: 'form', locals: { order: @order, button_text: 'Add order' } %>
+
+<% content_for :extra_footer_links do %>
+  <div class="extra_footer_links">
+    <%= link_to 'Back', :back %>
+  </div>
+<% end %>
