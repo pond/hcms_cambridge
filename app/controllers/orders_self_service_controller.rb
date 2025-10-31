@@ -84,7 +84,7 @@ class OrdersSelfServiceController < ApplicationController
         display_name:     Hcms.config.site_name,
         logo:  {
           type: 'url',
-          url:  helpers.image_url('logo'),
+          url:  helpers.image_url('logo.svg'),
         }
       }
 
