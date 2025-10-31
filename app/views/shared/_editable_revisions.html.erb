@@ -8,6 +8,7 @@
 %>
 
 <% if user_signed_in? %>
+  <%= javascript_include_tag 'admin' %>
   <%
     displayed_index = editable.revisions.index(editable.displayed_revision)
     newer_revisions = editable.revisions.first(displayed_index)
@@ -69,7 +70,12 @@
         end
       %>
       <% if share_link.present? %>
-        <button class="share_link" onclick="navigator.clipboard.writeText('<%= j(share_link) %>');"><i class="fa fa-copy"></i></button>
+        <%=
+          button_tag(
+            class: 'copy_from_data',
+            data:  { text: share_link }
+          ) do
+        %><i class="fa fa-copy"></i><% end %>
       <% end %>
     <% end %>
   <% end %>

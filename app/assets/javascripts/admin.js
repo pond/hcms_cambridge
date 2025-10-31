@@ -74,6 +74,31 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
+  // Copy buttons
+  // ===========================================================================
+  //
+  const copyFromDataButton = $('button.copy_from_data[data-text]');
+
+  if (copyFromDataButton.length > 0) {
+    copyFromDataButton.on('click', function(e) {
+      text = copyFromDataButton.data('text');
+      navigator.clipboard.writeText(text);
+
+      icon = copyFromDataButton.children('i.fa');
+      icon.removeClass('fa-copy');
+      icon.addClass('fa-check');
+
+      window.setTimeout(
+        function() {
+          icon.removeClass('fa-check');
+          icon.addClass('fa-copy');
+        },
+        2000
+      );
+    });
+  }
+
+  // ===========================================================================
   // For ad-hoc order changes, calculate price based on number of seats
   // ===========================================================================
   //
