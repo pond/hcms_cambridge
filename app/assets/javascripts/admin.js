@@ -77,14 +77,16 @@ $(document).ready(function() {
   // Copy buttons
   // ===========================================================================
   //
-  const copyFromDataButton = $('button.copy_from_data[data-text]');
+  const copyFromDataButtons = $('button.copy_from_data[data-text]');
 
-  if (copyFromDataButton.length > 0) {
-    copyFromDataButton.on('click', function(e) {
-      text = copyFromDataButton.data('text');
+  if (copyFromDataButtons.length > 0) {
+    copyFromDataButtons.on('click', function(e) {
+      const targetButton = $(this);
+
+      text = targetButton.data('text');
       navigator.clipboard.writeText(text);
 
-      icon = copyFromDataButton.children('i.fa');
+      icon = targetButton.find('i.fa');
       icon.removeClass('fa-copy');
       icon.addClass('fa-check');
 

@@ -59,7 +59,7 @@ class Admin::OrdersController < ApplicationController
         if @order.amount_owed.zero?
           @order.pay_state!
         elsif @event.state_presales?
-          @order.reserved_state!
+          @order.reserve_state!
         end
 
         redirect_to(
