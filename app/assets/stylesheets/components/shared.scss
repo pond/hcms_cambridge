@@ -94,10 +94,12 @@ form div.field div.checkbox {
 }
 
 div.row-wide-column-small-container {
+  @include standard_shadow;
+
   border: 1px solid $head_foot_border_colour;
   background: $head_foot_background;
-  border-radius: 5px;
-  padding: 0.5em;
+  border-radius: 10px;
+  padding: 10px 20px;
   margin-bottom: 1em;
 }
 
@@ -155,15 +157,49 @@ input[type="number"] {
   width: 5em;
 }
 
-input[type="file"]::-webkit-file-upload-button,
-input[type="submit"],
-button[name="submit"],
-button[name="publish"] {
-  font-size: 12pt;
-  border: 1px solid #aaaaaa;
-  border-radius: 4px;
+input[type="file"] {
+  border: none;
+  padding: 0;
+}
+
+              button:not(.bold_button),
+input[type='submit']:not(.bold_button),
+input[type="file"]::-webkit-file-upload-button {
+  font-size: 14pt;
+  border-radius: 5px;
+  border: 1px solid #888;
+  background-image: linear-gradient(to top, #eee 0%, #fff 100%);
   padding: 5px 10px;
-  background-image: linear-gradient(to top, #d0d0d0 0%, #f0f0f0 100%)
+
+  &:hover {
+    background: #ddd;
+  }
+}
+
+button {
+  &.confirm {
+    box-shadow: 0 0 3px #8f8;
+  }
+
+  &.cancel {
+    box-shadow: 0 0 3px #f88;
+  }
+
+  &[name="publish"] {
+    box-shadow: 0 0 5px 0 green;
+  }
+
+  &[name="submit"] {
+    box-shadow: 0 0 5px 0 orange;
+  }
+}
+
+tr.children input[type="submit"] {
+  background-image: linear-gradient(to top, #bdb 0%, #cec 100%);
+
+  &:hover {
+    background: #aca;
+  }
 }
 
 a.disabled {
@@ -192,14 +228,6 @@ div.actions {
       }
     }
   }
-}
-
-button[name="publish"] {
-  box-shadow: 0 0 5px 0 green;
-}
-
-button[name="submit"] {
-  box-shadow: 0 0 5px 0 orange;
 }
 
 .field_with_errors {

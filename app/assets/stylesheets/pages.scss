@@ -12,30 +12,6 @@ body {
   white-space: normal;
 }
 
-              button:not(.bold_button),
-input[type='submit']:not(.bold_button) {
-  font-size: 14pt;
-  background: white;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  -o-border-radius: 4px;
-  border-radius: 4px;
-  border: 1px solid #888;
-}
-
-              button:not(.bold_button):hover,
-input[type='submit']:not(.bold_button):hover {
-  background: #ddd;
-}
-
-button.confirm {
-  box-shadow: 0 0 3px #8f8;
-}
-
-button.cancel {
-  box-shadow: 0 0 3px #f88;
-}
-
 section.main_content table {
   border-collapse: collapse;
   width: 100%;
