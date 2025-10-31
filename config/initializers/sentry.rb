@@ -25,7 +25,23 @@ if ENV['SENTRY_DSN'].present?
     filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
 
     config.before_send = lambda do |event, hint|
-      filter.filter(event.to_hash)
+      if event.extra
+        event.extra = filter.filter(event.extra)
+      end
+
+      if event.user
+        event.user = filter.filter(event.user)
+      end
+
+      if event.contexts
+        event.contexts = filter.filter(event.contexts)
+      end
+
+      if hint[:exception].is_a?(ActiveRecord::ConnectionNotEstablished)
+        event.fingerprint = ["database-unavailable"]
+      end
+
+      event
     end
   end
 else
