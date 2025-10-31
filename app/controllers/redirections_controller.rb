@@ -30,13 +30,13 @@ class RedirectionsController < ApplicationController
   })
 
   # Used internally by the no-page-impression ignore system for configurable
-  # mappings in 'config.yml', mapping config sections to Ruby string methods.
+  # mappings in 'hcms.yml', mapping config sections to Ruby string methods.
   #
   STATS_IGNORE_METHODS = {
     'match_exactly'  => :eql?,
     'starts_with'    => :start_with?,
     'found_anywhere' => :include?
-  }
+  }.with_indifferent_access()
 
   def show
     self.populate_constants! if BLOG_MAPPINGS.blank?
@@ -168,6 +168,10 @@ class RedirectionsController < ApplicationController
 
       Hcms.config.statistics_ignore.each do |section, list|
         matcher = STATS_IGNORE_METHODS[section]
+
+        if matcher.nil?
+          raise "*"*80+(Hcms.config.inspect)+"*"*80+(Hcms.config.statistics_ignore).inspect+"*"*80+section.inspect+"*"*80
+        end
 
         list.each do | item |
           return true if path.send(matcher, item)
