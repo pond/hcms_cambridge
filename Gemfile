@@ -14,11 +14,11 @@ gem 'ostruct'
 #
 #   https://rubygems.org/gems/sass-rails
 #   https://rubygems.org/gems/coffee-rails
-#   https://rubygems.org/gems/uglifier
+#   https://rubygems.org/gems/terser
 #
 gem 'sass-rails'
 gem 'coffee-rails'
-gem 'uglifier'
+gem 'terser'
 
 # jQuery for JavaScript, SDoc formatted documentation.
 #
