@@ -169,10 +169,6 @@ class RedirectionsController < ApplicationController
       Hcms.config.statistics_ignore.each do |section, list|
         matcher = STATS_IGNORE_METHODS[section]
 
-        if matcher.nil?
-          raise "*"*80+(Hcms.config.inspect)+"*"*80+(Hcms.config.statistics_ignore).inspect+"*"*80+section.inspect+"*"*80
-        end
-
         list.each do | item |
           return true if path.send(matcher, item)
         end
