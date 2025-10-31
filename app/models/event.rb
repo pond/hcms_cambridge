@@ -5,6 +5,8 @@ class Event < Editable
 
   belongs_to :page
   has_many :orders
+  has_many :confirmed_orders, -> { self.confirmed }, class_name: 'Order' # (for eager-loading use only)
+  has_one  :stripe_price, required: false, dependent: :destroy
 
   after_initialize(unless: :persisted?) do
     tz_now = Time.current
@@ -13,6 +15,8 @@ class Event < Editable
     self.ends_at   = tz_now.beginning_of_day + 17.hours
     self.currency  = Hcms.config.currency
   end
+
+  after_commit :stripe_make_inactive, on: :destroy
 
   # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
@@ -158,7 +162,7 @@ class Event < Editable
       return nil
     else
       @provisional_seats_remaining ||= begin
-        orders = Order.inflight.where(event: self)
+        orders = self.orders.inflight
         [0, self.number_of_seats - orders.sum(:number_of_seats)].max()
       end
     end
@@ -173,10 +177,47 @@ class Event < Editable
     if self.unrestricted_seating?
       return nil
     else
-      @confirmed_seats_remaining ||= begin
-        orders = Order.confirmed.where(event: self)
-        self.number_of_seats - orders.sum(:number_of_seats)
+      @confirmed_seats_remaining ||= self.number_of_seats - self.confirmed_seats_taken
+    end
+  end
+
+  # Opposite of #confirmed_seats_remaining, giving the number of seats taken.
+  #
+  def confirmed_seats_taken
+    if self.unrestricted_seating?
+      return nil
+    else
+      @confirmed_seats_taken ||= self.confirmed_orders.sum(&:number_of_seats)
+    end
+  end
+
+  def get_or_create_stripe_price(with_event_url:)
+    return self.stripe_price || begin
+      product_image_url = if self.event_hero_image.class.storage == CarrierWave::Storage::File
+        'https://upload.wikimedia.org/wikipedia/commons/1/15/Hieronymus_Bosch_-_Allegory_of_Gluttony_and_Lust_-_WGA02558.jpg'
+      else
+        self.event_hero_image.url
       end
+
+      product_result = Stripe::Product.create(
+        name:        self.title,
+        description: ApplicationController.helpers.evtshelp_datetime(self),
+        images:      [product_image_url],
+        shippable:   false,
+        unit_label:  'seat',
+        url:         with_event_url,
+      )
+
+      price_result = Stripe::Price.create(
+        currency:     self.currency,
+        unit_amount:  self.price_per_seat,
+        product:      product_result.id
+      )
+
+      StripePrice.create!(
+        event:           self,
+        stripe_price_id: price_result.id,
+      )
     end
   end
 
@@ -207,11 +248,11 @@ class Event < Editable
       transitions from: [:presales, :reserver_purchases], to: :public_purchases
     end
 
-    event :archive do
+    event :archive, after_commit: :stripe_make_inactive do
       transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_ended?
     end
 
-    event :cancel, after_commit: :update_orders_for_cancellation do
+    event :cancel, after_commit: [:update_orders_for_cancellation, :stripe_make_inactive] do
       transitions from: [:presales, :reserver_purchases, :public_purchases], to: :cancelled
     end
   end
@@ -317,4 +358,18 @@ class Event < Editable
       end
     end
   end
+
+  # An event is archived or cancelled; update Stripe accordingly. This handler
+  # is also called after-commit-on-destroy.
+  #
+  def stripe_make_inactive
+    if self.stripe_price
+      price   = Stripe::Price.retrieve(self.stripe_price.stripe_price_id)
+      product = Stripe::Product.retrieve(price.product)
+
+      Stripe::Product.update(product.id, {active: false})
+      Stripe::Price.update(price.id, {active: false})
+    end
+  end
+
 end

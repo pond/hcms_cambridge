@@ -1,0 +1,26 @@
+<h1>Problematic order alert</h1>
+
+<p>
+  An order is in an unexpected state. Usually, this means payment <em>has</em>
+  been made, but an unrecoverable error was then encountered when trying to
+  update the order's state inside the web site.
+</p>
+
+<p>
+  Please reconcile payment records against order entries in the admin interface
+  <%= link_to('here', @admin_url) %>.
+<p>
+
+<dl>
+  <dt>Event</dt>
+  <dd><%= @order.event&.title || 'Unknown' %></dd>
+
+  <dt>From</dt>
+  <dd><%= @order.name.presence || 'Unknown' %></dd>
+
+  <dt>E-mail address</dt>
+  <dd><%= link_to(@email, "mailto:#{@email}") %></dd>
+
+  <dt>Phone number</dt>
+  <dd><%= @order.phone_number.present? ? link_to(@order.phone_number, "tel:#{@order.phone_number}") : 'Not given' %></dd>
+</dl>

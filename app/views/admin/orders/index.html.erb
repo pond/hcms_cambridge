@@ -16,6 +16,7 @@
       <% elsif @event.confirmed_seats_remaining.zero? %>
         <strong>sold out</strong>
       <% else %>
+        <%= @event.confirmed_seats_taken %> taken,
         <%= @event.confirmed_seats_remaining %> remaining
       <% end %>
       <%= evtshelp_seat_state_glyph(@event) %>

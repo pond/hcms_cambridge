@@ -1,3 +1,6 @@
+# Handles 'magic links' in e-mails but is also used for e.g. the checkout flow
+# when a new order is valid, saved, and goes directly to payment.
+#
 class OrdersSelfServiceController < ApplicationController
   layout 'events'
 
@@ -9,72 +12,128 @@ class OrdersSelfServiceController < ApplicationController
   def update
     event = params[:event] if params[:process] == 'state'
 
-    case event
-      when 'cancel'
-        @order.cancel_state!
-        redirect_to(
-          page_event_path(page_id: @page.slug, id: @event.slug),
-          notice: "OK, that's cancelled."
+    # Params for a given state should only happen if the state is valid, but we
+    # do have to account for race conditions if Events change "under our feet",
+    # stale pages, hacking attempts and so-on.
+
+    # User has elected to cancel their order 🥺
+    #
+    if event == 'cancel'
+      @order.cancel_state!
+      redirect_to(
+        page_event_path(page_id: @page.slug, id: @event.slug),
+        notice: "OK, that's cancelled."
+      )
+
+    # * Order reserves a seat, event is accepting payments for reservations.
+    #
+    # * Any path which leads to general payments being possible, including
+    #   a reservation-purchase-only order with some unclaimed reservations
+    #   going to public-sales and thus some order states resetting to 'new'.
+    #
+    # We intentionally redirect out to gateway-hosted payment pages, as we
+    # consider those to be the more 'trusted brand' when it comes to things
+    # like entering a credit card number, rather than e.g. embedding as an
+    # iframe. We of course don't accept the card number directly, as that
+    # incurs significant PCI compliance obligations.
+    #
+    elsif event == 'pay'
+
+      # First deal with the unhappy path, then the payment flow.
+      #
+      unless @order.customer_can_pay_for_reservation? || @order.customer_can_pay_for_booking?
+        Sentry.capture_message(
+          "Tried to pay but states indicate this is not possible - order ID #{@order.id}",
+          level: :error,
+          extra: {
+            controller: controller_name,
+            action: action_name,
+          },
+          tags: {
+            page: "#{controller_name}##{action_name}",
+            path: request.path
+          }
         )
 
-      when 'pay'
-        #
-        # Order reserves a seat, event is accepting payments for reservations.
-        #
-        if @order.can_pay_for_reservation?
-          redirect_to(
-            edit_page_event_order_path(
-              page_id:  @order.event.page.slug,
-              event_id: @order.event.slug,
-              id:       @order.id
-            )
-          )
+        redirect_to(
+          page_event_path(page_id: @page.slug, id: @event.slug),
+          notice: "Sorry, this event isn't accepting payments anymore."
+        )
 
-        # Should only be possible for orders which had reserved a seat, but
-        # then the event event went public and the order states were reset to
-        # "new". Normally, orders in a "new" state for events accepting public
-        # purchases go straight through to payment.
-        #
-        elsif @order.can_pay_for_booking?
-          redirect_to(
-            edit_page_event_order_path(
-              page_id:  @order.event.page.slug,
-              event_id: @order.event.slug,
-              id:       @order.id
-            )
-          )
+        return # NOTE EARLY EXIT
+      end
 
-        # Shouldn't be here!
-        #
-        else
-          Sentry.capture_message(
-            "Tried to pay but states indicate this is not possible - order ID #{@order.id}",
-            level: :error,
-            extra: {
-              controller: controller_name,
-              action: action_name,
-            },
-            tags: {
-              page: "#{controller_name}##{action_name}",
-              path: request.path
-            }
-          )
+      # Edge case - "paying" for a free item. Just say, "booking confirmed".
+      #
+      if @order.amount_owed.zero?
+        @order.paid_state!
+        redirect_to(
+          page_event_path(page_id: @page.slug, id: @event.slug),
+          notice: 'Thanks, your booing is confirmed! We look forward to seeing you there.'
+        )
 
-          redirect_to(
-            page_event_path(page_id: @page.slug, id: @event.slug),
-            notice: "Sorry, this event isn't accepting payments anymore."
-          )
-        end
+        return # NOTE EARLY EXIT
+      end
 
-      else
-        raise "Unsupported parameters - #{params[:event].inspect} / #{params[:process].inspect}"
+      stripe_price = @order.event.get_or_create_stripe_price(
+        with_event_url: page_event_url(page_id: @order.event.page.slug, id: @order.event.slug)
+      )
+
+      branding_settings = {
+        background_color: (Hcms.config.stripe[:checkout_background] rescue '#ffffff'),
+        display_name:     Hcms.config.site_name,
+        logo:  {
+          type: 'url',
+          url:  helpers.image_url('logo'),
+        }
+      }
+
+      invoice_data = {
+        description: @order.event.title,
+        footer:      [Hcms.config.site_name, Hcms.config.orders_email].reject(&:blank?).join(' / '),
+      }
+
+      base_success_url      = stripe_payment_succeeded_url(order_id: @order.id, token: @order.token)
+      base_cancel_url       = stripe_payment_cancelled_url(order_id: @order.id, token: @order.token)
+      templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
+      templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
+
+      session = Stripe::Checkout::Session.create(
+        mode:              'payment',
+        success_url:       templated_success_url,
+        cancel_url:        templated_cancel_url,
+        customer_email:    @order.email,
+        branding_settings: branding_settings,
+        invoice_creation:  {
+          enabled:      true,
+          invoice_data: invoice_data,
+        },
+        line_items:  [
+          {
+            price:    stripe_price.stripe_price_id,
+            quantity: @order.number_of_seats,
+          }
+        ],
+      )
+
+      redirect_to(session.url, status: :see_other, allow_other_host: true) # (HTTP 303)
+
+    else
+      raise "Unsupported parameters - #{params[:event].inspect} / #{params[:process].inspect}"
     end
-  rescue => e
+
+  rescue Stripe::StripeError => e
+    Sentry.capture_exception(e, extra: { order_id: @order&.id })
+
+    flash[:alert] = 'There was a problem trying to talk to the payment provider. Please wait a moment, then try again. If problems persist, please get in touch!'
+    render :edit
+
+  rescue StandardError => e
     Sentry.capture_exception(e)
 
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
-      notice: 'Sorry, there was an unexpected problem trying to update that order! Please try again later.'
+      alert: 'Sorry, there was an unexpected problem trying to update that order! Please try again later.'
     )
   end
 
@@ -92,6 +151,71 @@ class OrdersSelfServiceController < ApplicationController
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
       notice: "OK, that's cancelled."
+    )
+  end
+
+  # A non-RESTful GET endpoint, nested by page and event ID or slug, and order
+  # ID. Stripe redirects here when payment succeeds including the session ID
+  # via a template variable in the URL we gave them. See the payment flow in
+  # #update for more.
+  #
+  def stripe_payment_succeeded
+    ActiveRecord::Base.transaction do
+      locked_order = Order.lock.find(@order.id)
+
+      if locked_order.valid?
+        locked_order.pay_state!
+      else # Never expected - *THIS IS SERIOUS* as payment has been taken.
+        Sentry.capture_message(
+          "URGENT: Payment made but website-side order update failed (#{@order&.id} / #{@order&.email} / #{@order&.name})",
+          level: :error,
+          extra: {
+            controller:  controller_name,
+            action:      action_name,
+            order_id:    @order&.id,
+            order_name:  @order&.name,
+            order_email: @order&.email,
+          },
+          tags: {
+            page: "#{controller_name}##{action_name}",
+            path: request.path
+          }
+        )
+
+        Admin::AdminMailer.problematic_order_email(@order).deliver_now()
+        return
+      end
+
+      # Try to get the payment details for our-side refund, but this isn't
+      # critical so we do it outside the above transaction and lock.
+      #
+      begin
+        session = Stripe::Checkout::Session.retrieve(params[:csid])
+        StripePayment.create!(
+          order:                 @order,
+          stripe_payment_intent: session.payment_intent
+        )
+      rescue Stripe::StripeError => e
+        Sentry.capture_exception(e, extra: { order_id: @order&.id })
+      end
+    end
+
+    # Success or not, *do not panic the user!* - there is nothing they can do.
+    # We have to hope our monitoring and alerting worked OK so that if there
+    # was a problem, it can be manually resolved.
+    #
+    redirect_to(
+      page_event_path(page_id: @page.slug, id: @event.slug),
+      notice: 'Thanks, your booing is confirmed! We look forward to seeing you there.'
+    )
+  end
+
+  # As above, but for Stripe-side cancellations.
+  #
+  def stripe_payment_cancelled
+    redirect_to(
+      manage_order_path(order_id: @order.id, token: @order.token),
+      notice: "Please confirm cancellation by using the 'cancel' button below, or retry with the 'pay now' button."
     )
   end
 

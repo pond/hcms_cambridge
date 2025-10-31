@@ -35,7 +35,7 @@ class Admin::EventsController < ApplicationController
     def index
       @events = Event
         .where(page_id: @page.id)
-        .includes(:orders)
+        .includes(:revisions, :orders, :confirmed_orders)
     end
 
     # GET /admin/pages/<page_id>/events/<id>
@@ -53,7 +53,7 @@ class Admin::EventsController < ApplicationController
     # POST /admin/pages/<page_id>/events
     def create
       handle_form_submission(
-        event:           @event,
+        event:             @event,
         render_on_fail:    :new,
         draft_message:     'New draft event created.',
         published_message: 'New event published.'
@@ -98,7 +98,7 @@ class Admin::EventsController < ApplicationController
 
         else
           handle_form_submission(
-            event:           @event,
+            event:             @event,
             render_on_fail:    :edit,
             draft_message:     'Changes saved as draft.',
             published_message: 'Event changes published.'

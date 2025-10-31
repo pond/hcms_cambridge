@@ -113,6 +113,7 @@ en:
         email: "E-mail address"
         number_of_seats: "Number of seats"
         notes: "Any other notes?"
+        amount_owed: "Total price"
 
       page:
         title: "Page title"
@@ -196,5 +197,5 @@ en:
           one: "Please confirm your reservation of one seat at “%{event_title}”."
           other: "Please confirm your reservation of %{count} seats at “%{event_title}”."
         booking:
-          one: "Please enter payment details for your booking for one seat at “%{event_title}”."
-          other: "Please enter payment details for your booking for %{count} seats at “%{event_title}”."
+          one: "Please check the details of your booking for one seat at “%{event_title}”."
+          other: "Please check the details of your booking for %{count} seats at “%{event_title}”."

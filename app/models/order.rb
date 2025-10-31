@@ -4,6 +4,7 @@ class Order < ApplicationRecord
   has_secure_token()
 
   belongs_to :event
+  has_one :stripe_payment, required: false, dependent: :destroy
 
   # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
@@ -183,7 +184,7 @@ class Order < ApplicationRecord
 
   def customer_can_pay_for_reservation?
     ! self.event.has_started? &&
-    self.state_reserved? &&
+    (self.state_reserved? || self.state_payment_failed?) &&
     (
       self.event.state_reserver_purchases? ||
       self.event.state_public_purchases?
@@ -194,7 +195,7 @@ class Order < ApplicationRecord
     self.customer_can_pay_for_reservation? ||
     (
       ! self.event.has_started? &&
-      self.state_new? &&
+      (self.state_new? || self.state_payment_failed?) &&
       self.event.state_public_purchases?
     )
   end
@@ -216,7 +217,7 @@ class Order < ApplicationRecord
     end
 
     event :pay, after_commit: :notify_is_paid do
-      transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :payment_makes_sense?
+      transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :paid_state_makes_sense?
     end
 
     event :payment_failed, after_commit: :notify_payment_failed do
@@ -231,7 +232,7 @@ class Order < ApplicationRecord
       transitions from: :paid, to: :refunded
     end
 
-    event :force_refund, after_commit: :refund_and_notify_is_refunded, guard: :no_refunds_window_exists? do
+    event :force_refund, after_commit: :refund_and_notify_is_refunded, guard: :inside_no_refunds_window? do
       transitions from: :paid, to: :refunded
     end
   end
@@ -250,22 +251,29 @@ class Order < ApplicationRecord
   # AASM STATE MACHINE namespace 'state': Guards
   # ============================================================================
 
-  def payment_makes_sense? # (AASM guard)
-    self.event&.free_of_charge? == false
+  # A "paid" state is entered immediately if amount-owed is zero, so that's not
+  # the condition for a guard - only the event-vs-order states matter.
+  #
+  def paid_state_makes_sense? # (AASM guard)
+    self.event.present? && (
+      self.customer_can_pay_for_reservation? ||
+      self.customer_can_pay_for_booking?
+    )
   end
 
   def reservation_makes_sense? # (AASM guard)
-    self.event&.state_presales? == true
+    self.event.present? &&
+    self.event.state_presales? &&
+    ! self.event.has_started?
   end
 
   def outside_no_refunds_window?
     Hcms.config.no_refunds_window.zero? ||
-    Time.current < (self.event.starts_at - Hcms.no_refunds_window.days)
+    Time.current < (self.event.starts_at - Hcms.config.no_refunds_window.days)
   end
 
   def inside_no_refunds_window?
-    ! Hcms.config.no_refunds_window.zero? &&
-    Time.current >= (self.event.starts_at - Hcms.no_refunds_window.days)
+    ! self.outside_no_refunds_window?
   end
 
   # ============================================================================

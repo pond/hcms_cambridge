@@ -7,8 +7,8 @@
     model:   order,
     builder: FormBuilderWithInlineErrors,
     url:     order.new_record? ?
-             page_event_orders_path(page_id: order.event.page.slug, event_id: order.event.slug) :
-             page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug)
+             admin_page_event_orders_path(page_id: order.event.page.slug, event_id: order.event.slug) :
+             admin_page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id)
   ) do | f |
 %>
   <p>
@@ -30,14 +30,36 @@
     at <strong><%= evtshelp_price(order.event) %></strong> per seat <small>(<%= order.event.currency %>)</small>
   </p>
 
-  <h1>Optional cost override here!</h1>
+  <p>
+    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount") %>
+    <%= Money::Currency.new(Hcms.config.currency).symbol %>
+    <%= hidden_field_tag(:price_per_seat_cents,    f.object.event.price_per_seat.to_s) %>
+    <%= hidden_field_tag(:price_per_seat_currency, f.object.event.currency) %>
+    <%=
+      parsed_amount = Money.from_cents(
+        f.object.amount_owed,
+        @event.currency
+      )
 
-  <% unless Hcms.config.hide_order_notes %>
-    <p>
-      <%= apphelp_label(f, :notes) %>
-      <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes, questions etc.' %>
-    </p>
-  <% end %>
+      f.text_field(
+        :amount_owed,
+        value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+        style: 'width: 5em;'
+      )
+    %>
+    <small><%= Hcms.config.currency %></small>
+    <br>
+    <small><em>
+      The customer will be notified of the order details automatically, but
+      payment must be manually requested (e.g. by separately e-mailing them a
+      one-off Stripe payment link or bank transfer details).
+    </em></small>
+  </p>
+
+  <p>
+    <%= apphelp_label(f, :notes, hint: 'the customer will be able to see these') %>
+    <%= f.text_area :notes, rows: 3, cols: 80 %>
+  </p>
 
   <p>
     <%= submit_tag(button_text, class: 'bold_button') %>

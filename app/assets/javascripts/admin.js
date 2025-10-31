@@ -12,9 +12,12 @@
 //= require redactor_config.js
 
 $(document).ready(function() {
+
+  // ===========================================================================
+  // Handle changes of Page type
+  // ===========================================================================
+  //
   const pageTypeSelector = $('#page_page_type');
-  const eventOnArchiveSelector = $('#event_on_archive_action');
-  const buttonsWithConfirmsSelector = $('button[data-confirm]');
 
   if (pageTypeSelector.length > 0) {
     function setVisibilities() {
@@ -46,6 +49,12 @@ $(document).ready(function() {
     });
   }
 
+  // ===========================================================================
+  // Handle changes of "on archive" action for Events
+  // ===========================================================================
+  //
+  const eventOnArchiveSelector = $('#event_on_archive_action');
+
   if (eventOnArchiveSelector.length > 0) {
     function setVisibilities() {
       var selectedOnArchiveAction = eventOnArchiveSelector.children("option:selected").val();
@@ -64,13 +73,48 @@ $(document).ready(function() {
     });
   }
 
-  buttonsWithConfirmsSelector.on('click', function(e) {
-    var warning = $(this).data('confirm');
+  // ===========================================================================
+  // For ad-hoc order changes, calculate price based on number of seats
+  // ===========================================================================
+  //
+  const pricePerSeatCentsHidden = $('#price_per_seat_cents');
 
-    if (!confirm(warning)) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  });
+  if (pricePerSeatCentsHidden.length > 0) {
+    const pricePerSeatCents   = parseInt(pricePerSeatCentsHidden.val());
+    const currency            = $('#price_per_seat_currency').val();
+    const numberOfSeatsInput  = $('#order_number_of_seats');
+    const amountOwedInput     = $('#order_amount_owed');
+    var   manualInputDetected = false;
+
+    const formatter = new Intl.NumberFormat(
+      navigator.language, {
+        style:               'currency',
+        currency:            currency,
+        currencyDisplay:     'code',
+        trailingZeroDisplay: 'stripIfInteger',
+      }
+    );
+
+    amountOwedInput.on('input', function(e) {
+      manualInputDetected = (amountOwedInput.val().trim().length > 0);
+    });
+
+    numberOfSeatsInput.on('input', function(e) {
+      if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
+        const inputAmount = numberOfSeatsInput.val();
+
+        if (numberOfSeatsInput.val().length > 0) {
+          const numberOfSeats   = parseInt(inputAmount);
+          const amountOwedCents = numberOfSeats * pricePerSeatCents;
+
+          formatted = formatter.format(amountOwedCents / 100);
+          formatted = formatted.replace(currency, '').trim();
+
+          amountOwedInput.val(formatted);
+        } else {
+          amountOwedInput.val('');
+        }
+      }
+    });
+  }
 });

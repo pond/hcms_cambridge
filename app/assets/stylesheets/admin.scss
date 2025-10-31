@@ -146,14 +146,20 @@ main.admin {
     tr.children.even { background: rgb( 220, 255, 220 ); }
     tr.children.odd  { background: rgb( 220, 245, 220 ); }
 
-    tr.event-state-archived td#event-title,
-    tr.event-state-archived td#event-starts-at {
+    tr.event-state-archived td.event-title,
+    tr.event-state-archived td.event-starts-at {
       color: #888;
     }
 
-    tr.event-state-cancelled td#event-title,
-    tr.event-state-cancelled td#event-starts-at {
+    tr.event-state-cancelled td.event-title,
+    tr.event-state-cancelled td.event-starts-at {
       text-decoration: line-through;
+    }
+
+    td.event-title div.event-state {
+      margin-top: 2px;
+      font-size: 70%;
+      color: #888;
     }
   }
 

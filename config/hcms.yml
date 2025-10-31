@@ -24,6 +24,11 @@ default: &default
   twitter:           '' # 'https://x.com/WineSentience/'
   instagram:         'https://www.instagram.com/winesentience/'
 
+  # If supporting paid orders via Stripe, this configuration section applies.
+  #
+  stripe:
+    checkout_background: '#f5f5ef'
+
   # Custom redirections go here, for cases where a site has been migrated; blog
   # articles first (requested path base -> blog page's slug) - this tries to then
   # match the *last* part of the requested path against an article's slug -

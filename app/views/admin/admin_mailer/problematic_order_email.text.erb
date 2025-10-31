@@ -1,0 +1,15 @@
+PROBLEMATIC ORDER ALERT
+=======================
+
+An order is in an unexpected state. Usually, this means payment *has* been
+made, but an unrecoverable error was then encountered when trying to update
+the order's state inside the web site.
+
+Please reconcile payment records against order entries in the admin interface:
+
+* <%= @admin_url %>
+
+Event:          <%= @order.event&.title || 'Unknown' %>
+From:           <%= @order.name.presence || 'Unknown' %>
+E-mail address: <%= @email %>
+Phone number:   <%= @order.phone_number.presence || 'Not given' %>

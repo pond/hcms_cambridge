@@ -6,17 +6,22 @@ Rails.application.routes.draw do
   resources :pages, only: :show do
     resources :articles, only: :show
     resources :events, only: :show do
-      resources :orders do
+      resources :orders, except: [:edit, :update] do
         member do
           post :confirm_reservation
-          post :checkout
         end
       end
     end
   end
 
-  get   'manage_order/:order_id/:token', controller: :orders_self_service, action: :edit, as: :manage_order
-  patch 'manage_order/:order_id/:token', controller: :orders_self_service, action: :update
+  scope 'manage_order/:order_id/:token', controller: :orders_self_service do
+    get   '/', action: :edit, as: :manage_order
+    patch '/', action: :update
+    get   '/stripe_payment_succeeded', action: :stripe_payment_succeeded, as: :stripe_payment_succeeded
+    get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_payment_cancelled
+  end
+
+  post 'webhooks/stripe', controller: 'webhooks/stripe', action: :webhook
 
   resources :by_titles, only: :show
   post '/user_mails/:page_id', to: 'user_emails#create', as: :user_emails

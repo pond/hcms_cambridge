@@ -52,4 +52,21 @@ module OrdersHelper
       return html
     end
   end
+
+  # Generates a button title for the given order and the given event, with a
+  # specialisation for refund cases. Aimed at the admin UI only.
+  #
+  def ordershelp_event_title(order, event)
+    title = t("models.order_state_aasm_events.#{event.name}", default: event.name.to_s.titleize)
+
+    if event.name.ends_with?('refund')
+      if order.stripe_payment.present?
+        title += ' (automatic via Stripe)'
+      else
+        title += ' (process manually)'
+      end
+    end
+
+    title
+  end
 end

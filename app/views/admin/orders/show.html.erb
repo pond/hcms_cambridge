@@ -43,7 +43,6 @@
     </span>
   </div>
 
-
   <div class="row-wide-column-small">
     <% if @order.valid_events.empty? %>
       <span>
@@ -54,7 +53,7 @@
         <% next if event.name == :payment_failed %>
         <%=
           button_to(
-            t("models.order_state_aasm_events.#{event.name}", default: event.name.to_s.titleize),
+            ordershelp_event_title(@order, event),
             admin_page_event_order_path(
               page_id:  @order.event.page.slug,
               event_id: @order.event.slug,

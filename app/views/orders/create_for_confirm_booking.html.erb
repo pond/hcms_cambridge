@@ -6,7 +6,7 @@
     <p>
       <%=
         t(
-          'views.orders.confirm.reservation',
+          'views.orders.confirm.booking',
           count: @order.number_of_seats,
           event_title: @order.event.title
         )
@@ -16,39 +16,37 @@
     <ul>
       <li><%= evtshelp_datetime(@order.event) %></li>
       <li><%= @order.event.location %></li>
+      <li>
+        Confirmation and updates will be sent to you by e-mail at
+        <strong><%= @order.email %></code></strong>
+      </li>
     </ul>
 
-    <% unless @order.event.free_of_charge? %>
-      <p>
-        You don't need to pay anything until closer to the event date.
-      </p>
-
-      <ul>
-        <li>
-          When it's time to pay, an e-mail will be sent to you at
-          <strong><%= @order.email %></code></strong>
-        </li>
-        <li>
-          The amount payable will be
-          <%= @order.number_of_seats %> &times;
-          <%= evtshelp_price(@order.event) %> &equals;
-          <strong><big>
-            <%= apphelp_money(@order.event.price_per_seat * @order.number_of_seats, currency: @order.event.currency) %>
-          </big></strong>
-        </li>
-      </ul>
-    <% end %>
+    <p>
+      The amount payable is
+      <%= @order.number_of_seats %> &times;
+      <%= evtshelp_price(@order.event) %> &equals;
+      <strong><big>
+        <%= apphelp_money(@order.event.price_per_seat * @order.number_of_seats, currency: @order.event.currency) %>
+      </big></strong>
+    </p>
 
     <div class="row-wide-column-small">
       <%=
         button_to(
-          '<strong>Confirm reservation</strong>'.html_safe(),
-          confirm_reservation_page_event_order_path(
-            page_id:  @order.event.page.slug,
-            event_id: @order.event.slug,
-            id:       @order.id
+          '<strong>Pay now</strong>'.html_safe(),
+          manage_order_path(
+            order_id: @order.id,
+            token:    @order.token,
           ),
-          { class: 'bold_button' }
+          {
+            method: :patch,
+            class:  'bold_button',
+            params: {
+              process:  'state',
+              event:    'pay',
+            }
+          }
         )
       %>
 

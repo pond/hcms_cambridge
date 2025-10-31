@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_10_035603) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_31_023455) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -133,6 +133,22 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_10_035603) do
     t.index ["current"], name: "index_revisions_on_current"
     t.index ["published"], name: "index_revisions_on_published"
     t.index ["revisable_type", "revisable_id"], name: "index_revisions_on_revisable"
+  end
+
+  create_table "stripe_payments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "order_id", null: false
+    t.text "stripe_payment_intent", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_stripe_payments_on_order_id"
+  end
+
+  create_table "stripe_prices", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.text "stripe_price_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_stripe_prices_on_event_id"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

@@ -5,10 +5,10 @@
   #     event: Event model instance
   #   }
 %>
-<td class="admin_actions centre">
+<td class="admin_actions">
   <% if event.revisions.any?(&:published?) %>
-    <%= link_to "Orders (#{event.orders.size})", admin_page_event_orders_path(event.page.slug, event.slug) %>
     <%= evtshelp_seat_state_glyph(event) %>
+    <%= evtshelp_admin_orders_link(event) %>
   <% else %>
     &ndash;
   <% end %>

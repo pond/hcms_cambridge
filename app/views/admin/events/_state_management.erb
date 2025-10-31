@@ -41,15 +41,7 @@
 
     <span></span>
 
-    <% if action_name == 'show' %>
-      <%=
-        button_to(
-          'Edit event',
-          edit_admin_page_event_path(event.page, event),
-          { method: :get }
-        )
-      %>
-    <% else %>
+    <% if action_name == 'edit' %>
       <%=
         button_to(
           @event.hidden == true ? 'Make visible to everyone' : "Hide unless you've a link",
@@ -61,16 +53,23 @@
           { method: :patch }
         )
       %>
-      <%=
-        button_to(
-          'Manage orders',
-          admin_page_event_orders_path(
-            page_id:  event.page.slug,
-            event_id: event.slug,
-          ),
-          { method: :get }
-        )
-      %>
     <% end %>
+    <%=
+      button_to(
+        'Edit event',
+        edit_admin_page_event_path(event.page, event),
+        { method: :get }
+      )
+    %>
+    <%=
+      button_to(
+        'Manage orders',
+        admin_page_event_orders_path(
+          page_id:  event.page.slug,
+          event_id: event.slug,
+        ),
+        { method: :get }
+      )
+    %>
   </div>
 </div>

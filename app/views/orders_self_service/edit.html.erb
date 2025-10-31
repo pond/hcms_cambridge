@@ -47,7 +47,7 @@
       <% if @order.may_pay_state? %>
         <%=
           button_to(
-           'Pay now',
+            'Pay now',
             manage_order_path(
               order_id: @order.id,
               token:    @order.token,

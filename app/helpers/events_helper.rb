@@ -70,6 +70,17 @@ module EventsHelper
     end
   end
 
+  def evtshelp_admin_orders_link(event)
+    link = link_to('Orders', admin_page_event_orders_path(event.page.slug, event.slug))
+    confirmed_seat_count = event.confirmed_orders.sum(&:number_of_seats)
+
+    if confirmed_seat_count > 0
+      link = link.concat(" (#{confirmed_seat_count})")
+    end
+
+    link
+  end
+
   def evtshelp_seat_state_glyph(event)
     if event.state_archived? || event.unrestricted_seating?
       ''
@@ -80,7 +91,7 @@ module EventsHelper
     elsif event.confirmed_seats_remaining == event.number_of_seats
       '🟠'
     else
-      ''
+      '👤'
     end
   end
 end

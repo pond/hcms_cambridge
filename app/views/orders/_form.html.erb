@@ -6,9 +6,8 @@
   form_with(
     model:   order,
     builder: FormBuilderWithInlineErrors,
-    url:     order.new_record? ?
-             page_event_orders_path(page_id: order.event.page.slug, event_id: order.event.slug) :
-             page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug)
+    url:     page_event_orders_path(page_id: order.event.page.slug, event_id: order.event.slug),
+    method:  :post
   ) do | f |
 %>
   <p>
@@ -33,7 +32,7 @@
   <% unless Hcms.config.hide_order_notes %>
     <p>
       <%= apphelp_label(f, :notes) %>
-      <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'Optional booking notes, questions etc.' %>
+      <%= f.text_area :notes, rows: 3, cols: 80, placeholder: 'Optional booking notes, questions etc.' %>
     </p>
   <% end %>
 
