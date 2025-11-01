@@ -68,11 +68,11 @@ class RedirectionsController < ApplicationController
     #
     def populate_constants!
       Hcms.config.blog_mappings&.each do | path, blog_page_slug |
-        BLOG_MAPPINGS[path] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
+        BLOG_MAPPINGS[path.to_s] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
       end
 
       Hcms.config.page_mappings&.each do | path, other_page_slug |
-        PAGE_MAPPINGS[path] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
+        PAGE_MAPPINGS[path.to_s] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
       end
     end
 
