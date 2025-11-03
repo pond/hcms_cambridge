@@ -177,9 +177,8 @@ class Order < ApplicationRecord
   end
 
   def customer_self_service_possible?
-    self.event.active? && (
-      self.state_new? || self.state_reserved? || self.state_paid?
-    )
+    self.customer_can_pay_for_reservation? ||
+    self.customer_can_pay_for_booking?
   end
 
   def customer_can_pay_for_reservation?
@@ -220,6 +219,13 @@ class Order < ApplicationRecord
       transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :paid_state_makes_sense?
     end
 
+    # At the time of writing this comment, this state is hypothetical and is
+    # not relevant to off-site (Stripe-hosted) payments, since Stripe handles
+    # payments itself and if they fail, they "fail within" Stripe's UI. We get
+    # a success-or-cancel redirection URI only.
+    #
+    # This is kept here in case of future need.
+    #
     event :payment_failed, after_commit: :notify_payment_failed do
       transitions from: [:new, :reserved], to: :payment_failed
     end
@@ -282,10 +288,12 @@ class Order < ApplicationRecord
 
   def notify_is_reserved
     OrderMailer.order_state_reserved_email(self).deliver_later()
+    Admin::AdminMailer.order_reserved(self).deliver_later()
   end
 
   def notify_is_paid
     OrderMailer.order_state_paid_email(self).deliver_later()
+    Admin::AdminMailer.order_paid(self).deliver_later()
   end
 
   def notify_payment_failed
@@ -294,6 +302,9 @@ class Order < ApplicationRecord
 
   def notify_is_cancelled
     OrderMailer.order_state_cancelled_email(self).deliver_later()
+    unless self.state_previously_was == self.class.states[:new]
+      Admin::AdminMailer.order_cancelled(self).deliver_later()
+    end
   end
 
   def refund_and_notify_is_refunded

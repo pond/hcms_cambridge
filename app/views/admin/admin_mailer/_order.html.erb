@@ -1,0 +1,29 @@
+<dl>
+  <dt>Event</dt>
+  <dd><%= order.event&.title || 'Unknown' %></dd>
+
+  <dt>From</dt>
+  <dd><%= order.name.presence || 'Unknown' %></dd>
+
+  <dt>E-mail address</dt>
+  <dd><%= order.email.present? ? link_to(order.email, "mailto:#{order.email}") : 'Unknown' %></dd>
+
+  <dt>Phone number</dt>
+  <dd><%= order.phone_number.present? ? link_to(order.phone_number, "tel:#{order.phone_number}") : 'Not given' %></dd>
+
+  <dt>Manage</dt>
+  <dd>
+    <% if order.event&.page.blank? %>
+      <%= link_to('Manage order', admin_pages_url()) %>
+    <% else %>
+      <%= link_to('Manage order', admin_page_event_order_url(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id)) %>
+    <% end %>
+  </dd>
+</dl>
+
+<% if order.event&.page.present? %>
+  <p>
+    You can find a list of all orders
+    <%= link_to('here', admin_page_event_orders_url(page_id: order.event.page.slug, event_id: order.event.slug)) %>.
+  </p>
+<% end %>

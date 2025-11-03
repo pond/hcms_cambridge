@@ -9,7 +9,4 @@ Please reconcile payment records against order entries in the admin interface:
 
 * <%= @admin_url %>
 
-Event:          <%= @order.event&.title || 'Unknown' %>
-From:           <%= @order.name.presence || 'Unknown' %>
-E-mail address: <%= @email %>
-Phone number:   <%= @order.phone_number.presence || 'Not given' %>
+<%= render partial: 'order', object: @order %>

@@ -7,20 +7,8 @@
 </p>
 
 <p>
-  Please reconcile payment records against order entries in the admin interface
-  <%= link_to('here', @admin_url) %>.
+  Please reconcile payment records against order entries in the
+  <%= link_to('admin interface', @admin_url) %>.
 <p>
 
-<dl>
-  <dt>Event</dt>
-  <dd><%= @order.event&.title || 'Unknown' %></dd>
-
-  <dt>From</dt>
-  <dd><%= @order.name.presence || 'Unknown' %></dd>
-
-  <dt>E-mail address</dt>
-  <dd><%= link_to(@email, "mailto:#{@email}") %></dd>
-
-  <dt>Phone number</dt>
-  <dd><%= @order.phone_number.present? ? link_to(@order.phone_number, "tel:#{@order.phone_number}") : 'Not given' %></dd>
-</dl>
+<%= render partial: 'order', object: @order %>

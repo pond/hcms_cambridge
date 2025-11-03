@@ -1,4 +1,34 @@
 class Admin::AdminMailer < ApplicationMailer
+  def order_reserved(order)
+    @order = order
+
+    mail(
+      to:      Hcms.config.contact_email,
+      from:    order.email,
+      subject: "[#{Hcms.config.site_name}] New reservation from #{order.name}"
+    )
+  end
+
+  def order_paid(order)
+    @order = order
+
+    mail(
+      to:      Hcms.config.contact_email,
+      from:    order.email,
+      subject: "[#{Hcms.config.site_name}] New paid booking from #{order.name}"
+    )
+  end
+
+  def order_cancelled(order)
+    @order = order
+
+    mail(
+      to:      Hcms.config.contact_email,
+      from:    order.email,
+      subject: "[#{Hcms.config.site_name}] Cancellation from #{order.name}"
+    )
+  end
+
   def problematic_order_email(order)
     @order = order                || Order.new
     @email = order.email.presence || 'unknown@test.com'

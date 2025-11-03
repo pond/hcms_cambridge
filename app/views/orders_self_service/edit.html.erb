@@ -80,9 +80,15 @@
       <% end %>
     <% else %>
       <span>
-        This order is in a finalised state. No further actions are available.
-        <br>
-        For help, please contact us by e-mail at
+        <% if @order.state_paid? %>
+          The booking has been paid for successfully. If you think you need to
+          cancel and request a refund,
+        <% else %>
+          This order is in a finalised state. No further actions are available.
+          <br>
+          For help,
+        <% end %>
+        please contact us by e-mail at
         <%= mail_to(Hcms.config.orders_email) %> or by phone on
         <%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %>.
       </span>
