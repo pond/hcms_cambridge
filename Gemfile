@@ -58,6 +58,12 @@ gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branc
 #
 gem 'mailgun-ruby', '~> 1.3'
 
+# Automated inlining of e-mail styles.
+#
+#   https://rubygems.org/gems/roadie-rails
+#
+gem 'roadie-rails', '~> 3.4'
+
 # Orderable pages.
 #
 #   https://rubygems.org/gems/acts_as_list

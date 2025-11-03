@@ -1,4 +1,6 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: Hcms.config.contact_email
+  include Roadie::Rails::Automatic
+
   layout 'mailer'
+  default from: Hcms.config.contact_email
 end

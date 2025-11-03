@@ -21,7 +21,7 @@ Rails.application.routes.draw do
     get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_payment_cancelled
   end
 
-  post 'webhooks/stripe', controller: 'webhooks/stripe', action: :webhook
+  # post 'webhooks/stripe', controller: 'webhooks/stripe', action: :webhook
 
   resources :by_titles, only: :show
   post '/user_mails/:page_id', to: 'user_emails#create', as: :user_emails
