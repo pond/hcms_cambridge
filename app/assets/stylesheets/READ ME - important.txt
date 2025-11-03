@@ -1,2 +1,0 @@
-When doing style work, don't forget about any potential changes that might
-make sense for the inline styles in "layouts/mailer.html.erb".
