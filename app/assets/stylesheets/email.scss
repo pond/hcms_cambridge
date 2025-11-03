@@ -37,7 +37,8 @@ img#logo {
 @media(max-width: $container_width_narrow) {
   img#logo {
     float: none !important;
-    margin: $h1_margin auto !important;
+    display: block;
+    margin: $h1_margin auto;
   }
 }
 
