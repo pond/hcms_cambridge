@@ -112,15 +112,17 @@ class Order < ApplicationRecord
   validates :state,                         inclusion:    { in: STATES,         message: 'is not recognised'      }
 
   validate :number_of_seats do |order|
-    if (
-      order.event.present? &&
-      order.event.number_of_seats > 0 &&
-      order.event.provisional_seats_remaining < (self.number_of_seats || 0)
-    )
-      self.errors.add(
-        :number_of_seats,
-        "requested is too high - only #{order.event.provisional_seats_remaining} left"
-      )
+    if order.event.present? && order.event.number_of_seats > 0
+      event        = order.event
+      other_orders = event.orders.inflight.where.not(id: self.id)
+      remaining    = [0, event.number_of_seats - other_orders.sum(:number_of_seats)].max()
+
+      if remaining < (self.number_of_seats || 0)
+        self.errors.add(
+          :number_of_seats,
+          "requested is too high - only #{remaining} left"
+        )
+      end
     end
   end
 
