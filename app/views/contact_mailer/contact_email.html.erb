@@ -6,7 +6,7 @@
   <dd><%= @name %></dd>
 
   <dt>E-mail address</dt>
-  <dd><%= link_to( @email, "mailto:#{ @email }" ) %></dd>
+  <dd><%= mail_to(@email, subject: "Your #{Hcms.config.site_name} enquiry") %></dd>
 
   <dt>Phone number</dt>
   <dd><%= @phone.present? ? link_to(@phone, "tel:#{@phone}") : 'Not given' %></dd>
@@ -17,6 +17,11 @@
   <% end %>
 </dl>
 
-<h2>Message</h2>
+<h2>Details</h2>
 
 <%= simple_format(@message.presence || 'None') %>
+
+<h2>Following up</h2>
+
+<strong>Do not reply to this message</strong> - to compose a reply, please use
+<%= mail_to(@email, 'this link', subject: "Your #{Hcms.config.site_name} enquiry") %>.

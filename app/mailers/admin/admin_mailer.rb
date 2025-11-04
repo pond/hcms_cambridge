@@ -1,10 +1,12 @@
 class Admin::AdminMailer < ApplicationMailer
+  helper :events
+
   def order_reserved(order)
     @order = order
 
     mail(
       to:      Hcms.config.contact_email,
-      from:    order.email,
+      from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] New reservation from #{order.name}"
     )
   end
@@ -14,7 +16,7 @@ class Admin::AdminMailer < ApplicationMailer
 
     mail(
       to:      Hcms.config.contact_email,
-      from:    order.email,
+      from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] New paid booking from #{order.name}"
     )
   end
@@ -24,14 +26,13 @@ class Admin::AdminMailer < ApplicationMailer
 
     mail(
       to:      Hcms.config.contact_email,
-      from:    order.email,
+      from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] Cancellation from #{order.name}"
     )
   end
 
   def problematic_order_email(order)
-    @order = order                || Order.new
-    @email = order.email.presence || 'unknown@test.com'
+    @order = order || Order.new
 
     @admin_url = if order.event.present?
       if order.event.page.present?
@@ -50,7 +51,7 @@ class Admin::AdminMailer < ApplicationMailer
 
     mail(
       to:      Hcms.config.contact_email,
-      from:    @email,
+      from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] PROBLEMATIC ORDER ALERT"
     )
   end

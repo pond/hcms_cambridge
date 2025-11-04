@@ -11,7 +11,7 @@ class BookingMailer < ApplicationMailer
 
     mail(
       to:      Hcms.config.booking_email,
-      from:    @email,
+      from:    Hcms.config.booking_email,
       subject: "[#{Hcms.config.site_name}] \"#{@page.title}\" - booking enquiry"
     )
   end

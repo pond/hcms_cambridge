@@ -94,4 +94,19 @@ module EventsHelper
       '👤'
     end
   end
+
+  def evtshelp_reply_link(order, link_text: nil)
+    if order.email.blank?
+      'Unknown'
+    else
+      link_text ||= order.email
+      subject = if order.event&.title.present?
+        "Your booking for \"#{order.event.title}\""
+      else
+        "Your #{Hcms.config.site_name} booking"
+      end
+
+      mail_to(order.email, link_text, subject: subject)
+    end
+  end
 end

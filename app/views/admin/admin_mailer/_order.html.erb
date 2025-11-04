@@ -6,7 +6,7 @@
   <dd><%= order.name.presence || 'Unknown' %></dd>
 
   <dt>E-mail address</dt>
-  <dd><%= order.email.present? ? link_to(order.email, "mailto:#{order.email}") : 'Unknown' %></dd>
+  <dd><%= evtshelp_reply_link(order) %></dd>
 
   <dt>Phone number</dt>
   <dd><%= order.phone_number.present? ? link_to(order.phone_number, "tel:#{order.phone_number}") : 'Not given' %></dd>
@@ -25,5 +25,16 @@
   <p>
     You can find a list of all orders
     <%= link_to('here', admin_page_event_orders_url(page_id: order.event.page.slug, event_id: order.event.slug)) %>.
+  </p>
+<% end %>
+
+<h2>Following up</h2>
+
+<% if order.email.blank? %>
+  <p>There was no e-mail address captured for this order!</p>
+<% else %>
+  <p>
+    <strong>Do not reply to this message</strong> - to compose a reply, please use
+    <%= evtshelp_reply_link(order, link_text: 'this link') %>.
   </p>
 <% end %>

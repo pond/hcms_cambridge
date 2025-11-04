@@ -9,7 +9,7 @@ class ContactMailer < ApplicationMailer
 
     mail(
       to:      Hcms.config.contact_email,
-      from:    @email,
+      from:    Hcms.config.contact_email,
       subject: "[#{Hcms.config.site_name}] \"#{@page.title}\" - message"
     )
   end
