@@ -9,6 +9,10 @@
   padding: 0;
 }
 
+@mixin content-metrics-print {
+  width: 100%;
+}
+
 @mixin widescreen_video_block {
   $inner_width: $content_width * 0.7;
   $inner_height: ($inner_width * 9) / 16;

@@ -26,6 +26,7 @@ en:
       short_no_year: "%b %-d (%A), %-l:%M%P"
       time_only: "%-l:%M%P"
       date_only: "%b %-d %Y (%A)"
+      invoice_date: "%b %-d %Y"
 
   activemodel:
     models:

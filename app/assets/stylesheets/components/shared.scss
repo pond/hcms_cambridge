@@ -1066,3 +1066,26 @@ nav {
     row-gap: 1em;
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// Printed output
+//////////////////////////////////////////////////////////////////////////////
+
+@media print {
+  html, body {
+    display: block;
+    height: auto;
+    min-height: auto;
+  }
+
+  body {
+    zoom: 0.75;
+  }
+
+  section.header_content,
+  section.main_content,
+  section.footer_content,
+  section.footer_suffix {
+    @include content_metrics_print;
+  }
+}

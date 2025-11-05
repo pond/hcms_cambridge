@@ -18,11 +18,11 @@
   </tr>
   <tr>
     <th>Issue Date</th>
-    <td><%= apphelp_human_time(@order.created_at, date_only: true) %></td>
+    <td><%= apphelp_human_time(@order.created_at, invoice: true) %></td>
   </tr>
   <tr>
     <th>Due Date</th>
-    <td><%= apphelp_human_time(@order.event.starts_at - 1.day, date_only: true) %></td>
+    <td><%= apphelp_human_time(@order.event.starts_at - 1.day, invoice: true) %></td>
   </tr>
 <table>
 

@@ -13,8 +13,8 @@ module ApplicationHelper
     message
   end
 
-  def apphelp_human_time(datetime, time_only: false, date_only: false)
-    TimeZoneHelp.in_configured_time_zone(datetime, time_only:, date_only:)
+  def apphelp_human_time(datetime, time_only: false, date_only: false, invoice: false)
+    TimeZoneHelp.in_configured_time_zone(datetime, time_only:, date_only:, invoice:)
   end
 
   # Render a boolean-like thing as 'yes/no' text in a span that can include a
