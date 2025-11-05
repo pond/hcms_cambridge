@@ -85,10 +85,14 @@
 </table>
 
 <p style="text-align: center">
-  <%= Hcms.config.site_name unless Hcms.config.footer_summary.include?(Hcms.config.site_name) %>
+  <% unless Hcms.config.footer_summary.include?(Hcms.config.site_name) %>
+    <%= tag.strong(Hcms.config.site_name) %>
+    &ndash;
+  <% end %>
   <%= Hcms.config.footer_summary.html_safe %>
   <% if Hcms.config.tax_number.present? %>
-    - <%= Hcms.config.tax_number %>
+    &ndash;
+    <%= tag.strong(Hcms.config.tax_number) %>
   <% end %>
 </p>
 

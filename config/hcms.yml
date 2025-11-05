@@ -25,7 +25,7 @@ default: &default
   tax_number:        '123-456-789'
   tax_name:          'GST'
 
-  footer_summary:    '<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand'
+  footer_summary:    '<strong>Wine Sentience</strong> &ndash; The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand'
   hide_contact_info: true
   facebook:          ''
   twitter:           '' # 'https://x.com/WineSentience/'
