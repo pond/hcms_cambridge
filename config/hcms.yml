@@ -18,7 +18,14 @@ default: &default
   hide_order_notes:  true  # Not just a default; permanently hide the "other notes" field for orders
   no_refunds_window: 3     # In days, before event starts; zero for "refunds always offered"
 
-  footer_summary:    "<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand"
+  # If supporting events and orders and you want local invoices to be proper
+  # tax invoices, provide your business's tax (e.g. GST, VAT) number here and
+  # the name of tax type you want to show therein (e.g. GST, "taxes", etc.)
+  #
+  tax_number:        '123-456-789'
+  tax_name:          'GST'
+
+  footer_summary:    '<strong>Wine Sentience</strong> - The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand'
   hide_contact_info: true
   facebook:          ''
   twitter:           '' # 'https://x.com/WineSentience/'

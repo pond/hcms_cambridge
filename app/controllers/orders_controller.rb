@@ -1,9 +1,8 @@
 class OrdersController < ApplicationController
-
   layout 'events'
 
-  before_action :get_page_and_event
-  before_action :get_order, except: [:new, :create]
+  include GetPageAndEventConcern   # Sets @page and @event
+  include GetOrderCarefullyConcern # Sets @order
 
   after_action :delete_stale_orders
 
@@ -159,36 +158,6 @@ class OrdersController < ApplicationController
   # ============================================================================
   #
   private
-
-    # Called before-action.
-    #
-    def get_page_and_event
-      @page    = Page.find_by_slug(params[:page_id])
-      @page  ||= Page.find_by_id(params[:page_id])
-      @event   = @page&.events&.find_by_slug(params[:event_id])
-      @event ||= @page&.events&.find_by_id(params[:event_id])
-
-      if @event.nil?
-        path = @page.nil? ? root_path() : page_path(@page.id)
-        redirect_to path, notice: 'Sorry, that event seems to have disappeared!'
-        return
-      end
-    end
-
-    # Called before-action.
-    #
-    def get_order
-      order = Order.find_by_id(params[:id])
-
-      if order&.event_id == @event.id
-        @order = order
-      else
-        redirect_to(
-          page_event_path(page_id: @event.page.slug, id: @event.slug),
-          alert: 'Sorry, that reservation or booking cannot be found!'
-        )
-      end
-    end
 
     # Called after-action. Sweeps away stale order records (those in a "new"
     # state which haven't been updated in a long time, including by whatever

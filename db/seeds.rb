@@ -1,7 +1,27 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
+# For a clean database, set up any values or other data not captured by
+# "db/schema.rb".
 #
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+if Page.count.zero?
+  puts 'Creating new Home page'
+
+  page  = Page.new.for_edit!
+  attrs = { title: 'Home', body: 'Welcome!' }
+
+  page.persist!(attrs, publish: true)
+else
+  puts 'Not creating new Home page - at least one Page already present'
+end
+
+if Order.count.zero?
+  puts 'Setting psuedorandom initial invoice number'
+
+  starting_invoice_number = rand(1001..1499)
+
+  ActiveRecord::Base.connection.execute(
+    <<-SQL
+      ALTER SEQUENCE orders_invoice_number_seq RESTART WITH #{starting_invoice_number};
+    SQL
+  )
+else
+  puts 'Not resetting invoice numbers - at least one Order already present'
+end

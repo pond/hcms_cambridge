@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_31_023455) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_05_065014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_31_023455) do
     t.datetime "created_at", null: false
     t.text "email", null: false
     t.bigint "event_id", null: false
+    t.bigserial "invoice_number", null: false
     t.text "name", null: false
     t.text "notes"
     t.integer "number_of_seats", null: false
@@ -69,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_31_023455) do
     t.text "token", null: false
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_orders_on_event_id"
+    t.index ["invoice_number"], name: "index_orders_on_invoice_number", unique: true
     t.index ["state"], name: "index_orders_on_state"
   end
 

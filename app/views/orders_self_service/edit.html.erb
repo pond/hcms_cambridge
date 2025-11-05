@@ -92,6 +92,22 @@
         <%= mail_to(Hcms.config.orders_email) %> or by phone on
         <%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %>.
       </span>
+      <% if @order.state_paid? %>
+        <%=
+          link_to(
+            'Invoice',
+            page_event_order_invoice_path(
+              page_id:  @order.event.page.slug,
+              event_id: @order.event.slug,
+              id:       @order.id,
+            ),
+            {
+              class:  'bold_button',
+              target: '_blank'
+            }
+          )
+        %>
+      <% end %>
     <% end %>
   </div>
 </div>

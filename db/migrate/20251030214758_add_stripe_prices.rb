@@ -1,4 +1,4 @@
-class AddStripePrice < ActiveRecord::Migration[8.1]
+class AddStripePrices < ActiveRecord::Migration[8.1]
   def change
     create_table :stripe_prices do | t |
       t.timestamps                   null: false

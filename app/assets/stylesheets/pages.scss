@@ -47,4 +47,20 @@ section.main_content table {
   td:last-child, th:last-child {
     padding-right: 10px;
   }
+
+  &#invoice-meta {
+    th {
+      width: 1px;
+      text-wrap: nowrap;
+      text-align: left;
+    }
+  }
+
+  &#invoice-lines {
+    th.amounts, td.amounts {
+      width: 1px;
+      text-wrap: nowrap;
+      text-align: right;
+    }
+  }
 }

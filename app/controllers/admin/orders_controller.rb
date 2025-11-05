@@ -3,7 +3,7 @@ class Admin::OrdersController < ApplicationController
   layout 'admin'
 
   before_action :authenticate_admin_user! # (via Devise)
-  before_action :get_page_and_event
+  include GetPageAndEventConcern # Sets @page and @event
   before_action :get_order, except: [:index]
 
   PERMITTED_ORDER_PARAMS = %i{
@@ -142,21 +142,6 @@ class Admin::OrdersController < ApplicationController
     end
 
   private
-
-    # Called before-action.
-    #
-    def get_page_and_event
-      @page    = Page.find_by_slug(params[:page_id])
-      @page  ||= Page.find_by_id(params[:page_id])
-      @event   = @page&.events&.find_by_slug(params[:event_id])
-      @event ||= @page&.events&.find_by_id(params[:event_id])
-
-      if @event.nil?
-        path = @page.nil? ? root_path() : page_path(@page.id)
-        redirect_to path, notice: 'Sorry, that event seems to have disappeared!'
-        return
-      end
-    end
 
     # Called before-action.
     #

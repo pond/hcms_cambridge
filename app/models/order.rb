@@ -4,7 +4,17 @@ class Order < ApplicationRecord
   has_secure_token()
 
   belongs_to :event
+
   has_one :stripe_payment, required: false, dependent: :destroy
+  has_one :invoice,        required: false, dependent: :destroy
+
+  # Uses the site name first letters capitalised plus "I-" - e.g. for a site
+  # name of "Some web site", the prefix would be "SWSI-".
+  #
+  # "Our" invoices are usually only shown for non-Stripe payments, since Stripe
+  # can give a 'true' invoice from the actual direct payment otherwise.
+  #
+  INVOICE_NUMBER_PREFIX = "#{Hcms.config.site_name.split(' ').map(&:first).join().upcase()}I-"
 
   # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
@@ -172,6 +182,10 @@ class Order < ApplicationRecord
     end
 
     OrderState.new(state_for_i18n).human_name
+  end
+
+  def human_invoice_number
+    "#{INVOICE_NUMBER_PREFIX}#{self.invoice_number}"
   end
 
   def token_expires_at

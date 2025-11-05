@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render partial: 'layouts/content_preamble', locals: { content: @event } %>
+    <title><%= Hcms.config.site_name %>: Tax Invoice <%= @order.human_invoice_number %></title>
+  </head>
+
+  <body>
+    <header>
+      <section class="header_content">
+        <%=
+          image_tag(
+            'logo.svg',
+            id:     'logo',
+            alt:    'Logo',
+            width:  Hcms.config.logo_w,
+            height: Hcms.config.logo_h
+          )
+        %>
+
+        <nav class="main_menu">
+          <h1 id="navigation_title"><%= Hcms.config.site_name %></h1>
+        </nav>
+      </section>
+    </header>
+
+    <main>
+      <%= render partial: 'layouts/content_main', locals: { content: @event } %>
+    </main>
+  </body>
+</html>
