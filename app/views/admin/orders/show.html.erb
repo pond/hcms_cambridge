@@ -49,25 +49,43 @@
         This order is in a finalised state. No further actions are available.
       </span>
     <% else %>
-      <% @order.valid_events.each do | event | %>
-        <% next if event.name == :payment_failed %>
-        <%=
-          button_to(
-            ordershelp_event_title(@order, event),
-            admin_page_event_order_path(
-              page_id:  @order.event.page.slug,
-              event_id: @order.event.slug,
-              id:       @order.id,
-              process:  'state',
-              event:    event.name,
-            ),
-            {
-              method: :patch,
-              data:   { confirm: 'Are you sure? This cannot be undone. The customer will be notified by e-mail.' }
-            }
-          )
-        %>
-      <% end %>
+      <span>
+        <% @order.valid_events.each do | event | %>
+          <% next if event.name == :payment_failed %>
+          <%=
+            button_to(
+              ordershelp_event_title(@order, event),
+              admin_page_event_order_path(
+                page_id:  @order.event.page.slug,
+                event_id: @order.event.slug,
+                id:       @order.id,
+                process:  'state',
+                event:    event.name,
+              ),
+              {
+                method: :patch,
+                data:   { confirm: 'Are you sure? This cannot be undone. The customer will be notified by e-mail.' }
+              }
+            )
+          %>
+        <% end %>
+      </span>
+    <% end %>
+    <% if @order.state_paid? %>
+      <%=
+        button_to(
+          'Invoice',
+          page_event_order_invoice_path(
+            page_id:  @order.event.page.slug,
+            event_id: @order.event.slug,
+            order_id: @order.id,
+          ),
+          {
+            method: :get,
+            form:   { target: '_blank' }
+          }
+        )
+      %>
     <% end %>
   </div>
 </div>

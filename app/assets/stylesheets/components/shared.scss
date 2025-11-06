@@ -1082,6 +1082,10 @@ nav {
     zoom: 0.75;
   }
 
+  a.print_button {
+    display: none;
+  }
+
   section.header_content,
   section.main_content,
   section.footer_content,

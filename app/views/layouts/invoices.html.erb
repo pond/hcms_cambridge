@@ -26,6 +26,10 @@
 
     <main>
       <%= render partial: 'layouts/content_main', locals: { content: @event } %>
+
+      <p style="text-align: center">
+        <a onclick='window.print()' class='bold_button print_button'>Print</a>
+      </p>
     </main>
   </body>
 </html>
