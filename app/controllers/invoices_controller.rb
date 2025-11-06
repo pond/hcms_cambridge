@@ -11,11 +11,12 @@ class InvoicesController < OrdersController
     # hacks. We wouldn't care so much except printed output tends to include
     # the page URL.
     #
-    if request.url.end_with?('?')
-      redirect_to(request.url.chomp('?'))
-      return
-    end
+    raw_uri = request.env['REQUEST_URI']
 
-    render()
+    if raw_uri.end_with?('?')
+      redirect_to(raw_uri.chomp('?'), status: :moved_permanently)
+    else
+      render()
+    end
   end
 end
