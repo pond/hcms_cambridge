@@ -34,7 +34,7 @@
   <p>
     <%= apphelp_label(f, :number_of_seats, required: true) %>
     <%= f.number_field(:number_of_seats, min: 1) %>
-    at <strong><%= evtshelp_price(order.event) %></strong> per seat <small>(<%= order.event.currency %>)</small>
+    which would cost <strong><%= evtshelp_price(order.event) %></strong> per seat <small>(<%= order.event.currency %>)</small>
   </p>
 
   <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
@@ -44,6 +44,6 @@
   <% end %>
 
   <p>
-    <%= submit_tag('Confirm', class: 'bold_button') %>
+    <%= submit_tag('Send waitlist request', class: 'bold_button') %>
   </p>
 <% end %>
