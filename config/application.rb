@@ -33,9 +33,5 @@ module Hcms
     #
     config.time_zone = Hcms.config.time_zone || 'London'
 
-    # Preserve the full timezone rather than offset of the receiver.
-    #
-    config.active_support.to_time_preserves_timezone = :zone
-
   end
 end

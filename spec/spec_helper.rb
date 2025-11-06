@@ -274,6 +274,24 @@ def spechelp_decode_multipart
   )
 end
 
+# Given HTML from an ActionMailer-sent e-mail along with an e-mail address,
+# expect to find a "mailto" link for that address. Optional "body" and
+# "subject" contents can be checked for too.
+#
+def spechelp_check_mailto(html:, email:, body: nil, subject: nil)
+  helper = Object.new.extend(ActionView::Helpers::UrlHelper)
+
+  expect(html).to include(helper.mail_to(email, subject: subject, body: body))
+end
+
+# Similar to #spechelp_check_mailto, but for telephone number links in e-mails.
+#
+def spechelp_check_tel(html:, phone:)
+  helper = Object.new.extend(ActionView::Helpers::UrlHelper)
+
+  expect(html).to include(helper.link_to(phone, "tel:#{phone.gsub(' ', '%20')}"))
+end
+
 # Wait for a default jQuery animation to complete.
 #
 # TODO: Currently, this a very simple implementation! Just assumes a 400ms

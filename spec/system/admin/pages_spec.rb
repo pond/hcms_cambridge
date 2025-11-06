@@ -348,12 +348,23 @@ RSpec.describe "Admin - pages" do
           expect(page).to have_field("page_form_selection_list_contents")
         end
 
-        it "hides non-blog fields initially for blog page types" do
+        it "does not hide metadata fields initially for blog page types" do
           p = create(:page, :blog)
           visit(edit_admin_page_path(p))
-          find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
+          expect(page).to_not have_css("details > summary", text: "Expand to edit page attributes")
           expect(page).to     have_select("page_page_type", selected: "Blog")
+          expect(page).to_not have_css(".redactor_container")
+          expect(page).to_not have_field("page_form_selection_list_label")
+          expect(page).to_not have_field("page_form_selection_list_contents")
+        end
+
+        it "does not hide metadata fields initially for events page types" do
+          p = create(:page, :events)
+          visit(edit_admin_page_path(p))
+
+          expect(page).to_not have_css("details > summary", text: "Expand to edit page attributes")
+          expect(page).to     have_select("page_page_type", selected: "Events")
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
@@ -1054,7 +1065,6 @@ RSpec.describe "Admin - pages" do
     it "shows the expected CMS options" do
       p = create(:page, :blog)
       visit(edit_admin_page_path(p))
-      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
@@ -1063,6 +1073,44 @@ RSpec.describe "Admin - pages" do
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List articles",   href: admin_page_articles_path(page_id: p.id))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit blog page",  href: edit_admin_page_path(p))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management", href: admin_pages_path())
+    end
+  end
+
+  # Blog articles are fully tested in 'events_spec.rb', but basic events
+  # container tests are done here.
+  #
+  context "events containers" do
+    it "allows a container to be created", js: true do
+      visit(new_admin_page_path())
+
+      title            = "Quick Brown Fox"
+      navigation_title = "Jumps Over The"
+
+      fill_in("page_title", with: title)
+      fill_in("page_navigation_title", with: navigation_title)
+      select("Events", from: "page_page_type")
+      spechelp_wait_for_animation()
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "New page published")
+
+      expect(Page.first.page_type       ).to eql(Page::PAGE_TYPE_EVENTS)
+      expect(Page.first.title           ).to eql(title)
+      expect(Page.first.navigation_title).to eql(navigation_title)
+      expect(Page.first.body            ).to be_empty
+    end
+
+    it "shows the expected CMS options" do
+      p = create(:page, :events)
+      visit(edit_admin_page_path(p))
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "Page changes published")
+
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Add event",        href: new_admin_page_event_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List events",      href: admin_page_events_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit events page", href: edit_admin_page_path(p))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",  href: admin_pages_path())
     end
   end
 

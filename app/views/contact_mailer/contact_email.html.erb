@@ -4,7 +4,7 @@
     <<~MESSAGE
       You asked:
 
-      #{@message.gsub(/^/m, "> ")}
+      #{@message.gsub(/^/m, "> ").gsub("\r\n", "\n")}
 
     MESSAGE
   else

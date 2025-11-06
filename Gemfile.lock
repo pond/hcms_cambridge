@@ -1,4 +1,16 @@
 GIT
+  remote: https://github.com/heartcombo/devise
+  revision: c6b08ae7e12d068e7fde62dda951316147300daf
+  branch: main
+  specs:
+    devise (5.0.0.beta)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 6.0.0)
+      responders
+      warden (~> 1.2.3)
+
+GIT
   remote: https://github.com/pond/redactor3_rails.git
   revision: 1e144530acc77eb13fe49fa5ee8a19d0d57cae0f
   branch: feature/fix-js
@@ -143,12 +155,6 @@ GEM
     debug (1.11.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
-    devise (4.9.4)
-      bcrypt (~> 3.0)
-      orm_adapter (~> 0.1)
-      railties (>= 4.1.0)
-      responders
-      warden (~> 1.2.3)
     diff-lcs (1.6.2)
     docile (1.4.1)
     doggo (1.4.0)
@@ -157,7 +163,7 @@ GEM
     erb (5.1.3)
     erubi (1.13.1)
     eventmachine (1.2.7)
-    excon (1.3.0)
+    excon (1.3.1)
       logger
     execjs (2.10.0)
     factory_bot (6.5.6)
@@ -192,7 +198,7 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
-    fog-aws (3.33.0)
+    fog-aws (3.33.1)
       base64 (>= 0.2, < 0.4)
       fog-core (~> 2.6)
       fog-json (~> 1.1)
@@ -414,10 +420,10 @@ GEM
     sdoc (2.6.5)
       rdoc (>= 5.0)
     securerandom (0.4.1)
-    sentry-rails (6.0.0)
+    sentry-rails (6.1.0)
       railties (>= 5.2.0)
-      sentry-ruby (~> 6.0.0)
-    sentry-ruby (6.0.0)
+      sentry-ruby (~> 6.1.0)
+    sentry-ruby (6.1.0)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
     simplecov (0.22.0)
@@ -444,7 +450,7 @@ GEM
     ssrf_filter (1.3.0)
     stackprof (0.2.27)
     stringio (3.1.7)
-    stripe (17.1.0)
+    stripe (17.2.0)
     terser (1.2.6)
       execjs (>= 0.3.0, < 3)
     thin (1.8.2)
@@ -457,7 +463,7 @@ GEM
     tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (1.1.0)
+    uri (1.1.1)
     useragent (0.16.11)
     warden (1.2.9)
       rack (>= 2.0.9)
@@ -499,7 +505,7 @@ DEPENDENCIES
   coffee-rails
   cuprite (~> 0.17)
   debug
-  devise (~> 4.9)
+  devise!
   doggo (~> 1.4)
   factory_bot_rails (~> 6.5)
   faker (~> 3.5)

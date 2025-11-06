@@ -32,7 +32,8 @@ gem 'sdoc'
 #
 #   https://rubygems.org/gems/devise
 #
-gem 'devise', '~> 4.9'
+# gem 'devise', '~> 4.9'     -- Ruby 3.3 / Rails 7, many deprecation warnings
+gem 'devise', git: 'https://github.com/heartcombo/devise', branch: 'main'
 
 # Recaptcha used for e.g. the "booking" type pages.
 #
