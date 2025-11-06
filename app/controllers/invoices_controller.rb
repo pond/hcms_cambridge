@@ -1,4 +1,5 @@
 class InvoicesController < OrdersController
+
   layout 'invoices'
 
   include GetPageAndEventConcern   # Sets @page and @event

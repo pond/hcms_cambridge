@@ -59,7 +59,13 @@ module EventsHelper
   def evntshelp_booking_button(event)
     return nil if event.free_of_charge? # NOTE EARLY EXIT
 
-    if event.provisional_seats_remaining > 0
+    if controller_name == 'waitlists'
+      link_to(
+        'Join waitlist',
+        new_event_waitlist_path(event_id: event.slug),
+        class: 'bold_button'
+      )
+    elsif event.provisional_seats_remaining > 0
       link_to(
         evtshelp_booking_action_title(event),
         new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),

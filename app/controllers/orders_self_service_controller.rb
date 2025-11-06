@@ -2,11 +2,13 @@
 # when a new order is valid, saved, and goes directly to payment.
 #
 class OrdersSelfServiceController < ApplicationController
+
   layout 'events'
 
   before_action :get_order_event_and_page
 
   def edit
+    render()
   end
 
   def update

@@ -1,4 +1,5 @@
 class UserEmailsController < ApplicationController
+
   layout 'pages'
 
   before_action do

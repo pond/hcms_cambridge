@@ -22,6 +22,10 @@ Rails.application.routes.draw do
     get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_payment_cancelled
   end
 
+  resources :events, only: [] do
+    resource :waitlist, only: [:show, :new, :create]
+  end
+
   # post 'webhooks/stripe', controller: 'webhooks/stripe', action: :webhook
 
   resources :by_titles, only: :show

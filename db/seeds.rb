@@ -18,7 +18,7 @@ if Order.count.zero?
   starting_invoice_number = rand(1001..1499)
 
   ActiveRecord::Base.connection.execute(
-    <<-SQL
+    <<~SQL
       ALTER SEQUENCE orders_invoice_number_seq RESTART WITH #{starting_invoice_number};
     SQL
   )

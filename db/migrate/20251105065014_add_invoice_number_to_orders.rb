@@ -8,7 +8,7 @@ class AddInvoiceNumberToOrders < ActiveRecord::Migration[8.1]
     # reset.
     #
     starting_invoice_number = rand(1001..1499)
-    execute <<-SQL
+    execute <<~SQL
       ALTER SEQUENCE orders_invoice_number_seq RESTART WITH #{starting_invoice_number};
       UPDATE orders SET invoice_number = nextval('orders_invoice_number_seq');
     SQL

@@ -1,0 +1,14 @@
+<article class="event-order-form-container">
+  <section class="event-order-form">
+    <h1>Join the waitlist</h1>
+    <h2><%= @order.event.title %></h2>
+
+    <%= render partial: 'form', locals: { order: @order } %>
+  </section>
+
+  <section class="event-order-poster">
+    <%= link_to page_event_path(page_id: @order.event.page.slug, id: @order.event.slug) do %>
+      <%= image_tag(@order.event.event_hero_image.url, alt: @order.event.title) %>
+    <% end %>
+  </section>
+</article>

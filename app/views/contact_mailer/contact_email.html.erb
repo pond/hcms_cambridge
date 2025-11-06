@@ -1,3 +1,17 @@
+<%
+  reply_subject = "Your #{Hcms.config.site_name} enquiry"
+  reply_body    = if @message.present?
+    <<~MESSAGE
+      You asked:
+
+      #{@message.gsub(/^/m, "> ")}
+
+    MESSAGE
+  else
+    nil
+  end
+%>
+
 <h1><%= @page.title %></h1>
 <h2>New message</h2>
 
@@ -6,7 +20,7 @@
   <dd><%= @name %></dd>
 
   <dt>E-mail address</dt>
-  <dd><%= mail_to(@email, subject: "Your #{Hcms.config.site_name} enquiry") %></dd>
+  <dd><%= mail_to(@email, subject: reply_subject, body: reply_body) %></dd>
 
   <dt>Phone number</dt>
   <dd><%= @phone.present? ? link_to(@phone, "tel:#{@phone}") : 'Not given' %></dd>
@@ -24,4 +38,4 @@
 <h2>Following up</h2>
 
 <strong>Do not reply to this message</strong> - to compose a reply, please use
-<%= mail_to(@email, 'this link', subject: "Your #{Hcms.config.site_name} enquiry") %>.
+<%= mail_to(@email, 'this link', subject: reply_subject, body: reply_body) %>.

@@ -1,0 +1,23 @@
+<% reply_subject = "#{Hcms.config.site_name} waitlist update for \"#{@order.event.title}\"" %>
+
+<h1><%= @order.event.title %></h1>
+<h2>Request to join waitlist</h2>
+
+<dl>
+  <dt>From</dt>
+  <dd><%= @order.name %></dd>
+
+  <dt>E-mail address</dt>
+  <dd><%= mail_to(@order.email, subject: reply_subject) %></dd>
+
+  <dt>Phone number</dt>
+  <dd><%= @order.phone_number.present? ? link_to(@order.phone_number, "tel:#{@order.phone_number}") : 'Not given' %></dd>
+
+  <dt>Number of seats requested</dt>
+  <dd><%= @order.number_of_seats %></dd>
+</dl>
+
+<h2>Following up</h2>
+
+<strong>Do not reply to this message</strong> - to compose a reply, please use
+<%= mail_to(@order.email, 'this link', subject: reply_subject) %>.

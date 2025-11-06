@@ -1,4 +1,5 @@
 class OrdersController < ApplicationController
+
   layout 'events'
 
   include GetPageAndEventConcern   # Sets @page and @event
@@ -33,6 +34,19 @@ class OrdersController < ApplicationController
   def create
     @order = Order.new(event: @event)
     @order.assign_attributes(order_params())
+
+    success = begin
+      verify_recaptcha(action: 'order')
+    rescue
+      false
+    end
+
+    unless success
+      flash[:alert] = "Sorry! The anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
+
+      render :new
+      return
+    end
 
     # A user going Back and resubmitting the form (rather than using an "amend
     # details" in-page form button) might be causing lots of orders to pile up

@@ -22,7 +22,7 @@ default: &default
   # tax invoices, provide your business's tax (e.g. GST, VAT) number here and
   # the name of tax type you want to show therein (e.g. GST, "taxes", etc.)
   #
-  tax_number:        '123-456-789'
+  tax_number:        '65-749-556'
   tax_name:          'GST'
 
   footer_summary:    '<strong>Wine Sentience</strong> &ndash; The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand'
