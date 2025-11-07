@@ -96,6 +96,12 @@ class Event < Editable
   validates :state,             inclusion: { in: STATES,                        message: 'is not recognised'     }
   validates :on_archive_action, inclusion: { in: ON_ARCHIVE_ACTIONS,            message: 'is not recognised'     }
 
+  validate do | event |
+    if ((event.starts_at >= event.ends_at) rescue false)
+      event.errors.add(:ends_at, 'must be after the start time')
+    end
+  end
+
   # ============================================================================
   # Overrides of Editable base class
   # ============================================================================
@@ -110,32 +116,6 @@ class Event < Editable
 
   def collapse_metadata_in_form?
     ! self.new_record? && self.valid?
-  end
-
-  # ============================================================================
-  # Navigation
-  # ============================================================================
-
-  # A closer event - next lower starts_at. Assumes no two identical times.
-  #
-  def next
-    @next ||= self.class
-      .for_navigation
-      .reorder(starts_at: :desc)
-      .where(page_id: self.page_id)
-      .where('starts_at < ?', self.starts_at)
-      .first
-  end
-
-  # A more distant event - next greater starts_at. Assumes no two identical times.
-  #
-  def prev
-    @prev ||= self.class
-      .for_navigation
-      .reorder(starts_at: :asc)
-      .where(page_id: self.page_id)
-      .where('starts_at > ?', self.starts_at)
-      .first
   end
 
   # ============================================================================

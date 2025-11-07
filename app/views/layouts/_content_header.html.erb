@@ -24,6 +24,7 @@
             nav_list_classes << 'pure-menu-has-children' if top_level_page.children_for_navigation.any?
             nav_list_classes << 'current' if (
               (content.is_a?(Article) && (top_level_page.id == content.page_id)) ||
+              (content.is_a?(Event) && (top_level_page.id == content.page_id)) ||
               (content.is_a?(Page) && (top_level_page.id == content.id || top_level_page.id == content.parent.try(:id)))
             )
 

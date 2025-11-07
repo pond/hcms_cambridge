@@ -23,12 +23,6 @@
         <%= event.summary %>
       </div>
       <div class="event-next-prev">
-        <% if event.next %>
-          <%= link_to('◀︎', page_event_path(page_id: event.page.slug, id: event.next.slug), title: "Happening sooner: #{event.next.title}", rel: "newer") %>
-        <% end %>
-        <% if event.prev %>
-          <%= link_to('▶︎', page_event_path(page_id: event.page.slug, id: event.prev.slug), title: "Further away: #{event.prev.title}", rel: "older") %>
-        <% end %>
         <%= evntshelp_booking_button(event) %>
       </div>
     </div>

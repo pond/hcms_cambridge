@@ -11,6 +11,7 @@ SimpleCov.start
 
 # ==============================================================================
 
+
 require "debug"
 require "capybara/cuprite"
 require "capybara/rspec"
@@ -41,6 +42,10 @@ rescue ActiveRecord::PendingMigrationError => e
   puts e.to_s.strip
   exit 1
 end
+
+# Things like 'Faker::Address.full_address' tend to respect this setting.
+#
+Faker::Config.locale = "en-NZ"
 
 # https://thoughtbot.com/blog/acceptance-tests-with-subdomains
 #

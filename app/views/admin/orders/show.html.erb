@@ -34,6 +34,20 @@
     <dt>Other notes</dt>
     <dd><%= @order.notes %></dd>
   <% end %>
+  <dt>Customer's order management "magic link"</dt>
+  <dd>
+    <% magic_link = ordershelp_magic_link(@order) %>
+    <%=
+      button_tag(
+        class: 'copy_from_data',
+        style: 'font-size: 85%',
+        data:  { text: magic_link }
+      ) do
+    %><i class="fa fa-copy"></i><% end %>
+    <small>
+      <code><%= magic_link %></code>
+    </small>
+  </dd>
 </dl>
 
 <div class="row-wide-column-small-container">

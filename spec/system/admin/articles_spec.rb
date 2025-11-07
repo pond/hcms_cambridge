@@ -4,7 +4,6 @@ RSpec.describe "Admin - articles" do
   include ApplicationHelper
 
   before :each do
-    allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
     spechelp_log_in()
 
     @page = create(:page, :blog)
@@ -782,8 +781,8 @@ RSpec.describe "Admin - articles" do
         expect(row_2).to have_text("#{article_2.title} #{apphelp_human_time(article_2.created_at, date_only: true)} Yes No Show Edit Delete", exact: true)
         expect(row_3).to have_text("#{article_1.title} #{apphelp_human_time(article_1.created_at, date_only: true)} No Yes Show Edit Delete", exact: true)
 
-        # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
-        # arrows, 7 - main actions, 8 - delete action.
+        # Check a few links. Column 1 - article title, 2 - published date,
+        # 3-4 - boolean, 5 - main actions, 6 - delete action.
         #
         expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Yes", href: admin_page_article_path(@page, article_3, revision: article_3.revisions.last.id))
         expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show", href: admin_page_article_path(page_id: @page.slug, id: article_2.slug))

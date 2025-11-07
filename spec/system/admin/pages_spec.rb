@@ -326,6 +326,12 @@ RSpec.describe "Admin - pages" do
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
+
+          select("Events", from: "page_page_type")
+
+          expect(page).to_not have_css(".redactor_container")
+          expect(page).to_not have_field("page_form_selection_list_label")
+          expect(page).to_not have_field("page_form_selection_list_contents")
         end
 
         it "shows contact form fields initially for contact form page types" do
@@ -1122,6 +1128,7 @@ RSpec.describe "Admin - pages" do
         page_3 = create(:page                ); page_3.revisions.first.update!(published: true)
         page_4 = create(:page, parent: page_3); page_4.revisions.first.update!(published: true)
         page_5 = create(:page, :blog         ); page_5.revisions.first.update!(published: true)
+        page_6 = create(:page, :events       ); page_6.revisions.first.update!(published: true)
 
         page_3.revisions << build(:revision, :for_page)
         page_3.save!
@@ -1133,6 +1140,7 @@ RSpec.describe "Admin - pages" do
         row_3 = find(:css, "table tbody > tr:nth-child(3)")
         row_4 = find(:css, "table tbody > tr:nth-child(4)")
         row_5 = find(:css, "table tbody > tr:nth-child(5)")
+        row_6 = find(:css, "table tbody > tr:nth-child(6)")
 
         # Title / Published? / Draft? / In menu? / Actions
         #
@@ -1141,6 +1149,7 @@ RSpec.describe "Admin - pages" do
         expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show Edit Delete", exact: true)
         expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show Edit Delete", exact: true) # "— " prefix for is-child
         expect(row_5).to have_text("#{page_5.title} Yes No Yes Show Edit Articles Delete", exact: true)
+        expect(row_6).to have_text("#{page_6.title} Yes No Yes Show Edit Events Delete", exact: true)
 
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
@@ -1150,6 +1159,7 @@ RSpec.describe "Admin - pages" do
         expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit", href: edit_admin_page_path(page_3.id))
         expect(row_4.find(:css, "> td:nth-child(8)")).to have_link("Delete", href: admin_page_path(page_4.id))
         expect(row_5.find(:css, "> td:nth-child(7)")).to have_link("Articles", href: admin_page_articles_path(page_5.id))
+        expect(row_6.find(:css, "> td:nth-child(7)")).to have_link("Events", href: admin_page_events_path(page_6.id))
       end
     end # 'context "display" do'
 

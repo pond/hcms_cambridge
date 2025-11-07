@@ -17,5 +17,9 @@ FactoryBot.define do
     trait :for_article do
       summary { Faker::Lorem.paragraph }
     end
+
+    trait :for_event do
+      summary { Faker::Lorem.paragraph }
+    end
   end
 end

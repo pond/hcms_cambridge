@@ -707,6 +707,10 @@ RSpec.describe "Pages" do
     # Nothing to do here; it's all in 'articles_spec.rb'
   end # 'context "blog containers" do'
 
+  context "event containers" do
+    # Nothing to do here; it's all in 'events_spec.rb'
+  end # 'context "event containers" do'
+
   require_relative "shared_examples/footer_spec.rb"
   context "shared" do
     let(:path_to_test) { root_path() }
@@ -745,5 +749,9 @@ RSpec.describe "Pages" do
     context "blog container" do
       # Nothing to do here; it's all in 'articles_spec.rb'
     end # 'context "blog container" do'
+
+    context "event container" do
+      # Nothing to do here; it's all in 'events_spec.rb'
+    end # 'context "event container" do'
   end # 'context "shared" do'
 end
