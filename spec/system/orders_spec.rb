@@ -1,10 +1,57 @@
 require "spec_helper.rb"
 
-RSpec.describe "Pages" do
+RSpec.describe "Orders" do
   before :each do
+    allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+
     @page = create(:page, :events)
     @page.revisions.first.update!(published: true)
+
+    @event = create(:event, page: @page)
+    @event.revisions.first.update!(published: true)
   end
+
+  context "presales" do
+    it "validates the form" do
+      visit new_page_event_order_path(@page.slug, @event.slug)
+
+      click_on("Next")
+
+      expect(page).to have_css(".field_error_messages", text: "Name must be provided")
+      expect(page).to have_css(".field_error_messages", text: "E-mail address must be provided")
+      expect(page).to have_css(".field_error_messages", text: "Number of seats must be provided")
+
+      fill_in("order_name", with: "Fred Flinstone")
+
+      click_on("Next")
+
+      expect(page).to     have_field("order_name", with: "Fred Flinstone")
+      expect(page).to_not have_css(".field_error_messages", text: "Name must be provided")
+
+      fill_in("order_number_of_seats", with: @event.number_of_seats + 1)
+
+      click_on("Next")
+
+      expect(page).to have_css(".field_error_messages", text: "Number of seats requested is too high - only #{@event.number_of_seats} left")
+    end
+
+    it "accepts a reservation" do
+      name  = "Fred Flintstone"
+      email = "fred@example.com"
+      phone = "+64 021 000 000"
+      seats = 2
+    end
+
+    it "lets the user cancel" do
+    end
+  end
+
+  context "public sales" do
+  end
+
+
+
+
 
   it "lists in starts-at ascending order and links to the events" do
     p       = create(:page, :events); p.revisions.first.update!(published: true) # ...so it'll be in the menu bar

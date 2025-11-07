@@ -310,8 +310,8 @@ RSpec.describe "Admin - events" do
         expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
         expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
       end
-    end # "context "dynamic behaviour", js: true do"
-  end # "context "creation" do"
+    end # context "dynamic behaviour", js: true do'
+  end # 'context "creation" do'
 
   context "revision management" do
     context "with only one revision" do
@@ -343,7 +343,7 @@ RSpec.describe "Admin - events" do
           expect(page).to     have_text("Published")
         end
       end
-    end # "context "with only one revision" do"
+    end # 'context "with only one revision" do'
 
     context "navigation with many revisions" do
       around :each do | example |
@@ -507,7 +507,7 @@ RSpec.describe "Admin - events" do
           expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
         end
       end
-    end # "context "navigation with many revisions" do"
+    end # 'context "navigation with many revisions" do'
 
     it "can roll back and edit, creating a new draft after a published revision" do
       visit(new_admin_page_event_path(@page))
@@ -726,7 +726,7 @@ RSpec.describe "Admin - events" do
       expect(Revision.for_events.pluck(:published)).to eql([true, false])
       expect(Revision.for_events.pluck(:current  )).to eql([true, false])
     end
-  end # "context "revision management" do"
+  end # 'context "revision management" do'
 
   context "raw editor" do
     it "can be selected when creating a draft" do
@@ -872,7 +872,7 @@ RSpec.describe "Admin - events" do
       expect(page).to have_css("textarea#event_body")
       expect(page).to have_field("event_body", with: event.body)
     end
-  end # "context "raw editor" do"
+  end # 'context "raw editor" do'
 
   context "hidden flag and initial state" do
     it "can set as 'hidden'" do
@@ -946,7 +946,7 @@ RSpec.describe "Admin - events" do
       expect(Event.first.hidden).to eql(false)
       expect(Event.first.state).to eql('public_purchases')
     end
-  end # "context "hidden flag and initial state" do"
+  end # 'context "hidden flag and initial state" do'
 
   context "lists" do
     context "display" do
