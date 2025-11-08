@@ -1,0 +1,7 @@
+<%
+  # Render the body for a 'normal' type page. Usually only rendered via the
+  # "shared/_page.html.erb" Partial. Requires local "page", holding the Page
+  # instance that is being rendered.
+%>
+
+<%= page.body.html_safe() %>

@@ -8,7 +8,7 @@ default: &default
 
   mail_domain:       'winesentience.com'
   booking_email:     'stephen@winesentience.com' # The "to" address for ad hoc booking enquiries sent to you
-  orders_email:      'stephen@winesentience.com' # The "from" address in event sales messages sent to customers
+  orders_email:      'stephen@winesentience.com' # The "from" for event sales messages to customers, and notifications "to" you
   contact_email:     'stephen@winesentience.com'
   contact_tel_human: '021 488 855'
   contact_tel_full:  '+6421488855'

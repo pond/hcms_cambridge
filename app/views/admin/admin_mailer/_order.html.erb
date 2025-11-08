@@ -11,6 +11,9 @@
   <dt>Phone number</dt>
   <dd><%= order.phone_number.present? ? link_to(order.phone_number, "tel:#{order.phone_number}") : 'Not given' %></dd>
 
+  <dt>Number of seats requested</dt>
+  <dd><%= order.number_of_seats %></dd>
+
   <dt>Manage</dt>
   <dd>
     <% if order.event&.page.blank? %>

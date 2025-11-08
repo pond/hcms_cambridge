@@ -1,8 +1,13 @@
 require "spec_helper.rb"
 
 RSpec.describe "Orders" do
+  include OrdersHelper
+
   before :each do
     allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+
+    allow(Hcms.config).to receive(:orders_email).and_return("orders@example.com")
+    allow(Hcms.config).to receive(:site_name   ).and_return("Site Under Test")
 
     @page = create(:page, :events)
     @page.revisions.first.update!(published: true)
@@ -35,11 +40,81 @@ RSpec.describe "Orders" do
       expect(page).to have_css(".field_error_messages", text: "Number of seats requested is too high - only #{@event.number_of_seats} left")
     end
 
-    it "accepts a reservation" do
+    it "accepts a reservation and sends confirmation e-mails to both parties" do
+      visit new_page_event_order_path(@page.slug, @event.slug)
+
       name  = "Fred Flintstone"
       email = "fred@example.com"
       phone = "+64 021 000 000"
       seats = 2
+
+      fill_in("order_name",            with: name)
+      fill_in("order_email",           with: email)
+      fill_in("order_phone_number",    with: phone)
+      fill_in("order_number_of_seats", with: seats)
+
+      click_on("Next")
+
+      expect(Order.count).to eql(1)
+      expect(Order.first.state).to eql("new")
+
+      per_seat = spechelp_format_money(@event.price_per_seat,         @event.currency)
+      total    = spechelp_format_money(@event.price_per_seat * seats, @event.currency)
+
+      expect(page).to have_text("Please confirm your reservation")
+      expect(page).to have_text(@event.title)
+      expect(page).to have_text(@event.location)
+      expect(page).to have_text("#{seats} × #{per_seat}")
+      expect(page).to have_text("#{total}")
+
+      click_on("Confirm reservation")
+
+      expect(Order.count).to eql(1)
+      expect(Order.first.state).to eql("reserved")
+      expect(page).to have_text("Thanks, your reservation has been made!")
+
+      messages = spechelp_decode_multipart(count: 2)
+
+      to_customer = spechelper_find_in_decoded(messages, to: email)
+      to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+
+      expect(to_customer.email.from   ).to eql(["orders@example.com"])
+      expect(to_customer.email.subject).to eql("Reservation confirmed for \"#{@event.title}\"")
+
+      expect(to_customer.text).to include(@event.title.upcase)
+      expect(to_customer.text).to include(total)
+      expect(to_customer.text).to include(ordershelp_magic_link(Order.first))
+
+      expect(to_customer.html).to include(@event.title)
+      expect(to_customer.html).to include(total)
+      expect(to_customer.html).to have_link('Manage order', href: ordershelp_magic_link(Order.first))
+
+      expect(to_admin.email.from   ).to eql(["orders@example.com"])
+      expect(to_admin.email.subject).to eql("[Site Under Test] New reservation from #{Order.first.name}")
+
+      expect(to_admin.text).to include(name)
+      expect(to_admin.text).to include(email)
+      expect(to_admin.text).to include("021 000 000")
+
+      expect(to_admin.html).to have_css("dd", text: name)
+      expect(to_admin.html).to have_css("dd", text: seats)
+      spechelp_check_mailto(
+        html:    to_admin.html,
+        email:   email,
+        subject: "Your booking for \"#{@event.title}\""
+      )
+      spechelp_check_tel(
+        html:  to_admin.html,
+        phone: "021 000 000"
+      )
+      expect(to_admin.html).to have_link(
+        "Manage order",
+        href: admin_page_event_order_url(page_id: @event.page.slug, event_id: @event.slug, id: Order.first.id)
+      )
+      expect(to_admin.html).to have_link(
+        "here", # ...as in, "You can find a list of all orders <here>"
+        href: admin_page_event_orders_url(page_id: @event.page.slug, event_id: @event.slug)
+      )
     end
 
     it "lets the user cancel" do
@@ -48,220 +123,4 @@ RSpec.describe "Orders" do
 
   context "public sales" do
   end
-
-
-
-
-
-  it "lists in starts-at ascending order and links to the events" do
-    p       = create(:page, :events); p.revisions.first.update!(published: true) # ...so it'll be in the menu bar
-    event_1 = create(:event, page: p); event_1.revisions.first.update!(published: true) # NOTE: Newer
-    event_2 = create(:event, page: p); event_2.revisions.first.update!(published: true) # NOTE: Older
-
-    event_1.update(starts_at: Time.now + 1.day, ends_at: (Time.now + 1.day) + 2.hours)
-    event_2.update(starts_at: Time.now - 1.day, ends_at: (Time.now - 1.day) + 2.hours)
-
-    visit page_path(p)
-
-    expect(find(:css, "section.events article:nth-child(1)")).to have_text(event_1.title)
-    expect(find(:css, "section.events article:nth-child(2)")).to have_text(event_2.title)
-
-    # Event main page is highlighted as current item in navigation.
-    #
-    expect(find(:css, "nav.main_menu li.current")).to have_link(p.title)
-
-    find(:css, "section.events article:nth-child(1)").click_on(event_1.title)
-
-    expect(page).to have_current_path(page_event_path(page_id: p.slug, id: event_1.slug))
-
-    # Title, summary and body but no hero image in the main event article.
-    #
-    expect(page).to     have_text(event_1.title)
-    expect(page).to     have_text(event_1.summary)
-    expect(page).to     have_text(spechelp_strip_markup event_1.body)
-    expect(page).to_not have_css("img.event-hero-image[alt=\"#{event_1.title}\"]")
-
-    # Event main page is still highlighted as current item in navigation.
-    #
-    expect(find(:css, "nav.main_menu li.current")).to have_link(p.title)
-  end
-
-  it "does not show drafts" do
-    p       = create(:page, :events)
-    event_1 = create(:event, page: p) # Note, not published
-    event_2 = create(:event, page: p) # Same
-
-    visit page_path(p)
-
-    expect(page).to     have_text("There are no events scheduled")
-    expect(page).to_not have_text(event_1.title)
-    expect(page).to_not have_text(event_2.title)
-
-    event_1.revisions.first.update!(published: true)
-    event_2.revisions.first.update!(published: true)
-
-    event_2_published_revision = event_2.revisions.first
-    event_2_draft_revision     = build(:revision, :for_event) # Draft, shouldn't show up
-    event_2.revisions << event_2_draft_revision
-    event_2.save!
-
-    visit page_path(p)
-
-    expect(page).to_not have_text("There are no events scheduled")
-
-    expect(page).to     have_text(event_1.title)
-    expect(page).to     have_text(event_1.summary)
-    expect(page).to_not have_text(spechelp_strip_markup event_1.body)
-    expect(page).to     have_css("img.event-hero-image[alt=\"#{event_1.title}\"]")
-
-    expect(page).to     have_text(event_2_published_revision.title)
-    expect(page).to     have_text(event_2_published_revision.summary)
-    expect(page).to_not have_text(spechelp_strip_markup event_2.body)
-    expect(page).to     have_css("img.event-hero-image[alt=\"#{event_2_published_revision.title}\"]")
-
-    expect(page).to_not have_text(event_2_draft_revision.title)
-    expect(page).to_not have_text(event_2_draft_revision.summary)
-    expect(page).to_not have_css("img.event-hero-image[alt=\"#{event_2_draft_revision.title}\"]")
-  end
-
-  context "navigation" do
-    it "redirects to the Admin page if logged in" do
-      p = create(:page, :events)
-      p.revisions.first.update!(published: true)
-
-      event = create(:event, page: p)
-      event.revisions.first.update!(published: true)
-
-      visit(page_path(p.slug))
-      expect(page).to have_current_path(page_path(p.slug)) # No redirection
-
-      visit(page_event_path(p.slug, event.slug))
-      expect(page).to have_current_path(page_event_path(p.slug, event.slug)) # No redirection
-
-      spechelp_log_in()
-
-      visit(page_path(p.slug))
-      expect(page).to have_current_path(admin_page_path(p.slug)) # Redirected to admin
-
-      visit(page_event_path(p.slug, event.slug))
-      expect(page).to have_current_path(admin_page_event_path(p.slug, event.slug)) # Redirected to admin
-    end
-  end # 'context "navigation" do'
-
-  require_relative "shared_examples/footer_spec.rb"
-  context "shared" do
-    let(:path_to_test) { root_path() }
-
-    before :each do
-      @event = create(:event, page: @page)
-      @event.revisions.first.update!(published: true)
-    end
-
-    context "when viewing the blog container" do
-      let(:path_to_test) { page_path(@page.slug) }
-      it_behaves_like "a public page footer"
-    end
-
-    context "when viewing an event" do
-      let(:path_to_test) { page_event_path(@page.slug, @event.slug) }
-      it_behaves_like "a public page footer"
-    end
-  end # 'context "shared" do'
-
-  context "hidden events" do
-    before :each do
-      @event = create(:event, page: @page)
-    end
-
-    it 'drafts are not listed' do
-      visit page_path(@page.slug)
-
-      expect(page).to have_text("There are no events scheduled")
-    end
-
-    it 'published events are listed' do
-      @event.revisions.first.update!(published: true)
-      visit page_path(@page.slug)
-
-      expect(page).to_not have_text("There are no events scheduled")
-    end
-
-    it 'hidden events are not listed' do
-      @event.revisions.first.update!(published: true)
-      @event.update!(hidden: true)
-      visit page_path(@page.slug)
-
-      expect(page).to have_text("There are no events scheduled")
-    end
-
-    it 'can be visited directly' do
-      @event.revisions.first.update!(published: true)
-      @event.update!(hidden: true)
-      visit page_event_path(@page.slug, @event.slug)
-
-      expect(page).to have_current_path(page_event_path(@page.slug, @event.slug))
-      expect(page).to have_text(@event.title)
-    end
-  end # 'context "hidden events" do'
-
-  context "states" do
-    before :each do
-      @event = create(:event, page: @page)
-      @event.revisions.first.update!(published: true)
-    end
-
-    context "presales" do
-      before :each do
-        @event.update_column(:state, 'presales')
-        visit page_event_path(@page.slug, @event.slug)
-      end
-
-      it "supports reservations" do
-        button = find(:css, "div.event-summary-and-links-container a.bold_button")
-
-        expect(button).to have_text("Reserve seats")
-
-        button.click()
-
-        expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Reserve seats')
-      end
-    end # 'context "presales" do'
-
-    context "reserver payments" do
-      before :each do
-        @event.update_column(:state, 'reserver_purchases')
-        visit page_event_path(@page.slug, @event.slug)
-      end
-
-      it 'asks people to check their magic links' do
-        button = find(:css, "div.event-summary-and-links-container a.bold_button")
-
-        expect(button).to have_text("Pay for reservation")
-
-        button.click()
-
-        expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Pay for reservation')
-      end
-    end # 'context "reserver payments" do
-
-    context "general sales" do
-      before :each do
-        @event.update_column(:state, 'public_purchases')
-        visit page_event_path(@page.slug, @event.slug)
-      end
-
-      it 'supports payments' do
-        button = find(:css, "div.event-summary-and-links-container a.bold_button")
-
-        expect(button).to have_text("Book seats")
-
-        button.click()
-
-        expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Book seats')
-      end
-    end # 'context "general sales" do'
-  end # 'context "states" do'
 end

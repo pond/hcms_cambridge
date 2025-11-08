@@ -14,7 +14,7 @@ FactoryBot.define do
     ends_at          { starts_at + 3.hours }
     number_of_seats  { rand(10..50) }
     price_per_seat   { rand(2499..50000) }
-    currency         { ["NZD", "EUR", "GBP"].sample() } # Note that many tests assume "2dp" precision currency
+    currency         { SUPPORTED_TEST_CURRENCIES.sample() }
     location         { Faker::Address.full_address }
 
     trait :free do

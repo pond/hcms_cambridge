@@ -5,7 +5,7 @@ class Admin::AdminMailer < ApplicationMailer
     @order = order
 
     mail(
-      to:      Hcms.config.contact_email,
+      to:      Hcms.config.orders_email,
       from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] New reservation from #{order.name}"
     )
@@ -15,7 +15,7 @@ class Admin::AdminMailer < ApplicationMailer
     @order = order
 
     mail(
-      to:      Hcms.config.contact_email,
+      to:      Hcms.config.orders_email,
       from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] New paid booking from #{order.name}"
     )
@@ -25,7 +25,7 @@ class Admin::AdminMailer < ApplicationMailer
     @order = order
 
     mail(
-      to:      Hcms.config.contact_email,
+      to:      Hcms.config.orders_email,
       from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] Cancellation from #{order.name}"
     )
@@ -50,7 +50,7 @@ class Admin::AdminMailer < ApplicationMailer
     end
 
     mail(
-      to:      Hcms.config.contact_email,
+      to:      Hcms.config.orders_email,
       from:    Hcms.config.orders_email,
       subject: "[#{Hcms.config.site_name}] PROBLEMATIC ORDER ALERT"
     )
