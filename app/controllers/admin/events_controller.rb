@@ -9,25 +9,25 @@ class Admin::EventsController < ApplicationController
   before_action :build_editable_event, only: [:new,  :create]
   before_action :check_for_revision,   only: [:show, :edit, :update]
 
-  PERMITTED_EVENT_PARAMS = %i{
-    title
-    slug
-    event_hero_image
-    summary
-    body
-    raw_editor
+  PERMITTED_EVENT_PARAMS = [
+    :title,
+    :slug,
+    :event_hero_image,
+    :summary,
+    :body,
+    :raw_editor,
 
-    hidden
-    state
-    starts_at
-    ends_at
-    number_of_seats
-    price_per_seat
-    location
+    :hidden,
+    :state,
+    :starts_at,
+    :ends_at,
+    :number_of_seats,
+    :price_per_seat,
+    :location,
 
-    on_archive_action
-    on_archive_params_blog_id
-  }
+    :on_archive_action,
+    on_archive_params: [:blog_id],
+  ]
 
   public
 
@@ -69,9 +69,17 @@ class Admin::EventsController < ApplicationController
           event_name   = params[:event]
 
           if all_events.exclude?(event_name)
-            return bail_out_with('Unrecognised event change requested')
+            redirect_to(
+              admin_page_event_path(page_id: @event.page.slug, id: @event.slug),
+              alert: 'Unrecognised event change requested'
+            )
+            return # NOTE EARLY EXIT
           elsif valid_events.exclude?(event_name)
-            return bail_out_with('That event cannot be changed in that way')
+            redirect_to(
+              admin_page_event_path(page_id: @event.page.slug, id: @event.slug),
+              alert: 'That event cannot be changed in that way'
+            )
+            return # NOTE EARLY EXIT
           else
             @event.send("#{event_name}_state!")
           end
@@ -158,14 +166,17 @@ class Admin::EventsController < ApplicationController
       draft_message:,
       published_message:
     )
-      safe_params               = self.event_params()
-      on_archive_action         = safe_params.delete(:on_archive_action)
-      on_archive_params         = {}
-      on_archive_params_blog_id = safe_params.delete(:on_archive_params_blog_id)
+      safe_params       = self.event_params()
+      on_archive_action = safe_params[:on_archive_action]
 
       if on_archive_action == Event.on_archive_actions[:move]
-        blog = Page.blogs.find_by_id(on_archive_params_blog_id)
-        on_archive_params[:blog_id] == blog.id if blog.present?
+        blog_id = safe_params.dig(:on_archive_params, :blog_id)
+        blog    = Page.blogs.find_by_id(blog_id) if blog_id.present?
+
+        if blog.blank?
+          safe_params[:on_archive_action] = 'keep'
+          safe_params[:on_archive_params] = {}
+        end
       end
 
       [:number_of_seats, :price_per_seat].each do | attr |
@@ -190,7 +201,6 @@ class Admin::EventsController < ApplicationController
         safe_params[attr] = tz_datetime
       end
 
-      event.assign_attributes(safe_params)
       result = event.persist!(safe_params, publish: params[:publish].present?)
 
       if result.successful

@@ -117,8 +117,18 @@
             <%= f.collection_select :on_archive_action, ::EventOnArchiveAction.types, :internal_name, :human_name %>
 
             <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event.on_archive_actions[:move] ? 'block' : 'none' %>">
-              <%= f.label(:on_archive_params_blog_id, 'Move into which blog?') %>
-              <%= f.collection_select(:on_archive_params_blog_id, Page.blogs.order(:title), :id, :title) %>
+              <%= f.fields_for :on_archive_params do |on_archive_fields| %>
+                <%= on_archive_fields.label(:blog_id, 'Move into which blog?') %>
+                <%=
+                  on_archive_fields.collection_select(
+                    :blog_id,
+                    Page.blogs.order(:title),
+                    :id,
+                    :title,
+                    selected: @event.on_archive_params&.dig('blog_id')
+                  )
+                %>
+              <% end %>
             </div>
           <% end %>
         </div>

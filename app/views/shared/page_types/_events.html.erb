@@ -2,11 +2,20 @@
   # Render the body for an 'events' type page. Usually only rendered via the
   # "shared/_page.html.erb" Partial. Requires local "page", holding the Page
   # instance that is being rendered.
+  #
+  found_archived_section = false
 %>
 
 <% if page.events.for_navigation.any? %>
   <section class="events with-poster-grid">
     <% page.events.for_navigation.each do | event | %>
+      <% if event.state_archived? && found_archived_section == false %>
+        <% found_archived_section = true %>
+        </section>
+        <h2 style="margin-top: 80px;">From the archives</h2>
+        <section class="events with-poster-grid">
+      <% end %>
+
       <article class="event">
         <%= link_to page_event_path(page_id: page.slug, id: event.slug), class: 'event-link' do %>
           <img class="event-hero-image" src="<%= event.event_hero_image.url %>" alt="<%= event.title %>">

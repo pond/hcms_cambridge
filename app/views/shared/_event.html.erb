@@ -12,7 +12,11 @@
     <div class="event-date-and-heading-container">
       <h2 class="event-heading"><%= event.title %></h2>
       <div class="event-date-and-location">
-        <%= evtshelp_datetime(event) %>
+        <% if event.state_archived? %>
+          Took place on <%= apphelp_human_time(event.starts_at, date_only: true) %>
+        <% else %>
+          <%= evtshelp_datetime(event) %>
+        <% end %>
         <% if event.location.present? %>
           <address class="event-location"><%= evtshelp_location(event) %></address>
         <% end %>

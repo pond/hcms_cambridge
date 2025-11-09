@@ -177,14 +177,14 @@ class Editable < ApplicationRecord
 
   # Uses the title to generate a slug, making sure it is unique.
   #
-  def generate_unique_slug
-    return if self.title.blank?
+  def generate_unique_slug(starting_with: nil)
+    return if starting_with.blank? && self.title.blank?
 
-    slug_base = self.title.parameterize
+    slug_base = starting_with || self.title.parameterize
     suffix    = ''
     counter   = 2
 
-    while Page.where(slug: slug_base + suffix).any?
+    while self.class.where(slug: slug_base + suffix).any?
       suffix  = "-#{counter}"
       counter += 1
     end

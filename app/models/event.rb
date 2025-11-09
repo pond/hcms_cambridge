@@ -52,7 +52,7 @@ class Event < Editable
     :on_archive_action,
     {
       keep: 'keep', # Ends up in 'past events' subsection on event page
-      hide: 'hide', # All revisions move into draft state
+      hide: 'hide', # Set as "hidden"; links work, but not shown in navigation
       move: 'move', # Convert and move to blog indicated by archive params
     },
     prefix:  true,
@@ -64,6 +64,33 @@ class Event < Editable
   # ============================================================================
   # Scopes
   # ============================================================================
+
+  STATE_LIST_SQL = <<~SQL
+    CASE state
+      WHEN ? THEN 1
+      WHEN ? THEN 1
+      WHEN ? THEN 1
+      WHEN ? THEN 2
+      WHEN ? THEN 3
+      ELSE 100
+    END ASC,
+    starts_at ASC
+  SQL
+
+  default_scope -> {
+    order(
+      Arel.sql(
+        self.sanitize_sql_array([
+          STATE_LIST_SQL,
+          self.states[:presales          ],
+          self.states[:reserver_purchases],
+          self.states[:public_purchases  ],
+          self.states[:archived          ],
+          self.states[:cancelled         ],
+        ])
+      )
+    )
+  }
 
   default_scope -> { order(starts_at: :asc) }
 
@@ -228,7 +255,7 @@ class Event < Editable
       transitions from: [:presales, :reserver_purchases], to: :public_purchases
     end
 
-    event :archive, after_commit: :stripe_make_inactive do
+    event :archive, after_commit: [:perform_on_archive_action, :stripe_make_inactive] do
       transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_ended?
     end
 
@@ -297,6 +324,53 @@ class Event < Editable
         Sentry.capture_exception(e)
         raise ActiveRecord::Rollback
       end
+    end
+  end
+
+  # The event has been archived; perform the "on archive" action.
+  #
+  def perform_on_archive_action
+
+    # IMPORTANT: Remember to avoid triggering more callbacks here; we're in an
+    # after-commit hook via AASM, so caution is required.
+    #
+    case self.on_archive_action
+      when Event.on_archive_actions[:hide]
+        self.update_column(:hidden, true)
+
+      when Event.on_archive_actions[:move]
+        blog     = Page.blogs.find_by_id(self.on_archive_params&.dig("blog_id"))
+        revision = self.current_revision || self.revisions.order(created_at: :desc).first
+
+        if blog.present? && revision.present?
+          ActiveRecord::Base.transaction do
+            self.update_column(:hidden, true)
+
+            article = Article.new(
+              page_id:            blog.id,
+              created_at:         self.starts_at,
+              updated_at:         self.starts_at,
+              article_hero_image: self.event_hero_image,
+              raw_editor:         self.raw_editor,
+            )
+
+            article.generate_unique_slug(starting_with: self.slug)
+
+            revision = article.revisions.build(
+              title:            revision.title,
+              navigation_title: revision.navigation_title,
+              summary:          revision.summary,
+              body:             revision.body,
+              published:        true,
+              current:          true
+            )
+
+            article.save!
+          end
+        end
+
+      else
+        # Do nothing - state is either "keep" or not yet implemented.
     end
   end
 
