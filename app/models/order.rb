@@ -4,9 +4,7 @@ class Order < ApplicationRecord
   has_secure_token()
 
   belongs_to :event
-
   has_one :stripe_payment, required: false, dependent: :destroy
-  has_one :invoice,        required: false, dependent: :destroy
 
   # Uses the site name first letters capitalised plus "I-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSI-".
