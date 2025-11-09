@@ -165,7 +165,7 @@ RSpec.describe "Pages" do
 
     context "presales" do
       before :each do
-        @event.update_column(:state, 'presales')
+        @event.update_column(:state, "presales")
         visit page_event_path(@page.slug, @event.slug)
       end
 
@@ -177,13 +177,13 @@ RSpec.describe "Pages" do
         button.click()
 
         expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Reserve seats')
+        expect(page).to have_text("Reserve seats")
       end
     end # 'context "presales" do'
 
     context "reserver payments" do
       before :each do
-        @event.update_column(:state, 'reserver_purchases')
+        @event.update_column(:state, "reserver_purchases")
         visit page_event_path(@page.slug, @event.slug)
       end
 
@@ -195,13 +195,13 @@ RSpec.describe "Pages" do
         button.click()
 
         expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Pay for reservation')
+        expect(page).to have_text("Pay for reservation")
       end
     end # 'context "reserver payments" do
 
     context "general sales" do
       before :each do
-        @event.update_column(:state, 'public_purchases')
+        @event.update_column(:state, "public_purchases")
         visit page_event_path(@page.slug, @event.slug)
       end
 
@@ -213,7 +213,7 @@ RSpec.describe "Pages" do
         button.click()
 
         expect(page).to have_current_path(new_page_event_order_path(@page.slug, @event.slug))
-        expect(page).to have_text('Book seats')
+        expect(page).to have_text("Book seats")
       end
     end # 'context "general sales" do'
   end # 'context "states" do'

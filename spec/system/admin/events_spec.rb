@@ -39,7 +39,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       click_on("Save draft")
       spechelp_check_flash(:notice, "New draft event created")
@@ -63,7 +63,7 @@ RSpec.describe "Admin - events" do
       expect(Event.first.revisions.first.published).to eql(false)
 
       expect(Event.first.hidden).to eql(false)
-      expect(Event.first.state).to eql('presales')
+      expect(Event.first.state).to eql("presales")
 
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing event draft", href: edit_admin_page_event_path(Page.first, Event.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Add event",                    href: new_admin_page_event_path(Page.first))
@@ -99,7 +99,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       click_on("Publish event")
       spechelp_check_flash(:notice, "New event published")
@@ -165,7 +165,7 @@ RSpec.describe "Admin - events" do
         fill_in("event_price_per_seat",  with: price)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('event_event_hero_image', image_path)
+        attach_file("event_event_hero_image", image_path)
 
         spechelp_fill_in_redactor(body, for_type: "event")
 
@@ -212,7 +212,7 @@ RSpec.describe "Admin - events" do
         fill_in("event_price_per_seat",  with: price)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('event_event_hero_image', image_path)
+        attach_file("event_event_hero_image", image_path)
 
         editor = find(:css, ".redactor_container .redactor-in")
         editor.click()
@@ -227,7 +227,7 @@ RSpec.describe "Admin - events" do
 
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
           find(".upload-redactor-box").click()
-          attach_file('file', image_path, make_visible: true)
+          attach_file("file", image_path, make_visible: true)
         end
 
         expect(page).to     have_field("event_body", visible: false, with: /\<figure/)
@@ -272,7 +272,7 @@ RSpec.describe "Admin - events" do
         fill_in("event_price_per_seat",  with: price)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('event_event_hero_image', image_path)
+        attach_file("event_event_hero_image", image_path)
 
         editor = find(:css, ".redactor_container .redactor-in")
         editor.click()
@@ -286,7 +286,7 @@ RSpec.describe "Admin - events" do
           file_path = Rails.root.join("spec", "fixtures", "example.pdf")
 
           find(".upload-redactor-box").click()
-          attach_file('file', file_path, make_visible: true)
+          attach_file("file", file_path, make_visible: true)
           fill_in("modal-file-title", with: "Example PDF file")
         end
 
@@ -531,7 +531,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       click_on("Publish event")
       spechelp_check_flash(:notice, "New event published")
@@ -600,7 +600,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       click_on("Publish event")
       spechelp_check_flash(:notice, "New event published")
@@ -677,7 +677,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       click_on("Publish event")
       spechelp_check_flash(:notice, "New event published")
@@ -751,7 +751,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       check("event_raw_editor")
 
@@ -800,7 +800,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       check("event_raw_editor")
 
@@ -897,7 +897,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       check("event_hidden")
 
@@ -908,7 +908,7 @@ RSpec.describe "Admin - events" do
       expect(Revision.for_events.count).to eql(1)
 
       expect(Event.first.hidden).to eql(true)
-      expect(Event.first.state).to eql('presales')
+      expect(Event.first.state).to eql("presales")
     end
 
     it "can start directly in a public sales state" do
@@ -933,7 +933,7 @@ RSpec.describe "Admin - events" do
       fill_in("event_price_per_seat",  with: price)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('event_event_hero_image', image_path)
+      attach_file("event_event_hero_image", image_path)
 
       choose("event_state_public_purchases")
 
@@ -944,7 +944,7 @@ RSpec.describe "Admin - events" do
       expect(Revision.for_events.count).to eql(1)
 
       expect(Event.first.hidden).to eql(false)
-      expect(Event.first.state).to eql('public_purchases')
+      expect(Event.first.state).to eql("public_purchases")
     end
   end # 'context "hidden flag and initial state" do'
 
@@ -968,8 +968,8 @@ RSpec.describe "Admin - events" do
 
         order = Order.create!(
           event:           event_3,
-          name:            'Fred Flintstone',
-          email:           'fred@example.com',
+          name:            "Fred Flintstone",
+          email:           "fred@example.com",
           number_of_seats: 3,
           amount_owed:     3 * event_3.price_per_seat
         )

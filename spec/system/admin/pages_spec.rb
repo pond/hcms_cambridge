@@ -164,7 +164,7 @@ RSpec.describe "Admin - pages" do
 
         expect(new_page.parent).to be_nil
       end
-    end # "context "parent-child" do"
+    end # 'context "parent-child" do'
 
     context "dynamic form behaviour", js: true do
       it "Redactor text entry works" do
@@ -219,7 +219,7 @@ RSpec.describe "Admin - pages" do
           #
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
           find(".upload-redactor-box").click()
-          attach_file('file', image_path, make_visible: true)
+          attach_file("file", image_path, make_visible: true)
         end
 
         # Must wait for the upload to be processed and written with <figure>
@@ -268,7 +268,7 @@ RSpec.describe "Admin - pages" do
           file_path = Rails.root.join("spec", "fixtures", "example.pdf")
 
           find(".upload-redactor-box").click()
-          attach_file('file', file_path, make_visible: true)
+          attach_file("file", file_path, make_visible: true)
           fill_in("modal-file-title", with: "Example PDF file")
         end
 
@@ -375,9 +375,9 @@ RSpec.describe "Admin - pages" do
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
         end
-      end # "context "changes in page type" do"
-    end # "context "dynamic form behaviour", js: true do"
-  end # "context "creation" do"
+      end # 'context "changes in page type" do'
+    end # "'context "dynamic form behaviour", js: true do'
+  end # 'context "creation" do'
 
   context "revision management" do
     context "with only one revision" do
@@ -409,7 +409,7 @@ RSpec.describe "Admin - pages" do
           expect(page).to     have_text("Published")
         end
       end
-    end # "context "with only one revision" do"
+    end # 'context "with only one revision" do'
 
     context "navigation with many revisions" do
       around :each do | example |
@@ -564,7 +564,7 @@ RSpec.describe "Admin - pages" do
           expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
         end
       end
-    end # "context "navigation with many revisions" do"
+    end # 'context "navigation with many revisions" do'
 
     it "can roll back and edit, creating a new draft after a published revision" do
       visit(new_admin_page_path())
@@ -738,7 +738,7 @@ RSpec.describe "Admin - pages" do
       expect(Revision.pluck(:published)).to eql([true, false])
       expect(Revision.pluck(:current  )).to eql([true, false])
     end
-  end # "context "revision management" do"
+  end # 'context "revision management" do'
 
   context "raw editor" do
     it "can be selected when creating a draft" do
@@ -854,11 +854,11 @@ RSpec.describe "Admin - pages" do
       expect(page).to have_css("textarea#page_body")
       expect(page).to have_field("page_body", with: p.body)
     end
-  end # "context "raw editor" do"
+  end # 'context "raw editor" do'
 
   context "contact forms" do
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
     end
 
     it "allows menu items to be specified", js: true do
@@ -928,11 +928,11 @@ RSpec.describe "Admin - pages" do
       expect(page).to     have_field("forms_contact_message")
       expect(page).to     have_button("Send message")
     end
-  end # "context "contact forms" do"
+  end # 'context "contact forms" do'
 
   context "booking forms" do
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
     end
 
     it "allows menu items to be specified", js: true do
@@ -1042,7 +1042,7 @@ RSpec.describe "Admin - pages" do
       expect(page).to     have_field("forms_booking_notes")
       expect(page).to     have_button("Send enquiry")
     end
-  end # "context "booking forms" do"
+  end # 'context "booking forms" do'
 
   # Blog articles are fully tested in 'articles_spec.rb', but basic blog
   # container tests are done here.

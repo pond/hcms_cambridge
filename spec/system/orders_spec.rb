@@ -4,7 +4,7 @@ RSpec.describe "Orders" do
   include OrdersHelper
 
   before :each do
-    allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+    allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
 
     allow(Hcms.config).to receive(:orders_email).and_return("orders@example.com")
     allow(Hcms.config).to receive(:site_name   ).and_return("Site Under Test")
@@ -107,7 +107,7 @@ RSpec.describe "Orders" do
       messages = spechelp_decode_multipart(count: 2)
 
       to_customer = spechelper_find_in_decoded(messages, to: email)
-      to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+      to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
       expect(to_customer).to be_present
       expect(to_admin   ).to be_present
@@ -121,7 +121,7 @@ RSpec.describe "Orders" do
 
       expect(to_customer.html).to include(@event.title)
       expect(to_customer.html).to include(total)
-      expect(to_customer.html).to have_link('Manage order', href: ordershelp_magic_link(Order.first))
+      expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(Order.first))
 
       expect(to_admin.email.from   ).to eql(["orders@example.com"])
       expect(to_admin.email.subject).to eql("[Site Under Test] New reservation from #{Order.first.name}")
@@ -222,7 +222,7 @@ RSpec.describe "Orders" do
       messages = spechelp_decode_multipart(count: 2)
 
       to_customer = spechelper_find_in_decoded(messages, to: "2-" + email)
-      to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+      to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
       expect(to_customer).to be_present
       expect(to_admin   ).to be_present
@@ -270,7 +270,7 @@ RSpec.describe "Orders" do
         messages = spechelp_decode_multipart(count: 2)
 
         to_customer = spechelper_find_in_decoded(messages, to: email)
-        to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
         expect(to_customer).to be_present
         expect(to_admin   ).to be_present
@@ -282,7 +282,7 @@ RSpec.describe "Orders" do
         expect(to_customer.text).to include(ordershelp_magic_link(Order.first))
 
         expect(to_customer.html).to include(@event.title)
-        expect(to_customer.html).to have_link('Manage order', href: ordershelp_magic_link(Order.first))
+        expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(Order.first))
 
         expect(to_admin.email.from   ).to eql(["orders@example.com"])
         expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{Order.first.name}")
@@ -398,7 +398,7 @@ RSpec.describe "Orders" do
         messages = spechelp_decode_multipart(count: 2)
 
         to_customer = spechelper_find_in_decoded(messages, to: email)
-        to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
         expect(to_customer).to be_present
         expect(to_admin   ).to be_present
@@ -412,7 +412,7 @@ RSpec.describe "Orders" do
 
         expect(to_customer.html).to include(@event.title)
         expect(to_customer.html).to include(total)
-        expect(to_customer.html).to have_link('Manage order', href: ordershelp_magic_link(Order.first))
+        expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(Order.first))
 
         expect(to_admin.email.from   ).to eql(["orders@example.com"])
         expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{Order.first.name}")
@@ -551,7 +551,7 @@ RSpec.describe "Orders" do
         messages = spechelp_decode_multipart(count: 2)
 
         to_customer = spechelper_find_in_decoded(messages, to: email)
-        to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
         expect(to_customer).to be_present
         expect(to_admin   ).to be_present
@@ -734,7 +734,7 @@ RSpec.describe "Orders" do
           messages = spechelp_decode_multipart(count: 2)
 
           to_customer = spechelper_find_in_decoded(messages, to: email)
-          to_admin    = spechelper_find_in_decoded(messages, to: 'orders@example.com')
+          to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
           expect(to_customer).to be_present
           expect(to_admin   ).to be_present
@@ -793,4 +793,45 @@ RSpec.describe "Orders" do
       end # 'context "handle failures"'
     end # 'context "paid events" do'
   end # 'context "public sales" do'
+
+
+
+
+
+
+
+
+
+
+
+  xcontext "reserver payments" do
+    it "lets reservers pay" do
+    end
+  end # 'context "reserver payments" do'
+
+  # Possibly put this into a different test, since it's a different controller
+  # (but some of that's already tested above and it's all generally "orders").
+  #
+  xcontext "order management" do
+    it "lets end users manage orders" do
+    end
+
+    # And it lets admins manage - perhaps don't do this here?
+  end # 'context "order management" do'
+
+  xcontext "other failure cases" do
+    it "order pay state change attempt is invalid" do
+    end
+  end
+
+  xcontext 'lots of model stuff' do
+    it "order state machine" do
+    end
+
+    it "event state machine" do
+    end
+
+    it "event on-archive" do
+    end
+  end
 end

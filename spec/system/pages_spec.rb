@@ -19,7 +19,7 @@ RSpec.describe "Pages" do
       main_menu    = find(:css, "nav.main_menu")
       main_content = find(:css, "section.main_content")
 
-      expect(main_menu.find(:css, 'h1')).to have_text(page_1.navigation_title)
+      expect(main_menu.find(:css, "h1")).to have_text(page_1.navigation_title)
       expect(main_content).to have_text(spechelp_strip_markup page_1.body)
 
       expect(main_menu).to     have_link(page_3.title, href: page_path(page_3.slug))
@@ -250,7 +250,7 @@ RSpec.describe "Pages" do
     end
 
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
 
       allow(Hcms.config).to receive(:contact_email).and_return("contact@example.com")
       allow(Hcms.config).to receive(:site_name    ).and_return("Site Under Test")
@@ -307,16 +307,16 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("+64 21 000 000")
       expect(delivered.text).to include("Quick Brown Fox\nOther text")
 
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
+        email:   "fred@example.com",
         body:    "You asked:\n\n> Quick Brown Fox\n> Other text\n\n",
-        subject: 'Your Site Under Test enquiry'
+        subject: "Your Site Under Test enquiry"
       )
       spechelp_check_tel(
         html:  delivered.html,
-        phone: '+64 21 000 000'
+        phone: "+64 21 000 000"
       )
       expect(delivered.html).to include(">Quick Brown Fox\n<br>Other text</p>")
     end
@@ -344,12 +344,12 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
+        email:   "fred@example.com",
         body:    "You asked:\n\n> Quick Brown Fox\n\n",
-        subject: 'Your Site Under Test enquiry'
+        subject: "Your Site Under Test enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -385,14 +385,14 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dt', text: 'Menu selection')
-      expect(delivered.html).to have_css('dd', text: 'This is item two')
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dt", text: "Menu selection")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
+        email:   "fred@example.com",
         body:    "You asked:\n\n> Quick Brown Fox\n\n",
-        subject: 'Your Site Under Test enquiry'
+        subject: "Your Site Under Test enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -429,14 +429,14 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dt', text: 'How did you hear about us?')
-      expect(delivered.html).to have_css('dd', text: 'This is item two')
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
+        email:   "fred@example.com",
         body:    "You asked:\n\n> Quick Brown Fox\n\n",
-        subject: 'Your Site Under Test enquiry'
+        subject: "Your Site Under Test enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -452,7 +452,7 @@ RSpec.describe "Pages" do
     end
 
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
 
       allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
       allow(Hcms.config).to receive(:booking_email    ).and_return("booking@example.com")
@@ -515,20 +515,20 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("11:30")
       expect(delivered.text).to include("Quick Brown Fox\nOther text")
 
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
-        subject: 'Your Site Under Test booking enquiry'
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
       )
       spechelp_check_tel(
         html:  delivered.html,
         phone: '+64 021 000 000'
       )
-      expect(delivered.html).to have_css('dt', text: 'Date')
-      expect(delivered.html).to have_css('dd', text: "20/01/#{Date.today.year + 2}")
-      expect(delivered.html).to have_css('dt', text: 'Preferred time')
-      expect(delivered.html).to have_css('dd', text: '11:30')
+      expect(delivered.html).to have_css("dt", text: "Date")
+      expect(delivered.html).to have_css("dd", text: "20/01/#{Date.today.year + 2}")
+      expect(delivered.html).to have_css("dt", text: "Preferred time")
+      expect(delivered.html).to have_css("dd", text: "11:30")
       expect(delivered.html).to include(">Quick Brown Fox\n<br>Other text</p>")
     end
 
@@ -555,11 +555,11 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
-        subject: 'Your Site Under Test booking enquiry'
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -595,13 +595,13 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dt', text: 'Menu selection')
-      expect(delivered.html).to have_css('dd', text: 'This is item two')
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dt", text: "Menu selection")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
-        subject: 'Your Site Under Test booking enquiry'
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -638,13 +638,13 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to have_css('dt', text: 'How did you hear about us?')
-      expect(delivered.html).to have_css('dd', text: 'This is item two')
-      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      expect(delivered.html).to have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
-        subject: 'Your Site Under Test booking enquiry'
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
       )
       expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
@@ -692,13 +692,13 @@ RSpec.describe "Pages" do
       expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
       spechelp_check_mailto(
         html:    delivered.html,
-        email:   'fred@example.com',
-        subject: 'Your Site Under Test booking enquiry'
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
       )
-      expect(delivered.html).to     have_css('dt', text: 'How did you hear about us?')
-      expect(delivered.html).to     have_css('dd', text: 'This is item two')
-      expect(delivered.html).to_not have_css('dt', text: 'Date')
-      expect(delivered.html).to_not have_css('dt', text: 'Preferred time')
+      expect(delivered.html).to     have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to     have_css("dd", text: "This is item two")
+      expect(delivered.html).to_not have_css("dt", text: "Date")
+      expect(delivered.html).to_not have_css("dt", text: "Preferred time")
       expect(delivered.html).to     include(">Quick Brown Fox</p>")
      end
   end # 'context "booking forms" do'

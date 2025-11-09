@@ -29,7 +29,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       click_on("Save draft")
       spechelp_check_flash(:notice, "New draft article created")
@@ -71,7 +71,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       click_on("Publish article")
       spechelp_check_flash(:notice, "New article published")
@@ -121,7 +121,7 @@ RSpec.describe "Admin - articles" do
         fill_in("article_summary", with: summary)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('article_article_hero_image', image_path)
+        attach_file("article_article_hero_image", image_path)
 
         spechelp_fill_in_redactor(body, for_type: "article")
 
@@ -153,7 +153,7 @@ RSpec.describe "Admin - articles" do
         fill_in("article_summary", with: summary)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('article_article_hero_image', image_path)
+        attach_file("article_article_hero_image", image_path)
 
         editor = find(:css, ".redactor_container .redactor-in")
         editor.click()
@@ -168,7 +168,7 @@ RSpec.describe "Admin - articles" do
 
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
           find(".upload-redactor-box").click()
-          attach_file('file', image_path, make_visible: true)
+          attach_file("file", image_path, make_visible: true)
         end
 
         expect(page).to     have_field("article_body", visible: false, with: /\<figure/)
@@ -203,7 +203,7 @@ RSpec.describe "Admin - articles" do
         fill_in("article_summary", with: summary)
 
         image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-        attach_file('article_article_hero_image', image_path)
+        attach_file("article_article_hero_image", image_path)
 
         editor = find(:css, ".redactor_container .redactor-in")
         editor.click()
@@ -217,7 +217,7 @@ RSpec.describe "Admin - articles" do
           file_path = Rails.root.join("spec", "fixtures", "example.pdf")
 
           find(".upload-redactor-box").click()
-          attach_file('file', file_path, make_visible: true)
+          attach_file("file", file_path, make_visible: true)
           fill_in("modal-file-title", with: "Example PDF file")
         end
 
@@ -241,8 +241,8 @@ RSpec.describe "Admin - articles" do
         expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
         expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
       end
-    end # "context "dynamic behaviour", js: true do"
-  end # "context "creation" do"
+    end # 'context "dynamic behaviour", js: true do'
+  end # 'context "creation" do'
 
   context "revision management" do
     context "with only one revision" do
@@ -274,7 +274,7 @@ RSpec.describe "Admin - articles" do
           expect(page).to     have_text("Published")
         end
       end
-    end # "context "with only one revision" do"
+    end # 'context "with only one revision" do'
 
     context "navigation with many revisions" do
       around :each do | example |
@@ -438,7 +438,7 @@ RSpec.describe "Admin - articles" do
           expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
         end
       end
-    end # "context "navigation with many revisions" do"
+    end # 'context "navigation with many revisions" do'
 
     it "can roll back and edit, creating a new draft after a published revision" do
       visit(new_admin_page_article_path(@page))
@@ -452,7 +452,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       click_on("Publish article")
       spechelp_check_flash(:notice, "New article published")
@@ -511,7 +511,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       click_on("Publish article")
       spechelp_check_flash(:notice, "New article published")
@@ -578,7 +578,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       click_on("Publish article")
       spechelp_check_flash(:notice, "New article published")
@@ -627,7 +627,7 @@ RSpec.describe "Admin - articles" do
       expect(Revision.for_articles.pluck(:published)).to eql([true, false])
       expect(Revision.for_articles.pluck(:current  )).to eql([true, false])
     end
-  end # "context "revision management" do"
+  end # 'context "revision management" do'
 
   context "raw editor" do
     it "can be selected when creating a draft" do
@@ -642,7 +642,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       check("article_raw_editor")
 
@@ -681,7 +681,7 @@ RSpec.describe "Admin - articles" do
       fill_in("article_body",    with: body)
 
       image_path = Rails.root.join("spec", "fixtures", "example.jpg")
-      attach_file('article_article_hero_image', image_path)
+      attach_file("article_article_hero_image", image_path)
 
       check("article_raw_editor")
 
@@ -753,7 +753,7 @@ RSpec.describe "Admin - articles" do
       expect(page).to have_css("textarea#article_body")
       expect(page).to have_field("article_body", with: article.body)
     end
-  end # "context "raw editor" do"
+  end # 'context "raw editor" do'
 
   context "lists" do
     context "display" do

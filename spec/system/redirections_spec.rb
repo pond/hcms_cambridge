@@ -141,13 +141,13 @@ RSpec.describe "Redirections" do
         list.each do | item |
           random = SecureRandom.uuid
           case section
-            when 'match_exactly', :match_exactly
+            when "match_exactly", :match_exactly
               test_positive = item
               test_negative = "#{item}#{random}"
-            when 'starts_with', :starts_with
+            when "starts_with", :starts_with
               test_positive = "#{item}#{random}"
               test_negative = "#{random}#{item}#{random}"
-            when 'found_anywhere', :found_anywhere
+            when "found_anywhere", :found_anywhere
               test_positive = "#{random}#{item}#{random}"
               test_negative = "#{random}#{item[...-1]}#{random}"
           end
