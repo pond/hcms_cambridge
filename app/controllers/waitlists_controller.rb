@@ -37,7 +37,7 @@ class WaitlistsController < ApplicationController
     end
 
     unless success
-      flash[:alert] = "Sorry! The anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
+      flash[:alert] = "Sorry, the anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
 
       render :new
       return

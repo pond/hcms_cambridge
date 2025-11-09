@@ -16,12 +16,7 @@ class OrdersController < ApplicationController
   # parameter.
   #
   def new
-    if params[:with_order]
-      order = Order.find_by_id(params[:with_order])
-      @order = order if order&.state_new?
-    end
-
-    @order ||= Order.new(event: @event)
+    self.get_or_build_new_order()
   end
 
   # This is one way that payment gateway (e.g. Stripe) checkout flow kicks
@@ -32,7 +27,7 @@ class OrdersController < ApplicationController
   # which goes to that same controller.
   #
   def create
-    @order = Order.new(event: @event)
+    self.get_or_build_new_order()
     @order.assign_attributes(order_params())
 
     success = begin
@@ -42,7 +37,7 @@ class OrdersController < ApplicationController
     end
 
     unless success
-      flash[:alert] = "Sorry! The anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
+      flash[:alert] = "Sorry, the anti-robots checker wasn't happy... Please try again or contact us by phone or social medial for assistance."
 
       render :new
       return
@@ -80,10 +75,10 @@ class OrdersController < ApplicationController
     # confirm the successful booking.
     #
     elsif @order.amount_owed.zero?
-      @order.paid_state!
+      @order.pay_state!
       redirect_to(
         page_event_path(page_id: @page.slug, id: @event.slug),
-        notice: 'Thanks, your booing is confirmed! We look forward to seeing you there.'
+        notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
       )
 
     # Payment flow. The user wants to pay now.
@@ -103,10 +98,6 @@ class OrdersController < ApplicationController
       flash[:alert] = 'There was a problem with the order confirmation; please check the order details'
       render :new
     end
-  rescue Stripe::StripeError => e
-    Sentry.capture_exception(e, extra: { order_id: @order&.id })
-    flash[:alert] = 'There was a problem trying to talk to the payment provider; please wait a moment, then try again. If problems persist, please get in touch!'
-    render :new
   end
 
   # DELETE /pages/<page_id>/events/<event_id>/orders/<order_id>
@@ -181,6 +172,18 @@ class OrdersController < ApplicationController
       Order.stale.delete_all # (delete -> direct SQL for speed; no callbacks)
     end
 
+    # If 'with_order' holds a valid ID of an Order in a 'new' state with an
+    # event ID matching @event, store it in @order; else store a new record
+    # there, for the event in @event.
+    #
+    def get_or_build_new_order
+      if params[:with_order]
+        order = Order.find_by_id(params[:with_order])
+        @order = order if order&.state_new? && order.event_id == @event.id
+      end
+
+      @order ||= Order.new(event: @event)
+    end
     def order_params
       permitted_order_params = %i{
         name

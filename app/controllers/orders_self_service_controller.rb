@@ -68,10 +68,10 @@ class OrdersSelfServiceController < ApplicationController
       # Edge case - "paying" for a free item. Just say, "booking confirmed".
       #
       if @order.amount_owed.zero?
-        @order.paid_state!
+        @order.pay_state!
         redirect_to(
           page_event_path(page_id: @page.slug, id: @event.slug),
-          notice: 'Thanks, your booing is confirmed! We look forward to seeing you there.'
+          notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
         )
 
         return # NOTE EARLY EXIT
@@ -127,11 +127,11 @@ class OrdersSelfServiceController < ApplicationController
   rescue Stripe::StripeError => e
     Sentry.capture_exception(e, extra: { order_id: @order&.id })
 
-    flash[:alert] = 'There was a problem trying to talk to the payment provider. Please wait a moment, then try again. If problems persist, please get in touch!'
+    flash[:alert] = 'Sorry, there was a problem trying to talk to the payment provider. Please wait a moment, then try again. If problems persist, please get in touch!'
     render :edit
 
   rescue StandardError => e
-    Sentry.capture_exception(e)
+    Sentry.capture_exception(e, extra: { order_id: (@order&.id rescue nil) })
 
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
@@ -163,11 +163,10 @@ class OrdersSelfServiceController < ApplicationController
   #
   def stripe_payment_succeeded
     ActiveRecord::Base.transaction do
-      locked_order = Order.lock.find(@order.id)
-
-      if locked_order.valid?
+      begin
+        locked_order = Order.lock.find(@order.id)
         locked_order.pay_state!
-      else # Never expected - *THIS IS SERIOUS* as payment has been taken.
+      rescue StandardError => e
         Sentry.capture_message(
           "URGENT: Payment made but website-side order update failed (#{@order&.id} / #{@order&.email} / #{@order&.name})",
           level: :error,
@@ -185,7 +184,9 @@ class OrdersSelfServiceController < ApplicationController
         )
 
         Admin::AdminMailer.problematic_order_email(@order).deliver_now()
-        return
+        Sentry.capture_exception(e, extra: { order_id: (@order&.id rescue nil) })
+
+        return # NOTE EARLY EXIT (but note the 'ensure' clause below)
       end
 
       # Try to get the payment details for our-side refund, but this isn't
@@ -197,18 +198,20 @@ class OrdersSelfServiceController < ApplicationController
           order:                 @order,
           stripe_payment_intent: session.payment_intent
         )
-      rescue Stripe::StripeError => e
+      rescue StandardError => e
         Sentry.capture_exception(e, extra: { order_id: @order&.id })
       end
     end
 
+  ensure
+    #
     # Success or not, *do not panic the user!* - there is nothing they can do.
     # We have to hope our monitoring and alerting worked OK so that if there
     # was a problem, it can be manually resolved.
     #
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
-      notice: 'Thanks, your booing is confirmed! We look forward to seeing you there.'
+      notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
     )
   end
 

@@ -10,6 +10,8 @@
     method:  :post
   ) do | f |
 %>
+  <%= hidden_field_tag(:with_order, params[:with_order]) if params[:with_order].present? %>
+
   <p>
     <%= apphelp_label(f, :name, required: true) %>
     <%= f.text_field :name %>

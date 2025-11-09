@@ -107,9 +107,17 @@ module EventsHelper
     else
       link_text ||= order.email
       subject = if order.event&.title.present?
-        "Your booking for \"#{order.event.title}\""
+        if order.state_paid?
+          "Your booking for \"#{order.event.title}\""
+        else
+          "Your reservation for \"#{order.event.title}\""
+        end
       else
-        "Your #{Hcms.config.site_name} booking"
+        if order.state_paid?
+          "Your #{Hcms.config.site_name} booking"
+        else
+          "Your #{Hcms.config.site_name} reservation"
+        end
       end
 
       mail_to(order.email, link_text, subject: subject)
