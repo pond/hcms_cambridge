@@ -794,19 +794,381 @@ RSpec.describe "Orders" do
     end # 'context "paid events" do'
   end # 'context "public sales" do'
 
+  context "reserver payments" do
+    before :each do
+      expect(@event.state).to eql(Event.states[:presales]) # (self-check)
 
+      @name     = "Fred Flintstone"
+      @email    = "fred@example.com"
+      @phone    = "+64 021 000 000"
+      @seats    = 2
+      @discount = @event.price_per_seat / 2
 
+      @order = Order.create!(
+        event:           @event,
+        name:            @name ,
+        email:           @email,
+        phone_number:    @phone,
+        number_of_seats: @seats,
+        amount_owed:     @seats * @event.price_per_seat - @discount,
+      )
 
+      @order.reserve_state!
 
+      messages    = spechelp_decode_multipart(count: 2)
+      to_customer = spechelper_find_in_decoded(messages, to: @email)
+      to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
+      expect(to_customer).to be_present
+      expect(to_admin   ).to be_present
 
+      expect(to_customer.email.from   ).to eql(["orders@example.com"])
+      expect(to_customer.email.subject).to eql("Reservation confirmed for \"#{@event.title}\"")
 
+      expect(to_admin.email.from   ).to eql(["orders@example.com"])
+      expect(to_admin.email.subject).to eql("[Site Under Test] New reservation from #{Order.first.name}")
 
+      ActionMailer::Base.deliveries.clear()
 
+      @event.start_reserver_purchases_state!
 
-  xcontext "reserver payments" do
-    it "lets reservers pay" do
+      to_customer = spechelp_decode_multipart(count: 1)
+
+      expect(to_customer.email.to     ).to eql([@email])
+      expect(to_customer.email.from   ).to eql(["orders@example.com"])
+      expect(to_customer.email.subject).to eql("It's time to confirm your booking for \"#{@event.title}\"")
+
+      expect(to_customer.text).to include(@event.title.upcase)
+      expect(to_customer.text).to include("If you still wish to attend")
+      expect(to_customer.text).to include(ordershelp_magic_link(@order))
+
+      expect(to_customer.html).to include(@event.title)
+      expect(to_customer.html).to include("If you still wish to attend")
+      expect(to_customer.html).to have_link("Manage booking", href: ordershelp_magic_link(@order))
+
+      ActionMailer::Base.deliveries.clear()
     end
+
+    context "free events" do
+      before :each do
+        @event.update_column(:price_per_seat, 0)
+        @order.update_column(:amount_owed,    0)
+      end
+
+      it "cannot accept direct payment or other reservations" do
+        visit new_page_event_order_path(@page.slug, @event.slug)
+
+        expect(page).to     have_text("Thanks for your interest in this event")
+        expect(page).to     have_text("reservation period has ended")
+        expect(page).to_not have_css('input[type="submit"]')
+      end
+
+      it "can be confirmed via the order management link" do
+        visit URI(ordershelp_magic_link(@order)).path
+
+        expect(page).to have_text("Manage order")
+        expect(page).to have_text(@event.title)
+        expect(page).to have_css("dd", text: @name)
+        expect(page).to have_css("dd", text: @email)
+        expect(page).to have_css("dd", text: @seats)
+        expect(page).to have_css("dd", text: "No charge")
+
+        click_on("Finalise booking")
+
+        expect(page).to have_text("Thanks, your booking is confirmed")
+
+        @order.reload()
+
+        expect(@order.state).to eql("paid")
+        expect(@event.confirmed_seats_remaining).to eql(@event.number_of_seats - @seats)
+
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: @email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer).to be_present
+        expect(to_admin   ).to be_present
+
+        expect(to_customer.email.from   ).to eql(["orders@example.com"])
+        expect(to_customer.email.subject).to eql("Booking confirmed for \"#{@event.title}\"")
+
+        expect(to_customer.text).to include(@event.title.upcase)
+        expect(to_customer.text).to include(ordershelp_magic_link(@order))
+
+        expect(to_customer.html).to include(@event.title)
+        expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(@order))
+
+        expect(to_admin.email.from   ).to eql(["orders@example.com"])
+        expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{@name}")
+      end
+
+      it "can be cancelled via the order management link", js: true do
+        visit URI(ordershelp_magic_link(@order)).path
+
+        expect(page).to have_text("Manage order")
+
+        accept_confirm("Are you sure") do
+          click_on("Cancel")
+        end
+
+        expect(page).to have_text("OK, that's cancelled")
+
+        @order.reload()
+
+        expect(@order.state).to eql("cancelled")
+        expect(@event.confirmed_seats_remaining).to eql(@event.number_of_seats)
+
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: @email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer).to be_present
+        expect(to_admin   ).to be_present
+
+        expect(to_customer.email.from   ).to eql(["orders@example.com"])
+        expect(to_customer.email.subject).to eql("Confirmation of cancellation for \"#{@event.title}\"")
+
+        expect(to_customer.text).to include(@event.title.upcase)
+        expect(to_customer.text).to include("Your reservation for this event has been cancelled.")
+
+        expect(to_customer.html).to include(@event.title)
+        expect(to_customer.html).to include("Your reservation for this event has been cancelled.")
+
+        expect(to_admin.email.from   ).to eql(["orders@example.com"])
+        expect(to_admin.email.subject).to eql("[Site Under Test] Cancellation from #{@name}")
+
+        expect(to_admin.text).to include(@event.title)
+        expect(to_admin.text).to include(@name)
+        expect(to_admin.text).to include(@email)
+        expect(to_admin.html).to include(admin_page_event_orders_url(page_id: @event.page.slug, event_id: @event.slug))
+
+        expect(to_admin.html).to include(@event.title)
+        expect(to_admin.html).to include(@name)
+        expect(to_admin.html).to include(@email)
+        expect(to_admin.html).to have_link("here", href: admin_page_event_orders_url(page_id: @event.page.slug, event_id: @event.slug))
+      end
+    end # 'context "free events" do'
+
+    context "paid events" do
+      it "cannot accept direct payment or other reservations" do
+        visit new_page_event_order_path(@page.slug, @event.slug)
+
+        expect(page).to     have_text("Thanks for your interest in this event")
+        expect(page).to     have_text("reservation period has ended")
+        expect(page).to_not have_css('input[type="submit"]')
+      end
+
+      it "can be paid for via the order management link (respecting discounts)" do
+        visit URI(ordershelp_magic_link(@order)).path
+
+        per_seat = spechelp_format_money(@event.price_per_seat, @event.currency)
+        total    = spechelp_format_money(@order.amount_owed,    @event.currency)
+
+        expect(page).to have_text("Manage order")
+        expect(page).to have_text(@event.title)
+        expect(page).to have_css("dd", text: @name)
+        expect(page).to have_css("dd", text: @email)
+        expect(page).to have_css("dd", text: @seats)
+        expect(page).to have_css("dd", text: total)
+
+        mock_prodid  = "product_test_1234"
+        mock_priceid = "price_test_1234"
+        mock_csid    = "cs_test_1234"
+        mock_payint  = "pi_test_1234"
+
+        expect(Stripe::Product).to receive(:create).once do | args |
+          expect(args[:name]).to eql(@event.title)
+
+          double(id: mock_prodid)
+        end
+
+        expect(Stripe::Price).to receive(:create).once do | args |
+          expect(args[:currency   ]).to eql(@event.currency)
+          expect(args[:unit_amount]).to eql(@event.price_per_seat)
+          expect(args[:product    ]).to eql(mock_prodid)
+
+          double(id: mock_priceid)
+        end
+
+        expect(Stripe::Checkout::Session).to receive(:create).once do | args |
+          expect(args[:mode]).to eql("payment")
+          expect(args[:success_url]).to include("manage_order")
+          expect(args[:cancel_url ]).to include("manage_order")
+          expect(args[:success_url]).to end_with("stripe_payment_succeeded?csid={CHECKOUT_SESSION_ID}")
+          expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
+
+          expect(args[:line_items].size ).to eql(1)
+          expect(args[:line_items].first).to eql({price: mock_priceid, quantity: 2})
+
+          double(url: args[:success_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
+        end
+
+        expect(Stripe::Checkout::Session).to receive(:retrieve).with(mock_csid) do
+          double(payment_intent: mock_payint)
+        end
+
+        click_on("Pay now")
+
+        expect(StripePrice.count).to eql(1)
+        expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
+        expect(StripePayment.count).to eql(1)
+        expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
+        expect(Order.count).to eql(1)
+        expect(Order.first.state).to eql("paid")
+        expect(page).to have_text("Thanks, your booking is confirmed")
+
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: @email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer).to be_present
+        expect(to_admin   ).to be_present
+
+        expect(to_customer.email.from   ).to eql(["orders@example.com"])
+        expect(to_customer.email.subject).to eql("Booking confirmed for \"#{@event.title}\"")
+
+        expect(to_customer.text).to include(@event.title.upcase)
+        expect(to_customer.text).to include(ordershelp_magic_link(@order))
+
+        expect(to_customer.html).to include(@event.title)
+        expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(@order))
+
+        expect(to_admin.email.from   ).to eql(["orders@example.com"])
+        expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{@name}")
+      end
+
+      it "handles the user cancelling from within Stripe and confirming" do
+        visit new_page_event_order_path(@page.slug, @event.slug)
+
+        name  = "Fred Flintstone"
+        email = "fred@example.com"
+        phone = "+64 021 000 000"
+        seats = 2
+
+        fill_in("order_name",            with: name)
+        fill_in("order_email",           with: email)
+        fill_in("order_phone_number",    with: phone)
+        fill_in("order_number_of_seats", with: seats)
+
+        click_on("Next")
+
+        expect(Order.count).to eql(1)
+        expect(page).to have_text("Please check the details of your booking")
+
+        mock_prodid  = "product_test_1234"
+        mock_priceid = "price_test_1234"
+        mock_csid    = "cs_test_1234"
+
+        expect(Stripe::Product).to receive(:create).once do | args |
+          double(id: mock_prodid)
+        end
+
+        expect(Stripe::Price).to receive(:create).once do | args |
+          double(id: mock_priceid)
+        end
+
+        expect(Stripe::Checkout::Session).to receive(:create).once do | args |
+          double(url: args[:cancel_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
+        end
+
+        click_on("Pay now")
+
+        expect(Order.count).to eql(1)
+        expect(Order.first.state).to eql("new")
+        expect(page).to have_text("Please confirm cancellation")
+
+        click_on("Cancel")
+
+        expect(Order.count).to eql(1)
+        expect(Order.first.state).to eql("cancelled")
+        expect(page).to have_text("OK, that's cancelled")
+      end
+
+      it "handles the user cancelling from within Stripe but then changing their mind and paying" do
+        visit new_page_event_order_path(@page.slug, @event.slug)
+
+        name  = "Fred Flintstone"
+        email = "fred@example.com"
+        phone = "+64 021 000 000"
+        seats = 2
+
+        fill_in("order_name",            with: name)
+        fill_in("order_email",           with: email)
+        fill_in("order_phone_number",    with: phone)
+        fill_in("order_number_of_seats", with: seats)
+
+        click_on("Next")
+
+        expect(Order.count).to eql(1)
+        expect(page).to have_text("Please check the details of your booking")
+
+        mock_prodid  = "product_test_1234"
+        mock_priceid = "price_test_1234"
+        mock_csid    = "cs_test_1234"
+        mock_payint  = "pi_test_1234"
+
+        expect(Stripe::Product).to receive(:create).once do | args |
+          double(id: mock_prodid)
+        end
+
+        expect(Stripe::Price).to receive(:create).once do | args |
+          double(id: mock_priceid)
+        end
+
+        expect(Stripe::Checkout::Session).to receive(:create).once do | args |
+          double(url: args[:cancel_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
+        end
+
+        click_on("Pay now")
+
+        expect(Order.count).to eql(1)
+        expect(Order.first.state).to eql("new")
+        expect(page).to have_text("Please confirm cancellation")
+
+        expect(Stripe::Checkout::Session).to receive(:create).once do | args |
+          double(url: args[:success_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
+        end
+
+        expect(Stripe::Checkout::Session).to receive(:retrieve).with(mock_csid) do
+          double(payment_intent: mock_payint)
+        end
+
+        click_on("Pay now")
+
+        expect(StripePrice.count).to eql(1)
+        expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
+        expect(StripePayment.count).to eql(1)
+        expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
+        expect(Order.count).to eql(1)
+        expect(Order.first.state).to eql("paid")
+        expect(page).to have_text("Thanks, your booking is confirmed")
+
+        messages = spechelp_decode_multipart(count: 2)
+
+        to_customer = spechelper_find_in_decoded(messages, to: email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer).to be_present
+        expect(to_admin   ).to be_present
+      end
+
+      it "can be cancelled via the order management link", js: true do
+        visit URI(ordershelp_magic_link(@order)).path
+
+        expect(page).to have_text("Manage order")
+
+        accept_confirm("Are you sure") do
+          click_on("Cancel")
+        end
+
+        expect(page).to have_text("OK, that's cancelled")
+
+        @order.reload()
+
+        expect(@order.state).to eql("cancelled")
+        expect(@event.confirmed_seats_remaining).to eql(@event.number_of_seats)
+      end
+    end # 'context "paid events" do'
   end # 'context "reserver payments" do'
 
   # Possibly put this into a different test, since it's a different controller

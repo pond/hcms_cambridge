@@ -198,18 +198,23 @@ class Event < Editable
     end
   end
 
+  # This is mostly here for local development and test purposes, where file
+  # storage is in use - otherwise the event hero URL from S3 is used.
+  #
+  def product_image_url
+    product_image_url = if self.event_hero_image.class.storage == CarrierWave::Storage::File
+      'https://upload.wikimedia.org/wikipedia/commons/1/15/Hieronymus_Bosch_-_Allegory_of_Gluttony_and_Lust_-_WGA02558.jpg'
+    else
+      self.event_hero_image.url
+    end
+  end
+
   def get_or_create_stripe_price(with_event_url:)
     return self.stripe_price || begin
-      product_image_url = if self.event_hero_image.class.storage == CarrierWave::Storage::File
-        'https://upload.wikimedia.org/wikipedia/commons/1/15/Hieronymus_Bosch_-_Allegory_of_Gluttony_and_Lust_-_WGA02558.jpg'
-      else
-        self.event_hero_image.url
-      end
-
       product_result = Stripe::Product.create(
         name:        self.title,
         description: ApplicationController.helpers.evtshelp_datetime(self),
-        images:      [product_image_url],
+        images:      [self.product_image_url],
         shippable:   false,
         unit_label:  'seat',
         url:         with_event_url,

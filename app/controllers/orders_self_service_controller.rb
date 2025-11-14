@@ -77,9 +77,8 @@ class OrdersSelfServiceController < ApplicationController
         return # NOTE EARLY EXIT
       end
 
-      stripe_price = @order.event.get_or_create_stripe_price(
-        with_event_url: page_event_url(page_id: @order.event.page.slug, id: @order.event.slug)
-      )
+      event_url    = page_event_url(page_id: @order.event.page.slug, id: @order.event.slug)
+      stripe_price = @order.event.get_or_create_stripe_price(with_event_url: event_url)
 
       branding_settings = {
         background_color: (Hcms.config.stripe[:checkout_background] rescue '#ffffff'),
@@ -100,26 +99,41 @@ class OrdersSelfServiceController < ApplicationController
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
+      if @order.amount_owed == @event.price_per_seat * @order.number_of_seats
+        line_items = [{
+          quantity: @order.number_of_seats,
+          price:    stripe_price.stripe_price_id,
+        }]
+      else
+        line_items = [{
+          quantity:   1,
+          price_data: {
+            currency:     @order.event.currency,
+            unit_amount:  @order.amount_owed,
+            product_data: {
+              name:        @order.event.title,
+              description: helpers.evtshelp_datetime(@order.event),
+              images:      [@order.event.product_image_url],
+              unit_label:  "booking",
+            }
+          }
+        }]
+      end
+
       session = Stripe::Checkout::Session.create(
         mode:              'payment',
         success_url:       templated_success_url,
         cancel_url:        templated_cancel_url,
         customer_email:    @order.email,
         branding_settings: branding_settings,
+        line_items:        line_items,
         invoice_creation:  {
           enabled:      true,
           invoice_data: invoice_data,
         },
-        line_items:  [
-          {
-            price:    stripe_price.stripe_price_id,
-            quantity: @order.number_of_seats,
-          }
-        ],
       )
 
       redirect_to(session.url, status: :see_other, allow_other_host: true) # (HTTP 303)
-
     else
       raise "Unsupported parameters - #{params[:event].inspect} / #{params[:process].inspect}"
     end
