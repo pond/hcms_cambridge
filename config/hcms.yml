@@ -25,6 +25,9 @@ default: &default
   tax_number:        '65-749-556'
   tax_name:          'GST'
 
+  # If you use event ordering (see above) then the footer summary must contain a
+  # postal address, since this summary is shown in tax invoices.
+  #
   footer_summary:    '<strong>Wine Sentience</strong> &ndash; The Exchange, 17A Allen Street, Te Aro, Wellington 6011, New Zealand'
   hide_contact_info: true
   facebook:          ''

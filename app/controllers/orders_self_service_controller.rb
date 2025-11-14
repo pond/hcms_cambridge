@@ -99,12 +99,7 @@ class OrdersSelfServiceController < ApplicationController
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
-      if @order.amount_owed == @event.price_per_seat * @order.number_of_seats
-        line_items = [{
-          quantity: @order.number_of_seats,
-          price:    stripe_price.stripe_price_id,
-        }]
-      else
+      if @order.includes_discount?
         line_items = [{
           quantity:   1,
           price_data: {
@@ -117,6 +112,11 @@ class OrdersSelfServiceController < ApplicationController
               unit_label:  "booking",
             }
           }
+        }]
+      else
+        line_items = [{
+          quantity: @order.number_of_seats,
+          price:    stripe_price.stripe_price_id,
         }]
       end
 

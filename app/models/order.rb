@@ -213,6 +213,10 @@ class Order < ApplicationRecord
     )
   end
 
+  def includes_discount?
+    self.amount_owed < self.event.price_per_seat * self.number_of_seats
+  end
+
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Main definition
   # ============================================================================

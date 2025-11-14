@@ -104,8 +104,7 @@ RSpec.describe "Orders" do
       expect(Order.first.state).to eql("reserved")
       expect(page).to have_text("Thanks, your reservation has been made")
 
-      messages = spechelp_decode_multipart(count: 2)
-
+      messages    = spechelp_decode_multipart(count: 2)
       to_customer = spechelper_find_in_decoded(messages, to: email)
       to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -219,8 +218,7 @@ RSpec.describe "Orders" do
       expect(Order.first.state).to eql("reserved")
       expect(page).to have_text("Thanks, your reservation has been made")
 
-      messages = spechelp_decode_multipart(count: 2)
-
+      messages    = spechelp_decode_multipart(count: 2)
       to_customer = spechelper_find_in_decoded(messages, to: "2-" + email)
       to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -256,8 +254,9 @@ RSpec.describe "Orders" do
 
         click_on("Next")
 
-        expect(Order.count).to eql(1)
+        expect(page).to have_text("Thanks, your booking is confirmed")
 
+        expect(Order.count).to eql(1)
         expect(Order.first.state          ).to eql("paid")
         expect(Order.first.name           ).to eql(name)
         expect(Order.first.email          ).to eql(email)
@@ -265,10 +264,7 @@ RSpec.describe "Orders" do
         expect(Order.first.number_of_seats).to eql(seats)
         expect(Order.first.amount_owed    ).to eql(0)
 
-        expect(page).to have_text("Thanks, your booking is confirmed")
-
-        messages = spechelp_decode_multipart(count: 2)
-
+        messages    = spechelp_decode_multipart(count: 2)
         to_customer = spechelper_find_in_decoded(messages, to: email)
         to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -376,7 +372,7 @@ RSpec.describe "Orders" do
           expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
 
           expect(args[:line_items].size ).to eql(1)
-          expect(args[:line_items].first).to eql({price: mock_priceid, quantity: 2})
+          expect(args[:line_items].first).to eql({quantity: 2, price: mock_priceid})
 
           double(url: args[:success_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
         end
@@ -387,16 +383,15 @@ RSpec.describe "Orders" do
 
         click_on("Pay now")
 
+        expect(page).to have_text("Thanks, your booking is confirmed")
         expect(StripePrice.count).to eql(1)
         expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
         expect(StripePayment.count).to eql(1)
         expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
         expect(Order.count).to eql(1)
         expect(Order.first.state).to eql("paid")
-        expect(page).to have_text("Thanks, your booking is confirmed")
 
-        messages = spechelp_decode_multipart(count: 2)
-
+        messages    = spechelp_decode_multipart(count: 2)
         to_customer = spechelper_find_in_decoded(messages, to: email)
         to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -440,6 +435,13 @@ RSpec.describe "Orders" do
           "here", # ...as in, "You can find a list of all orders <here>"
           href: admin_page_event_orders_url(page_id: @event.page.slug, event_id: @event.slug)
         )
+
+        visit URI(ordershelp_magic_link(Order.first)).path
+
+        expect(page).to     have_text("Manage order")
+        expect(page).to     have_text("The booking has been paid for")
+        expect(page).to     have_text("If you think you need to cancel and request a refund, please contact us")
+        expect(page).to_not have_button("Cancel")
       end
 
       it "handles the user cancelling from within Stripe and confirming" do
@@ -540,16 +542,15 @@ RSpec.describe "Orders" do
 
         click_on("Pay now")
 
+        expect(page).to have_text("Thanks, your booking is confirmed")
         expect(StripePrice.count).to eql(1)
         expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
         expect(StripePayment.count).to eql(1)
         expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
         expect(Order.count).to eql(1)
         expect(Order.first.state).to eql("paid")
-        expect(page).to have_text("Thanks, your booking is confirmed")
 
-        messages = spechelp_decode_multipart(count: 2)
-
+        messages    = spechelp_decode_multipart(count: 2)
         to_customer = spechelper_find_in_decoded(messages, to: email)
         to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -724,15 +725,14 @@ RSpec.describe "Orders" do
           # The Sentry call is expected - see above - and no StripePayment is
           # then recorded, but everything else should still work.
           #
+          expect(page).to have_text("Thanks, your booking is confirmed")
           expect(StripePrice.count).to eql(1)
           expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
           expect(StripePayment.count).to eql(0)
           expect(Order.count).to eql(1)
           expect(Order.first.state).to eql("paid")
-          expect(page).to have_text("Thanks, your booking is confirmed")
 
-          messages = spechelp_decode_multipart(count: 2)
-
+          messages    = spechelp_decode_multipart(count: 2)
           to_customer = spechelper_find_in_decoded(messages, to: email)
           to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
@@ -801,7 +801,7 @@ RSpec.describe "Orders" do
       @name     = "Fred Flintstone"
       @email    = "fred@example.com"
       @phone    = "+64 021 000 000"
-      @seats    = 2
+      @seats    = 2 # Must be > 1 to make quantity checks later on more useful
       @discount = @event.price_per_seat / 2
 
       @order = Order.create!(
@@ -832,7 +832,7 @@ RSpec.describe "Orders" do
 
       @event.start_reserver_purchases_state!
 
-      to_customer = spechelp_decode_multipart(count: 1)
+      to_customer = spechelp_decode_multipart()
 
       expect(to_customer.email.to     ).to eql([@email])
       expect(to_customer.email.from   ).to eql(["orders@example.com"])
@@ -906,6 +906,7 @@ RSpec.describe "Orders" do
         visit URI(ordershelp_magic_link(@order)).path
 
         expect(page).to have_text("Manage order")
+        expect(page).to have_button("Cancel")
 
         accept_confirm("Are you sure") do
           click_on("Cancel")
@@ -970,6 +971,7 @@ RSpec.describe "Orders" do
         expect(page).to have_css("dd", text: @email)
         expect(page).to have_css("dd", text: @seats)
         expect(page).to have_css("dd", text: total)
+        expect(page).to have_css("dd", text: "#{@seats} → #{@total}")
 
         mock_prodid  = "product_test_1234"
         mock_priceid = "price_test_1234"
@@ -997,8 +999,22 @@ RSpec.describe "Orders" do
           expect(args[:success_url]).to end_with("stripe_payment_succeeded?csid={CHECKOUT_SESSION_ID}")
           expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
 
-          expect(args[:line_items].size ).to eql(1)
-          expect(args[:line_items].first).to eql({price: mock_priceid, quantity: 2})
+          # Line items differs from earlier tests due to the discount.
+          #
+          expect(args[:line_items].size).to eql(1)
+
+          line_item = args[:line_items][0]
+
+          expect(line_item[:quantity]).to eql(1) # (always 1, not @seats)
+          expect(line_item[:price_data][:unit_amount]).to eql(@order.amount_owed)
+          expect(line_item[:price_data][:currency   ]).to eql(@order.event.currency)
+
+          product_data = line_item[:price_data][:product_data]
+
+          expect(product_data[:name       ]).to eql(@order.event.title)
+          expect(product_data[:description]).to be_present
+          expect(product_data[:images     ]).to be_present
+          expect(product_data[:unit_label ]).to eql("booking")
 
           double(url: args[:success_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
         end
@@ -1009,13 +1025,13 @@ RSpec.describe "Orders" do
 
         click_on("Pay now")
 
+        expect(page).to have_text("Thanks, your booking is confirmed")
         expect(StripePrice.count).to eql(1)
         expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
         expect(StripePayment.count).to eql(1)
         expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
         expect(Order.count).to eql(1)
         expect(Order.first.state).to eql("paid")
-        expect(page).to have_text("Thanks, your booking is confirmed")
 
         messages    = spechelp_decode_multipart(count: 2)
         to_customer = spechelper_find_in_decoded(messages, to: @email)
@@ -1028,32 +1044,28 @@ RSpec.describe "Orders" do
         expect(to_customer.email.subject).to eql("Booking confirmed for \"#{@event.title}\"")
 
         expect(to_customer.text).to include(@event.title.upcase)
+        expect(to_customer.text).to include(total)
         expect(to_customer.text).to include(ordershelp_magic_link(@order))
 
         expect(to_customer.html).to include(@event.title)
+        expect(to_customer.html).to include(total)
         expect(to_customer.html).to have_link("Manage order", href: ordershelp_magic_link(@order))
 
         expect(to_admin.email.from   ).to eql(["orders@example.com"])
         expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{@name}")
+
+        visit URI(ordershelp_magic_link(@order)).path
+
+        expect(page).to     have_text("Manage order")
+        expect(page).to     have_text("The booking has been paid for")
+        expect(page).to     have_text("If you think you need to cancel and request a refund, please contact us")
+        expect(page).to_not have_button("Cancel")
       end
 
       it "handles the user cancelling from within Stripe and confirming" do
-        visit new_page_event_order_path(@page.slug, @event.slug)
+        visit URI(ordershelp_magic_link(@order)).path
 
-        name  = "Fred Flintstone"
-        email = "fred@example.com"
-        phone = "+64 021 000 000"
-        seats = 2
-
-        fill_in("order_name",            with: name)
-        fill_in("order_email",           with: email)
-        fill_in("order_phone_number",    with: phone)
-        fill_in("order_number_of_seats", with: seats)
-
-        click_on("Next")
-
-        expect(Order.count).to eql(1)
-        expect(page).to have_text("Please check the details of your booking")
+        expect(page).to have_text("Manage order")
 
         mock_prodid  = "product_test_1234"
         mock_priceid = "price_test_1234"
@@ -1073,34 +1085,34 @@ RSpec.describe "Orders" do
 
         click_on("Pay now")
 
-        expect(Order.count).to eql(1)
-        expect(Order.first.state).to eql("new")
         expect(page).to have_text("Please confirm cancellation")
+
+        @order.reload()
+
+        expect(Order.count).to eql(1)
+        expect(@order.state).to eql("reserved")
 
         click_on("Cancel")
 
-        expect(Order.count).to eql(1)
-        expect(Order.first.state).to eql("cancelled")
         expect(page).to have_text("OK, that's cancelled")
+
+        @order.reload()
+
+        expect(@order.state).to eql("cancelled")
+        expect(@event.confirmed_seats_remaining).to eql(@event.number_of_seats)
+
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: @email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer).to be_present
+        expect(to_admin   ).to be_present
       end
 
       it "handles the user cancelling from within Stripe but then changing their mind and paying" do
-        visit new_page_event_order_path(@page.slug, @event.slug)
+        visit URI(ordershelp_magic_link(@order)).path
 
-        name  = "Fred Flintstone"
-        email = "fred@example.com"
-        phone = "+64 021 000 000"
-        seats = 2
-
-        fill_in("order_name",            with: name)
-        fill_in("order_email",           with: email)
-        fill_in("order_phone_number",    with: phone)
-        fill_in("order_number_of_seats", with: seats)
-
-        click_on("Next")
-
-        expect(Order.count).to eql(1)
-        expect(page).to have_text("Please check the details of your booking")
+        expect(page).to have_text("Manage order")
 
         mock_prodid  = "product_test_1234"
         mock_priceid = "price_test_1234"
@@ -1122,7 +1134,7 @@ RSpec.describe "Orders" do
         click_on("Pay now")
 
         expect(Order.count).to eql(1)
-        expect(Order.first.state).to eql("new")
+        expect(Order.first.state).to eql("reserved")
         expect(page).to have_text("Please confirm cancellation")
 
         expect(Stripe::Checkout::Session).to receive(:create).once do | args |
@@ -1135,17 +1147,16 @@ RSpec.describe "Orders" do
 
         click_on("Pay now")
 
+        expect(page).to have_text("Thanks, your booking is confirmed")
         expect(StripePrice.count).to eql(1)
         expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
         expect(StripePayment.count).to eql(1)
         expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
         expect(Order.count).to eql(1)
         expect(Order.first.state).to eql("paid")
-        expect(page).to have_text("Thanks, your booking is confirmed")
 
-        messages = spechelp_decode_multipart(count: 2)
-
-        to_customer = spechelper_find_in_decoded(messages, to: email)
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: @email)
         to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
 
         expect(to_customer).to be_present
@@ -1171,29 +1182,49 @@ RSpec.describe "Orders" do
     end # 'context "paid events" do'
   end # 'context "reserver payments" do'
 
-  # Possibly put this into a different test, since it's a different controller
-  # (but some of that's already tested above and it's all generally "orders").
+  # A lot of cases for order management were already handled above.
   #
-  xcontext "order management" do
-    it "lets end users manage orders" do
-    end
+  context "paid order management" do
+    it 'lets paid users view an invoice' do
+      allow(Hcms.config).to receive(:tax_number).and_return("123-456-789")
+      allow(Hcms.config).to receive(:tax_name  ).and_return("IMAGINARYTAX")
 
-    # And it lets admins manage - perhaps don't do this here?
-  end # 'context "order management" do'
+      @event.start_public_purchases_state!
+
+      order    = create(:order, event: @event)
+      per_seat = spechelp_format_money(@event.price_per_seat,                         @event.currency)
+      total    = spechelp_format_money(@event.price_per_seat * order.number_of_seats, @event.currency)
+
+      order.pay_state!
+
+      visit URI(ordershelp_magic_link(order)).path
+
+      expect(page).to have_text("Manage order")
+
+      click_on("Invoice")
+
+      expect(page).to have_text("Tax Invoice")
+      expect(page).to have_text(order.human_invoice_number)
+
+      expect(page).to have_text("Site Under Test")
+      expect(page).to have_text("123-456-789")
+      expect(page).to have_text("IMAGINARYTAX")
+
+      expect(page).to have_text(per_seat)
+      expect(page).to have_text(total   )
+
+      expect(page).to have_text(order.name)
+      expect(page).to have_text(order.email)
+      expect(page).to have_text(order.phone_number)
+
+      print_link = page.find("a", text: "Print")
+
+      expect(print_link['onclick']).to eql("window.print()")
+    end
+  end # 'context "paid order management" do'
 
   xcontext "other failure cases" do
     it "order pay state change attempt is invalid" do
-    end
-  end
-
-  xcontext 'lots of model stuff' do
-    it "order state machine" do
-    end
-
-    it "event state machine" do
-    end
-
-    it "event on-archive" do
     end
   end
 end

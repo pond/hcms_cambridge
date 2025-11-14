@@ -13,7 +13,7 @@ class InvoicesController < OrdersController
     #
     raw_uri = request.env['REQUEST_URI']
 
-    if raw_uri.end_with?('?')
+    if raw_uri&.end_with?('?')
       redirect_to(raw_uri.chomp('?'), status: :moved_permanently)
     else
       render()
