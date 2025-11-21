@@ -78,9 +78,11 @@ RSpec.describe Page, type: :model do
         # Overriding Editable
         #
         expect(page.is_normal_type?).to eql(true)
-        expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_form_type?  ).to eql(false)
+        expect(page.is_blog_type?  ).to eql(false)
+        expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
         #
@@ -107,9 +109,11 @@ RSpec.describe Page, type: :model do
         # Overriding Editable
         #
         expect(page.is_normal_type?).to eql(false)
-        expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_form_type?  ).to eql(true)
+        expect(page.is_blog_type?  ).to eql(false)
+        expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
         #
@@ -136,9 +140,11 @@ RSpec.describe Page, type: :model do
         # Overriding Editable
         #
         expect(page.is_normal_type?).to eql(false)
-        expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_form_type?  ).to eql(true)
+        expect(page.is_blog_type?  ).to eql(false)
+        expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
         #
@@ -165,9 +171,11 @@ RSpec.describe Page, type: :model do
         # Overriding Editable
         #
         expect(page.is_normal_type?).to eql(false)
-        expect(page.is_blog_type?  ).to eql(true)
         expect(page.is_form_type?  ).to eql(false)
+        expect(page.is_blog_type?  ).to eql(true)
+        expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
         #
@@ -184,7 +192,37 @@ RSpec.describe Page, type: :model do
 
         expect(page).to be_valid
       end
-    end # 'context "normal" do'
+    end # 'context "blog" do'
+
+    context "events" do
+      it "responds correctly to trait enquiries" do
+        page = build(:page, :events)
+
+        # Overriding Editable
+        #
+        expect(page.is_normal_type?).to eql(false)
+        expect(page.is_form_type?  ).to eql(false)
+        expect(page.is_blog_type?  ).to eql(false)
+        expect(page.is_events_type?).to eql(true)
+        expect(page.is_article?    ).to eql(false)
+        expect(page.is_event?      ).to eql(false)
+
+        # Specific to Page
+        #
+        expect(page.is_contact_form?).to eql(false)
+        expect(page.is_booking_form?).to eql(false)
+      end
+
+      it "does not require body" do
+        page = build(:page, :events)
+
+        expect(page).to be_valid
+
+        page.revisions.first.body = nil
+
+        expect(page).to be_valid
+      end
+    end # 'context "events" do'
   end # 'context "page types" do'
 
   context "utilities" do

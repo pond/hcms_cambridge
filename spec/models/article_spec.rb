@@ -7,7 +7,7 @@ RSpec.describe Article, type: :model do
 
   context "scopes and associations" do
     it "default scope orders newest-creation-time first" do
-      page = create(:page)
+      page = create(:page, :blog)
 
       article_1 = create(:article, page: page, created_at: Time.now - 1.day)
       article_2 = create(:article, page: page, created_at: Time.now + 1.day)
@@ -21,7 +21,7 @@ RSpec.describe Article, type: :model do
     end
 
     it "::for_navigation only includes published articles" do
-      page = create(:page)
+      page = create(:page, :blog)
 
       article_1 = create(:article, page: page); article_1.revisions.update_all(published: false)
       article_2 = create(:article, page: page); article_2.revisions.update_all(published: true)
@@ -35,7 +35,7 @@ RSpec.describe Article, type: :model do
     it "requires a title, summary, body and hero image" do
       article = build(:article)
 
-      expect(article).to be_valid
+      expect(article).to be_valid # (self-check)
 
       article.revisions.first.summary = nil
 
@@ -68,10 +68,12 @@ RSpec.describe Article, type: :model do
     expect(article.is_normal_type?).to eql(false)
     expect(article.is_blog_type?  ).to eql(false)
     expect(article.is_form_type?  ).to eql(false)
+    expect(article.is_events_type?).to eql(false)
     expect(article.is_article?    ).to eql(true)
+    expect(article.is_event?      ).to eql(false)
   end
 
-  context "utilities" do
+  context "base class overrides" do
     context "#for_navigation?" do
       it "returns 'true' for a not-hidden page with a published revision" do
         page = create(:page)
@@ -85,5 +87,5 @@ RSpec.describe Article, type: :model do
         expect(article_3.for_navigation?).to eql(true)
       end
     end # 'context "#for_navigation?" do'
-  end # 'context "utilities" do'
+  end # 'context "base class overrides" do'
 end

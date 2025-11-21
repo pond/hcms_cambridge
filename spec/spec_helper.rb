@@ -90,6 +90,10 @@ RSpec.configure do |config|
 
   Kernel.srand(config.seed)
 
+  config.before :each do
+    Faker::UniqueGenerator.clear()
+  end
+
   config.before :each, type: :system do |example|
     if example&.metadata&.dig(:js) == true
       spechelp_use_chrome()

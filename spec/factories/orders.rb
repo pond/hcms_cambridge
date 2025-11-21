@@ -4,7 +4,7 @@ FactoryBot.define do
     association :event
 
     name            { Faker::Name.name }
-    email           { Faker::Internet.email }
+    email           { Faker::Internet.unique.email } # NOTE always unique
     phone_number    { "+6421000#{rand(111..999)}" }
     number_of_seats { rand(2..([event.number_of_seats, 5].min)) }
     amount_owed     { number_of_seats * event.price_per_seat }

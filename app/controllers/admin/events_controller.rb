@@ -116,12 +116,30 @@ class Admin::EventsController < ApplicationController
 
     # DELETE /admin/pages/<page_id>/events/<id>
     def destroy
-      @event.destroy!
+      refuse_deletion_count = @event.orders.where(state: Order::REFUSE_EVENT_DELETION_STATES).count
 
-      redirect_to(
-        admin_page_events_url( page_id: @page.id ),
-        notice: 'Event deleted.'
-      )
+      if refuse_deletion_count.zero?
+        @event.destroy!
+
+        redirect_to(
+          admin_page_events_url( page_id: @page.id ),
+          notice: 'Event deleted.'
+        )
+      else
+        irrevocable_count = @event.orders.where(state: Order::IRREVOCABLE_REFUSE_EVENT_DELETION_STATES).count
+
+        if irrevocable_count.zero?
+          redirect_to(
+            admin_page_events_url( page_id: @page.id ),
+            alert: 'This event has orders so it cannot be deleted. Cancel in-flight orders first either individually or by cancelling the whole event, then try again.'
+          )
+        else
+          redirect_to(
+            admin_page_events_url( page_id: @page.id ),
+            alert: 'This event has orders so it cannot be deleted. Customers have orders with payment invoices which refer to it.'
+          )
+        end
+      end
     end
 
   private
@@ -224,3 +242,4 @@ class Admin::EventsController < ApplicationController
       return params.require(:event).permit(PERMITTED_EVENT_PARAMS)
     end
 end
+#

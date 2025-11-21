@@ -209,15 +209,19 @@ class Editable < ApplicationRecord
   # the method describes.
   # ===========================================================================
 
-  def is_form_type?
-    false
-  end
-
   def is_normal_type?
     false
   end
 
+  def is_form_type?
+    false
+  end
+
   def is_blog_type?
+    false
+  end
+
+  def is_events_type?
     false
   end
 

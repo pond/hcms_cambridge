@@ -37,10 +37,30 @@ class Order < ApplicationRecord
       refunded:       'refunded',
     },
     prefix:  'enum_state',
-    default: :new
+    default: :new,
   )
 
   STATES = self.states.keys
+
+  # These states mean that an associated event shouldn't be deleted, since
+  # users will want to refer to it (e.g. via invoices or in-flight orders).
+  # Some states may be reversible, e.g. a reservation can be cancelled. See
+  # also IRREVOCABLE_REFUSE_EVENT_DELETION_STATES.
+  #
+  REFUSE_EVENT_DELETION_STATES = [
+    self.states[:reserved],
+    self.states[:payment_failed],
+    self.states[:paid],
+    self.states[:refunded],
+  ]
+
+  # These states are related to REFUSE_EVENT_DELETION_STATES but represent
+  # orders which "lock" the event for invoicing purposes.
+  #
+  IRREVOCABLE_REFUSE_EVENT_DELETION_STATES = [
+    self.states[:paid],
+    self.states[:refunded],
+  ]
 
   # ============================================================================
   # Scopes
@@ -115,9 +135,10 @@ class Order < ApplicationRecord
     state
   }
 
+  # Note that the state machine enum is validated automatically.
+
   validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
   validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
-  validates :state,                         inclusion:    { in: STATES,         message: 'is not recognised'      }
 
   validate :number_of_seats do |order|
     if order.event.present? && order.event.number_of_seats > 0

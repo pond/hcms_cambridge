@@ -41,16 +41,16 @@ class Page < Editable
     self.page_type == PAGE_TYPE_NORMAL
   end
 
+  def is_form_type?
+    self.is_contact_form? || self.is_booking_form?
+  end
+
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
   end
 
   def is_events_type?
     self.page_type == PAGE_TYPE_EVENTS
-  end
-
-  def is_form_type?
-    self.is_contact_form? || self.is_booking_form?
   end
 
   def for_navigation?

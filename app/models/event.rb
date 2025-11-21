@@ -116,16 +116,18 @@ class Event < Editable
     on_archive_action
   }
 
+  # Note that the state and on-archive enums are validated automatically.
+
   validates :event_hero_image, presence: true, on: :create
 
-  validates :starts_at,        comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
-  validates :ends_at,          comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
-  validates :state,             inclusion: { in: STATES,                        message: 'is not recognised'     }
-  validates :on_archive_action, inclusion: { in: ON_ARCHIVE_ACTIONS,            message: 'is not recognised'     }
+  with_options unless: [:state_archived?, :state_cancelled?] do
+    validates :starts_at, comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
+    validates :ends_at,   comparison: { greater_than: -> { Time.current }, message: 'must be in the future' }
 
-  validate do | event |
-    if ((event.starts_at >= event.ends_at) rescue false)
-      event.errors.add(:ends_at, 'must be after the start time')
+    validate do | event |
+      if ((event.starts_at >= event.ends_at) rescue false)
+        event.errors.add(:ends_at, 'must be after the start time')
+      end
     end
   end
 
@@ -253,19 +255,34 @@ class Event < Editable
     state :cancelled
 
     event :start_reserver_purchases, after_commit: :notify_reservers do
-      transitions from: :presales, to: :reserver_purchases, guard: :has_reservers?
+      transitions(
+        from:  :presales,
+        to:    :reserver_purchases,
+        guard: [:has_reservers?, :has_not_started?]
+      )
     end
 
     event :start_public_purchases, after_commit: :cancel_reservations_and_notify_reservers do
-      transitions from: [:presales, :reserver_purchases], to: :public_purchases
+      transitions(
+        from:  [:presales, :reserver_purchases],
+        to:    :public_purchases,
+        guard: :has_not_ended?
+      )
     end
 
     event :archive, after_commit: [:perform_on_archive_action, :stripe_make_inactive] do
-      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :archived, guard: :has_ended?
+      transitions(
+        from:  [:presales, :reserver_purchases, :public_purchases],
+        to:    :archived,
+        guard: :has_ended?
+      )
     end
 
     event :cancel, after_commit: [:update_orders_for_cancellation, :stripe_make_inactive] do
-      transitions from: [:presales, :reserver_purchases, :public_purchases], to: :cancelled
+      transitions(
+        from: [:presales, :reserver_purchases, :public_purchases],
+        to:   :cancelled
+      )
     end
   end
 
@@ -277,12 +294,6 @@ class Event < Editable
     Event.aasm(:state).events.filter do |event|
       self.send("may_#{event.name}_state?")
     end
-  end
-
-  def active?
-    ! self.state_archived?  &&
-    ! self.state_cancelled? &&
-    ! self.has_ended?
   end
 
   # ============================================================================
@@ -297,138 +308,160 @@ class Event < Editable
     self.starts_at <= Time.current
   end
 
+  def has_not_started?
+    ! self.has_started?
+  end
+
   def has_ended?
     self.persisted? && self.ends_at <= Time.current
   end
 
-  # ============================================================================
-  # AASM STATE MACHINE namespace 'state': After-commit handlers
-  # ============================================================================
-
-  # Notify reservers that they can now make purchases via their magic link and
-  # that once public sales start, it becomes a free-for-all.
-  #
-  def notify_reservers
-    self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
-      OrderMailer.event_state_reserver_purchases_email(order).deliver_later()
-    end
+  def has_not_ended?
+    ! self.has_ended?
   end
 
-  # Notify reservers that sales are now open to the public, so they need to
-  # confirm their booking via payment ASAP or risk losing the seat.
+  # ============================================================================
+  # PRIVATE INSTANCE METHODS
+  # ============================================================================
   #
-  # If there seems to be an error with notification, the order state change is
-  # rolled back and an alert is sent out via Sentry.
-  #
-  def cancel_reservations_and_notify_reservers
-    self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
-      ActiveRecord::Base.transaction do
-        order.update!(state: Order.states[:new])
-        OrderMailer.event_state_public_purchases_email(order).deliver()
-      rescue => e
-        Sentry.capture_exception(e)
-        raise ActiveRecord::Rollback
+  private
+
+    # Called before-destroy. If there are "relevant state" orders associated,
+    # refuse to exit. "Relevant" means - not in "new" (initial) or "cancelled"
+    # states. If there any reservations or paid items
+
+    # ==========================================================================
+    # AASM STATE MACHINE namespace 'state': After-commit handlers
+    # ==========================================================================
+
+    # Notify reservers that they can now make purchases via their magic link and
+    # that once public sales start, it becomes a free-for-all.
+    #
+    def notify_reservers
+      self.orders.enum_state_reserved.where.not(amount_owed: 0).each do |order|
+        OrderMailer.event_state_reserver_purchases_email(order).deliver_later()
       end
     end
-  end
 
-  # The event has been archived; perform the "on archive" action.
-  #
-  def perform_on_archive_action
-
-    # IMPORTANT: Remember to avoid triggering more callbacks here; we're in an
-    # after-commit hook via AASM, so caution is required.
+    # Notify reservers that sales are now open to the public, so they need to
+    # confirm their booking via payment ASAP or risk losing the seat.
     #
-    case self.on_archive_action
-      when Event.on_archive_actions[:hide]
-        self.update_column(:hidden, true)
-
-      when Event.on_archive_actions[:move]
-        blog     = Page.blogs.find_by_id(self.on_archive_params&.dig("blog_id"))
-        revision = self.current_revision || self.revisions.order(created_at: :desc).first
-
-        if blog.present? && revision.present?
-          ActiveRecord::Base.transaction do
-            self.update_column(:hidden, true)
-
-            article = Article.new(
-              page_id:            blog.id,
-              created_at:         self.starts_at,
-              updated_at:         self.starts_at,
-              article_hero_image: self.event_hero_image,
-              raw_editor:         self.raw_editor,
-            )
-
-            article.generate_unique_slug(starting_with: self.slug)
-
-            revision = article.revisions.build(
-              title:            revision.title,
-              navigation_title: revision.navigation_title,
-              summary:          revision.summary,
-              body:             revision.body,
-              published:        true,
-              current:          true
-            )
-
-            article.save!
+    # If there seems to be an error with notification, the order state change is
+    # rolled back and an alert is sent out via Sentry.
+    #
+    def cancel_reservations_and_notify_reservers
+      self.orders.enum_state_reserved.each do |order|
+        ActiveRecord::Base.transaction do
+          if order.amount_owed.zero?
+            order.update!(state: Order.states[:paid])
+          else
+            order.update!(state: Order.states[:new])
+            OrderMailer.event_state_public_purchases_email(order).deliver()
           end
+        rescue => e
+          Sentry.capture_exception(e)
+          raise ActiveRecord::Rollback
         end
-
-      else
-        # Do nothing - state is either "keep" or not yet implemented.
-    end
-  end
-
-  # The event has been cancelled. Run order updates for appropriate states and
-  # let the order model take care of notification e-mails.
-  #
-  def update_orders_for_cancellation
-
-    # People who've paid get refunded.
-    #
-    self.orders.enum_state_paid.each do |order|
-      ActiveRecord::Base.transaction do
-        order.refund_state!
-      rescue => e
-        Sentry.capture_exception(e)
-        raise ActiveRecord::Rollback
       end
     end
 
-    # People with reservations have those reservations cancelled.
+    # The event has been archived; perform the "on archive" action.
     #
-    self.orders.enum_state_reserved.each do |order|
-      ActiveRecord::Base.transaction do
-        order.cancel_state!
-      rescue => e
-        Sentry.capture_exception(e)
-        raise ActiveRecord::Rollback
+    def perform_on_archive_action
+
+      # IMPORTANT: Remember to avoid triggering more callbacks here; we're in an
+      # after-commit hook via AASM, so caution is required.
+      #
+      case self.on_archive_action
+        when Event.on_archive_actions[:hide]
+          self.update_column(:hidden, true)
+
+        when Event.on_archive_actions[:move]
+          blog     = Page.blogs.find_by_id(self.on_archive_params&.dig("blog_id"))
+          revision = self.current_revision || self.revisions.order(created_at: :desc).first
+
+          if blog.present? && revision.present?
+            ActiveRecord::Base.transaction do
+              self.update_column(:hidden, true)
+
+              article = Article.new(
+                page_id:            blog.id,
+                created_at:         self.starts_at,
+                updated_at:         self.starts_at,
+                article_hero_image: self.event_hero_image,
+                raw_editor:         self.raw_editor,
+              )
+
+              article.generate_unique_slug(starting_with: self.slug)
+
+              revision = article.revisions.build(
+                title:            revision.title,
+                navigation_title: revision.navigation_title,
+                summary:          revision.summary,
+                body:             revision.body,
+                published:        true,
+                current:          true
+              )
+
+              article.save!
+            end
+          end
+
+        else
+          # Do nothing - state is either "keep" or not yet implemented.
       end
     end
 
-    # New orders get set to a cancelled state too, but without a notification
-    # e-mail since the order was never confirmed.
+    # The event has been cancelled. Run order updates for appropriate states and
+    # let the order model take care of notification e-mails.
     #
-    self.orders.enum_state_new.each do |order|
-      begin
-        order.update!(state: Order.states[:cancelled])
-      rescue => e
-        Sentry.capture_exception(e)
+    def update_orders_for_cancellation
+
+      # People who've paid get refunded.
+      #
+      self.orders.enum_state_paid.each do |order|
+        ActiveRecord::Base.transaction do
+          order.refund_state!
+        rescue => e
+          Sentry.capture_exception(e)
+          raise ActiveRecord::Rollback
+        end
+      end
+
+      # People with reservations have those reservations cancelled.
+      #
+      self.orders.enum_state_reserved.each do |order|
+        ActiveRecord::Base.transaction do
+          order.cancel_state!
+        rescue => e
+          Sentry.capture_exception(e)
+          raise ActiveRecord::Rollback
+        end
+      end
+
+      # New orders get set to a cancelled state too, but without a notification
+      # e-mail since the order was never confirmed.
+      #
+      self.orders.enum_state_new.each do |order|
+        begin
+          order.update!(state: Order.states[:cancelled])
+        rescue => e
+          Sentry.capture_exception(e)
+        end
       end
     end
-  end
 
-  # An event is archived or cancelled; update Stripe accordingly. This handler
-  # is also called after-commit-on-destroy.
-  #
-  def stripe_make_inactive
-    if self.stripe_price
-      price   = Stripe::Price.retrieve(self.stripe_price.stripe_price_id)
-      product = Stripe::Product.retrieve(price.product)
+    # An event is archived or cancelled; update Stripe accordingly. This handler
+    # is also called after-commit-on-destroy.
+    #
+    def stripe_make_inactive
+      if self.stripe_price
+        price   = Stripe::Price.retrieve(self.stripe_price.stripe_price_id)
+        product = Stripe::Product.retrieve(price.product)
 
-      Stripe::Product.update(product.id, {active: false})
-      Stripe::Price.update(price.id, {active: false})
+        Stripe::Product.update(product.id, {active: false})
+        Stripe::Price.update(price.id, {active: false})
+      end
     end
-  end
 
 end

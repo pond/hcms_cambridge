@@ -1222,9 +1222,4 @@ RSpec.describe "Orders" do
       expect(print_link['onclick']).to eql("window.print()")
     end
   end # 'context "paid order management" do'
-
-  xcontext "other failure cases" do
-    it "order pay state change attempt is invalid" do
-    end
-  end
 end
