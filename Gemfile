@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
-ruby '3.4.6'
+ruby '3.4.7'
 
-gem 'rails', '>= 8', '< 9'
+gem 'rails', '>= 8.1', '< 9'
 
 gem 'pg'
 gem 'puma'

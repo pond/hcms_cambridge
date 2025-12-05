@@ -53,7 +53,7 @@ class OrderMailer < ApplicationMailer
     mail(
       to:      @order.email,
       from:    Hcms.config.orders_email,
-      subject: "Refund confirmation for \"#{@order.event.title}\""
+      subject: "Confirmation of refund for \"#{@order.event.title}\""
     )
   end
 

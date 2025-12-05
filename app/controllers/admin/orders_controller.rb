@@ -95,19 +95,21 @@ class Admin::OrdersController < ApplicationController
         return bail_out_with('That order cannot be changed in that way')
       else
         ActiveRecord::Base.transaction do
+          stripe_payment_was_present = @order.stripe_payment.present?
+
           @order.send("#{event_name}_state!")
           notification = 'Order updated'
 
           if event_name == 'refund'
-            notification = 'Order marked as refunded locally only. No matter how it was paid for - e.g. bank transfer or a processor such as Stripe - please make sure that this mechansim has been, or is used to actually return the paid money.'
-
-            if @order.stripe_payment.present?
-              stripe_refund = Stripe::Refund.create(payment_intent: @order.stripe_payment.stripe_payment_intent)
-
-              if stripe_refund.status == 'succeeded'
-                @order.stripe_payment.destroy!
-                notification = 'Refund successfully processed automatically via Stripe.'
-              end
+            if stripe_payment_was_present && @order.reload.stripe_payment.nil?
+              notification = 'Refund successfully processed automatically via Stripe.'
+            else
+              notification = <<~STR
+                Order marked as refunded locally only. No matter how it was paid
+                for - e.g. bank transfer or a processor such as Stripe - please
+                make sure that this mechansim has been, or is used to actually
+                return the paid money.'
+              STR
             end
           end
 

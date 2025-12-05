@@ -4,7 +4,7 @@ RSpec.describe Event, type: :model do
 
   # A little helper to DRY things a tiny bit.
   #
-  def expect_stripe_to_be_made_inactive_via(event)
+  def expect_stripe_to_be_made_inactive_via(event, simulated_failure: false)
     mock_prodid  = "product_test_1234"
     mock_priceid = "price_test_1234"
 
@@ -14,7 +14,12 @@ RSpec.describe Event, type: :model do
     expect(Stripe::Product).to receive(:retrieve).with(mock_prodid).and_return double(id: mock_prodid)
 
     expect(Stripe::Product).to receive(:update).with(mock_prodid, {active: false})
-    expect(Stripe::Price).to receive(:update).with(mock_priceid, {active: false})
+
+    if simulated_failure
+      expect(Stripe::Price).to receive(:update) { raise "An error" }
+    else
+      expect(Stripe::Price).to receive(:update).with(mock_priceid, {active: false})
+    end
   end
 
   it "is an Editable" do # (because that's tested separately, so no need to duplicate tests here)
@@ -485,36 +490,21 @@ RSpec.describe Event, type: :model do
           default_url_options[:host] = 'www.example.com'
         end
 
-  #
-  # side effects...
-  #
-  # Start reserver:
-    # notify_reservers
-  # Start public:
-    # cancel_reservations_and_notify_reservers
-    # - from presales or reserver purchases
-  # Archive:
-    # perform_on_archive_action / stripe_make_inactive
-  # Cancel:
-    # update_orders_for_cancellation / stripe_make_inactive
-    # - from presales, reserver purchases or public purchases
-
-
         it "starting reserver sales" do
-          order_1 = create(:order, event: @event)
+          order_1 = create(:order, event: @event, number_of_seats: 1)
           order_1.reserve_state!
 
-          order_2 = create(:order, event: @event)
+          order_2 = create(:order, event: @event, number_of_seats: 1)
           order_2.reserve_state!
 
           # No e-mail sent to someone that is getting a free ticket
           #
-          order_3 = create(:order, event: @event, amount_owed: 0)
-          order_3.reserve_state!3
+          order_3 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+          order_3.reserve_state!
 
           # No e-mail sent to someone that somehow paid (e.g. via admin action)
           #
-          order_4 = create(:order, event: @event)
+          order_4 = create(:order, event: @event, number_of_seats: 1)
           order_4.update_column(:state, Order.states[:paid])
 
           perform_enqueued_jobs()
@@ -541,21 +531,20 @@ RSpec.describe Event, type: :model do
         end
 
         it "starting public sales" do
-          order_1 = create(:order, event: @event)
+          order_1 = create(:order, event: @event, number_of_seats: 1)
           order_1.reserve_state!
 
-          order_2 = create(:order, event: @event)
+          order_2 = create(:order, event: @event, number_of_seats: 1)
           order_2.reserve_state!
 
-          # No e-mail sent to someone that is getting a free ticket, and this
-          # order should auto-advance to "paid" state
+          # No e-mail sent to someone that is getting a free ticket
           #
-          order_3 = create(:order, event: @event, amount_owed: 0)
-          order_3.reserve_state!3
+          order_3 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+          order_3.reserve_state!
 
           # No e-mail sent to someone that somehow paid (e.g. via admin action)
           #
-          order_4 = create(:order, event: @event)
+          order_4 = create(:order, event: @event, number_of_seats: 1)
           order_4.update_column(:state, Order.states[:paid])
 
           perform_enqueued_jobs()
@@ -588,30 +577,196 @@ RSpec.describe Event, type: :model do
           end
         end
 
-        it "cancelling from a presales state without a Stripe price present" do
-          @event.cancel_state!
+        shared_examples "a working cancellation state machine" do
+          it "which sends e-mails and updates order states" do
+            order_1 = create(:order, event: @event, number_of_seats: 1)
+            order_1.reserve_state!
 
-          expect(ActionMailer::Base.deliveries.count).to be_zero
+            order_2 = create(:order, event: @event, number_of_seats: 1)
+            order_2.reserve_state!
+
+            order_3 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+            order_3.reserve_state!
+
+            # Refund e-mail sent for order paid (probably via admin action)
+            #
+            order_4 = create(:order, event: @event, number_of_seats: 1)
+            order_4.update_column(:state, Order.states[:paid])
+
+            # This order is a work-in-progress.
+            #
+            order_5 = create(:order, event: @event, number_of_seats: 1)
+
+            if @advance_to_reserver_purchases_first
+              @event.start_reserver_purchases_state!
+            end
+
+            if @advance_to_public_purchases_first
+              @event.start_public_purchases_state!
+            end
+
+            perform_enqueued_jobs()
+            ActionMailer::Base.deliveries.clear()
+
+            if @expect_event_cancellation_error
+              expect { @event.cancel_state! }.to raise_error(RuntimeError)
+            else
+              @event.cancel_state!
+            end
+
+            # - No notification for the "new" state order customer
+            # - Refund notification for non-zero amount paid order's customer
+            # - Cancel notifications for the other order customers
+            # - No admin cancellation notifications, since the event itself was
+            #   cancelled
+            #
+            messages = spechelp_decode_multipart(count: 4)
+
+            [order_1, order_2, order_3].each do | order |
+              to_customer = messages.find { |m| m.email.to.first == order.email }
+
+              expect(to_customer).to be_present
+              expect(to_customer.email.subject).to include("Confirmation of cancellation")
+
+              expect(to_customer.text).to include(@event.title.upcase)
+              expect(to_customer.text).to include("Unfortunately, this event has been cancelled.")
+
+              expect(to_customer.html).to include(@event.title)
+              expect(to_customer.html).to include("Unfortunately, this event has been cancelled.")
+
+              expect(order.reload().state_cancelled?).to eql(true)
+            end
+
+            to_customer = messages.find { |m| m.email.to.first == order_4.email }
+            total       = spechelp_format_money(order_4.amount_owed, @event.currency)
+
+            expect(to_customer).to be_present
+            expect(to_customer.email.subject).to include("Confirmation of refund")
+
+            expect(to_customer.text).to include(@event.title.upcase)
+            expect(to_customer.text).to include("Unfortunately, this event has been cancelled.") # (sic.)
+            expect(to_customer.text).to include("#{total} has been refunded.")
+
+            expect(to_customer.html).to include(@event.title)
+            expect(to_customer.html).to include("Unfortunately, this event has been cancelled.") # (sic.)
+            expect(to_customer.html).to include("#{total}\n  has been refunded.")
+
+            expect(order_4.reload().state_refunded?).to eql(true)
+            expect(order_5.reload().state_cancelled?).to eql(true)
+          end
+        end # 'shared_examples "a working state machine" do'
+
+        context "cancelling from presales without a Stripe price present" do
+          it_behaves_like "a working cancellation state machine"
+        end # 'context "without a Stripe price present" do'
+
+        context "cancelling from presales with a Stripe price present and no errors from Stripe" do
+          before :each do
+            expect_stripe_to_be_made_inactive_via(@event)
+          end
+
+          it_behaves_like "a working cancellation state machine"
         end
 
-        it "cancelling from a presales state with a Stripe price present" do
-          expect_stripe_to_be_made_inactive_via(@event)
+        context "cancelling from presales with a Stripe price present and an error from Stripe" do
+          before :each do
+            expect_stripe_to_be_made_inactive_via(@event, simulated_failure: true)
+            @expect_event_cancellation_error = true
+          end
 
-          @event.cancel_state!
-
-          expect(ActionMailer::Base.deliveries.count).to be_zero
+          it_behaves_like "a working cancellation state machine"
         end
 
-        xit "cancelling with resesrvation holders present" do
+        context "cancelling from presales when inside the refunds window" do
+          before :each do
+            allow(Hcms.config).to receive(:no_refunds_window).and_return(2) # (2 days)
+
+            @event.starts_at = Time.now + 1.day
+            @event.ends_at   = Time.now + 1.day + 3.hours
+            @event.save!
+          end
+
+          it_behaves_like "a working cancellation state machine"
         end
 
-        xit "cancelling with paid orders present" do
+        context "cancelling from the reserver purchases state" do
+          before :each do
+            @advance_to_reserver_purchases_first = true
+          end
+
+          it_behaves_like "a working cancellation state machine"
         end
 
+        # This is bespoke compared to the above use of shared examples, because
+        # once we go to public sales, presales are dropped into a "new" state,
+        # so the e-mail expectations no longer work. It's simpler to test anew.
+        #
+        context "cancelling from the public purchases state" do
+          it "sends e-mails and updates order states" do
+            @event.start_public_purchases_state!
+
+            # Non-zero amount, so gets 'refunded due to cancellation'.
+            #
+            order_1 = create(:order, event: @event, number_of_seats: 1)
+            order_1.pay_state!
+
+            # Paid but free, so gets 'event cancelled'.
+            #
+            order_2 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+            order_2.pay_state!
+
+            # This order is a work-in-progress. No e-mails should be sent.
+            #
+            order_3 = create(:order, event: @event, number_of_seats: 1)
+
+            perform_enqueued_jobs()
+            ActionMailer::Base.deliveries.clear()
+
+            @event.cancel_state!
+
+            expect(order_1.reload().state_refunded? ).to eql(true)
+            expect(order_2.reload().state_cancelled?).to eql(true)
+
+            messages    = spechelp_decode_multipart(count: 2)
+            to_customer = messages.find { |m| m.email.to.first == order_1.email }
+            total       = spechelp_format_money(order_1.amount_owed, @event.currency)
+
+            expect(to_customer).to be_present
+            expect(to_customer.email.subject).to include("Confirmation of refund")
+
+            expect(to_customer.text).to include(@event.title.upcase)
+            expect(to_customer.text).to include("Unfortunately, this event has been cancelled.") # (sic.)
+            expect(to_customer.text).to include("#{total} has been refunded.")
+
+            expect(to_customer.html).to include(@event.title)
+            expect(to_customer.html).to include("Unfortunately, this event has been cancelled.") # (sic.)
+            expect(to_customer.html).to include("#{total}\n  has been refunded.")
+
+            to_customer = messages.find { |m| m.email.to.first == order_2.email }
+
+            expect(to_customer).to be_present
+            expect(to_customer.email.subject).to include("Confirmation of cancellation")
+
+            expect(to_customer.text).to include(@event.title.upcase)
+            expect(to_customer.text).to include("Unfortunately, this event has been cancelled.")
+
+            expect(to_customer.html).to include(@event.title)
+            expect(to_customer.html).to include("Unfortunately, this event has been cancelled.")
+          end
+        end
+
+
+
+
+
+
+
+
+
+        # Archive:
+        # perform_on_archive_action / stripe_make_inactive
         xcontext "archiving" do
-
           # ...along with on-archive action tests.
-
         end # 'context "archiving" do'
       end # 'context "side effects" do'
     end # 'context "transitions" do'

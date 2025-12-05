@@ -10,7 +10,7 @@ FactoryBot.define do
 
     raw_editor       { false }
     event_hero_image { Rack::Test::UploadedFile.new(Rails.root.join("spec", "fixtures", "example.jpg")) }
-    starts_at        { Time.current.midnight + rand(2..4).days + 18.hours }
+    starts_at        { Time.current.midnight + Hcms.config.no_refunds_window + rand(2..4).days + 18.hours }
     ends_at          { starts_at + 3.hours }
     number_of_seats  { rand(10..50) }
     price_per_seat   { rand(2499..50000) }

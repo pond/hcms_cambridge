@@ -273,11 +273,21 @@ class Order < ApplicationRecord
       transitions from: [:new, :reserved, :payment_failed], to: :cancelled
     end
 
-    event :refund, after_commit: :refund_and_notify_is_refunded, guard: :outside_no_refunds_window? do
+    event(
+      :refund,
+      guard:        :outside_no_refunds_window?,
+      before:       :process_refund,
+      after_commit: :notify_is_refunded
+    ) do
       transitions from: :paid, to: :refunded
     end
 
-    event :force_refund, after_commit: :refund_and_notify_is_refunded, guard: :inside_no_refunds_window? do
+    event(
+      :force_refund,
+      guard:        :inside_no_refunds_window?,
+      before:       :process_refund,
+      after_commit: :notify_is_refunded
+    ) do
       transitions from: :paid, to: :refunded
     end
   end
@@ -296,9 +306,6 @@ class Order < ApplicationRecord
   # AASM STATE MACHINE namespace 'state': Guards
   # ============================================================================
 
-  # A "paid" state is entered immediately if amount-owed is zero, so that's not
-  # the condition for a guard - only the event-vs-order states matter.
-  #
   def paid_state_makes_sense? # (AASM guard)
     self.event.present? && (
       self.customer_can_pay_for_reservation? ||
@@ -314,6 +321,7 @@ class Order < ApplicationRecord
 
   def outside_no_refunds_window?
     Hcms.config.no_refunds_window.zero? ||
+    self.event.state_cancelled? ||
     Time.current < (self.event.starts_at - Hcms.config.no_refunds_window.days)
   end
 
@@ -322,7 +330,7 @@ class Order < ApplicationRecord
   end
 
   # ============================================================================
-  # AASM STATE MACHINE namespace 'state': After-commit handlers
+  # AASM STATE MACHINE namespace 'state': Callback handlers
   # ============================================================================
 
   def notify_is_reserved
@@ -341,15 +349,27 @@ class Order < ApplicationRecord
 
   def notify_is_cancelled
     OrderMailer.order_state_cancelled_email(self).deliver_later()
-    unless self.state_previously_was == self.class.states[:new]
+
+    unless self.event.state_cancelled? || self.state_previously_was == self.class.states[:new]
       Admin::AdminMailer.order_cancelled(self).deliver_later()
     end
   end
 
-  def refund_and_notify_is_refunded
-    if self.state_paid?
-      raise "Refund goes here!"
+  def process_refund
+    if self.stripe_payment.present?
+      stripe_refund = Stripe::Refund.create(payment_intent: self.stripe_payment.stripe_payment_intent)
+
+      if stripe_refund.status == 'succeeded'
+        self.stripe_payment.destroy!
+      end
     end
-    OrderMailer.order_state_refunded_email(self).deliver_later()
+  end
+
+  def notify_is_refunded
+    if self.amount_owed > 0
+      OrderMailer.order_state_refunded_email(self).deliver_later()
+    elsif self.event.state_cancelled?
+      OrderMailer.order_state_cancelled_email(self).deliver_later()
+    end
   end
 end
