@@ -284,7 +284,6 @@ class Order < ApplicationRecord
 
     event(
       :force_refund,
-      guard:        :inside_no_refunds_window?,
       before:       :process_refund,
       after_commit: :notify_is_refunded
     ) do
@@ -320,13 +319,9 @@ class Order < ApplicationRecord
   end
 
   def outside_no_refunds_window?
-    Hcms.config.no_refunds_window.zero? ||
     self.event.state_cancelled? ||
+    Hcms.config.no_refunds_window.zero? ||
     Time.current < (self.event.starts_at - Hcms.config.no_refunds_window.days)
-  end
-
-  def inside_no_refunds_window?
-    ! self.outside_no_refunds_window?
   end
 
   # ============================================================================
@@ -361,6 +356,8 @@ class Order < ApplicationRecord
 
       if stripe_refund.status == 'succeeded'
         self.stripe_payment.destroy!
+      else
+        raise "Stripe refund error - state #{stripe_refund.status.inspect} for ID #{stripe_refund.id.inspect}"
       end
     end
   end

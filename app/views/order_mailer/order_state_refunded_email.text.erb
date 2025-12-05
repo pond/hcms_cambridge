@@ -4,8 +4,8 @@
 <% if @order.event.state_cancelled? %>
 Unfortunately, this event has been cancelled. We are very sorry for any
 disappointment or inconvenience this may cause.
-<% end %>
 
+<% end %>
 <%
   str = <<~TEXT.squish()
     Your payment of #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}
