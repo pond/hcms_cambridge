@@ -208,7 +208,8 @@ class Order < ApplicationRecord
   end
 
   def token_expires_at
-    self.event.ends_at + 1.day
+    Time.now + 1.year # TODO: FIX ME! - invoice pages are accessed from here.
+    # .event.ends_at + 1.day
   end
 
   def customer_self_service_possible?
