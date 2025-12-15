@@ -12,6 +12,16 @@ body {
   white-space: normal;
 }
 
+section.main_content form {
+  textarea {
+    border: 1px solid black;
+  }
+
+  div.field_with_errors > textarea {
+    border: 1px dashed red;
+  }
+}
+
 section.main_content table {
   border-collapse: collapse;
   width: 100%;

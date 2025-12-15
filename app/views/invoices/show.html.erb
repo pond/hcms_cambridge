@@ -36,6 +36,13 @@
   <% if @order.phone_number.present? %>
     <li><%= @order.phone_number %></li>
   <% end %>
+  <% if @order.address.present? %>
+    <li>
+      <address>
+        <%= h(@order.address).gsub(/\n+/, '<br>').html_safe() %>
+      </address>
+    </li>
+  <% end %>
 </ul>
 
 <table id="invoice-lines">
@@ -65,6 +72,9 @@
     <tr>
       <td colspan="3">
         Total (<%= @order.event.currency %>) incl. <%= Hcms.config.tax_name.presence || 'tax' %>
+        <% if Hcms.config.tax_number.present? %>
+          (<%= Hcms.config.tax_number %>)
+        <% end %>
       </td>
       <td class="amounts">
         <%= apphelp_money(actual_price, currency: @order.event.currency) %>
@@ -92,7 +102,10 @@
   <%= Hcms.config.footer_summary.html_safe %>
   <% if Hcms.config.tax_number.present? %>
     &ndash;
-    <%= tag.strong(Hcms.config.tax_number) %>
+    <%= tag.strong do %>
+      <%= Hcms.config.tax_name.presence || 'tax' %>
+      <%= Hcms.config.tax_number %>
+    <% end %>
   <% end %>
 </p>
 

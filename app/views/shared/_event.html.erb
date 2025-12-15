@@ -46,7 +46,7 @@
         <dd><%= evtshelp_location(event) %></dd>
       <% end %>
 
-      <% unless event.unrestricted_seating? %>
+      <% unless event.unrestricted_seating? || event.number_of_seats == 1 %>
         <dt>Seats</dt>
         <dd>
           <% if event.confirmed_seats_remaining > 5 %>

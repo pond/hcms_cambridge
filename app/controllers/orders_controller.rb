@@ -189,6 +189,7 @@ class OrdersController < ApplicationController
         name
         email
         phone_number
+        address
         number_of_seats
       }
 

@@ -10,6 +10,7 @@ class Admin::OrdersController < ApplicationController
     name
     email
     phone_number
+    address
     number_of_seats
     amount_owed
     notes

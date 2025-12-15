@@ -50,7 +50,11 @@ module EventsHelper
     elsif event.state_reserver_purchases?
       "Pay for reservation"
     elsif event.state_public_purchases?
-      "Book seats"
+      if event.number_of_seats == 1 # Assume a bespoke one-off event entry
+        "Pay for event"
+      else
+        "Book seats"
+      end
     else
       nil
     end
@@ -71,8 +75,10 @@ module EventsHelper
         new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),
         class: 'bold_button'
       )
-    else
+    elsif event.number_of_seats > 1
       link_to('Sold out', '#', class: 'bold_button disabled')
+    else
+      ""
     end
   end
 

@@ -135,6 +135,8 @@ class Order < ApplicationRecord
     state
   }
 
+  validates_presence_of :address, if: -> (order) { order.event.price_per_seat > 100000 }
+
   # Note that the state machine enum is validated automatically.
 
   validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
