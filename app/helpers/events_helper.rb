@@ -70,11 +70,16 @@ module EventsHelper
         class: 'bold_button'
       )
     elsif event.provisional_seats_remaining > 0
-      link_to(
-        evtshelp_booking_action_title(event),
-        new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),
-        class: 'bold_button'
-      )
+      title = evtshelp_booking_action_title(event)
+      if title.present?
+        link_to(
+          title,
+          new_page_event_order_path(page_id: event.page.slug, event_id: event.slug),
+          class: 'bold_button'
+        )
+      else
+        ""
+      end
     elsif event.number_of_seats > 1
       link_to('Sold out', '#', class: 'bold_button disabled')
     else
