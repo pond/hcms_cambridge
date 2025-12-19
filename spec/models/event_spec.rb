@@ -710,7 +710,8 @@ RSpec.describe Event, type: :model do
             order_1 = create(:order, event: @event, number_of_seats: 1)
             order_1.pay_state!
 
-            # Paid but free, so gets 'event cancelled'.
+            # Paid but free, so gets 'event cancelled' as an e-mail but the
+            # internal state is still 'refunded'.
             #
             order_2 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
             order_2.pay_state!
@@ -725,7 +726,18 @@ RSpec.describe Event, type: :model do
             @event.cancel_state!
 
             expect(order_1.reload().state_refunded? ).to eql(true)
-            expect(order_2.reload().state_cancelled?).to eql(true)
+            expect(order_2.reload().state_refunded? ).to eql(true)
+            expect(order_3.reload().state_cancelled?).to eql(true)
+
+
+
+            # TEST IS A WIP
+            #
+            # Need to check the force-refund condition in case we're inside the
+            # refunds window at cancellation time
+
+
+
 
             messages    = spechelp_decode_multipart(count: 2)
             to_customer = messages.find { |m| m.email.to.first == order_1.email }
@@ -765,6 +777,10 @@ RSpec.describe Event, type: :model do
 
         # Archive:
         # perform_on_archive_action / stripe_make_inactive
+        #
+        # IMPORTANT: Check this *with the event in the past* as well as in the
+        # future, since that was a real-world bug.
+        #
         xcontext "archiving" do
           # ...along with on-archive action tests.
         end # 'context "archiving" do'

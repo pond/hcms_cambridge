@@ -417,11 +417,11 @@ class Event < Editable
     #
     def update_orders_for_cancellation
 
-      # People who've paid get refunded.
+      # People who've paid get refunded, even outside any normal refund window.
       #
       self.orders.enum_state_paid.each do |order|
         ActiveRecord::Base.transaction do
-          order.refund_state!
+          order.force_refund_state!
         rescue => e
           Sentry.capture_exception(e)
           raise ActiveRecord::Rollback
