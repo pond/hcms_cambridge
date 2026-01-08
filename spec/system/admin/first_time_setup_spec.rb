@@ -110,13 +110,13 @@ RSpec.describe "Admin - first time setup" do
       visit(new_admin_user_session_path())
       click_on("Log in")
 
-      expect(page).to have_css("section.messages p.alert", text:  "Invalid Email or password")
+      expect(page).to have_css("section.messages p.alert", text:  "Invalid email or password")
 
       fill_in("admin_user_email",    with: "a@b.com")
       fill_in("admin_user_password", with: "1234567890")
       click_on("Log in")
 
-      expect(page).to have_css("section.messages p.alert", text:  "Invalid Email or password")
+      expect(page).to have_css("section.messages p.alert", text:  "Invalid email or password")
     end
 
     it "reset password" do
