@@ -1,0 +1,179 @@
+require "spec_helper.rb"
+
+RSpec.describe Encounter, type: :model do
+
+  # A little helper to DRY things a tiny bit.
+  #
+  def expect_stripe_to_be_made_inactive_via(encounter, simulated_failure: false)
+    mock_prodid  = "product_test_1234"
+    mock_priceid = "price_test_1234"
+
+    StripePrice.create!(priceable: encounter, stripe_price_id: mock_priceid)
+
+    expect(Stripe::Price).to receive(:retrieve).with(mock_priceid).and_return double(id: mock_priceid, product: mock_prodid)
+    expect(Stripe::Product).to receive(:retrieve).with(mock_prodid).and_return double(id: mock_prodid)
+
+    expect(Stripe::Product).to receive(:update).with(mock_prodid, {active: false})
+
+    if simulated_failure
+      expect(Stripe::Price).to receive(:update) { raise "An error" }
+    else
+      expect(Stripe::Price).to receive(:update).with(mock_priceid, {active: false})
+    end
+  end
+
+  it "is an Editable" do # (because that's tested separately, so no need to duplicate tests here)
+    expect(Encounter.ancestors).to include(Editable)
+  end
+
+  context "scopes and associations" do
+    it "default scope orders by created-at-date ascending" do
+      t_ref       = Time.now.midnight + 1.day + 18.hours
+      encounter_1 = create(:encounter, created_at: t_ref)
+      encounter_2 = create(:encounter, created_at: t_ref - 1.day)
+      encounter_3 = create(:encounter, created_at: t_ref + 1.day)
+
+      expect(Encounter.all.to_a).to eql([encounter_3, encounter_1, encounter_2])
+    end
+
+    it "::for_navigation finds nothing" do
+      encounter_1 = create(:encounter); encounter_1.revisions.update_all(published: false)
+      encounter_2 = create(:encounter); encounter_2.revisions.update_all(published: true)
+      encounter_3 = create(:encounter); encounter_3.revisions.update_all(published: true)
+
+      expect(Encounter.for_navigation).to be_empty
+    end
+  end # 'context "scopes and associations" do'
+
+  context "validations" do
+    it "requires a title, summary, body and hero image" do
+      encounter = build(:encounter)
+
+      expect(encounter).to be_valid # (self-check)
+
+      encounter.revisions.first.summary = nil
+
+      expect(encounter).to_not be_valid
+      expect(encounter.errors.of_kind?(:summary, :blank)).to eql(true)
+
+      encounter.revisions.first.summary = "OK"
+
+      expect(encounter).to be_valid
+
+      encounter.revisions.first.body = nil
+
+      expect(encounter).to_not be_valid
+      expect(encounter.errors.of_kind?(:body, :blank)).to eql(true)
+
+      encounter.revisions.first.body = "<p>OK</p>"
+
+      expect(encounter).to be_valid
+
+      encounter.encounter_hero_image = nil
+
+      expect(encounter).to_not be_valid
+      expect(encounter.errors.of_kind?(:encounter_hero_image, :blank)).to eql(true)
+    end
+  end # 'context "validations" do'
+
+  it "responds correctly to trait enquiries" do
+    encounter = build(:encounter)
+
+    expect(encounter.is_normal_type?).to eql(false)
+    expect(encounter.is_form_type?  ).to eql(false)
+    expect(encounter.is_blog_type?  ).to eql(false)
+    expect(encounter.is_events_type?).to eql(false)
+    expect(encounter.is_article?    ).to eql(false)
+    expect(encounter.is_encounter?  ).to eql(true)
+    expect(encounter.is_event?      ).to eql(false)
+  end
+
+  context "base class overrides" do
+    context "#for_navigation?" do
+      it "returns 'false' always" do
+        encounter_1 = create(:encounter); encounter_1.revisions.update_all(published: false)
+        encounter_2 = create(:encounter); encounter_2.revisions.update_all(published: true)
+        encounter_3 = create(:encounter); encounter_3.revisions.update_all(published: true)
+
+        expect(encounter_1.for_navigation?).to eql(false)
+        expect(encounter_2.for_navigation?).to eql(false)
+        expect(encounter_3.for_navigation?).to eql(false)
+      end
+    end # 'context "#for_navigation?" do'
+  end # 'context "base class overrides" do'
+
+  context "miscellaneous" do
+    it "#free_of_charge?" do
+      expect(build(:encounter       ).free_of_charge?).to eql(false)
+      expect(build(:encounter, :free).free_of_charge?).to eql(true)
+    end
+
+    it "#no_physical_aspect?" do
+      expect(build(:encounter                ).no_physical_aspect?).to eql(false)
+      expect(build(:encounter, :physical_none).no_physical_aspect?).to eql(true)
+    end
+
+    it "#physical_aspect_free_of_charge?" do
+      expect(build(:encounter                ).physical_aspect_free_of_charge?).to eql(false)
+      expect(build(:encounter, :physical_free).physical_aspect_free_of_charge?).to eql(true)
+    end
+
+    context '#get_or_create_stripe_price' do
+      it 'when the encounter has no stripe price attached' do
+        mock_prodid        = "product_test_1234"
+        mock_priceid       = "price_test_1234"
+        mock_encounter_url = "https://www.example.com/encounter"
+        encounter          = create(:encounter)
+
+        expect(Stripe::Product).to receive(:create) do | args |
+          expect(args[:name       ]     ).to eql(encounter.title)
+          expect(args[:description]     ).to be_nil # (note how this differs from Events)
+          expect(args[:images     ].size).to eql(1)
+          expect(args[:images     ][0]  ).to eql(encounter.product_image_url())
+          expect(args[:shippable  ]     ).to eql(false)
+          expect(args[:unit_label ]     ).to eql("seat")
+          expect(args[:url        ]     ).to eql(mock_encounter_url)
+
+          double(:product, id: mock_prodid)
+        end
+
+        expect(Stripe::Price).to receive(:create) do | args |
+          expect(args[:currency   ]).to eql(encounter.currency)
+          expect(args[:unit_amount]).to eql(encounter.price_per_seat)
+          expect(args[:product    ]).to eql(mock_prodid)
+
+          double(:price, id: mock_priceid)
+        end
+
+        price = encounter.get_or_create_stripe_price(with_encounter_url: mock_encounter_url)
+
+        expect(price                ).to be_present
+        expect(price.encounter_id   ).to eql(encounter.id)
+        expect(price.stripe_price_id).to eql(mock_priceid)
+      end
+
+      it 'when the encounter has a stripe price attached' do
+        price_double = double(:price)
+        encounter    = create(:encounter)
+
+        expect(encounter.stripe_price).to be_nil # (self-check)
+
+        allow(encounter).to receive(:stripe_price).and_return(price_double)
+
+        expect(encounter.get_or_create_stripe_price(with_encounter_url: 'n/a')).to eql(price_double)
+      end
+    end # 'context '#get_or_create_stripe_price' do'
+  end # 'context "miscellaneous" do'
+
+  context "when destroyed" do
+    it "makes an associated Stripe price inactive" do
+      encounter = create(:encounter)
+
+      expect_stripe_to_be_made_inactive_via(encounter)
+
+      encounter.destroy!
+
+      expect(Encounter.find_by_id(encounter.id)).to be_nil
+    end
+  end
+end

@@ -1,0 +1,36 @@
+<h1 id="admin-header-main">
+  Encounters
+</h1>
+
+<div id="admin-header-with-nav">
+  <h2>All encounters</h2>
+  <span>▶︎</span>
+  <nav>
+    <%= link_to 'New encounter',            new_admin_encounter_path() %> |
+    <%= link_to 'Back to "All pages" list', admin_pages_path() %>
+  </nav>
+</div>
+
+<table class="full_width">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th class="centre">Published?</th>
+      <th class="centre">Has draft?</th>
+      <th class="centre" colspan="3">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @encounters.each do | encounter | %>
+
+      <tr class="<%= cycle( 'even', 'odd' ) %>">
+        <td class="encounter-title"><%= encounter.title %><br></td>
+        <%= render partial: 'booleans', locals: { encounter: encounter } %>
+        <%= render partial: 'actions', locals: { encounter: encounter } %>
+      </tr>
+
+    <% end %>
+  </tbody>
+</table>

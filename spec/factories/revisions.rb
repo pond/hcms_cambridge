@@ -10,16 +10,20 @@ FactoryBot.define do
       available_title
     end
 
-    trait :for_page do
-      navigation_title { Faker::Lorem.sentence.chomp(".") }
+    trait :for_article do
+      summary { Faker::Lorem.paragraph }
     end
 
-    trait :for_article do
+    trait :for_encounter do
       summary { Faker::Lorem.paragraph }
     end
 
     trait :for_event do
       summary { Faker::Lorem.paragraph }
+    end
+
+    trait :for_page do
+      navigation_title { Faker::Lorem.sentence.chomp(".") }
     end
   end
 end

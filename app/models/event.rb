@@ -6,7 +6,7 @@ class Event < Editable
   belongs_to :page
   has_many :orders
   has_many :confirmed_orders, -> { self.confirmed }, class_name: 'Order' # (for eager-loading use only)
-  has_one  :stripe_price, required: false, dependent: :destroy
+  has_one  :stripe_price, as: :priceable, required: false, dependent: :destroy
 
   after_initialize(unless: :persisted?) do
     tz_now = Time.current
@@ -229,7 +229,7 @@ class Event < Editable
       )
 
       StripePrice.create!(
-        event:           self,
+        priceable:       self,
         stripe_price_id: price_result.id,
       )
     end
@@ -325,10 +325,6 @@ class Event < Editable
   # ============================================================================
   #
   private
-
-    # Called before-destroy. If there are "relevant state" orders associated,
-    # refuse to exit. "Relevant" means - not in "new" (initial) or "cancelled"
-    # states. If there any reservations or paid items
 
     # ==========================================================================
     # AASM STATE MACHINE namespace 'state': After-commit handlers

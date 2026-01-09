@@ -90,9 +90,19 @@ en:
       article:
         title: "Title"
         summary: "Brief summary"
-        article_hero_image: "Thumbnail photo"
+        article_hero_image: "Poster photo"
         raw_editor: "Use the low-level HTML editor?"
         body: "Main article"
+
+      encounter:
+        title: "Title"
+        summary: "Brief summary"
+        encounter_hero_image: "Poster photo"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Encounter details"
+        location: "Location"
+        price_per_seat: "Price per seat"
+        price_physical: "Optional physical item price"
 
       event:
         title: "Title"

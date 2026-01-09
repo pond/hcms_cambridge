@@ -104,7 +104,7 @@ RSpec.describe "Admin - articles" do
       click_on("Publish article")
 
       expect(page).to have_css(".field_error_messages", text: "Title must be provided")
-      expect(page).to have_css(".field_error_messages", text: "Thumbnail photo must be provided")
+      expect(page).to have_css(".field_error_messages", text: "Poster photo must be provided")
       expect(page).to have_css(".field_error_messages", text: "Brief summary must be provided")
       expect(page).to have_css(".field_error_messages", text: "Main article must be provided")
     end

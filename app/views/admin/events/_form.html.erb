@@ -49,13 +49,13 @@
 
         <div class="two_column">
           <div class="field">
-            <%= apphelp_label(f, :number_of_seats, hint: 'leave blank or set to zero if there is no limit') %>
+            <%= apphelp_label(f, :number_of_seats, hint: 'set to zero if there is no limit') %>
             <%= f.number_field :number_of_seats, min: 0, step: 1 %>
           </div>
 
           <% if Hcms.config.currency.present? %>
             <div class="field">
-              <%= apphelp_label(f, :price_per_seat, hint: 'leave blank or set to zero if free of charge') %>
+              <%= apphelp_label(f, :price_per_seat, hint: 'set to zero if free of charge') %>
               <%= Money::Currency.new(Hcms.config.currency).symbol %>
               <%=
                 parsed_amount = Money.from_cents(
@@ -65,7 +65,7 @@
 
                 f.text_field(
                   :price_per_seat,
-                  value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+                  value: parsed_amount.format(symbol: false),
                   class: 'not_full_width_in_two_column'
                 )
               %>

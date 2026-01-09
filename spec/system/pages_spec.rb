@@ -1,4 +1,5 @@
 require "spec_helper.rb"
+require_relative "shared_examples/footer_spec.rb"
 
 RSpec.describe "Pages" do
   context "navigation" do
@@ -711,7 +712,6 @@ RSpec.describe "Pages" do
     # Nothing to do here; it's all in 'events_spec.rb'
   end # 'context "event containers" do'
 
-  require_relative "shared_examples/footer_spec.rb"
   context "shared" do
     let(:path_to_test) { root_path() }
 

@@ -229,6 +229,10 @@ class Editable < ApplicationRecord
     false
   end
 
+  def is_encounter?
+    false
+  end
+
   def is_event?
     false
   end

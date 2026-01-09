@@ -8,7 +8,7 @@ RSpec.describe Event, type: :model do
     mock_prodid  = "product_test_1234"
     mock_priceid = "price_test_1234"
 
-    StripePrice.create!(event: event, stripe_price_id: mock_priceid)
+    StripePrice.create!(priceable: event, stripe_price_id: mock_priceid)
 
     expect(Stripe::Price).to receive(:retrieve).with(mock_priceid).and_return double(id: mock_priceid, product: mock_prodid)
     expect(Stripe::Product).to receive(:retrieve).with(mock_prodid).and_return double(id: mock_prodid)
@@ -135,6 +135,7 @@ RSpec.describe Event, type: :model do
     expect(event.is_blog_type?  ).to eql(false)
     expect(event.is_events_type?).to eql(false)
     expect(event.is_article?    ).to eql(false)
+    expect(event.is_encounter?  ).to eql(false)
     expect(event.is_event?      ).to eql(true)
   end
 

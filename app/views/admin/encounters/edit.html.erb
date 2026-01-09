@@ -1,0 +1,10 @@
+<h1>Edit encounter &ldquo;<%= @encounter.title %>&rdquo;</h1>
+
+<%= render 'form' %>
+
+<% content_for :extra_footer_links do %>
+  <div class="extra_footer_links">
+    <%= link_to 'Show', admin_encounter_path(id: @encounter.slug) %> |
+    <%= link_to 'Back', :back %>
+  </div>
+<% end %>

@@ -15,6 +15,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :encounters, only: :show do
+    resources :encounter_orders, except: [:edit, :update] do
+      resource :invoice, only: :show
+    end
+  end
+
   scope 'manage_order/:order_id/:token', controller: :orders_self_service do
     get   '/', action: :edit, as: :manage_order
     patch '/', action: :update
@@ -39,6 +45,10 @@ Rails.application.routes.draw do
       resources :events do
         resources :orders
       end
+    end
+
+    resources :encounters do
+      resources :encounter_orders
     end
 
     resources :move_pages, only: :update

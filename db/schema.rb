@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_15_090540) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_08_232402) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,6 +32,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_090540) do
     t.datetime "updated_at", precision: nil, null: false
     t.index ["page_id"], name: "index_articles_on_page_id"
     t.index ["slug"], name: "index_articles_on_slug", unique: true
+  end
+
+  create_table "encounters", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "currency", limit: 3, null: false
+    t.text "encounter_hero_image", null: false
+    t.text "location"
+    t.integer "price_per_seat", null: false
+    t.integer "price_physical"
+    t.boolean "raw_editor", default: false, null: false
+    t.text "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_encounters_on_slug", unique: true
   end
 
   create_table "events", force: :cascade do |t|
@@ -148,10 +161,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_090540) do
 
   create_table "stripe_prices", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "event_id", null: false
+    t.bigint "priceable_id", null: false
+    t.string "priceable_type"
     t.text "stripe_price_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["event_id"], name: "index_stripe_prices_on_event_id"
+    t.index ["priceable_id"], name: "index_stripe_prices_on_priceable_id"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

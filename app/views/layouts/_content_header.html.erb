@@ -12,7 +12,7 @@
   %>
 
   <nav class="main_menu">
-    <% if @page.navigation_title.present? %>
+    <% if @page && @page.navigation_title.present? %>
       <h1 id="navigation_title"><%= @page.navigation_title %></h1>
     <% end %>
 

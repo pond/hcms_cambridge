@@ -21,9 +21,9 @@ class Admin::EventsController < ApplicationController
     :state,
     :starts_at,
     :ends_at,
+    :location,
     :number_of_seats,
     :price_per_seat,
-    :location,
 
     :on_archive_action,
     on_archive_params: [:blog_id],
@@ -136,7 +136,7 @@ class Admin::EventsController < ApplicationController
         else
           redirect_to(
             admin_page_events_url( page_id: @page.id ),
-            alert: 'This event has orders so it cannot be deleted. Customers have orders with payment invoices which refer to it.'
+            alert: 'This event has completed orders so it cannot be deleted, since customer payment invoices refer to it.'
           )
         end
       end

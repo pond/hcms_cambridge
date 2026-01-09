@@ -82,6 +82,7 @@ RSpec.describe Page, type: :model do
         expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_encounter?  ).to eql(false)
         expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
@@ -113,6 +114,7 @@ RSpec.describe Page, type: :model do
         expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_encounter?  ).to eql(false)
         expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
@@ -144,6 +146,7 @@ RSpec.describe Page, type: :model do
         expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_encounter?  ).to eql(false)
         expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
@@ -175,6 +178,7 @@ RSpec.describe Page, type: :model do
         expect(page.is_blog_type?  ).to eql(true)
         expect(page.is_events_type?).to eql(false)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_encounter?  ).to eql(false)
         expect(page.is_event?      ).to eql(false)
 
         # Specific to Page
@@ -205,6 +209,7 @@ RSpec.describe Page, type: :model do
         expect(page.is_blog_type?  ).to eql(false)
         expect(page.is_events_type?).to eql(true)
         expect(page.is_article?    ).to eql(false)
+        expect(page.is_encounter?  ).to eql(false)
         expect(page.is_event?      ).to eql(false)
 
         # Specific to Page

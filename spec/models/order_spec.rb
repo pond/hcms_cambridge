@@ -13,7 +13,7 @@ RSpec.describe Order, type: :model do
 
     @event = create(:event)
 
-    StripePrice.create!(event: @event, stripe_price_id: mock_priceid)
+    StripePrice.create!(priceable: @event, stripe_price_id: mock_priceid)
 
     allow(Stripe::Price).to receive(:retrieve).with(mock_priceid).and_return double(id: mock_priceid, product: mock_prodid)
     allow(Stripe::Product).to receive(:retrieve).with(mock_prodid).and_return double(id: mock_prodid)

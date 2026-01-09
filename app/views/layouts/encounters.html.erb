@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render partial: 'layouts/content_preamble', locals: { content: @encounter } %>
+    <title><%= Hcms.config.site_name %>: <%= @encounter.title %></title>
+  </head>
+
+  <body>
+    <header>
+      <%= render partial: 'layouts/content_header', locals: { content: @encounter } %>
+    </header>
+
+    <main>
+      <%= render partial: 'layouts/content_main', locals: { content: @encounter } %>
+    </main>
+
+    <footer>
+      <% content_for :signed_in_cms_menu do %>
+        <%= encshelp_edit_link_for(@encounter, params) %> |
+        <%= link_to 'Add encounter',   new_admin_encounter_path() %> |
+        <%= link_to 'List encounters', admin_encounters_path() %> |
+        <%= link_to 'Page management', admin_pages_path() %>
+      <% end %>
+
+      <%= render partial: 'layouts/content_footer', locals: { content: @encounter } %>
+    </footer>
+  </body>
+</html>

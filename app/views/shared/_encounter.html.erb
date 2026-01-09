@@ -1,0 +1,52 @@
+<%
+  # Render with locals 'encounter' giving the Encounter to render, with
+  # delegation set up to pull data from an appropriate Revision (by default -
+  # published, falling back the only unpublished revision if nothing is
+  # published).
+  #
+  #   render partial: 'shared/encounter', locals: { encounter: @encounter }
+%>
+<%= render partial: 'shared/editable_revisions', locals: { editable: encounter, form_path: admin_encounter_path(encounter) } %>
+
+<article class="encounter">
+  <section class="encounter-header">
+      <h2 class="encounter-heading"><%= encounter.title %></h2>
+    <div class="encounter-date-and-heading-container">
+      <div class="encounter-date-and-location">
+        <% if encounter.location.present? %>
+          <address class="encounter-location"><%= encshelp_location(encounter) %></address>
+        <% end %>
+      </div>
+    </div>
+    <div class="encounter-summary-and-links-container">
+      <div class="encounter-summary">
+        <%= encounter.summary %>
+      </div>
+      <div class="encounter-next-prev">
+        <% encshelp_booking_button(encounter) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="encounter-body">
+    <%= encounter.body.html_safe() %>
+  </section>
+
+  <section class="encounter-meta">
+    <dl>
+      <% if encounter.location.present? %>
+        <dt>Where</dt>
+        <dd><%= encshelp_location(encounter) %></dd>
+      <% end %>
+
+      <% if encounter.price_per_seat > 0 %>
+        <dt>Price</dt>
+        <dd>
+          <%= encshelp_price(encounter) %>
+          &nbsp;
+          <% encshelp_booking_button(encounter) %>
+        </dd>
+      <% end %>
+    </dl>
+  </section>
+</article>

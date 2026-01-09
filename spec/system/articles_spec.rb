@@ -1,4 +1,5 @@
 require "spec_helper.rb"
+require_relative "shared_examples/footer_spec.rb"
 
 RSpec.describe "Pages" do
   before :each do
@@ -155,7 +156,6 @@ RSpec.describe "Pages" do
     end
   end # 'context "navigation" do'
 
-  require_relative "shared_examples/footer_spec.rb"
   context "shared" do
     let(:path_to_test) { root_path() }
 

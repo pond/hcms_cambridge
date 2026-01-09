@@ -9,6 +9,28 @@
 # since it's well placed to know about deletion, cancellation and so-on.
 #
 class StripePrice < ApplicationRecord
-  belongs_to :event
-  validates_presence_of :event, :stripe_price_id
+  belongs_to :priceable, polymorphic: true
+  validates_presence_of :priceable, :stripe_price_id
+
+  # ============================================================================
+  # Convenience / more natural code than e.g. "price.priceable"
+  # ============================================================================
+
+  def event
+    item = self.priceable
+    item.is_a?(Event) ? item : nil
+  end
+
+  def event_id
+    self.priceable_type == 'Event' ? self.priceable_id : nil
+  end
+
+  def encounter
+    item = self.priceable
+    item.is_a?(Encounter) ? item : nil
+  end
+
+  def encounter_id
+    self.priceable_type == 'Encounter' ? self.priceable_id : nil
+  end
 end
