@@ -10,8 +10,8 @@
 
 <article class="encounter">
   <section class="encounter-header">
-      <h2 class="encounter-heading"><%= encounter.title %></h2>
     <div class="encounter-date-and-heading-container">
+      <h2 class="encounter-heading"><%= encounter.title %></h2>
       <div class="encounter-date-and-location">
         <% if encounter.location.present? %>
           <address class="encounter-location"><%= encshelp_location(encounter) %></address>

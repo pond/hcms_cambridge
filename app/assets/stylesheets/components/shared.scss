@@ -313,16 +313,18 @@ section.messages, div#error_explanation {
 }
 
 article.article,
-article.event {
+article.event,
+article.encounter {
   section.article-header,
-  section.event-header {
+  section.event-header,
+  section.encounter-header {
     border-top:    1px dotted #999;
     border-bottom: 1px dotted #999;
     margin-bottom: 20px;
   }
 
-  .article-date-and-heading-container,  .event-date-and-heading-container,
-  .article-summary-and-links-container, .event-summary-and-links-container {
+  .article-date-and-heading-container,  .event-date-and-heading-container,  .encounter-date-and-heading-container,
+  .article-summary-and-links-container, .event-summary-and-links-container, .encounter-summary-and-links-container {
     display: flex;
     justify-content: space-between;
     gap: 5px;
@@ -335,39 +337,39 @@ article.event {
     margin-bottom: 1em;
   }
 
-  .event-summary-and-links-container {
+  .event-summary-and-links-container, .encounter-summary-and-links-container {
     align-items: center;
     margin: 0.6em 0;
   }
 
-  .article-date, .event-date-and-location {
+  .article-date, .event-date-and-location, .encounter-date-and-location {
     font-size: small;
     margin: 0;
     padding-left: 5px;
     text-align: right;
   }
 
-  .event-date-and-location {
+  .event-date-and-location, .encounter-date-and-location {
     font-size: inherit;
     font-weight: bold;
 
-    .event-location {
+    .event-location, .encounter-location {
       font-style: normal;
       font-weight: normal;
       font-size: small;
     }
   }
 
-  .article-heading, .event-heading {
+  .article-heading, .event-heading, .encounter-heading {
     margin: 5px 0;
   }
 
-  .article-summary, .event-summary {
+  .article-summary, .event-summary, .encounter-summary {
     font-size: smaller;
     font-style: italic;
   }
 
-  .article-next-prev, .event-next-prev {
+  .article-next-prev, .event-next-prev, .encounter-next-prev {
     font-size: 18px;
     line-height: 110%;
     text-align: right;
@@ -548,11 +550,11 @@ main, .redactor-box.redactor-styles-on {
     }
   }
 
-  article.event-order-form-container {
+  article.event-order-form-container, article.encounter-order-form-container {
     display: grid;
     grid-template-columns: 65% 35%;
 
-    section.event-order-poster {
+    section.event-order-poster, section.encounter-order-poster {
       margin-left: 1em;
       a {
         display: inline-block;
@@ -633,19 +635,22 @@ a:visited {
   color: $nav_link_visited_colour;
 }
 
-a:not(.article-link):not(.event-link):not(.bold_button):hover,
-a:hover div.article-date-and-heading-container,
-a:hover   div.event-date-and-heading-container {
+a:not(.article-link):not(.event-link):not(.encounter-link):not(.bold_button):hover,
+a:hover   div.article-date-and-heading-container,
+a:hover     div.event-date-and-heading-container,
+a:hover div.encounter-date-and-heading-container {
   color: lighten($nav_link_base_colour, 50%);
   text-decoration: underline;
 }
 
-a.article-link:hover img, a.event-link:hover img {
+a.article-link:hover img, a.event-link:hover img, a.encounter-link:hover img {
   transition: transform 100ms;
   transform: scale(105%);
 }
 
-a.article-link:hover div.article-summary, a.event-link:hover div.event-summary {
+a.article-link:hover   div.article-summary,
+a.event-link:hover     div.event-summary,
+a.encounter-link:hover div.encounter-summary {
   color: lighten($nav_link_base_colour, 50%);
   text-decoration: none !important;
 }
@@ -964,39 +969,47 @@ nav {
     }
 
     article.article,
-    article.event {
+    article.event,
+    article.encounter {
       .article-summary-and-links-container,
-      .event-summary-and-links-container {
+      .event-summary-and-links-container,
+      .encounter-summary-and-links-container {
         align-items: center;
 
         .article-next-prev,
-        .event-next-prev {
+        .event-next-prev,
+        .encounter-next-prev {
           text-wrap: wrap;
         }
       }
     }
 
-    article.event {
+    article.event, article.encounter {
       div.event-date-and-heading-container,
       div.event-summary-and-links-container,
-      div.event-date-and-location {
+      div.event-date-and-location,
+      div.encounter-date-and-heading-container,
+      div.encounter-summary-and-links-container,
+      div.encounter-date-and-location {
         flex-direction: column;
         text-align: center;
       }
 
-      div.event-next-prev {
+      div.event-next-prev, div.encounter-next-prev {
         display: none;
       }
 
-      div.event-summary {
+      div.event-summary, div.encounter-summary {
         margin-top: 0.8em;
       }
     }
 
-    article.event-order-form-container {
+    article.event-order-form-container,
+    article.encounter-order-form-container {
       display: block;
 
-      section.event-order-poster {
+      section.event-order-poster,
+      section.encounter-order-poster {
         display: none;
       }
     }
