@@ -27,7 +27,7 @@ default: &default
 
   # Enable the Encounters system (reusable, bespoke, "one off" events)?
   #
-  enable_encounters: true
+  enable_encounters: false
 
   # If you use event ordering (see above) then the footer summary must contain a
   # postal address, since this summary is shown in tax invoices.
