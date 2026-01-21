@@ -177,6 +177,13 @@ class Event < Editable
     end
   end
 
+  # Boolean convenience equivalent of #provisional_seats_remaining.
+  #
+  def provisional_seats_remaining?
+    remaining = self.provisional_seats_remaining
+    remaining.nil? || remaining > 0
+  end
+
   # An at-the-instant count based on reserved or paid orders only and will allow
   # a negative return value if an event ends up oversubscribed (e.g. because the
   # event was edited after orders had been placed). Returns +nil+ if seat count
@@ -190,14 +197,19 @@ class Event < Editable
     end
   end
 
+  # Boolean convenience equivalent of #provisional_seats_remaining.
+  #
+  def confirmed_seats_remaining?
+    remaining = self.confirmed_seats_remaining
+    remaining.nil? || remaining > 0
+  end
+
   # Opposite of #confirmed_seats_remaining, giving the number of seats taken.
+  # Never returns +nil+, since it's not counting down a remaining amount, it's
+  # counting up an ordered amount.
   #
   def confirmed_seats_taken
-    if self.unrestricted_seating?
-      return nil
-    else
-      @confirmed_seats_taken ||= self.confirmed_orders.sum(&:number_of_seats)
-    end
+    @confirmed_seats_taken ||= self.confirmed_orders.sum(&:number_of_seats)
   end
 
   # This is mostly here for local development and test purposes, where file

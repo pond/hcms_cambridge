@@ -166,15 +166,19 @@ RSpec.describe Event, type: :model do
       expect(build(:event, :uncounted).unrestricted_seating?).to eql(true)
     end
 
-    context "#provisional_seats_remaining" do
+    context "#provisional_seats_remaining / #provisional_seats_remaining?" do
       it 'with unrestricted seating' do
-        expect(build(:event, :uncounted).provisional_seats_remaining).to be_nil
+        event = build(:event, :uncounted)
+
+        expect(event.provisional_seats_remaining ).to be_nil
+        expect(event.provisional_seats_remaining?).to eql(true)
       end
 
       it 'with counted seating' do
         event = create(:event, number_of_seats: 10)
 
-        expect(event.provisional_seats_remaining).to eql(10)
+        expect(event.provisional_seats_remaining ).to eql(10)
+        expect(event.provisional_seats_remaining?).to eql(true)
 
         order_1 = create(:order, event: event, number_of_seats: 2)
         order_2 = create(:order, event: event, number_of_seats: 3); order_2.update_column(:state, Order.states[:paid])
@@ -187,7 +191,8 @@ RSpec.describe Event, type: :model do
         # ...so we have to get a new instance
         #
         event = Event.find(event.id)
-        expect(event.provisional_seats_remaining).to eql(5) # 10 minus sum of Reserved order 1 and Paid order 2 seats
+        expect(event.provisional_seats_remaining ).to eql(5) # 10 minus sum of Reserved order 1 and Paid order 2 seats
+        expect(event.provisional_seats_remaining?).to eql(true)
       end
 
       it 'will not drop below zero for over-subscribed events' do
@@ -195,19 +200,24 @@ RSpec.describe Event, type: :model do
         order = create(:order, event: event, number_of_seats: 20)
         event.update!(number_of_seats: 10)
 
-        expect(event.provisional_seats_remaining).to be_zero
+        expect(event.provisional_seats_remaining ).to be_zero
+        expect(event.provisional_seats_remaining?).to eql(false)
       end
     end # 'context "#provisional_seats_remaining" do'
 
     context "#confirmed_seats_remaining" do
       it 'with unrestricted seating' do
-        expect(build(:event, :uncounted).confirmed_seats_remaining).to be_nil
+        event = build(:event, :uncounted)
+
+        expect(event.confirmed_seats_remaining ).to be_nil
+        expect(event.confirmed_seats_remaining?).to eql(true)
       end
 
       it 'with counted seating' do
         event = create(:event, number_of_seats: 10)
 
-        expect(event.confirmed_seats_remaining).to eql(10)
+        expect(event.confirmed_seats_remaining ).to eql(10)
+        expect(event.confirmed_seats_remaining?).to eql(true)
 
         order_1 = create(:order, event: event, number_of_seats: 2)
         order_2 = create(:order, event: event, number_of_seats: 3); order_2.update_column(:state, Order.states[:paid])
@@ -220,7 +230,8 @@ RSpec.describe Event, type: :model do
         # ...so we have to get a new instance
         #
         event = Event.find(event.id)
-        expect(event.confirmed_seats_remaining).to eql(7) # 10 minus sum of Paid order 2 seats only
+        expect(event.confirmed_seats_remaining ).to eql(7) # 10 minus sum of Paid order 2 seats only
+        expect(event.confirmed_seats_remaining?).to eql(true)
       end
 
       it 'will report below zero for over-subscribed events' do
@@ -228,13 +239,14 @@ RSpec.describe Event, type: :model do
         order = create(:order, event: event, number_of_seats: 20); order.update_column(:state, Order.states[:paid])
         event.update!(number_of_seats: 8)
 
-        expect(event.confirmed_seats_remaining).to eql(-12)
+        expect(event.confirmed_seats_remaining ).to eql(-12)
+        expect(event.confirmed_seats_remaining?).to eql(false)
       end
     end # 'context "#confirmed_seats_remaining" do'
 
     context "#confirmed_seats_taken" do
       it 'with unrestricted seating' do
-        expect(build(:event, :uncounted).confirmed_seats_taken).to be_nil
+        expect(build(:event, :uncounted).confirmed_seats_taken).to be_zero
       end
 
       it 'with counted seating' do

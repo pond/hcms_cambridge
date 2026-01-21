@@ -69,7 +69,7 @@ module EventsHelper
         new_event_waitlist_path(event_id: event.slug),
         class: 'bold_button'
       )
-    elsif event.provisional_seats_remaining > 0
+    elsif event.provisional_seats_remaining?
       title = evtshelp_booking_action_title(event)
       if title.present?
         link_to(

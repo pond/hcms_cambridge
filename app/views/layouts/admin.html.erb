@@ -27,9 +27,11 @@
               <li class="pure-menu-item pure-menu-allow-hover">
                 <%= link_to('Pages', admin_pages_path(), class: 'pure-menu-link') %>
               </li>
-              <li class="pure-menu-item pure-menu-allow-hover">
-                <%= link_to('Encounters', admin_encounters_path(), class: 'pure-menu-link') %>
-              </li>
+              <% if Hcms.config.enable_encounters %>
+                <li class="pure-menu-item pure-menu-allow-hover">
+                  <%= link_to('Encounters', admin_encounters_path(), class: 'pure-menu-link') %>
+                </li>
+              <% end %>
               <li class="pure-menu-item pure-menu-allow-hover">
                 <%= link_to('Statistics', admin_statistics_path(), class: 'pure-menu-link') %>
               </li>

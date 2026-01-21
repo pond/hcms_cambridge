@@ -4,7 +4,7 @@
       Current state: <%= event.human_state %>.
       <%= event.orders.enum_state_reserved.sum(:number_of_seats) %> reserved and
       <%= event.orders.enum_state_paid.sum(:number_of_seats) %> paid, with
-      <%= event.confirmed_seats_remaining %> seats remaining.
+      <%= event.unrestricted_seating? ? 'unlimited' : event.confirmed_seats_remaining %> seats remaining.
     </span>
   </div>
   <div class="row-wide-column-small">
