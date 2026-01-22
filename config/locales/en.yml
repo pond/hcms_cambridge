@@ -104,6 +104,17 @@ en:
         price_per_seat: "Price per seat"
         price_physical: "Optional physical item price"
 
+      encounter_order:
+        name: "Name"
+        email: "E-mail address"
+        phone_number: "Phone number"
+        starts_at: "Starting date and time"
+        has_physical: "Include physical product in price?"
+        gift_note: "Add a gift note?"
+        notes_to_buyer: "Any other notes?"
+        number_of_seats: "Number of seats"
+        amount_owed: "Total price"
+
       event:
         title: "Title"
         summary: "Brief summary"
@@ -122,6 +133,7 @@ en:
       order:
         name: "Name"
         email: "E-mail address"
+        phone_number: "Phone number"
         number_of_seats: "Number of seats"
         notes: "Any other notes?"
         amount_owed: "Total price"

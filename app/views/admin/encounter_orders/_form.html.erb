@@ -1,0 +1,106 @@
+<%
+  # Render with locals 'encounter_order' holding the encounter_order
+  # ActiveRecord object (with encounter associated already) and 'button_text'
+  # for the submit button text.
+%>
+<%=
+  form_with(
+    model:   encounter_order,
+    builder: FormBuilderWithInlineErrors,
+    url:     encounter_order.new_record? ?
+             admin_encounter_encounter_orders_path(encounter_id: encounter_order.encounter.slug) :
+             admin_encounter_encounter_order_path(encounter_id: encounter_order.encounter.slug, id: encounter_order.id)
+  ) do | f |
+%>
+  <hr>
+
+  <p>
+    <%= apphelp_label(f, :name, required: true, hint: "name of the person who will be paying for the encounter order") %>
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :email, required: true, hint: "the customer's encounter information and payment link is sent here") %>
+    <%= f.email_field :email %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :phone_number, hint: 'optional') %>
+    <%= f.telephone_field :phone_number %>
+  </p>
+
+  <hr>
+
+  <div class="field">
+    <%= apphelp_label(f, :starts_at) %>
+    <%= f.label :starts_at_kind_open_ended do %>
+      <%= f.radio_button :starts_at_kind, :open_ended %> Open-ended
+    <% end %>
+    <div class="field-row">
+      <%= f.label :starts_at_kind_fixed do %>
+        <%= f.radio_button :starts_at_kind, :fixed %> Fixed:
+      <% end %>
+      <%= f.datetime_field :starts_at %>
+    </div>
+  </div>
+
+  <p>
+    <% if @encounter.price_physical.nil? %>
+      This encounter has no related physical product.
+    <% else %>
+      <%= apphelp_label(f, :has_physical) %>
+      <%=
+        f.collection_select(
+          :has_physical,
+          [
+            ["", "Customer chooses at checkout"],
+            [true, "Included"],
+            [false, "Excluded"]
+          ],
+          :first,
+          :last
+        )
+      %>
+    <% end %>
+  <p>
+
+  <p>
+    <%= apphelp_label(f, :number_of_seats, required: true) %>
+    <%= f.number_field(:number_of_seats, min: 1) %>
+    at <strong><%= evtshelp_price(encounter_order.encounter) %></strong> per seat <small>(<%= encounter_order.encounter.currency %>)</small>
+  </p>
+
+  <p>
+    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
+    <%= Money::Currency.new(Hcms.config.currency).symbol %>
+    <%= hidden_field_tag(:price_per_seat_cents,    f.object.encounter.price_per_seat.to_s) %>
+    <%= hidden_field_tag(:price_per_seat_currency, f.object.encounter.currency) %>
+    <%=
+      parsed_amount = Money.from_cents(
+        f.object.amount_owed,
+        @encounter.currency
+      )
+
+      f.text_field(
+        :amount_owed,
+        value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+        style: 'width: 5em;'
+      )
+    %>
+    <small><%= Hcms.config.currency %></small>
+  </p>
+
+  <p>
+    <%= apphelp_label(f, :notes_to_buyer, hint: 'the customer will be able to see these') %>
+    <%= f.text_area :notes_to_buyer, rows: 3, cols: 80 %>
+  </p>
+
+  <div class="field">
+    <div class="field-row">
+      <%= submit_tag(button_text, class: 'bold_button') %>
+      <span>
+        The customer will be notified of the encounter details automatically,
+        asked for any additional information if relevant and be able to pay
+        for the finalised order directly via Stripe.
+      </span>
+    </div>
+  </div>
+<% end %>

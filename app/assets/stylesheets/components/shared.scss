@@ -136,6 +136,10 @@ label {
   display: block;
 }
 
+label + label {
+  margin-top: 10px;
+}
+
 textarea {
   margin: 5px 0;
   font-size: 12pt;

@@ -31,7 +31,7 @@
   </p>
 
   <p>
-    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount") %>
+    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
     <%= Money::Currency.new(Hcms.config.currency).symbol %>
     <%= hidden_field_tag(:price_per_seat_cents,    f.object.event.price_per_seat.to_s) %>
     <%= hidden_field_tag(:price_per_seat_currency, f.object.event.currency) %>
@@ -48,12 +48,6 @@
       )
     %>
     <small><%= Hcms.config.currency %></small>
-    <br>
-    <small><em>
-      The customer will be notified of the order details automatically, but
-      payment must be manually requested (e.g. by separately e-mailing them a
-      one-off Stripe payment link or bank transfer details).
-    </em></small>
   </p>
 
   <p>
@@ -61,7 +55,14 @@
     <%= f.text_area :notes, rows: 3, cols: 80 %>
   </p>
 
-  <p>
-    <%= submit_tag(button_text, class: 'bold_button') %>
-  </p>
+  <div class="field">
+    <div class="field-row">
+      <%= submit_tag(button_text, class: 'bold_button') %>
+      <span>
+        The customer will be notified of the order details automatically, but
+        payment must be manually requested (e.g. by separately e-mailing them a
+        one-off Stripe payment link or bank transfer details).
+      </span>
+    </div>
+  </div>
 <% end %>

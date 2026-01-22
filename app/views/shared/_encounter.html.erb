@@ -23,7 +23,7 @@
         <%= encounter.summary %>
       </div>
       <div class="encounter-next-prev">
-        <% encshelp_booking_button(encounter) %>
+        <%= encshelp_booking_button(encounter) %>
       </div>
     </div>
   </section>
@@ -44,7 +44,7 @@
         <dd>
           <%= encshelp_price(encounter) %>
           &nbsp;
-          <% encshelp_booking_button(encounter) %>
+          <%= encshelp_booking_button(encounter) %>
         </dd>
       <% end %>
     </dl>

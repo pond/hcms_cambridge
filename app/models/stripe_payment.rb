@@ -9,6 +9,28 @@
 # Stripe, we don't know about it and the payment record won't be cleaned up.
 #
 class StripePayment < ApplicationRecord
-  belongs_to :order
-  validates_presence_of :order, :stripe_payment_intent
+  belongs_to :payable, polymorphic: true
+  validates_presence_of :payable, :stripe_price_id
+
+  # ============================================================================
+  # Convenience / more natural code than e.g. "payment.payable"
+  # ============================================================================
+
+  def order
+    item = self.payable
+    item.is_a?(Order) ? item : nil
+  end
+
+  def order_id
+    self.payable_type == 'Order' ? self.payable_id : nil
+  end
+
+  def encounter_order
+    item = self.payable
+    item.is_a?(EncounterOrder) ? item : nil
+  end
+
+  def encounter_order_id
+    self.payable_type == 'EncounterOrder' ? self.payable_id : nil
+  end
 end

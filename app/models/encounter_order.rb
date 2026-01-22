@@ -1,9 +1,9 @@
-class Order < ApplicationRecord
+class EncounterOrder < ApplicationRecord
   include AASM
 
   has_secure_token()
 
-  belongs_to :event
+  belongs_to :encounter
   has_one :stripe_payment, required: false, dependent: :destroy
 
   # Uses the site name first letters capitalised plus "I-" - e.g. for a site
@@ -21,6 +21,8 @@ class Order < ApplicationRecord
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
   # migrations. Enum originally created by "20251010035603_add_orders.rb".
   #
+  # (And yes, that's an *order* state - EncounterOrder uses the same states).
+  #
   # Using 'enum' will cause Rails to generate a bunch of accessors which use
   # "enum_state_" as a prefix, to avoid collision with an AASM state machine
   # defined later, which uses "state_" as a prefix and should always be used
@@ -30,7 +32,7 @@ class Order < ApplicationRecord
     :state,
     {
       new:            'new',
-      reserved:       'reserved',
+      reserved:       'reserved', # (not used for EncounterOrders)
       paid:           'paid',
       payment_failed: 'payment_failed',
       cancelled:      'cancelled',
@@ -42,22 +44,22 @@ class Order < ApplicationRecord
 
   STATES = self.states.keys
 
-  # These states mean that an associated event shouldn't be deleted, since
+  # These states mean that an associated encounter shouldn't be deleted, since
   # users will want to refer to it (e.g. via invoices or in-flight orders).
   # Some states may be reversible, e.g. a reservation can be cancelled. See
-  # also IRREVOCABLE_REFUSE_EVENT_DELETION_STATES.
+  # also IRREVOCABLE_REFUSE_ENCOUNTER_DELETION_STATES.
   #
-  REFUSE_EVENT_DELETION_STATES = [
+  REFUSE_ENCOUNTER_DELETION_STATES = [
     self.states[:reserved],
     self.states[:payment_failed],
     self.states[:paid],
     self.states[:refunded],
   ]
 
-  # These states are related to REFUSE_EVENT_DELETION_STATES but represent
-  # orders which "lock" the event for invoicing purposes.
+  # These states are related to REFUSE_ENCOUNTER_DELETION_STATES but represent
+  # orders which "lock" the encounter for invoicing purposes.
   #
-  IRREVOCABLE_REFUSE_EVENT_DELETION_STATES = [
+  IRREVOCABLE_REFUSE_ENCOUNTER_DELETION_STATES = [
     self.states[:paid],
     self.states[:refunded],
   ]
@@ -135,7 +137,7 @@ class Order < ApplicationRecord
     state
   }
 
-  validates_presence_of :address, if: -> (order) { order.event.price_per_seat > 100000 }
+  validates_presence_of :address, if: -> (order) { order.encounter.price_per_seat > 100000 }
 
   # Note that the state machine enum is validated automatically.
 
@@ -143,10 +145,10 @@ class Order < ApplicationRecord
   validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
 
   validate :number_of_seats do |order|
-    if order.event.present? && order.event.number_of_seats > 0
-      event        = order.event
-      other_orders = event.orders.inflight.where.not(id: self.id)
-      remaining    = [0, event.number_of_seats - other_orders.sum(:number_of_seats)].max()
+    if order.encounter.present? && order.encounter.number_of_seats > 0
+      encounter        = order.encounter
+      other_orders = encounter.orders.inflight.where.not(id: self.id)
+      remaining    = [0, encounter.number_of_seats - other_orders.sum(:number_of_seats)].max()
 
       if remaining < (self.number_of_seats || 0)
         self.errors.add(
@@ -211,34 +213,18 @@ class Order < ApplicationRecord
 
   def token_expires_at
     Time.now + 1.year # TODO: FIX ME! - invoice pages are accessed from here.
-    # .event.ends_at + 1.day
   end
 
   def customer_self_service_possible?
-    self.customer_can_pay_for_reservation? ||
     self.customer_can_pay_for_booking?
   end
 
-  def customer_can_pay_for_reservation?
-    ! self.event.has_started? &&
-    (self.state_reserved? || self.state_payment_failed?) &&
-    (
-      self.event.state_reserver_purchases? ||
-      self.event.state_public_purchases?
-    )
-  end
-
   def customer_can_pay_for_booking?
-    self.customer_can_pay_for_reservation? ||
-    (
-      ! self.event.has_started? &&
-      (self.state_new? || self.state_payment_failed?) &&
-      self.event.state_public_purchases?
-    )
+    self.state_new? || self.state_payment_failed?
   end
 
   def includes_discount?
-    self.amount_owed < self.event.price_per_seat * self.number_of_seats
+    self.amount_owed < self.encounter.price_per_seat * self.number_of_seats
   end
 
   # ============================================================================
@@ -247,18 +233,14 @@ class Order < ApplicationRecord
 
   aasm(:state, namespace: 'state') do
     state :new, initial: true
-    state :reserved
+    state :reserved # (not used for EncounterOrders)
     state :payment_failed
     state :paid
     state :refunded
     state :cancelled
 
-    event :reserve, after_commit: :notify_is_reserved do
-      transitions from: :new, to: :reserved, guard: :reservation_makes_sense?
-    end
-
     event :pay, after_commit: :notify_is_paid do
-      transitions from: [:new, :reserved, :payment_failed], to: :paid, guard: :paid_state_makes_sense?
+      transitions from: [:new, :payment_failed], to: :paid, guard: :paid_state_makes_sense?
     end
 
     # At the time of writing this comment, this state is hypothetical and is
@@ -269,24 +251,15 @@ class Order < ApplicationRecord
     # This is kept here in case of future need.
     #
     event :payment_failed, after_commit: :notify_payment_failed do
-      transitions from: [:new, :reserved], to: :payment_failed
+      transitions from: [:new], to: :payment_failed
     end
 
     event :cancel, after_commit: :notify_is_cancelled do
-      transitions from: [:new, :reserved, :payment_failed], to: :cancelled
+      transitions from: [:new, :payment_failed], to: :cancelled
     end
 
     event(
       :refund,
-      guard:        :outside_no_refunds_window?,
-      before:       :process_refund,
-      after_commit: :notify_is_refunded
-    ) do
-      transitions from: :paid, to: :refunded
-    end
-
-    event(
-      :force_refund,
       before:       :process_refund,
       after_commit: :notify_is_refunded
     ) do
@@ -309,48 +282,20 @@ class Order < ApplicationRecord
   # ============================================================================
 
   def paid_state_makes_sense? # (AASM guard)
-    self.event.present? && (
-      self.customer_can_pay_for_reservation? ||
-      self.customer_can_pay_for_booking?
-    )
-  end
-
-  def reservation_makes_sense? # (AASM guard)
-    self.event.present? &&
-    self.event.state_presales? &&
-    ! self.event.has_started?
-  end
-
-  def outside_no_refunds_window?
-    self.event.state_cancelled? ||
-    Hcms.config.no_refunds_window.zero? ||
-    Time.current < (self.event.starts_at - Hcms.config.no_refunds_window.days)
+    self.encounter.present? && self.customer_can_pay_for_booking?
   end
 
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Callback handlers
   # ============================================================================
 
-  def notify_is_reserved
-    OrderMailer.order_state_reserved_email(self).deliver_later()
-    Admin::AdminMailer.order_reserved(self).deliver_later()
-  end
-
   def notify_is_paid
-    OrderMailer.order_state_paid_email(self).deliver_later()
-    Admin::AdminMailer.order_paid(self).deliver_later()
+    EncounterOrderMailer.encounter_order_state_paid_email(self).deliver_later()
+    Admin::AdminMailer.encounter_order_paid(self).deliver_later()
   end
 
   def notify_payment_failed
-    OrderMailer.order_state_payment_failed_email(self).deliver_later()
-  end
-
-  def notify_is_cancelled
-    OrderMailer.order_state_cancelled_email(self).deliver_later()
-
-    unless self.event.state_cancelled? || self.state_previously_was == self.class.states[:new]
-      Admin::AdminMailer.order_cancelled(self).deliver_later()
-    end
+    EncounterOrderMailer.encounter_order_state_payment_failed_email(self).deliver_later()
   end
 
   def process_refund
@@ -367,9 +312,7 @@ class Order < ApplicationRecord
 
   def notify_is_refunded
     if self.amount_owed > 0
-      OrderMailer.order_state_refunded_email(self).deliver_later()
-    elsif self.event.state_cancelled?
-      OrderMailer.order_state_cancelled_email(self).deliver_later()
+      EncounterOrderMailer.encounter_order_state_refunded_email(self).deliver_later()
     end
   end
 end

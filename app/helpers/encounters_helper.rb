@@ -48,8 +48,8 @@ module EncountersHelper
     return nil if encounter.free_of_charge? # NOTE EARLY EXIT
 
     link_to(
-      "Pay for encounter",
-      new_encounter_encounter_order_path(encounter_id: encounter.slug),
+      "Set up encounter",
+      new_admin_encounter_encounter_order_path(encounter_id: encounter.slug),
       class: 'bold_button'
     )
   end
