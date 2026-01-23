@@ -1,0 +1,21 @@
+Event:          <%= encounter_order.event&.title || 'Unknown' %>
+From:           <%= encounter_order.name.presence || 'Unknown' %>
+E-mail address: <%= encounter_order.email.presence || 'Unknown' %>
+Phone number:   <%= encounter_order.phone_number.presence || 'Not given' %>
+Manage:         <%= encounter_order.encounter.nil? ? admin_encounters_url() : admin_encounter_encounter_order_url(encounter_id: encounter_order.encounter.slug, id: encounter_order.id) %>
+<% if encounter_order.encounter.present? %>
+
+You can find a list of all encounter orders at:
+
+* <%= admin_encounter_encounter_orders_url(encounter_id: encounter_order.encounter.slug) %>.
+<% end %>
+
+Following up
+------------
+
+<% if encounter_order.email.blank? %>
+There was no e-mail address captured for this order!
+<% else %>
+Do not reply to this message - to compose a reply, please send e-mail to
+<%= encounter_order.email %> directly.
+<% end %>

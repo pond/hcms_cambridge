@@ -1,0 +1,46 @@
+<dl>
+  <dt>Encounter</dt>
+  <dd><%= encounter_order.encounter&.title || 'Unknown' %></dd>
+
+  <dt>From</dt>
+  <dd><%= encounter_order.name.presence || 'Unknown' %></dd>
+
+  <dt>E-mail address</dt>
+  <dd><%= encshelp_reply_link(encounter_order) %></dd>
+
+  <dt>Phone number</dt>
+  <dd><%= encounter_order.phone_number.present? ? link_to(encounter_order.phone_number, "tel:#{encounter_order.phone_number}") : 'Not given' %></dd>
+
+  <dt>Number of seats requested</dt>
+  <dd><%= encounter_order.number_of_seats %></dd>
+
+  <dt>Physical product requested</dt>
+  <dd><%= encounter_order.has_physical ? 'Yes' : 'No' %></dd>
+
+  <dt>Manage</dt>
+  <dd>
+    <% if encounter_order.encounter.nil? %>
+      <%= link_to('Manage encounters', admin_encounters_url()) %>
+    <% else %>
+      <%= link_to('Manage order', admin_encounter_encounter_order_url(encounter_id: encounter_order.encounter.slug, id: encounter_order.id)) %>
+    <% end %>
+  </dd>
+</dl>
+
+<% if encounter_order.encounter.present? %>
+  <p>
+    You can find a list of all encounter orders
+    <%= link_to('here', admin_encounter_encounter_orders_url(encounter_id: encounter_order.encounter.slug)) %>.
+  </p>
+<% end %>
+
+<h2>Following up</h2>
+
+<% if encounter_order.email.blank? %>
+  <p>There was no e-mail address captured for this order!</p>
+<% else %>
+  <p>
+    <strong>Do not reply to this message</strong> - to compose a reply, please use
+    <%= encshelp_reply_link(encounter_order, link_text: 'this link') %>.
+  </p>
+<% end %>

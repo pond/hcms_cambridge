@@ -60,7 +60,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
             action:     action_name,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )
@@ -203,7 +203,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     )
   end
 
-  # DELETE /pages/<page_id>/events/<event_id>/orders/<order_id>
+  # DELETE /encounters/<encounter_id>/encounter_orders/<encounter_order_id>
   #
   # When the end user cancels an order that's in flight, it just gets deleted
   # since there's no point keeping unfinished order records around the place.
@@ -215,40 +215,40 @@ class EncounterOrdersSelfServiceController < ApplicationController
     @encounter_order.destroy!
 
     redirect_to(
-      page_event_path(page_id: @page.slug, id: @event.slug),
+      encounter_path(id: @encounter.slug),
       notice: "OK, that's cancelled."
     )
   end
 
-  # A non-RESTful GET endpoint, nested by page and event ID or slug, and order
-  # ID. Stripe redirects here when payment succeeds including the session ID
-  # via a template variable in the URL we gave them. See the payment flow in
+  # A non-RESTful GET endpoint, nested by encounter ID or slug, and encounter
+  # order ID. Stripe redirects here when payment succeeds including the session
+  # ID via a template variable in the URL we gave them. See the payment flow in
   # #update for more.
   #
   def stripe_payment_succeeded
     ActiveRecord::Base.transaction do
       begin
-        locked_order = Order.lock.find(@encounter_order.id)
+        locked_order = EncounterOrder.lock.find(@encounter_order.id)
         locked_order.pay_state!
       rescue StandardError => e
         Sentry.capture_message(
           "URGENT: Payment made but website-side encounter order update failed (#{@encounter_order&.id} / #{@encounter_order&.email} / #{@encounter_order&.name})",
           level: :error,
           extra: {
-            controller:  controller_name,
-            action:      action_name,
-            order_id:    @encounter_order&.id,
-            order_name:  @encounter_order&.name,
-            order_email: @encounter_order&.email,
+            controller:            controller_name,
+            action:                action_name,
+            encounter_order_id:    @encounter_order&.id,
+            encounter_order_name:  @encounter_order&.name,
+            encounter_order_email: @encounter_order&.email,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )
 
-        Admin::AdminMailer.problematic_order_email(@encounter_order).deliver_now()
-        Sentry.capture_exception(e, extra: { order_id: (@encounter_order&.id rescue nil) })
+        Admin::AdminMailer.problematic_encounter_order_email(@encounter_order).deliver_now()
+        Sentry.capture_exception(e, extra: { encounter_order_id: (@encounter_order&.id rescue nil) })
 
         return # NOTE EARLY EXIT (but note the 'ensure' clause below)
       end
@@ -263,7 +263,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
           stripe_payment_intent: session.payment_intent
         )
       rescue StandardError => e
-        Sentry.capture_exception(e, extra: { order_id: @encounter_order&.id })
+        Sentry.capture_exception(e, extra: { encounter_order_id: @encounter_order&.id })
       end
     end
 
@@ -274,7 +274,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     # was a problem, it can be manually resolved.
     #
     redirect_to(
-      page_event_path(page_id: @page.slug, id: @event.slug),
+      encounter_path(id: @encounter.slug),
       notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
     )
   end
@@ -283,7 +283,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
   #
   def stripe_payment_cancelled
     redirect_to(
-      manage_order_path(order_id: @encounter_order.id, token: @encounter_order.token),
+      manage_encounter_order_path(encounter_order_id: @encounter_order.id, token: @encounter_order.token),
       notice: "Please confirm cancellation by using the 'cancel' button below, or retry with the 'pay now' button."
     )
   end

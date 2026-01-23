@@ -53,7 +53,7 @@ class OrdersSelfServiceController < ApplicationController
             action:     action_name,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )
@@ -193,7 +193,7 @@ class OrdersSelfServiceController < ApplicationController
             order_email: @order&.email,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )

@@ -67,26 +67,18 @@ module EncountersHelper
     link_to('Orders', admin_encounter_encounter_orders_path(encounter.slug))
   end
 
-  def encshelp_reply_link(order, link_text: nil)
-    if order.email.blank?
+  def encshelp_reply_link(encounter_order, link_text: nil)
+    if encounter_order.email.blank?
       'Unknown'
     else
-      link_text ||= order.email
-      subject = if order.encounter&.title.present?
-        if order.state_paid?
-          "Your booking for \"#{order.encounter.title}\""
-        else
-          "Your reservation for \"#{order.encounter.title}\""
-        end
+      link_text ||= encounter_order.email
+      subject = if encounter_order.encounter&.title.present?
+        "Your booking for \"#{encounter_order.encounter.title}\""
       else
-        if order.state_paid?
-          "Your #{Hcms.config.site_name} booking"
-        else
-          "Your #{Hcms.config.site_name} reservation"
-        end
+        "Your #{Hcms.config.site_name} booking"
       end
 
-      mail_to(order.email, link_text, subject: subject)
+      mail_to(encounter_order.email, link_text, subject: subject)
     end
   end
 end
