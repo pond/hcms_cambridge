@@ -28,12 +28,20 @@ module EncountersHelper
 
   # Render the per-seat encounter price as a formatted string, with currency symbol.
   #
-  def encshelp_price(encounter)
-    apphelp_money(
-      encounter.price_per_seat,
-      currency:       encounter.currency,
-      free_of_charge: encounter.free_of_charge?
-    )
+  def encshelp_price(encounter, for_physical_aspect: false)
+    if for_physical_aspect
+      apphelp_money(
+        encounter.price_physical,
+        currency:       encounter.currency,
+        free_of_charge: encounter.physical_aspect_free_of_charge?
+      )
+    else
+      apphelp_money(
+        encounter.price_per_seat,
+        currency:       encounter.currency,
+        free_of_charge: encounter.free_of_charge?
+      )
+    end
   end
 
   # Render the location with a map link.

@@ -148,7 +148,11 @@ class EncounterOrder < ApplicationRecord
   validates_presence_of(
     :address,
     if: -> (encounter_order) {
-      encounter_order.encounter.price_per_seat > 100000
+      encounter_order.has_physical ||
+      (
+        Hcms.config.tax_threshold.is_a?(Integer) &&
+        encounter_order.amount_owed >= Hcms.config.tax_threshold
+      )
     }
   )
 
@@ -231,7 +235,10 @@ class EncounterOrder < ApplicationRecord
   end
 
   def includes_discount?
-    self.amount_owed < self.encounter.price_per_seat * self.number_of_seats
+    standard_amount_owed  = self.encounter.price_per_seat * self.number_of_seats
+    standard_amount_owed += self.encounter.price_physical.to_i if self.has_physical
+
+    self.amount_owed < standard_amount_owed
   end
 
   # ============================================================================

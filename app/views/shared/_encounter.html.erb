@@ -35,14 +35,18 @@
   <section class="encounter-meta">
     <dl>
       <% if encounter.location.present? %>
-        <dt>Where</dt>
+        <dt><%= Encounter.human_attribute_name(:location) %></dt>
         <dd><%= encshelp_location(encounter) %></dd>
       <% end %>
 
       <% if encounter.price_per_seat > 0 %>
-        <dt>Price</dt>
+        <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
         <dd>
           <%= encshelp_price(encounter) %>
+          <% if encounter.has_physical_aspect? %>
+            (with optional <%= encounter.name_physical %> for
+            <%= encshelp_price(encounter, for_physical_aspect: true) %>)
+          <% end %>
           &nbsp;
           <%= encshelp_booking_button(encounter) %>
         </dd>

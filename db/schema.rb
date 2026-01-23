@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_22_045838) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_045838) do
     t.string "currency", limit: 3, null: false
     t.text "encounter_hero_image", null: false
     t.text "location"
+    t.text "name_physical"
     t.integer "price_per_seat", null: false
     t.integer "price_physical"
     t.boolean "raw_editor", default: false, null: false

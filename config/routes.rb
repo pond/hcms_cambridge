@@ -28,8 +28,11 @@ Rails.application.routes.draw do
     get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_order_payment_cancelled
   end
 
+  # Note 'prettified' "manage_encounter" but internally, we're managing an
+  # EncounterOrder. The URL helper method and controller names reflect that.
+  #
   scope 'manage_encounter/:encounter_order_id/:token', controller: :encounter_orders_self_service do
-    get   '/', action: :edit, as: :manage_encounter
+    get   '/', action: :edit, as: :manage_encounter_order
     patch '/', action: :update
     get   '/stripe_payment_succeeded', action: :stripe_payment_succeeded, as: :stripe_encounter_order_payment_succeeded
     get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_encounter_order_payment_cancelled

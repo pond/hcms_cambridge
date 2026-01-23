@@ -129,6 +129,7 @@
           <div class="field">
             <%= apphelp_label(f, :form_selection_list_contents, optional: true) %>
             <%= f.text_area :form_selection_list_contents, rows: 6, cols: 40 %>
+            <%= f.error_markup_for(:form_selection_list_contents) %>
           </div>
         </div>
 

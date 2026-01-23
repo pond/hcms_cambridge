@@ -33,6 +33,12 @@ class Encounter < Editable
 
   validates :encounter_hero_image, presence: true, on: :create
 
+  validate :name_physical do
+    if self.has_physical_aspect? && self.name_physical.blank?
+      self.errors.add(:name_physical, :blank)
+    end
+  end
+
   # ============================================================================
   # Overrides of Editable base class
   # ============================================================================
@@ -55,10 +61,10 @@ class Encounter < Editable
     self.price_per_seat.zero?
   end
 
-  # Does the encounter have no physical associated aspect?
+  # Does the encounter have a physical associated aspect?
   #
-  def no_physical_aspect?
-    self.price_physical.nil?
+  def has_physical_aspect?
+    self.price_physical.present?
   end
 
   # Does the encounter have a free physical associated aspect?

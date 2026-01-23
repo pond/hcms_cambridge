@@ -1,30 +1,37 @@
-# Handles 'magic links' in e-mails but is also used for e.g. the checkout flow
-# when a new order is valid, saved, and goes directly to payment.
+# Handles 'magic links' in e-mails, used by customers to provide any extra
+# information needed for an encounter order that an administrator created,
+# then pay.
 #
-class OrdersSelfServiceController < ApplicationController
+class EncounterOrdersSelfServiceController < ApplicationController
 
-  layout 'events'
+  layout 'encounters'
 
-  before_action :get_order_event_and_page
+  before_action :get_encounter_order_and_encounter
 
   def edit
     render()
   end
 
   def update
-    event = params[:event] if params[:process] == 'state'
+    event = if params[:state_pay]
+      'pay'
+    elsif params[:state_cancel]
+      'cancel'
+    else
+      'invalid'
+    end
 
     # Params for a given state should only happen if the state is valid, but we
-    # do have to account for race conditions if Events change "under our feet",
+    # do have to account for race conditions if things change "under our feet",
     # stale pages, hacking attempts and so-on.
 
     # User has elected to cancel their order 🥺
     #
     if event == 'cancel'
-      @order.cancel_state!
+      @encounter_order.cancel_state!
 
       redirect_to(
-        page_event_path(page_id: @page.slug, id: @event.slug),
+        encounter_path(@encounter),
         notice: "OK, that's cancelled."
       )
 
@@ -44,9 +51,9 @@ class OrdersSelfServiceController < ApplicationController
 
       # First deal with the unhappy path, then the payment flow.
       #
-      unless @order.customer_can_pay_for_reservation? || @order.customer_can_pay_for_booking?
+      unless @encounter_order.customer_can_pay_for_booking?
         Sentry.capture_message(
-          "Tried to pay but states indicate this is not possible - order ID #{@order.id}",
+          "Tried to pay but states indicate this is not possible - encounter order ID #{@encounter_order.id}",
           level: :error,
           extra: {
             controller: controller_name,
@@ -59,27 +66,51 @@ class OrdersSelfServiceController < ApplicationController
         )
 
         redirect_to(
-          page_event_path(page_id: @page.slug, id: @event.slug),
-          notice: "Sorry, this event isn't accepting payments anymore."
+          encounter_path(@encounter),
+          notice: "Sorry, this encounter isn't accepting payments anymore."
         )
 
         return # NOTE EARLY EXIT
       end
 
-      # Edge case - "paying" for a free item. Just say, "booking confirmed".
+      # Account for any additional form data that might be specified (dealing
+      # manually with the known, expected customer-settable fields) and handle
+      # validation.
       #
-      if @order.amount_owed.zero?
-        @order.pay_state!
+      if params[:encounter_order].present?
+        physical_product_was_unknown = @encounter_order.has_physical.nil?
+
+        safe_params = params.require(:encounter_order).permit(:gift_note, :has_physical, :address)
+        @encounter_order.assign_attributes(safe_params)
+
+        unless @encounter_order.valid?
+          flash.now[:alert] = "Oops, it looks like some information isn't quite right! Please check the highlighted fields below."
+          render :edit
+          return
+        end
+
+        if physical_product_was_unknown && @encounter_order.has_physical
+          @encounter_order.amount_owed += @encounter.price_physical
+        end
+
+        @encounter_order.save!
+      end
+
+      # Edge case - "paying" for a free item. Just say, "confirmed".
+      #
+      if @encounter_order.amount_owed.zero?
+        @encounter_order.pay_state!
+
         redirect_to(
-          page_event_path(page_id: @page.slug, id: @event.slug),
-          notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
+          encounter_path(@encounter),
+          notice: 'Thanks, your encounter booking is confirmed! We look forward to seeing you there.'
         )
 
         return # NOTE EARLY EXIT
       end
 
-      event_url    = page_event_url(page_id: @event.page.slug, id: @event.slug)
-      stripe_price = @event.get_or_create_stripe_price(with_event_url: event_url)
+      product_url  = encounter_url(@encounter)
+      stripe_price = @encounter.get_or_create_stripe_price(with_encounter_url: product_url)
 
       branding_settings = {
         background_color: (Hcms.config.stripe[:checkout_background] rescue '#ffffff'),
@@ -91,32 +122,50 @@ class OrdersSelfServiceController < ApplicationController
       }
 
       invoice_data = {
-        description: @event.title,
+        description: @encounter.title,
         footer:      [Hcms.config.site_name, Hcms.config.orders_email].reject(&:blank?).join(' / '),
       }
 
-      base_success_url      = stripe_order_payment_succeeded_url(order_id: @order.id, token: @order.token)
-      base_cancel_url       = stripe_order_payment_cancelled_url(order_id: @order.id, token: @order.token)
+      base_success_url      = stripe_encounter_order_payment_succeeded_url(encounter_order_id: @encounter_order.id, token: @encounter_order.token)
+      base_cancel_url       = stripe_encounter_order_payment_cancelled_url(encounter_order_id: @encounter_order.id, token: @encounter_order.token)
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
-      if @order.includes_discount?
+      if @encounter_order.includes_discount?
         line_items = [{
           quantity:   1,
           price_data: {
-            currency:     @event.currency,
-            unit_amount:  @order.amount_owed,
+            currency:     @encounter.currency,
+            unit_amount:  @encounter_order.amount_owed,
             product_data: {
-              name:        @event.title,
-              description: helpers.evtshelp_datetime(@event),
-              images:      [@event.product_image_url],
+              name:        @encounter.title,
+              description: helpers.encordshelp_datetime(@encounter_order),
+              images:      [@encounter.product_image_url],
               unit_label:  "booking",
             }
           }
         }]
+      elsif @encounter_order.has_physical
+        line_items = [
+          {
+            quantity: @encounter_order.number_of_seats,
+            price:    stripe_price.stripe_price_id,
+          },
+          {
+            quantity:   1,
+            price_data: {
+              currency:     @encounter.currency,
+              unit_amount:  @encounter.price_physical,
+              product_data: {
+                name:        @encounter.name_physical.upcase_first,
+                unit_label:  "item",
+              }
+            }
+          }
+        ]
       else
         line_items = [{
-          quantity: @order.number_of_seats,
+          quantity: @encounter_order.number_of_seats,
           price:    stripe_price.stripe_price_id,
         }]
       end
@@ -125,7 +174,7 @@ class OrdersSelfServiceController < ApplicationController
         mode:              'payment',
         success_url:       templated_success_url,
         cancel_url:        templated_cancel_url,
-        customer_email:    @order.email,
+        customer_email:    @encounter_order.email,
         branding_settings: branding_settings,
         line_items:        line_items,
         invoice_creation:  {
@@ -136,21 +185,21 @@ class OrdersSelfServiceController < ApplicationController
 
       redirect_to(session.url, status: :see_other, allow_other_host: true) # (HTTP 303)
     else
-      raise "Unsupported parameters - #{params[:event].inspect} / #{params[:process].inspect}"
+      raise "Unsupported parameters - #{params.inspect}"
     end
 
   rescue Stripe::StripeError => e
-    Sentry.capture_exception(e, extra: { order_id: @order&.id })
+    Sentry.capture_exception(e, extra: { encounter_order_id: @encounter_order&.id })
 
     flash[:alert] = 'Sorry, there was a problem trying to talk to the payment provider. Please wait a moment, then try again. If problems persist, please get in touch!'
     render :edit
 
   rescue StandardError => e
-    Sentry.capture_exception(e, extra: { order_id: (@order&.id rescue nil) })
+    Sentry.capture_exception(e, extra: { encounter_order_id: (@encounter_order&.id rescue nil) })
 
     redirect_to(
-      page_event_path(page_id: @page.slug, id: @event.slug),
-      alert: 'Sorry, there was an unexpected problem trying to update that order! Please try again later.'
+      encounter_path(@encounter),
+      alert: 'Sorry, there was an unexpected problem trying to update that booking! Please try again later.'
     )
   end
 
@@ -163,7 +212,7 @@ class OrdersSelfServiceController < ApplicationController
   # would be surprising if the link just broke.
   #
   def destroy
-    @order.destroy!
+    @encounter_order.destroy!
 
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
@@ -179,18 +228,18 @@ class OrdersSelfServiceController < ApplicationController
   def stripe_payment_succeeded
     ActiveRecord::Base.transaction do
       begin
-        locked_order = Order.lock.find(@order.id)
+        locked_order = Order.lock.find(@encounter_order.id)
         locked_order.pay_state!
       rescue StandardError => e
         Sentry.capture_message(
-          "URGENT: Payment made but website-side order update failed (#{@order&.id} / #{@order&.email} / #{@order&.name})",
+          "URGENT: Payment made but website-side encounter order update failed (#{@encounter_order&.id} / #{@encounter_order&.email} / #{@encounter_order&.name})",
           level: :error,
           extra: {
             controller:  controller_name,
             action:      action_name,
-            order_id:    @order&.id,
-            order_name:  @order&.name,
-            order_email: @order&.email,
+            order_id:    @encounter_order&.id,
+            order_name:  @encounter_order&.name,
+            order_email: @encounter_order&.email,
           },
           tags: {
             page: "#{controller_name}##{action_name}",
@@ -198,8 +247,8 @@ class OrdersSelfServiceController < ApplicationController
           }
         )
 
-        Admin::AdminMailer.problematic_order_email(@order).deliver_now()
-        Sentry.capture_exception(e, extra: { order_id: (@order&.id rescue nil) })
+        Admin::AdminMailer.problematic_order_email(@encounter_order).deliver_now()
+        Sentry.capture_exception(e, extra: { order_id: (@encounter_order&.id rescue nil) })
 
         return # NOTE EARLY EXIT (but note the 'ensure' clause below)
       end
@@ -210,11 +259,11 @@ class OrdersSelfServiceController < ApplicationController
       begin
         session = Stripe::Checkout::Session.retrieve(params[:csid])
         StripePayment.create!(
-          payable:               @order,
+          payable:               @encounter_order,
           stripe_payment_intent: session.payment_intent
         )
       rescue StandardError => e
-        Sentry.capture_exception(e, extra: { order_id: @order&.id })
+        Sentry.capture_exception(e, extra: { order_id: @encounter_order&.id })
       end
     end
 
@@ -234,7 +283,7 @@ class OrdersSelfServiceController < ApplicationController
   #
   def stripe_payment_cancelled
     redirect_to(
-      manage_order_path(order_id: @order.id, token: @order.token),
+      manage_order_path(order_id: @encounter_order.id, token: @encounter_order.token),
       notice: "Please confirm cancellation by using the 'cancel' button below, or retry with the 'pay now' button."
     )
   end
@@ -247,17 +296,16 @@ class OrdersSelfServiceController < ApplicationController
 
     # Called before-action.
     #
-    def get_order_event_and_page
-      @order = Order.find_by_id(params[:order_id])
+    def get_encounter_order_and_encounter
+      @encounter_order = EncounterOrder.find_by_id(params[:encounter_order_id])
       sleep(rand() / 2) unless Rails.env.test? # Endpoint isn't high security, but thwart timing attacks anyway
 
-      if @order.nil? || @order.token != params[:token] || @order.token_expires_at < Time.current
-        redirect_to root_path(), alert: 'Sorry, that order link does not seem to be valid - it might have expired.'
+      if @encounter_order.nil? || @encounter_order.token != params[:token] || @encounter_order.token_expires_at < Time.current
+        redirect_to root_path(), alert: 'Sorry, that encounter link does not seem to be valid - it might have expired.'
         return # NOTE EARLY EXIT
       end
 
-      @event = @order.event
-      @page  = @order.event.page
+      @encounter = @encounter_order.encounter
     end
 
 end

@@ -1,6 +1,6 @@
 <%
-  # Render with locals 'orders' containing items to list and 'event' holding
-  # the event that the orders are all for.
+  # Render with locals 'encounter_encounter_orders' containing items to list and
+  # 'encounter' holding the encounter that the encounter encounter_orders are all for.
 %>
 
 <table class="full_width">
@@ -17,22 +17,28 @@
   </thead>
 
   <tbody>
-    <% orders.each do | order | %>
+    <% encounter_orders.each do | encounter_order | %>
 
       <tr class="<%= cycle( 'even', 'odd' ) %>">
-        <td><%= order.name %></td>
-        <td><code><%= mail_to(order.email) %></code></td>
-        <td><%= apphelp_human_time(order.created_at, date_only: true) %></td>
-        <td><%= order.number_of_seats %></td>
+        <td><%= encounter_order.name %></td>
+        <td><code><%= mail_to(encounter_order.email) %></code></td>
+        <td><%= apphelp_human_time(encounter_order.created_at, date_only: true) %></td>
+        <td><%= encounter_order.number_of_seats %></td>
         <td>
-          <% if event.free_of_charge? %>
+          <% if encounter.free_of_charge? %>
             &ndash;
           <% else %>
-            <%= ordershelp_amount(order) %>
+            <%=
+              apphelp_money(
+                encounter_order.amount_owed,
+                currency:       encounter_order.encounter.currency,
+                free_of_charge: encounter_order.encounter.free_of_charge?
+              )
+            %>
           <% end %>
         </td>
-        <td><%= order.human_state %></td>
-        <%= render partial: 'actions', locals: { order: order } %>
+        <td><%= encounter_order.human_state %></td>
+        <%= render partial: 'actions', locals: { encounter_order: encounter_order } %>
       </tr>
 
     <% end %>
@@ -48,24 +54,20 @@
             button_tag(
               class: 'copy_from_data',
               style: 'font-size: 80%',
-              data:  { text: orders.map(&:email).each { |e| e.gsub(',', '=2C') }.join(',') }
+              data:  { text: encounter_orders.map(&:email).each { |e| e.gsub(',', '=2C') }.join(',') }
             ) do
           %><i class="fa fa-copy"></i><% end %>
         </div>
       </td>
       <td>&nbsp;</td>
       <td>
-        <% if event.unrestricted_seating? %>
-          &ndash;
-        <% else %>
-          <%= orders.sum(:number_of_seats) %>
-        <% end %>
+        <%= encounter_orders.sum(:number_of_seats) %>
       </td>
       <td>
-        <% if event.free_of_charge? %>
+        <% if encounter.free_of_charge? %>
           &ndash;
         <% else %>
-          <%= apphelp_money(orders.sum(:amount_owed), currency: event.currency) %>
+          <%= apphelp_money(encounter_orders.sum(:amount_owed), currency: encounter.currency) %>
         <% end %>
       </td>
       <td colspan="3">&nbsp;</td>

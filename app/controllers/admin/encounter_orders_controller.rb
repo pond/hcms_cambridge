@@ -11,6 +11,7 @@ class Admin::EncounterOrdersController < ApplicationController
     email
     phone_number
     address
+
     notes_to_buyer
     has_physical
     starts_at

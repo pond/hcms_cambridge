@@ -13,8 +13,8 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
-  <%= hidden_field_tag(:price_per_seat_cents, encounter_order.encounter.price_per_seat.to_s) %>
-  <%= hidden_field_tag(:price_physical_cents, encounter_order.encounter.price_physical&.to_s || 0) %>
+  <%= hidden_field_tag(:price_per_seat_cents, encounter_order.encounter.price_per_seat) %>
+  <%= hidden_field_tag(:price_physical_cents, encounter_order.encounter.price_physical.to_i) %>
 
   <hr>
 
@@ -48,22 +48,22 @@
 
   <p>
     <%= apphelp_label(f, :has_physical) %>
-    <% if encounter_order.encounter.price_physical.nil? %>
-      This encounter has no related physical product.
-      <%= f.hidden_field(:has_physical, value: false) %>
-    <% else %>
+    <% if encounter_order.encounter.has_physical_aspect? %>
       <%=
         f.collection_select(
           :has_physical,
           [
-            ["", "Customer chooses at checkout"],
-            [true, "Included"],
-            [false, "Excluded"]
+            ['',    'Customer chooses at checkout'],
+            [true,  'Included'                    ],
+            [false, 'Excluded'                    ],
           ],
           :first,
           :last
         )
       %>
+    <% else %>
+      This encounter has no related physical product.
+      <%= f.hidden_field(:has_physical, value: false) %>
     <% end %>
   <p>
 
@@ -90,17 +90,10 @@
     %>
     <small><%= Hcms.config.currency %></small>
     <span id="encounter_order_total_amount_hint" style="display: none">
-      <% if encounter_order.encounter.price_physical.to_i > 0 %>
+      <% if encounter_order.encounter.has_physical_aspect? && ! encounter_order.encounter.physical_aspect_free_of_charge? %>
         <small><em>
           (which will be increased by
-          <%=
-            parsed_amount = Money.from_cents(
-              encounter_order.encounter.price_physical,
-              encounter_order.encounter.currency
-            )
-
-            parsed_amount.format()
-          %>
+          <%= encshelp_price(encounter_order.encounter, for_physical_aspect: true) %>
           if the customer adds the physical product at checkout)
         </em></small>
       <% end %>
@@ -110,6 +103,7 @@
   <p>
     <%= apphelp_label(f, :notes_to_buyer, hint: 'the customer will be able to see these') %>
     <%= f.text_area :notes_to_buyer, rows: 3, cols: 80 %>
+    <%= f.error_markup_for(:notes_to_buyer) %>
   </p>
 
   <div class="field">

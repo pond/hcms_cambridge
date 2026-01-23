@@ -135,7 +135,10 @@ class Order < ApplicationRecord
     state
   }
 
-  validates_presence_of :address, if: -> (order) { order.event.price_per_seat > 100000 }
+  validates_presence_of :address, if: -> (order) {
+    Hcms.config.tax_threshold.is_a?(Integer) &&
+    order.amount_owed >= Hcms.config.tax_threshold
+  }
 
   # Note that the state machine enum is validated automatically.
 

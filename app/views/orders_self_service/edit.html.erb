@@ -1,9 +1,9 @@
 <%= javascript_include_tag 'minimal' %>
 
-<h1>Manage order for &ldquo;<%= @order.event.title %>&rdquo;</h1>
+<h1>Manage order for &ldquo;<%= @event.title %>&rdquo;</h1>
 
 <p>
-  <%= evtshelp_datetime(@order.event) %>
+  <%= evtshelp_datetime(@event) %>
 </p>
 
 <dl>
@@ -23,7 +23,7 @@
     <% if @order.amount_owed.zero? %>
       No charge
     <% else %>
-      <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
+      <%= apphelp_money(@order.amount_owed, currency: @event.currency) %>
     <% end %>
   </dd>
   <% if @order.notes.present? %>
@@ -33,7 +33,7 @@
   <dt>Order state</dt>
   <dd>
     <%= @order.human_state %>
-    <% if @order.state_reserved? && @order.event.state_presales? %>
+    <% if @order.state_reserved? && @event.state_presales? %>
       &ndash; the event is still only accepting reservations. When it becomes
       possible to confirm the reservation through payment, you'll be contacted
       by e-mail at the above address.
@@ -97,8 +97,8 @@
           link_to(
             'Invoice',
             page_event_order_invoice_path(
-              page_id:  @order.event.page.slug,
-              event_id: @order.event.slug,
+              page_id:  @page.slug,
+              event_id: @event.slug,
               order_id: @order.id,
             ),
             {

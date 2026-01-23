@@ -54,6 +54,7 @@
   <p>
     <%= apphelp_label(f, :notes, hint: 'the customer will be able to see these') %>
     <%= f.text_area :notes, rows: 3, cols: 80 %>
+    <%= f.error_markup_for(:notes) %>
   </p>
 
   <div class="field">
