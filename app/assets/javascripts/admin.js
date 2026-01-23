@@ -74,6 +74,113 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
+  // Handle changes of kind of encounter order starting date/time
+  // ===========================================================================
+  //
+  const encounterOrderStartsAtKindRadios = $('[id^="encounter_order_starts_at_kind_"]');
+
+  if (encounterOrderStartsAtKindRadios.length > 0) {
+    const encounterOrderStartsAtKindFixedDateRadio = $('#encounter_order_starts_at_kind_fixed_date');
+    const encounterOrderDateTimeInput = $('#encounter_order_starts_at');
+
+    function enableOrDisableDateTimeInput() {
+      if (encounterOrderStartsAtKindFixedDateRadio.is(':checked')) {
+        encounterOrderDateTimeInput.prop('disabled', false);
+      } else {
+        encounterOrderDateTimeInput.prop('disabled', true);
+      }
+    }
+
+    enableOrDisableDateTimeInput();
+    encounterOrderStartsAtKindRadios.on('change', enableOrDisableDateTimeInput);
+  }
+
+  // ===========================================================================
+  // For ad-hoc order or encounter order changes, calculate price based on the
+  // number of seats and (for encounters) physical product addition
+  // ===========================================================================
+  //
+  const pricePerSeatCentsHidden  = $('#price_per_seat_cents');
+  const pricePhysicalCentsHidden = $('#price_physical_cents');
+
+  if (pricePerSeatCentsHidden.length > 0) {
+    const currency            = $('#price_currency').val();
+    const hasPhysicalInput    = $('#encounter_order_has_physical');
+    const isEncounter         = (hasPhysicalInput.length > 0);
+    const pricePerSeatCents   = parseInt(pricePerSeatCentsHidden.val());
+    var   pricePhysicalCents;
+    var   numberOfSeatsInput;
+    var   amountOwedInput;
+    var   manualInputDetected = false;
+
+    if (isEncounter) {
+      numberOfSeatsInput = $('#encounter_order_number_of_seats');
+      amountOwedInput    = $('#encounter_order_amount_owed');
+      pricePhysicalCents = parseInt(pricePhysicalCentsHidden.val());
+    } else {
+      numberOfSeatsInput = $('#order_number_of_seats');
+      amountOwedInput    = $('#order_amount_owed');
+      pricePhysicalCents = 0;
+    }
+
+    const formatter = new Intl.NumberFormat(
+      navigator.language, {
+        style:               'currency',
+        currency:            currency,
+        currencyDisplay:     'code',
+        trailingZeroDisplay: 'stripIfInteger',
+      }
+    );
+
+    amountOwedInput.on('input', function(e) {
+      manualInputDetected = (amountOwedInput.val().trim().length > 0);
+    });
+
+    function updateTotal() {
+      if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
+        const inputAmount = numberOfSeatsInput.val();
+
+        if (numberOfSeatsInput.val().length > 0) {
+          const numberOfSeats   = parseInt(inputAmount);
+          var   amountOwedCents = numberOfSeats * pricePerSeatCents;
+
+          if (isEncounter && hasPhysicalInput.val() == 'true') {
+            amountOwedCents += pricePhysicalCents;
+          }
+
+          formatted = formatter.format(amountOwedCents / 100);
+          formatted = formatted.replace(currency, '').trim();
+
+          amountOwedInput.val(formatted);
+        } else {
+          amountOwedInput.val('');
+        }
+      }
+    }
+
+    updateTotal();
+    numberOfSeatsInput.on('input', updateTotal);
+
+    if (isEncounter) {
+      const totalExcludesPhysicalHint = $('#encounter_order_total_amount_hint');
+
+      function showOrHideHint() {
+        if (hasPhysicalInput.val() == '') {
+          totalExcludesPhysicalHint.show()
+        } else {
+          totalExcludesPhysicalHint.hide()
+        }
+      }
+
+      showOrHideHint();
+      hasPhysicalInput.on('change', function(e) {
+        updateTotal();
+        showOrHideHint();
+      });
+    }
+  }
+
+  // ===========================================================================
   // Copy buttons
   // ===========================================================================
   //
@@ -97,51 +204,6 @@ $(document).ready(function() {
         },
         2000
       );
-    });
-  }
-
-  // ===========================================================================
-  // For ad-hoc order changes, calculate price based on number of seats
-  // ===========================================================================
-  //
-  const pricePerSeatCentsHidden = $('#price_per_seat_cents');
-
-  if (pricePerSeatCentsHidden.length > 0) {
-    const pricePerSeatCents   = parseInt(pricePerSeatCentsHidden.val());
-    const currency            = $('#price_per_seat_currency').val();
-    const numberOfSeatsInput  = $('#order_number_of_seats');
-    const amountOwedInput     = $('#order_amount_owed');
-    var   manualInputDetected = false;
-
-    const formatter = new Intl.NumberFormat(
-      navigator.language, {
-        style:               'currency',
-        currency:            currency,
-        currencyDisplay:     'code',
-        trailingZeroDisplay: 'stripIfInteger',
-      }
-    );
-
-    amountOwedInput.on('input', function(e) {
-      manualInputDetected = (amountOwedInput.val().trim().length > 0);
-    });
-
-    numberOfSeatsInput.on('input', function(e) {
-      if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
-        const inputAmount = numberOfSeatsInput.val();
-
-        if (numberOfSeatsInput.val().length > 0) {
-          const numberOfSeats   = parseInt(inputAmount);
-          const amountOwedCents = numberOfSeats * pricePerSeatCents;
-
-          formatted = formatter.format(amountOwedCents / 100);
-          formatted = formatted.replace(currency, '').trim();
-
-          amountOwedInput.val(formatted);
-        } else {
-          amountOwedInput.val('');
-        }
-      }
     });
   }
 });

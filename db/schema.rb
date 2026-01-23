@@ -35,21 +35,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_045838) do
   end
 
   create_table "encounter_orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "address"
     t.integer "amount_owed", null: false
     t.datetime "created_at", null: false
     t.text "email", null: false
     t.bigint "encounter_id", null: false
     t.text "gift_note"
     t.boolean "has_physical"
+    t.bigserial "invoice_number", null: false
     t.text "name", null: false
     t.text "notes_to_buyer"
     t.integer "number_of_seats", null: false
     t.text "phone_number"
-    t.datetime "starts_at", null: false
+    t.datetime "starts_at"
     t.enum "state", default: "new", null: false, enum_type: "order_states"
     t.text "token", null: false
     t.datetime "updated_at", null: false
     t.index ["encounter_id"], name: "index_encounter_orders_on_encounter_id"
+    t.index ["invoice_number"], name: "index_encounter_orders_on_invoice_number", unique: true
     t.index ["state"], name: "index_encounter_orders_on_state"
   end
 

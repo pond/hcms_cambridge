@@ -42,6 +42,8 @@ body, .redactor-styles {
 
   h1 { font-size: 30px; margin: $h1_margin 0; }
   h2 { font-size: 28px; margin: $h2_margin 0; }
+
+  dl + dl { margin-top: 1.5em; }
 }
 
 hr {
@@ -114,6 +116,13 @@ div.row-wide-column-small {
     margin: 5px 0;
     flex-grow: 1;
   }
+
+  // For "button_to" use cases, stop the wrapper form from taking up the whole
+  // container width.
+  //
+  form {
+    display: inline-block;
+  }
 }
 
 input, select, button {
@@ -136,7 +145,7 @@ label {
   display: block;
 }
 
-label + label {
+label + label, div.field_with_errors + label {
   margin-top: 10px;
 }
 

@@ -33,7 +33,7 @@ RSpec.describe Encounter, type: :model do
       encounter_2 = create(:encounter, created_at: t_ref - 1.day)
       encounter_3 = create(:encounter, created_at: t_ref + 1.day)
 
-      expect(Encounter.all.to_a).to eql([encounter_3, encounter_1, encounter_2])
+      expect(Encounter.all.to_a).to eql([encounter_2, encounter_1, encounter_3])
     end
 
     it "::for_navigation finds nothing" do

@@ -12,6 +12,10 @@
              admin_encounter_encounter_order_path(encounter_id: encounter_order.encounter.slug, id: encounter_order.id)
   ) do | f |
 %>
+  <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
+  <%= hidden_field_tag(:price_per_seat_cents, encounter_order.encounter.price_per_seat.to_s) %>
+  <%= hidden_field_tag(:price_physical_cents, encounter_order.encounter.price_physical&.to_s || 0) %>
+
   <hr>
 
   <p>
@@ -31,22 +35,23 @@
 
   <div class="field">
     <%= apphelp_label(f, :starts_at) %>
-    <%= f.label :starts_at_kind_open_ended do %>
-      <%= f.radio_button :starts_at_kind, :open_ended %> Open-ended
+    <%= f.label "starts_at_kind_#{ EncounterOrder::STARTS_AT_KIND_OPEN_ENDED }" do %>
+      <%= f.radio_button :starts_at_kind, EncounterOrder::STARTS_AT_KIND_OPEN_ENDED %> Open-ended
     <% end %>
     <div class="field-row">
-      <%= f.label :starts_at_kind_fixed do %>
-        <%= f.radio_button :starts_at_kind, :fixed %> Fixed:
+      <%= f.label "starts_at_kind_#{ EncounterOrder::STARTS_AT_KIND_FIXED_DATE }" do %>
+        <%= f.radio_button :starts_at_kind, EncounterOrder::STARTS_AT_KIND_FIXED_DATE %> Fixed:
       <% end %>
       <%= f.datetime_field :starts_at %>
     </div>
   </div>
 
   <p>
-    <% if @encounter.price_physical.nil? %>
+    <%= apphelp_label(f, :has_physical) %>
+    <% if encounter_order.encounter.price_physical.nil? %>
       This encounter has no related physical product.
+      <%= f.hidden_field(:has_physical, value: false) %>
     <% else %>
-      <%= apphelp_label(f, :has_physical) %>
       <%=
         f.collection_select(
           :has_physical,
@@ -71,12 +76,10 @@
   <p>
     <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
     <%= Money::Currency.new(Hcms.config.currency).symbol %>
-    <%= hidden_field_tag(:price_per_seat_cents,    f.object.encounter.price_per_seat.to_s) %>
-    <%= hidden_field_tag(:price_per_seat_currency, f.object.encounter.currency) %>
     <%=
       parsed_amount = Money.from_cents(
-        f.object.amount_owed,
-        @encounter.currency
+        encounter_order.amount_owed,
+        encounter_order.encounter.currency
       )
 
       f.text_field(
@@ -86,6 +89,22 @@
       )
     %>
     <small><%= Hcms.config.currency %></small>
+    <span id="encounter_order_total_amount_hint" style="display: none">
+      <% if encounter_order.encounter.price_physical.to_i > 0 %>
+        <small><em>
+          (which will be increased by
+          <%=
+            parsed_amount = Money.from_cents(
+              encounter_order.encounter.price_physical,
+              encounter_order.encounter.currency
+            )
+
+            parsed_amount.format()
+          %>
+          if the customer adds the physical product at checkout)
+        </em></small>
+      <% end %>
+    </span>
   </p>
 
   <p>

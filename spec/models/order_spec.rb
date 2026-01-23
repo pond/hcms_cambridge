@@ -155,7 +155,7 @@ RSpec.describe Order, type: :model do
             mock_payment_intent = "pi_1234"
 
             StripePayment.create!(
-              order:                 @order,
+              payable:               @order,
               stripe_payment_intent: mock_payment_intent
             )
 
@@ -179,7 +179,7 @@ RSpec.describe Order, type: :model do
             mock_refund_status  = "failed"
 
             StripePayment.create!(
-              order:                 @order,
+              payable:               @order,
               stripe_payment_intent: mock_payment_intent
             )
 

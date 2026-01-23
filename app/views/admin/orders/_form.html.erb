@@ -11,6 +11,9 @@
              admin_page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id)
   ) do | f |
 %>
+  <%= hidden_field_tag(:price_currency,       order.event.currency) %>
+  <%= hidden_field_tag(:price_per_seat_cents, order.event.price_per_seat.to_s) %>
+
   <p>
     <%= apphelp_label(f, :name, required: true) %>
     <%= f.text_field :name %>
@@ -33,12 +36,10 @@
   <p>
     <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
     <%= Money::Currency.new(Hcms.config.currency).symbol %>
-    <%= hidden_field_tag(:price_per_seat_cents,    f.object.event.price_per_seat.to_s) %>
-    <%= hidden_field_tag(:price_per_seat_currency, f.object.event.currency) %>
     <%=
       parsed_amount = Money.from_cents(
-        f.object.amount_owed,
-        @event.currency
+        order.amount_owed,
+        order.event.currency
       )
 
       f.text_field(

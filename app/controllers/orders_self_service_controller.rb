@@ -94,8 +94,8 @@ class OrdersSelfServiceController < ApplicationController
         footer:      [Hcms.config.site_name, Hcms.config.orders_email].reject(&:blank?).join(' / '),
       }
 
-      base_success_url      = stripe_payment_succeeded_url(order_id: @order.id, token: @order.token)
-      base_cancel_url       = stripe_payment_cancelled_url(order_id: @order.id, token: @order.token)
+      base_success_url      = stripe_order_payment_succeeded_url(order_id: @order.id, token: @order.token)
+      base_cancel_url       = stripe_order_payment_cancelled_url(order_id: @order.id, token: @order.token)
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
@@ -209,7 +209,7 @@ class OrdersSelfServiceController < ApplicationController
       begin
         session = Stripe::Checkout::Session.retrieve(params[:csid])
         StripePayment.create!(
-          order:                 @order,
+          payable:               @order,
           stripe_payment_intent: session.payment_intent
         )
       rescue StandardError => e

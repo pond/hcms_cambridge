@@ -24,8 +24,15 @@ Rails.application.routes.draw do
   scope 'manage_order/:order_id/:token', controller: :orders_self_service do
     get   '/', action: :edit, as: :manage_order
     patch '/', action: :update
-    get   '/stripe_payment_succeeded', action: :stripe_payment_succeeded, as: :stripe_payment_succeeded
-    get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_payment_cancelled
+    get   '/stripe_payment_succeeded', action: :stripe_payment_succeeded, as: :stripe_order_payment_succeeded
+    get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_order_payment_cancelled
+  end
+
+  scope 'manage_encounter/:encounter_order_id/:token', controller: :encounter_orders_self_service do
+    get   '/', action: :edit, as: :manage_encounter
+    patch '/', action: :update
+    get   '/stripe_payment_succeeded', action: :stripe_payment_succeeded, as: :stripe_encounter_order_payment_succeeded
+    get   '/stripe_payment_cancelled', action: :stripe_payment_cancelled, as: :stripe_encounter_order_payment_cancelled
   end
 
   resources :events, only: [] do

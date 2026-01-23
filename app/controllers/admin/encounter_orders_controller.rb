@@ -6,14 +6,17 @@ class Admin::EncounterOrdersController < ApplicationController
   before_action :get_encounter
   before_action :get_order, except: [:index]
 
-  PERMITTED_ORDER_PARAMS = %i{
+  PERMITTED_ENCOUNTER_ORDER_PARAMS = %i{
     name
     email
     phone_number
     address
+    notes_to_buyer
+    has_physical
+    starts_at
+    starts_at_kind
     number_of_seats
     amount_owed
-    notes
   }
 
   public
@@ -30,6 +33,7 @@ class Admin::EncounterOrdersController < ApplicationController
     # GET /admin/encounters/<encounter_id>/orders/new
     def new
       @encounter_order = EncounterOrder.new(encounter: @encounter)
+      @encounter_order.starts_at_kind = EncounterOrder::STARTS_AT_KIND_OPEN_ENDED
     end
 
     # POST /admin/encounters/<encounter_id>/orders
@@ -38,20 +42,33 @@ class Admin::EncounterOrdersController < ApplicationController
       safe_params = self.order_params()
 
       safe_params[:number_of_seats] = safe_params[:number_of_seats].to_i
-      if safe_params[:number_of_seats] <= 0
+      if safe_params[:number_of_seats] < 0
         safe_params[:number_of_seats] = 0
       end
 
-      if @encounter.currency.present?
-        if safe_params[:amount_owed].present?
-          parsed_amount = Monetize.parse(
-            safe_params[:amount_owed],
-            @encounter.currency
-          )
-          safe_params[:amount_owed] = parsed_amount.cents
+      case safe_params[:has_physical]
+        when 'true'
+          safe_params[:has_physical] = true
+        when 'false'
+          safe_params[:has_physical] = false
         else
-          safe_params[:amount_owed] = @encounter.price_per_seat * safe_params[:number_of_seats]
+          safe_params[:has_physical] = nil
+      end
+
+      if safe_params[:amount_owed].present?
+        parsed_amount = Monetize.parse(
+          safe_params[:amount_owed],
+          @encounter.currency
+        )
+        safe_params[:amount_owed] = parsed_amount.cents
+      else
+        amount_cents = @encounter.price_per_seat * safe_params[:number_of_seats]
+
+        if safe_params[:has_physical] == true
+          amount_cents += @encounter_order.encounter.price_physical.to_i
         end
+
+        safe_params[:amount_owed] = amount_cents
       end
 
       @encounter_order.assign_attributes(safe_params)
@@ -60,7 +77,7 @@ class Admin::EncounterOrdersController < ApplicationController
         @encounter_order.pay_state! if @encounter_order.amount_owed.zero?
 
         redirect_to(
-          admin_encounter_order_path(
+          admin_encounter_encounter_order_path(
             encounter_id: @encounter_order.encounter.slug,
             id:           @encounter_order.id,
           ),
@@ -110,7 +127,7 @@ class Admin::EncounterOrdersController < ApplicationController
           end
 
           redirect_to(
-            admin_encounter_orders_path(@encounter.slug),
+            admin_encounter_encounter_orders_path(@encounter.slug),
             notice: notification
           )
         end
@@ -126,14 +143,14 @@ class Admin::EncounterOrdersController < ApplicationController
     def destroy
       flash_hash = if @encounter_order.state_paid?
         redirect_to(
-          admin_encounter_order_path(encounter_id: @encounter.slug, id: @encounter_order.id),
+          admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: @encounter_order.id),
           alert: 'You cannot delete a paid-for order; process a refund instead.'
         )
       else
         @encounter_order.destroy!
 
         redirect_to(
-          admin_encounter_orders_path(@encounter.slug),
+          admin_encounter_encounter_orders_path(@encounter.slug),
           notice: 'Order deleted. Customer web links to this order will no longer work.'
         )
       end
@@ -163,9 +180,9 @@ class Admin::EncounterOrdersController < ApplicationController
     #
     def bail_out_with(alert_message)
       path = if @encounter_order.nil?
-        admin_encounter_orders_path(encounter_id: @encounter.slug)
+        admin_encounter_encounter_orders_path(encounter_id: @encounter.slug)
       else
-        admin_encounter_order_path(
+        admin_encounter_encounter_order_path(
           encounter_id: @encounter_order.encounter.slug,
           id:           @encounter_order.id
         )
@@ -175,7 +192,7 @@ class Admin::EncounterOrdersController < ApplicationController
     end
 
     def order_params
-      return params.require(:order).permit(PERMITTED_ORDER_PARAMS)
+      return params.require(:encounter_order).permit(PERMITTED_ENCOUNTER_ORDER_PARAMS)
     end
 
 end

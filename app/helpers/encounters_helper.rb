@@ -13,16 +13,17 @@ module EncountersHelper
     end
 
     revision_id = params[:revision]
-    revision_id = nil if revision_id&.to_i == encounter.current_revision.id
+    revision_id = nil if revision_id.to_i == encounter.current_revision.id
 
     return link_to(link_text, edit_admin_encounter_path(encounter, revision: revision_id))
   end
 
   def encshelp_datetime(encounter)
-    formatted_start = apphelp_human_time(encounter.starts_at)
-    formatted_end   = apphelp_human_time(encounter.ends_at, time_only: (encounter.starts_at.to_date == encounter.ends_at.to_date))
-
-    "#{formatted_start} until #{formatted_end}"
+    if encounter.starts_at.nil?
+      'Open-ended'
+    else
+      apphelp_human_time(encounter.starts_at)
+    end
   end
 
   # Render the per-seat encounter price as a formatted string, with currency symbol.

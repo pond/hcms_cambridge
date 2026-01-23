@@ -134,9 +134,11 @@ en:
         name: "Name"
         email: "E-mail address"
         phone_number: "Phone number"
+        address: "Home postal address"
         number_of_seats: "Number of seats"
         notes: "Any other notes?"
         amount_owed: "Total price"
+        invoice_number: "Invoice number"
 
       page:
         title: "Page title"

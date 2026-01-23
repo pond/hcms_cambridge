@@ -4,7 +4,7 @@ class Order < ApplicationRecord
   has_secure_token()
 
   belongs_to :event
-  has_one :stripe_payment, required: false, dependent: :destroy
+  has_one :stripe_payment, as: :payable, required: false, dependent: :destroy
 
   # Uses the site name first letters capitalised plus "I-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSI-".
@@ -142,9 +142,9 @@ class Order < ApplicationRecord
   validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
   validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
 
-  validate :number_of_seats do |order|
-    if order.event.present? && order.event.number_of_seats > 0
-      event        = order.event
+  validate :number_of_seats do
+    if self.event.present? && self.event.number_of_seats > 0
+      event        = self.event
       other_orders = event.orders.inflight.where.not(id: self.id)
       remaining    = [0, event.number_of_seats - other_orders.sum(:number_of_seats)].max()
 
@@ -165,8 +165,8 @@ class Order < ApplicationRecord
   # phone numbers on older orders and might even clear them out now and again
   # to avoid unnecessary accumulation of unwanted PII.
   #
-  validate :phone_number do |order|
-    if order.phone_number.present?
+  validate :phone_number do
+    if self.phone_number.present?
       parsed = Phonelib.parse(self.phone_number)
       if parsed.valid?
         if parsed.countries.include?(Hcms.config.country_code)

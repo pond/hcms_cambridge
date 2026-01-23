@@ -4,7 +4,7 @@ class EncounterOrder < ApplicationRecord
   has_secure_token()
 
   belongs_to :encounter
-  has_one :stripe_payment, required: false, dependent: :destroy
+  has_one :stripe_payment, as: :payable, required: false, dependent: :destroy
 
   # Uses the site name first letters capitalised plus "I-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSI-".
@@ -13,6 +13,13 @@ class EncounterOrder < ApplicationRecord
   # can give a 'true' invoice from the actual direct payment otherwise.
   #
   INVOICE_NUMBER_PREFIX = "#{Hcms.config.site_name.split(' ').map(&:first).join().upcase()}I-"
+
+  # Used for form submissions as a transient value only
+  #
+  attr_accessor :starts_at_kind
+
+  STARTS_AT_KIND_OPEN_ENDED = 'open_ended'
+  STARTS_AT_KIND_FIXED_DATE = 'fixed_date'
 
   # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
@@ -50,7 +57,7 @@ class EncounterOrder < ApplicationRecord
   # also IRREVOCABLE_REFUSE_ENCOUNTER_DELETION_STATES.
   #
   REFUSE_ENCOUNTER_DELETION_STATES = [
-    self.states[:reserved],
+    self.states[:reserved], # (not used for EncounterOrders)
     self.states[:payment_failed],
     self.states[:paid],
     self.states[:refunded],
@@ -89,7 +96,7 @@ class EncounterOrder < ApplicationRecord
           self.states[:payment_failed],
           self.states[:cancelled     ],
           self.states[:paid          ],
-          self.states[:reserved      ],
+          self.states[:reserved      ], # (not used for EncounterOrders)
           self.states[:refunded      ],
           self.states[:new           ],
         ])
@@ -109,66 +116,66 @@ class EncounterOrder < ApplicationRecord
     where(state: [self.states[:new], self.states[:cancelled], self.states[:refunded]])
   }
 
-  # The 'inflight' scope includes a few minutes on new-state orders for people
-  # going through the checkout flow, to help avoid having seats snatched out
-  # from under them in-flow; other people coming in to place later orders will
-  # see a reduced availability while that time window applies.
+  # The 'inflight' scope gives a couple of days for people who've requested an
+  # encounter to deal with payment before we start getting nervous about how
+  # long it's been since the encounter order was created.
   #
-  INFLIGHT_WINDOW = 10.minutes
+  INFLIGHT_WINDOW = 2.days
   scope :inflight, -> {
     confirmed.or(where(state: self.states[:new], updated_at: INFLIGHT_WINDOW.ago..))
   }
 
-  # Related to the above, stale orders are in a "new" state and haven't been
-  # touched in a few days. They're fair game for deletion.
+  # Related to the above, stale encounter orders are in a "new" state and
+  # haven't been touched in several days. Might need to get in touch with the
+  # customer and check that everything's OK.
   #
-  STALE_WINDOW = 2.days
+  STALE_WINDOW = 5.days
   scope :stale, -> { where(state: self.states[:new], updated_at: ..STALE_WINDOW.ago) }
 
   # ============================================================================
   # Validations
   # ============================================================================
 
+  # Note that the state machine enum is validated automatically.
+
   validates_presence_of %i{
     name
     email
     number_of_seats
     amount_owed
-    state
   }
 
-  validates_presence_of :address, if: -> (order) { order.encounter.price_per_seat > 100000 }
+  validates_presence_of(
+    :address,
+    if: -> (encounter_order) {
+      encounter_order.encounter.price_per_seat > 100000
+    }
+  )
 
-  # Note that the state machine enum is validated automatically.
+  validates(
+    :starts_at,
+    allow_blank: true,
+    comparison:  {
+      greater_than: -> { Time.current },
+      message:      'must be in the future'
+    }
+  )
 
-  validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
-  validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
+  validates(
+    :email,
+    format: { with: URI::MailTo::EMAIL_REGEXP }
+  )
 
-  validate :number_of_seats do |order|
-    if order.encounter.present? && order.encounter.number_of_seats > 0
-      encounter        = order.encounter
-      other_orders = encounter.orders.inflight.where.not(id: self.id)
-      remaining    = [0, encounter.number_of_seats - other_orders.sum(:number_of_seats)].max()
+  validates(
+    :number_of_seats,
+    :amount_owed,
+    numericality: { only_integer: true, message: 'must be a whole number' }
+  )
 
-      if remaining < (self.number_of_seats || 0)
-        self.errors.add(
-          :number_of_seats,
-          "requested is too high - only #{remaining} left"
-        )
-      end
-    end
-  end
-
-  # Validation also rewrites the number in international or national format.
-  # The latter is friendly to humans, but does only have meaning in the context
-  # of the globally configured country code. If that were to change, there
-  # ideally would be a data migration to rewrite numbers to international so
-  # that they still made sense. In practice, we're unlikely to care about
-  # phone numbers on older orders and might even clear them out now and again
-  # to avoid unnecessary accumulation of unwanted PII.
+  # See similar validation in the Order model for rationale.
   #
-  validate :phone_number do |order|
-    if order.phone_number.present?
+  validate :phone_number do
+    if self.phone_number.present?
       parsed = Phonelib.parse(self.phone_number)
       if parsed.valid?
         if parsed.countries.include?(Hcms.config.country_code)
@@ -239,6 +246,8 @@ class EncounterOrder < ApplicationRecord
     state :refunded
     state :cancelled
 
+    event :reserve, guard: -> { false }
+
     event :pay, after_commit: :notify_is_paid do
       transitions from: [:new, :payment_failed], to: :paid, guard: :paid_state_makes_sense?
     end
@@ -272,7 +281,7 @@ class EncounterOrder < ApplicationRecord
   # the instance can *actually* use - at least, at the instant of calling.
   #
   def valid_events
-    Order.aasm(:state).events.filter do |event|
+    EncounterOrder.aasm(:state).events.filter do |event|
       self.send("may_#{event.name}_state?")
     end
   end

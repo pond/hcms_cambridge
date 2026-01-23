@@ -10,7 +10,7 @@
 #
 class StripePayment < ApplicationRecord
   belongs_to :payable, polymorphic: true
-  validates_presence_of :payable, :stripe_price_id
+  validates_presence_of :payable, :stripe_payment_intent
 
   # ============================================================================
   # Convenience / more natural code than e.g. "payment.payable"
