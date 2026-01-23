@@ -27,7 +27,7 @@
       <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency) %>
     <% end %>
     <% if @encounter_order.has_physical %>
-      (plus <%= encshelp_price(@encounter_order.encounter, for_physical_aspect: true) %>
+      (including <%= encshelp_price(@encounter_order.encounter, for_physical_aspect: true) %>
       for <%= @encounter_order.encounter.name_physical %>)
     <% end %>
    </dd>
