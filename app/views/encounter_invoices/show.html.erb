@@ -1,0 +1,127 @@
+<%
+  actual_price            = @encounter_order.amount_owed
+  expected_seat_price     = @encounter_order.encounter.price_per_seat * @encounter_order.number_of_seats
+  expected_physical_price = if @encounter_order.has_physical
+    @encounter_order.encounter.price_physical
+  else
+    0
+  end
+%>
+
+<h1>
+  <% if Hcms.config.tax_number.present? %>
+    Tax Invoice
+  <% else %>
+    Invoice
+  <% end %>
+</h1>
+
+<table id="invoice-meta">
+  <tr>
+    <th>Invoice No.</th>
+    <td><%= @encounter_order.human_invoice_number %></td>
+  </tr>
+  <tr>
+    <th>Issue Date</th>
+    <td><%= apphelp_human_time(@encounter_order.created_at, invoice: true) %></td>
+  </tr>
+  <tr>
+    <th>Due Date</th>
+    <td><%= apphelp_human_time(@encounter_order.starts_at - 1.day, invoice: true) %></td>
+  </tr>
+<table>
+
+<p>
+  <strong>Bill To</strong>
+</p>
+
+<ul>
+  <li><%= @encounter_order.name %></li>
+  <li><code><%= @encounter_order.email %></code></li>
+  <% if @encounter_order.phone_number.present? %>
+    <li><%= @encounter_order.phone_number %></li>
+  <% end %>
+  <% if @encounter_order.address.present? %>
+    <li>
+      <address>
+        <%= h(@encounter_order.address).gsub(/\n+/, '<br>').html_safe() %>
+      </address>
+    </li>
+  <% end %>
+</ul>
+
+<table id="invoice-lines">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Quantity</th>
+      <th>Unit price</th>
+      <th class="amounts">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><%= @encounter_order.encounter.title %></td>
+      <td><%= @encounter_order.number_of_seats %></td>
+      <td>
+        <% if expected_seat_price == actual_price - expected_physical_price %>
+          <%= apphelp_money(@encounter_order.encounter.price_per_seat, currency: @encounter_order.encounter.currency) %></td>
+        <% else %>
+          Special price
+        <% end %>
+      </td>
+      <td class="amounts">
+        <%= apphelp_money(actual_price - expected_physical_price, currency: @encounter_order.encounter.currency) %>
+      </td>
+    </tr>
+    <% if @encounter_order.has_physical %>
+      <tr>
+        <td><%= @encounter_order.encounter.name_physical %></td>
+        <td>1</td>
+        <td>
+          <%= apphelp_money(expected_physical_price, currency: @encounter_order.encounter.currency) %>
+        </td>
+        <td class="amounts">
+          <%= apphelp_money(expected_physical_price, currency: @encounter_order.encounter.currency) %>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <td colspan="3">
+        Total (<%= @encounter_order.encounter.currency %>) incl. <%= Hcms.config.tax_name.presence || 'tax' %>
+        <% if Hcms.config.tax_number.present? %>
+          (<%= Hcms.config.tax_number %>)
+        <% end %>
+      </td>
+      <td class="amounts">
+        <%= apphelp_money(actual_price, currency: @encounter_order.encounter.currency) %>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3"></td>
+      <td class="amounts">
+        <% if @encounter_order.state_paid? %>
+          <strong>PAID IN FULL</strong>
+        <% else %>
+          Due by<br>
+          <%= apphelp_human_time(@encounter_order.starts_at - 1.day, date_only: true) %>
+        <% end %>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="text-align: center">
+  <% unless Hcms.config.footer_summary.include?(Hcms.config.site_name) %>
+    <%= tag.strong(Hcms.config.site_name) %>
+    &ndash;
+  <% end %>
+  <%= Hcms.config.footer_summary.html_safe %>
+  <% if Hcms.config.tax_number.present? %>
+    &ndash;
+    <%= tag.strong do %>
+      <%= Hcms.config.tax_name.presence || 'tax' %>
+      <%= Hcms.config.tax_number %>
+    <% end %>
+  <% end %>
+</p>

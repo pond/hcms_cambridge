@@ -1,9 +1,6 @@
-class InvoicesController < ApplicationController
+class EncounterInvoicesController < ApplicationController
 
   layout 'invoices'
-
-  include GetPageAndEventConcern   # Sets @page and @event
-  include GetOrderCarefullyConcern # Sets @order
 
   def show
 
@@ -16,6 +13,10 @@ class InvoicesController < ApplicationController
     if raw_uri&.end_with?('?')
       redirect_to(raw_uri.chomp('?'), status: :moved_permanently)
     else
+      @encounter       = Encounter.find_by_id_or_slug!(params[:encounter_id])
+      @encounter_order = @encounter.encounter_orders.find_by_id(params[:encounter_order_id])
+
+
       render()
     end
   end

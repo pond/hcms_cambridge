@@ -56,13 +56,31 @@ class Admin::AdminMailer < ApplicationMailer
     )
   end
 
+  def encounter_order_paid(encounter_order)
+    @encounter_order = encounter_order
+
+    mail(
+      to:      Hcms.config.orders_email,
+      from:    Hcms.config.orders_email,
+      subject: "[#{Hcms.config.site_name}] New encounter booking from #{encounter_order.name}"
+    )
+  end
+
+  def encounter_order_cancelled(encounter_order)
+    @encounter_order = encounter_order
+
+    mail(
+      to:      Hcms.config.orders_email,
+      from:    Hcms.config.orders_email,
+      subject: "[#{Hcms.config.site_name}] Encounter cancellation from #{encounter_order.name}"
+    )
+  end
+
   def problematic_encounter_order_email(encounter_order)
     @encounter_order = encounter_order || EncounterOrder.new
 
     @admin_url = if encounter_order.encounter.present?
-      admin_encounter_encounter_orders_url(
-        encounter_id: encounter_order.encounter.slug,
-      )
+      admin_encounter_encounter_orders_url(encounter_id: encounter_order.encounter.slug)
     else
       admin_encounters_url()
     end

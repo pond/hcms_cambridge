@@ -1,0 +1,20 @@
+<h1><%= @encounter_order.encounter.title %></h1>
+
+<p>
+  Your payment of <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency) %>
+  has been refunded. Depending on your bank, it might take a few days for this to appear
+  in your account.
+</p>
+
+<%= render partial: 'encounter_order', object: @encounter_order %>
+<p>
+  <% if @encounter_order.encounter.state_cancelled? %>
+    If you have any questions about the cancellation or your refund, please get
+    in touch:
+  <% else %>
+    If you have any questions about your refund, please get in touch:
+  <% end %>
+</p>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

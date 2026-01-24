@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   resources :encounters, only: :show do
     resources :encounter_orders, except: [:edit, :update] do
-      resource :invoice, only: :show
+      resource :invoice, only: :show, controller: :encounter_invoices
     end
   end
 

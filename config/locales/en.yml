@@ -109,7 +109,7 @@ en:
         name: "Name"
         email: "E-mail address"
         phone_number: "Phone number"
-        address: "Home postal address"
+        address: "Postal address to show on tax invoice"
         starts_at: "Starting date and time"
         has_physical: "Include physical product in price?"
         gift_note: "If this is a gift, do you want to add a message for the recipient?"
@@ -215,6 +215,15 @@ en:
       unpublished: "Old (%{time})"
 
   views:
+    encounter_orders:
+      seats:
+        one: "One seat"
+        other: "%{count} seats"
+      confirm:
+        booking:
+          one: "Please check the details of your booking for one seat at “%{encounter_title}”."
+          other: "Please check the details of your booking for %{count} seats at “%{encounter_title}”."
+
     orders:
       seats:
         one: "One seat"

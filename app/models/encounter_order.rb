@@ -148,11 +148,8 @@ class EncounterOrder < ApplicationRecord
   validates_presence_of(
     :address,
     if: -> (encounter_order) {
-      encounter_order.has_physical ||
-      (
-        Hcms.config.tax_threshold.is_a?(Integer) &&
-        encounter_order.amount_owed >= Hcms.config.tax_threshold
-      )
+      Hcms.config.tax_threshold.is_a?(Integer) &&
+      encounter_order.amount_owed >= Hcms.config.tax_threshold
     }
   )
 
@@ -312,6 +309,14 @@ class EncounterOrder < ApplicationRecord
 
   def notify_payment_failed
     EncounterOrderMailer.encounter_order_state_payment_failed_email(self).deliver_later()
+  end
+
+  def notify_is_cancelled
+    EncounterOrderMailer.encounter_order_state_cancelled_email(self).deliver_later()
+
+    unless self.state_previously_was == self.class.states[:new]
+      Admin::AdminMailer.encounter_order_cancelled(self).deliver_later()
+    end
   end
 
   def process_refund

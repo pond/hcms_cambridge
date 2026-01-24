@@ -1,0 +1,16 @@
+<h1><%= @encounter_order.encounter.title %></h1>
+
+<p>
+  Unfortunately, <strong>there was a problem with your payment</strong> of
+  <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency) %>
+  for your booking so it is not yet confirmed. To work out what went wrong
+  and how to resolve it, please get in touch:
+</p>
+
+<%= render partial: 'contact' %>
+<p>
+  The booking details are:
+</p>
+
+<%= render partial: 'encounter_order', object: @encounter_order %>
+<%= render partial: 'signature' %>
