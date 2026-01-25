@@ -238,6 +238,10 @@ class EncounterOrder < ApplicationRecord
     self.amount_owed < standard_amount_owed
   end
 
+  def open_ended?
+    self.starts_at.blank?
+  end
+
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Main definition
   # ============================================================================

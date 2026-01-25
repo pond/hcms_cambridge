@@ -223,6 +223,8 @@ class Event < Editable
     end
   end
 
+  # Sync with Stripe, creating a Stripe Price for this Event if need be.
+  #
   def get_or_create_stripe_price(with_event_url:)
     return self.stripe_price || begin
       product_result = Stripe::Product.create(

@@ -10,12 +10,7 @@
 %><%= word_wrap(str, line_width: 78) %>
 
 <%= render partial: 'encounter_order', object: @encounter_order %>
-<% if @encounter_order.encounter.state_cancelled? %>
-If you have any questions about the cancellation or your refund, please get
-in touch:
-<% else %>
 If you have any questions about your refund, please get in touch:
-<% end %>
 
 <%= render partial: 'contact' %>
 <%= render partial: 'signature' %>

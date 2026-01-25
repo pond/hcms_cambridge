@@ -14,8 +14,7 @@ class EncounterInvoicesController < ApplicationController
       redirect_to(raw_uri.chomp('?'), status: :moved_permanently)
     else
       @encounter       = Encounter.find_by_id_or_slug!(params[:encounter_id])
-      @encounter_order = @encounter.encounter_orders.find_by_id(params[:encounter_order_id])
-
+      @encounter_order = @encounter.encounter_orders.find(params[:encounter_order_id])
 
       render()
     end

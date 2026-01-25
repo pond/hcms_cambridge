@@ -2,9 +2,49 @@
 
 <h1>Manage booking for &ldquo;<%= @encounter.title %>&rdquo;</h1>
 
+<p>
+  Full encounter information can be
+  <%= tag.strong link_to('found here', encordshelp_share_link(@encounter_order)) %>.
+</p>
+
 <dl>
   <dt>Date and time</dt>
   <dd><%= encordshelp_datetime(@encounter_order) %></dd>
+  <dt>Seats and price</dt>
+  <dd>
+    <%= @encounter_order.number_of_seats %> →
+    <% if @encounter_order.amount_owed.zero? %>
+      No charge
+    <% else %>
+      <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency) %>
+    <% end %>
+    <% if @encounter_order.has_physical %>
+      (including <%= encshelp_price(@encounter_order.encounter, for_physical_aspect: true) %>
+      for <%= @encounter_order.encounter.name_physical %>)
+    <% end %>
+  </dd>
+
+  <% if @encounter_order.state_paid? %>
+    <dt>Gift link</dt>
+    <dd>
+      If this is a gift, share this web link with recipients:<br>
+      <% magic_link = encordshelp_share_link(@encounter_order) %>
+      <%=
+        button_tag(
+          title: 'Copy link',
+          class: 'copy_from_data',
+          style: 'font-size: 85%',
+          data:  { text: magic_link }
+        ) do
+      %><i class="fa fa-copy"></i><% end %>
+      <small>
+        <code><%= magic_link %></code>
+      </small>
+    </dd>
+  <% end %>
+</dl>
+
+<dl>
   <dt>Your name</dt>
   <dd><%= @encounter_order.name %>
   <dt>E-mail address<dt>
@@ -18,24 +58,15 @@
 </dl>
 
 <dl>
-  <dt>Seats and price</dt>
-  <dd>
-    <%= @encounter_order.number_of_seats %> →
-    <% if @encounter_order.amount_owed.zero? %>
-      No charge
-    <% else %>
-      <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency) %>
-    <% end %>
-    <% if @encounter_order.has_physical %>
-      (including <%= encshelp_price(@encounter_order.encounter, for_physical_aspect: true) %>
-      for <%= @encounter_order.encounter.name_physical %>)
-    <% end %>
-   </dd>
   <dt>Booking state</dt>
   <dd><%= @encounter_order.human_state %></dd>
   <% if @encounter_order.notes_to_buyer.present? %>
     <dt>Other notes</dt>
     <dd><%= @encounter_order.notes_to_buyer %></dd>
+  <% end %>
+  <% if @encounter_order.gift_note.present? %>
+    <dt>Gift message</dt>
+    <dd><%= @encounter_order.gift_note %></dd>
   <% end %>
 </dl>
 

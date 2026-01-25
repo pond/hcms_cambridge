@@ -59,7 +59,7 @@
         </dd>
       <% end %>
 
-      <% if event.price_per_seat > 0 %>
+      <% unless event.free_of_charge? %>
         <dt>Price</dt>
         <dd>
           <%= evtshelp_price(event) %>

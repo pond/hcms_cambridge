@@ -50,11 +50,27 @@
   <% end %>
   <dt>Gift note written by customer at checkout</dt>
   <dd><%= @encounter_order.gift_note.presence || "N/A" %></dd>
-  <dt>Customer's order management "magic link"</dt>
+  <dt>Encounter information "share / gift link" (hides prices)</dt>
+  <dd>
+    <% share_link = encordshelp_share_link(@encounter_order) %>
+    <%=
+      button_tag(
+        title: 'Copy link',
+        class: 'copy_from_data',
+        style: 'font-size: 85%',
+        data:  { text: share_link }
+      ) do
+    %><i class="fa fa-copy"></i><% end %>
+    <small>
+      <code><%= share_link %></code>
+    </small>
+  </dd>
+  <dt>Customer's order management "magic link" (shows prices)</dt>
   <dd>
     <% magic_link = encordshelp_magic_link(@encounter_order) %>
     <%=
       button_tag(
+        title: 'Copy link',
         class: 'copy_from_data',
         style: 'font-size: 85%',
         data:  { text: magic_link }

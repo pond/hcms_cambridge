@@ -8,6 +8,7 @@
 </p>
 
 <%= render partial: 'encounter_order', object: @encounter_order %>
+<%= encordshelp_share_link_markup(@encounter_order, plain_text: false) %>
 <%= encordshelp_magic_link_markup(@encounter_order, plain_text: false) %>
 <p>
   If there are any problems with the booking, please get in touch:

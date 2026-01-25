@@ -1,10 +1,8 @@
 <%= @encounter_order.encounter.title.upcase %>
 <%= '=' * @encounter_order.encounter.title.size %>
 
-<% if @encounter_order.encounter.state_cancelled? %>
-Your booking has been cancelled. We're sorry you could not attend this time,
-but hope to see you again in future.
-<% end %>
+Your booking has been cancelled. We're sorry you could not attend this
+time, but hope to see you again in future.
 
 <%= render partial: 'encounter_order', object: @encounter_order %>
 If you have any questions about the cancellation, please get in touch:

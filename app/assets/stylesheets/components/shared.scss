@@ -92,7 +92,7 @@ form div.field div.checkbox {
   align-items: baseline;
 }
 
-div.row-wide-column-small-container {
+div.row-wide-column-small-container, div.highlighted-area-container {
   @include standard_shadow;
 
   border: 1px solid $head_foot_border_colour;
@@ -336,6 +336,35 @@ article.encounter {
     margin-bottom: 20px;
   }
 
+  section.article-body   > p:first-child,
+  section.event-body     > p:first-child,
+  section.encounter-body > p:first-child {
+    margin-top: 0;
+  }
+
+  div.encounter-gift-note {
+    margin: 1em 0;
+    text-align: center;
+
+    h3 {
+      margin: 0;
+      font-weight: bold;
+    }
+  }
+
+  section.encounter-body-and-poster {
+    display: flex;
+    flex-direction: flex-row;
+
+    section.encounter-poster img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      aspect-ratio: 2/3;
+      border-radius: 0.5em;
+    }
+  }
+
   .article-date-and-heading-container,  .event-date-and-heading-container,  .encounter-date-and-heading-container,
   .article-summary-and-links-container, .event-summary-and-links-container, .encounter-summary-and-links-container {
     display: flex;
@@ -382,6 +411,11 @@ article.encounter {
     font-style: italic;
   }
 
+  .encounter-summary-prominent {
+    display: inline-block;
+    margin: 0 auto;
+  }
+
   .article-next-prev, .event-next-prev, .encounter-next-prev {
     font-size: 18px;
     line-height: 110%;
@@ -394,6 +428,8 @@ article.encounter {
   }
 }
 
+// Lists of articles and events - not relevant for encounters.
+//
 section.blog-articles,
 section.events {
   display: grid;
@@ -825,6 +861,8 @@ nav {
       height: auto !important;
     }
 
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       article.article,
@@ -898,6 +936,21 @@ nav {
       height: auto !important;
     }
 
+    article.encounter {
+       section.encounter-body-and-poster {
+          flex-direction: column-reverse;
+
+          section.encounter-poster {
+            text-align: center;
+            img {
+              width: 75%;
+            }
+          }
+       }
+    }
+
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       grid-template-columns: 1fr 1fr;
@@ -966,6 +1019,13 @@ nav {
       height: auto !important;
     }
 
+    article.encounter {
+       section.encounter-body-and-poster {
+          flex-direction: column-reverse;
+       }
+    }
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       grid-template-columns: 1fr;

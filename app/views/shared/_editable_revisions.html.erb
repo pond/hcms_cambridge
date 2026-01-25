@@ -72,6 +72,7 @@
       <% if share_link.present? %>
         <%=
           button_tag(
+            title: 'Copy link',
             class: 'copy_from_data',
             data:  { text: share_link }
           ) do

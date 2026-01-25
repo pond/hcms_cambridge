@@ -40,6 +40,24 @@ class Encounter < Editable
   end
 
   # ============================================================================
+  # Internal utility class used in very limited cases for plain text body data
+  # ============================================================================
+
+  class EncounterToPlain
+    include ActionView::Helpers::SanitizeHelper
+
+    attr_reader :encounter
+
+    def initialize(encounter)
+      @encounter = encounter
+    end
+
+    def plain_body_text
+      strip_tags(self.encounter.body)
+    end
+  end
+
+  # ============================================================================
   # Overrides of Editable base class
   # ============================================================================
 
@@ -84,6 +102,28 @@ class Encounter < Editable
     end
   end
 
+  # Does the encounter's currency symbol or code appear inside the summary or
+  # description text?
+  #
+  def might_include_price_details?
+    symbol = Money.new(self.currency).symbol
+
+    # Bail early on the less expensive check; plain text short summary.
+    #
+    return true if self.summary.include?(symbol) || self.summary.include?(self.currency)
+
+    if self.body.include?(symbol) || self.body.include?(self.currency)
+      converter  = ::Encounter::EncounterToPlain.new(self)
+      plain_text = converter.plain_body_text
+
+      return plain_text.include?(symbol) || plain_text.include?(self.currency)
+    else
+      return false
+    end
+  end
+
+  # Sync with Stripe, creating a Stripe Price for this Encounter if need be.
+  #
   def get_or_create_stripe_price(with_encounter_url:)
     return self.stripe_price || begin
       product_result = Stripe::Product.create(

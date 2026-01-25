@@ -33,6 +33,9 @@ class Admin::EncountersController < ApplicationController
 
     # GET /admin/encounters/<id>
     def show
+      if @encounter.might_include_price_details?
+        flash.now[:alert] = "There might be price information included in this encounter's summary or description. Be careful to avoid price details in the summary or details areas, since these are seen by people who are sent details of the encounter as part of a gift."
+      end
     end
 
     # GET /admin/encounters/new

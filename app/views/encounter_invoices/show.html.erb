@@ -27,7 +27,7 @@
   </tr>
   <tr>
     <th>Due Date</th>
-    <td><%= apphelp_human_time(@encounter_order.starts_at - 1.day, invoice: true) %></td>
+    <td><%= encordshelp_formatted_invoice_due_date(@encounter_order) %></td>
   </tr>
 <table>
 
@@ -76,7 +76,7 @@
     </tr>
     <% if @encounter_order.has_physical %>
       <tr>
-        <td><%= @encounter_order.encounter.name_physical %></td>
+        <td><%= @encounter_order.encounter.name_physical.upcase_first %></td>
         <td>1</td>
         <td>
           <%= apphelp_money(expected_physical_price, currency: @encounter_order.encounter.currency) %>
@@ -104,7 +104,7 @@
           <strong>PAID IN FULL</strong>
         <% else %>
           Due by<br>
-          <%= apphelp_human_time(@encounter_order.starts_at - 1.day, date_only: true) %>
+          <%= encordshelp_formatted_invoice_due_date(@encounter_order) %>
         <% end %>
       </td>
     </tr>

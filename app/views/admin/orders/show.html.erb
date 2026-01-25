@@ -42,6 +42,7 @@
     <% magic_link = ordershelp_magic_link(@order) %>
     <%=
       button_tag(
+        title: 'Copy link',
         class: 'copy_from_data',
         style: 'font-size: 85%',
         data:  { text: magic_link }

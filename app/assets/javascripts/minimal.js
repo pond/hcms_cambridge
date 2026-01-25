@@ -1,4 +1,5 @@
 //= require jquery
+//= require shared
 
 $(document).ready(function() {
 

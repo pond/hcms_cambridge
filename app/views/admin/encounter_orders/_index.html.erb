@@ -52,6 +52,7 @@
           Copy all
           <%=
             button_tag(
+              title: 'Copy all addresses',
               class: 'copy_from_data',
               style: 'font-size: 80%',
               data:  { text: encounter_orders.map(&:email).each { |e| e.gsub(',', '=2C') }.join(',') }
