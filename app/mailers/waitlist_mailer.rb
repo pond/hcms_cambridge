@@ -1,5 +1,4 @@
 class WaitlistMailer < ApplicationMailer
-  #helper :application, :orders, :events
 
   # Sent for Reserved orders when the event starts accepting public payments,
   # so the reservation is no longer guaranteed.

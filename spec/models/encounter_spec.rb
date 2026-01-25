@@ -109,8 +109,8 @@ RSpec.describe Encounter, type: :model do
     end
 
     it "#no_physical_aspect?" do
-      expect(build(:encounter                ).no_physical_aspect?).to eql(false)
-      expect(build(:encounter, :physical_none).no_physical_aspect?).to eql(true)
+      expect(build(:encounter                ).has_physical_aspect?).to eql(true)
+      expect(build(:encounter, :physical_none).has_physical_aspect?).to eql(false)
     end
 
     it "#physical_aspect_free_of_charge?" do

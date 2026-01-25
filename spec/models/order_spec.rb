@@ -51,6 +51,51 @@ RSpec.describe Order, type: :model do
   end # 'context "scopes and associations" do'
 
   context "validations" do
+    context "addresses" do
+      it "requires an address where the total exceeds a configured threshold" do
+        order = build(:order, address: nil)
+
+        allow(Hcms.config).to receive(:tax_threshold).and_return(order.amount_owed - 1)
+
+        expect(order.valid?).to eql(false)
+        expect(order.errors).to have_key(:address)
+
+        allow(Hcms.config).to receive(:tax_threshold).and_return(order.amount_owed + 1)
+
+        expect(order.valid?).to eql(true)
+
+        allow(Hcms.config).to receive(:tax_threshold).and_return(order.amount_owed)
+
+        expect(order.valid?).to eql(false)
+        expect(order.errors).to have_key(:address)
+      end
+
+      it "requires an address always if there's a configured zero threshold" do
+        allow(Hcms.config).to receive(:tax_threshold).and_return(0)
+
+        order = build(:order, address: nil)
+
+        expect(order.valid?).to eql(false)
+        expect(order.errors).to have_key(:address)
+
+        order = build(:order, address: nil, amount_owed: 0)
+
+        expect(order.valid?).to eql(false)
+        expect(order.errors).to have_key(:address)
+      end
+
+      it "does not require an address if there is no configured threshold" do
+        allow(Hcms.config).to receive(:tax_threshold).and_return(nil)
+
+        order = build(:order, address: nil)
+
+        expect(order.valid?).to eql(true)
+
+        order = build(:order, address: nil, amount_owed: 0)
+
+        expect(order.valid?).to eql(true)
+      end
+    end # 'context "addresses" do'
   end # 'context "validations" do'
 
   context "utilities" do

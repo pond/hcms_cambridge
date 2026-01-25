@@ -11,6 +11,7 @@ FactoryBot.define do
     location             { Faker::Address.full_address }
     price_per_seat       { rand(2499..50000) }
     price_physical       { rand(250..750) }
+    name_physical        { Faker::Commerce.product_name.downcase }
     currency             { SUPPORTED_TEST_CURRENCIES.sample() }
 
     trait :free do
@@ -23,6 +24,7 @@ FactoryBot.define do
 
     trait :physical_none do
       price_physical { nil }
+      name_physical  { nil }
     end
   end
 end
