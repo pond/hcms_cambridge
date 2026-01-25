@@ -12,7 +12,6 @@
   draft_markup     = apphelp_boolean(active_draft, no_class: nil, yes_class: 'boolean_yes_highlight')
 %>
 <td class="centre"><%= published_markup %></td>
-<td class="centre"><%= draft_markup %></td>
 <td class="centre">
   <% if active_draft %>
     <%= link_to(draft_markup, [:admin, encounter, {revision: encounter.current_revision.id}]) %>

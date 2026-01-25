@@ -106,6 +106,8 @@ class Encounter < Editable
   # description text?
   #
   def might_include_price_details?
+    return false if self.currency.blank?
+
     symbol = Money.new(self.currency).symbol
 
     # Bail early on the less expensive check; plain text short summary.
