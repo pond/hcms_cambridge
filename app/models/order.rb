@@ -137,16 +137,35 @@ class Order < ApplicationRecord
 
   validates_presence_of :address, if: -> (order) {
     Hcms.config.tax_threshold.is_a?(Integer) &&
+    order.amount_owed.is_a?(Integer) &&
     order.amount_owed >= Hcms.config.tax_threshold
   }
 
   # Note that the state machine enum is validated automatically.
 
-  validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
-  validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
+  validates(
+    :email,
+    format: {
+      with:    URI::MailTo::EMAIL_REGEXP,
+      message: 'must be a valid e-mail address'
+    }
+  )
+
+  validates(
+    :number_of_seats, :amount_owed,
+    numericality: {
+      only_integer: true,
+      message:      'must be a whole number'
+    }
+  )
 
   validate :number_of_seats do
-    if self.event.present? && self.event.number_of_seats > 0
+    if (
+      self.number_of_seats.present?  &&
+      self.number_of_seats > 0       &&
+      self.event.present?            &&
+      self.event.number_of_seats > 0
+    )
       event        = self.event
       other_orders = event.orders.inflight.where.not(id: self.id)
       remaining    = [0, event.number_of_seats - other_orders.sum(:number_of_seats)].max()
@@ -195,7 +214,7 @@ class Order < ApplicationRecord
 
     # See "en.yml", models.order_state
     #
-    if self.state_new?
+    if self.state_new? && self.updated_at.present?
       if self.updated_at < INFLIGHT_WINDOW.ago
         if self.updated_at > STALE_WINDOW.ago
           state_for_i18n = 'getting_older'
@@ -222,6 +241,10 @@ class Order < ApplicationRecord
     self.customer_can_pay_for_booking?
   end
 
+  # Reservations mean you've essentially expressed an interest in an event which
+  # was accepting such things ("presales" state) previously, and now things have
+  # changed so that this reservation can be solidified into a booking.
+  #
   def customer_can_pay_for_reservation?
     ! self.event.has_started? &&
     (self.state_reserved? || self.state_payment_failed?) &&
@@ -231,6 +254,10 @@ class Order < ApplicationRecord
     )
   end
 
+  # You can pay for an event booking if you either could pay for a prior
+  # reservation, *or* if this is a new order for an event that's accepting
+  # public purchases.
+  #
   def customer_can_pay_for_booking?
     self.customer_can_pay_for_reservation? ||
     (

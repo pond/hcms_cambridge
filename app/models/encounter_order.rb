@@ -149,6 +149,7 @@ class EncounterOrder < ApplicationRecord
     :address,
     if: -> (encounter_order) {
       Hcms.config.tax_threshold.is_a?(Integer) &&
+      encounter_order.amount_owed.is_a?(Integer) &&
       encounter_order.amount_owed >= Hcms.config.tax_threshold
     }
   )
@@ -164,7 +165,10 @@ class EncounterOrder < ApplicationRecord
 
   validates(
     :email,
-    format: { with: URI::MailTo::EMAIL_REGEXP }
+    format:  {
+      with: URI::MailTo::EMAIL_REGEXP,
+      message: 'must be a valid e-mail address'
+    }
   )
 
   validates(
