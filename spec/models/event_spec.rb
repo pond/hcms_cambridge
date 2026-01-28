@@ -715,88 +715,219 @@ RSpec.describe Event, type: :model do
         # so the e-mail expectations no longer work. It's simpler to test anew.
         #
         context "cancelling from the public purchases state" do
-          it "sends e-mails and updates order states" do
-            @event.start_public_purchases_state!
+          shared_examples "a working from-public-purchase state machine" do
+            it "sends e-mails and updates order states" do
+              @event.start_public_purchases_state!
 
-            # Non-zero amount, so gets 'refunded due to cancellation'.
-            #
+              # Non-zero amount, so gets 'refunded due to cancellation'.
+              #
+              order_1 = create(:order, event: @event, number_of_seats: 1)
+              order_1.pay_state!
+
+              # Paid but free, so gets 'event cancelled' as an e-mail but the
+              # internal state is still 'refunded'.
+              #
+              order_2 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+              order_2.pay_state!
+
+              # This order is a work-in-progress. No e-mails should be sent.
+              #
+              order_3 = create(:order, event: @event, number_of_seats: 1)
+
+              perform_enqueued_jobs()
+              ActionMailer::Base.deliveries.clear()
+
+              @event.cancel_state!
+
+              expect(order_1.reload().state_refunded? ).to eql(true)
+              expect(order_2.reload().state_refunded? ).to eql(true)
+              expect(order_3.reload().state_cancelled?).to eql(true)
+
+              messages    = spechelp_decode_multipart(count: 2)
+              to_customer = messages.find { |m| m.email.to.first == order_1.email }
+              total       = spechelp_format_money(order_1.amount_owed, @event.currency)
+
+              expect(to_customer).to be_present
+              expect(to_customer.email.subject).to include("Confirmation of refund")
+
+              expect(to_customer.text).to include(@event.title.upcase)
+              expect(to_customer.text).to include("Unfortunately, this event has been cancelled.") # (sic.)
+              expect(to_customer.text).to include("#{total} has been refunded.")
+
+              expect(to_customer.html).to include(@event.title)
+              expect(to_customer.html).to include("Unfortunately, this event has been cancelled.") # (sic.)
+              expect(to_customer.html).to include("#{total}\n  has been refunded.")
+
+              to_customer = messages.find { |m| m.email.to.first == order_2.email }
+
+              expect(to_customer).to be_present
+              expect(to_customer.email.subject).to include("Confirmation of cancellation")
+
+              expect(to_customer.text).to include(@event.title.upcase)
+              expect(to_customer.text).to include("Unfortunately, this event has been cancelled.")
+
+              expect(to_customer.html).to include(@event.title)
+              expect(to_customer.html).to include("Unfortunately, this event has been cancelled.")
+            end
+          end # 'shared_examples "a working from-public-purchase state machine"'
+
+          context "outside the no-refunds window" do
+            it_behaves_like "a working from-public-purchase state machine"
+          end # 'context "outside the no-refunds window" do'
+
+          context "inside the no-refunds window" do
+            before :each do
+              allow(Hcms.config).to receive(:no_refunds_window).and_return(2) # (2 days)
+
+              @event.starts_at = Time.now + 1.day
+              @event.ends_at   = Time.now + 1.day + 3.hours
+              @event.save!
+            end
+
+            it_behaves_like "a working from-public-purchase state machine"
+          end # 'context "inside the no-refunds window" do'
+        end
+
+        # Archiving has a primary guard of "has ended". While an admin might
+        # want to manually archive before that time, this is presently not
+        # supported in order to keep things simple (last-minute cancellations,
+        # purchase requests etc. could all happen and would be a terrible mess
+        # to try and sort out if the event had reached an archived state).
+        #
+        # Since the event has finished, we don't send any further e-mails.
+        #
+        shared_examples "a working archiver" do
+          it "sends no messages, but makes the related Stripe product inactive" do
             order_1 = create(:order, event: @event, number_of_seats: 1)
-            order_1.pay_state!
+            order_1.reserve_state!
 
-            # Paid but free, so gets 'event cancelled' as an e-mail but the
-            # internal state is still 'refunded'.
-            #
-            order_2 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
-            order_2.pay_state!
+            order_2 = create(:order, event: @event, number_of_seats: 1)
+            order_2.reserve_state!
 
-            # This order is a work-in-progress. No e-mails should be sent.
+            # This is a free seat, but we still expect the user to confirm their
+            # reservation by going through the special case "free item" checkout
+            # flow.
             #
-            order_3 = create(:order, event: @event, number_of_seats: 1)
+            order_3 = create(:order, event: @event, number_of_seats: 1, amount_owed: 0)
+            order_3.reserve_state!
+
+            order_4 = create(:order, event: @event, number_of_seats: 1)
+            order_4.update_column(:state, Order.states[:paid])
 
             perform_enqueued_jobs()
             ActionMailer::Base.deliveries.clear()
 
-            @event.cancel_state!
+            @event.starts_at = Time.now - 3.hours - 5.minutes
+            @event.ends_at   = Time.now - 5.minutes
+            @event.archive_state!
 
-            expect(order_1.reload().state_refunded? ).to eql(true)
-            expect(order_2.reload().state_refunded? ).to eql(true)
-            expect(order_3.reload().state_cancelled?).to eql(true)
+            messages = spechelp_decode_multipart(count: 0)
 
+            expect(messages).to be_empty
 
+            [order_1, order_2, order_3, order_4].map(&:reload)
 
-            # TEST IS A WIP
-            #
-            # Need to check the force-refund condition in case we're inside the
-            # refunds window at cancellation time
-
-
-
-
-            messages    = spechelp_decode_multipart(count: 2)
-            to_customer = messages.find { |m| m.email.to.first == order_1.email }
-            total       = spechelp_format_money(order_1.amount_owed, @event.currency)
-
-            expect(to_customer).to be_present
-            expect(to_customer.email.subject).to include("Confirmation of refund")
-
-            expect(to_customer.text).to include(@event.title.upcase)
-            expect(to_customer.text).to include("Unfortunately, this event has been cancelled.") # (sic.)
-            expect(to_customer.text).to include("#{total} has been refunded.")
-
-            expect(to_customer.html).to include(@event.title)
-            expect(to_customer.html).to include("Unfortunately, this event has been cancelled.") # (sic.)
-            expect(to_customer.html).to include("#{total}\n  has been refunded.")
-
-            to_customer = messages.find { |m| m.email.to.first == order_2.email }
-
-            expect(to_customer).to be_present
-            expect(to_customer.email.subject).to include("Confirmation of cancellation")
-
-            expect(to_customer.text).to include(@event.title.upcase)
-            expect(to_customer.text).to include("Unfortunately, this event has been cancelled.")
-
-            expect(to_customer.html).to include(@event.title)
-            expect(to_customer.html).to include("Unfortunately, this event has been cancelled.")
+            expect(order_1.state).to eql(Order.states[:reserved])
+            expect(order_2.state).to eql(Order.states[:reserved])
+            expect(order_3.state).to eql(Order.states[:reserved]) # NOT auto-marked as paid; user never confirmed reservation
+            expect(order_4.state).to eql(Order.states[:paid])
           end
+        end # 'shared_examples "a working archiver" do'
+
+        context "archiving a completed event" do
+          before :each do
+            expect_stripe_to_be_made_inactive_via(@event)
+          end
+
+          it_behaves_like "a working archiver"
+        end # 'context "archiving a completed event" do'
+
+        context "archiving an event that never got a Stripe product added" do
+          before :each do
+            expect(@event.stripe_price).to be_nil # (event factory self-check)
+          end # 'context "archiving an event that never got a Stripe product added" do'
+
+          it_behaves_like "a working archiver"
         end
 
+        context "on-archive actions" do
+          before :each do
+            @event.starts_at = Time.now - 3.hours - 5.minutes
+            @event.ends_at   = Time.now - 5.minutes
+          end
 
+          it "makes no changes with 'keep'" do
+            @event.on_archive_action = Event.on_archive_actions[:keep]
 
+            expect {
+              @event.archive_state!
+            }.to_not change { Article.count + Revision.count }
 
+            @event.reload
 
+            expect(@event.hidden).to eql(false)
+          end
 
+          it "sets the 'hidden' flag with 'hide'" do
+            @event.on_archive_action = Event.on_archive_actions[:hide]
 
+            expect {
+              @event.archive_state!
+            }.to_not change { Article.count + Revision.count }
 
+            @event.reload
 
-        # Archive:
-        # perform_on_archive_action / stripe_make_inactive
-        #
-        # IMPORTANT: Check this *with the event in the past* as well as in the
-        # future, since that was a real-world bug.
-        #
-        xcontext "archiving" do
-          # ...along with on-archive action tests.
-        end # 'context "archiving" do'
+            expect(@event.hidden).to eql(true)
+          end
+
+          it "creates a copied blog post and hides the original with 'move'" do
+            page = create(:page, :blog)
+
+            expect(page.articles.count).to be_zero # (self-check)
+
+            @event.on_archive_action = Event.on_archive_actions[:move]
+            @event.on_archive_params = { blog_id: page.id }
+
+            expect {
+              @event.archive_state!
+            }.to change { Article.count + Revision.count }.by(2)
+
+            expect(page.articles.count).to eql(1)
+
+            article = page.articles.first
+
+            expect(article.title           ).to eql(@event.title           )
+            expect(article.navigation_title).to eql(@event.navigation_title)
+            expect(article.summary         ).to eql(@event.summary         )
+            expect(article.body            ).to eql(@event.body            )
+            expect(article.created_at      ).to eql(@event.starts_at       )
+            expect(article.updated_at      ).to eql(@event.starts_at       )
+            expect(article.created_at      ).to eql(@event.starts_at       )
+
+            expect(article.article_hero_image).to be_present
+
+            a_path = Rails.root.join("public", article.article_hero_image.url[1..])
+            e_path = Rails.root.join("public", @event.event_hero_image.url[1..])
+
+            a_digest = Digest::MD5.hexdigest(File.read(a_path))
+            e_digest = Digest::MD5.hexdigest(File.read(e_path))
+
+            expect(a_digest).to eql(e_digest)
+          end
+
+          it "handles a missing blog on-archive" do
+            @event.on_archive_action = Event.on_archive_actions[:move]
+            @event.on_archive_params = { blog_id: 0 }
+
+            expect {
+              @event.archive_state!
+            }.to_not change { Article.count + Revision.count }
+
+            @event.reload
+
+            expect(@event.hidden).to eql(true)
+          end
+        end # 'context "on-archive actions" do'
       end # 'context "side effects" do'
     end # 'context "transitions" do'
   end # 'context "state machine" do

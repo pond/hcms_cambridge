@@ -351,6 +351,14 @@ class Order < ApplicationRecord
     ! self.event.has_started?
   end
 
+  # Is this order *outside* the no-refunds window - that is, should a refund be
+  # allowed under normal circumstances?
+  #
+  # * Always allowed if the event was cancelled
+  # * Always allowed if the configured window period is zero
+  # * Otherwise the event cannot start within the configured number of days
+  #   from now.
+  #
   def outside_no_refunds_window?
     self.event.state_cancelled? ||
     Hcms.config.no_refunds_window.zero? ||

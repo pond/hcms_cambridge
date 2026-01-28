@@ -519,7 +519,7 @@ RSpec.describe Order, type: :model do
       #
       it '#outside_no_refunds_window?' do
         order                 = build(:order)
-        order.event.starts_at = Time.now - 23.hours
+        order.event.starts_at = Time.now + 25.hours
 
         allow(Hcms.config).to receive(:no_refunds_window).and_return(0)
 
