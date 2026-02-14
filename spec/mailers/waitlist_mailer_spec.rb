@@ -42,10 +42,6 @@ RSpec.describe WaitlistMailer, type: :mailer do
   context "without address" do
     let(:model_proc) { -> { create(:order, address: nil) } }
 
-    before :each do
-      allow(Hcms.config).to receive(:tax_threshold).and_return(nil)
-    end
-
     it_behaves_like "a working mailer"
   end
 
