@@ -1,0 +1,19 @@
+<h1><%= @order.event.title %></h1>
+
+<p>
+  Thank you for your reservation.
+  <% unless @order.amount_owed.zero? %>
+    Closer to the event, we will contact you on this e-mail address to finalise the
+    booking by paying <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
+    No payment is needed until then.
+  <% end %>
+</p>
+
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: false) %>
+<p>
+  If there are any problems with the reservation, please get in touch:
+</p>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

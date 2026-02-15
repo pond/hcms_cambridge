@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render partial: 'layouts/content_preamble', locals: { content: @event } %>
+    <title><%= Hcms.config.site_name %>: <%= @event.title %></title>
+  </head>
+
+  <body>
+    <header>
+      <%= render partial: 'layouts/content_header', locals: { content: @event } %>
+    </header>
+
+    <main>
+      <%= render partial: 'layouts/content_main', locals: { content: @event } %>
+    </main>
+
+    <footer>
+      <% content_for :signed_in_cms_menu do %>
+        <%= evtshelp_edit_link_for(@event, params) %> |
+        <%= link_to 'Add event',       new_admin_page_event_path(@event.page) %> |
+        <%= link_to 'List events',     admin_page_events_path(@event.page) %> |
+        <%= link_to 'Page management', admin_pages_path() %>
+      <% end %>
+
+      <%= render partial: 'layouts/content_footer', locals: { content: @event } %>
+    </footer>
+  </body>
+</html>

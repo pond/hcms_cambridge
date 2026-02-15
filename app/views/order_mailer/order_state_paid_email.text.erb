@@ -1,0 +1,15 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+<% unless @order.amount_owed.zero? %>
+Thank you for your payment of <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>.
+
+<% end %>
+Your booking is confirmed. We look forward to seeing you!
+
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: true) %>
+If there are any problems with the booking, please get in touch:
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

@@ -1,0 +1,21 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'actions', locals: {
+  #     encounter: Encounter model instance
+  #   }
+%>
+<td class="admin_actions">
+  <% if encounter.revisions.any?(&:published?) %>
+    <%= encshelp_admin_orders_link(encounter) %>
+  <% else %>
+    &ndash;
+  <% end %>
+</td>
+<td class="admin_actions">
+  <%= link_to 'Show', admin_encounter_path(encounter.slug) %>
+  <%= link_to 'Edit', edit_admin_encounter_path(encounter) %>
+</td>
+<td class="admin_actions for_delete">
+  <%= link_to 'Delete', admin_encounter_path(encounter), method: :delete, data: { confirm: apphelp_destroy_confirm(encounter) } %>
+</td>

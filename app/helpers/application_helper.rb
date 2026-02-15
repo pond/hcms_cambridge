@@ -2,15 +2,19 @@ module ApplicationHelper
   def apphelp_destroy_confirm(thing)
     message = 'Are you sure? This cannot be undone!'
 
-    if thing.is_a?(Page) && thing.is_blog_type? && thing.articles.for_navigation.any?
-      message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
+    if thing.is_a?(Page)
+      if thing.is_blog_type? && thing.articles.for_navigation.any?
+        message = "Are you sure? The page's blog articles will be deleted too. This cannot be undone!"
+      elsif thing.is_events_type? && thing.events.for_navigation.any?
+        message = "Are you sure? This page's listed events will be deleted too. This cannot be undone!"
+      end
     end
 
     message
   end
 
-  def apphelp_human_time(datetime, date_only: false)
-    TimeZoneHelp.in_configured_time_zone(datetime, date_only:)
+  def apphelp_human_time(datetime, time_only: false, date_only: false, invoice: false)
+    TimeZoneHelp.in_configured_time_zone(datetime, time_only:, date_only:, invoice:)
   end
 
   # Render a boolean-like thing as 'yes/no' text in a span that can include a
@@ -59,5 +63,24 @@ module ApplicationHelper
     end
 
     form.label(attribute) { contents }
+  end
+
+  # Return an amount of money formatted for a given (default - globally
+  # configured) configured currency, for a value expressed in 'cents', i.e.
+  # fractional units) with an optional support for 'free of charge' via the
+  # given boolean.
+  #
+  # Returns an en-dash HTML entity if there's no currency configured or given
+  # (specify via an ISO 3-letter code such as GBP or NZD).
+  #
+  def apphelp_money(amount_in_cents, currency: Hcms.config.currency, free_of_charge: false)
+    if currency.blank?
+      '&ndash;'.html_safe()
+    elsif free_of_charge
+      'Free'
+    else
+      parsed_amount = Money.from_cents(amount_in_cents, currency)
+      parsed_amount.format()
+    end
   end
 end

@@ -1,0 +1,5 @@
+<%# Needed since 'show' uses the public site layout for events, not the admin layout %>
+<%= javascript_include_tag 'minimal' %>
+
+<%= render partial: 'state_management', locals: { event: @event } %>
+<%= render partial: 'shared/event', locals: { event: @event } %>

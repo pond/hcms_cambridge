@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
-ruby '3.4.6'
+ruby '4.0.1'
 
-gem 'rails', '>= 8', '< 9'
+gem 'rails', '>= 8.1', '< 9'
 
 gem 'pg'
 gem 'puma'
@@ -14,11 +14,11 @@ gem 'ostruct'
 #
 #   https://rubygems.org/gems/sass-rails
 #   https://rubygems.org/gems/coffee-rails
-#   https://rubygems.org/gems/uglifier
+#   https://rubygems.org/gems/terser
 #
 gem 'sass-rails'
 gem 'coffee-rails'
-gem 'uglifier'
+gem 'terser'
 
 # jQuery for JavaScript, SDoc formatted documentation.
 #
@@ -32,7 +32,8 @@ gem 'sdoc'
 #
 #   https://rubygems.org/gems/devise
 #
-gem 'devise', '~> 4.9'
+# gem 'devise', '~> 4.9'     -- Ruby 3.3 / Rails 7, many deprecation warnings
+gem 'devise', git: 'https://github.com/heartcombo/devise', branch: 'main'
 
 # Recaptcha used for e.g. the "booking" type pages.
 #
@@ -58,17 +59,45 @@ gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branc
 #
 gem 'mailgun-ruby', '~> 1.3'
 
+# Automated inlining of e-mail styles.
+#
+#   https://rubygems.org/gems/roadie-rails
+#
+gem 'roadie-rails', '~> 3.4'
+
 # Orderable pages.
 #
 #   https://rubygems.org/gems/acts_as_list
 #
 gem 'acts_as_list', '~> 1.2'
 
+# State machines.
+#
+#   https://rubygems.org/gems/after_commit_everywhere
+#   https://rubygems.org/gems/aasm
+#
+gem 'after_commit_everywhere', '~> 1.6'
+gem 'aasm', '~> 5.5'
+
 # Phone number validation.
 #
 #   https://rubygems.org/gems/phonelib
 #
 gem 'phonelib', '~> 0.10'
+
+# Currency parsing and formatting.
+#
+#   https://rubygems.org/gems/money
+#   https://rubygems.org/gems/monetize
+#
+gem 'money',    '~> 6.19'
+gem 'monetize', '~> 1.13'
+
+# Payments via Stripe.
+#
+#   https://rubygems.org/gems/stripe
+#
+gem 'stripe', '~> 17.0'
 
 # Monitoring and alerting.
 #

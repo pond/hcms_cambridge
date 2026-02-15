@@ -1,0 +1,36 @@
+# Stripe is managed via the offsite ("hosted") checkout flow. We pass a success
+# URL that includes Stripe's checkout session ID, so when the browser is
+# directed to that URL, we can get and store the charge ID over API using that
+# session information. A payment record is then written with the charge ID,
+# which allows an over-API refund later.
+#
+# A refund actioned on our side and completed by Stripe will result in the
+# corresponding payment record being deleted. If a refund is done fully in
+# Stripe, we don't know about it and the payment record won't be cleaned up.
+#
+class StripePayment < ApplicationRecord
+  belongs_to :payable, polymorphic: true
+  validates_presence_of :payable, :stripe_payment_intent
+
+  # ============================================================================
+  # Convenience / more natural code than e.g. "payment.payable"
+  # ============================================================================
+
+  def order
+    item = self.payable
+    item.is_a?(Order) ? item : nil
+  end
+
+  def order_id
+    self.payable_type == 'Order' ? self.payable_id : nil
+  end
+
+  def encounter_order
+    item = self.payable
+    item.is_a?(EncounterOrder) ? item : nil
+  end
+
+  def encounter_order_id
+    self.payable_type == 'EncounterOrder' ? self.payable_id : nil
+  end
+end

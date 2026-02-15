@@ -30,13 +30,13 @@ class RedirectionsController < ApplicationController
   })
 
   # Used internally by the no-page-impression ignore system for configurable
-  # mappings in 'config.yml', mapping config sections to Ruby string methods.
+  # mappings in 'hcms.yml', mapping config sections to Ruby string methods.
   #
   STATS_IGNORE_METHODS = {
     'match_exactly'  => :eql?,
     'starts_with'    => :start_with?,
     'found_anywhere' => :include?
-  }
+  }.with_indifferent_access()
 
   def show
     self.populate_constants! if BLOG_MAPPINGS.blank?
@@ -67,12 +67,12 @@ class RedirectionsController < ApplicationController
     # Lazy-populate the mapping constants via configuration data.
     #
     def populate_constants!
-      Rails.application.config.uk_org_pond_hcms.blog_mappings&.each do | path, blog_page_slug |
-        BLOG_MAPPINGS[path] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
+      Hcms.config.blog_mappings&.each do | path, blog_page_slug |
+        BLOG_MAPPINGS[path.to_s] = Page.find_by_slug(blog_page_slug) # Note, might be "nil"
       end
 
-      Rails.application.config.uk_org_pond_hcms.page_mappings&.each do | path, other_page_slug |
-        PAGE_MAPPINGS[path] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
+      Hcms.config.page_mappings&.each do | path, other_page_slug |
+        PAGE_MAPPINGS[path.to_s] = Page.find_by_slug(other_page_slug) # Note, might be "nil"
       end
     end
 
@@ -166,7 +166,7 @@ class RedirectionsController < ApplicationController
 
       return true if early_exit
 
-      Rails.application.config.uk_org_pond_hcms.statistics_ignore.each do |section, list|
+      Hcms.config.statistics_ignore.each do |section, list|
         matcher = STATS_IGNORE_METHODS[section]
 
         list.each do | item |

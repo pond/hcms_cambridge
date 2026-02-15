@@ -1,0 +1,63 @@
+<%
+  # Render the body for a 'booking form' type page. Usually only rendered via
+  # the "shared/_page.html.erb" Partial. Requires local "page", holding the
+  # Page instance that is being rendered.
+%>
+
+<%= page.body.html_safe() %>
+
+<%=
+  form_with(
+    model:   @form_model,
+    builder: FormBuilderWithInlineErrors,
+    url:     user_emails_path(page_id: @page.id)
+  ) do | f |
+%>
+  <% if page.body.present? %>
+    <hr>
+  <% end %>
+  <p>
+    <%= apphelp_label(f, :name, required: true) %>
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :email, required: true) %>
+    <%= f.email_field :email %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :phone) %>
+    <%= f.telephone_field :phone %>
+  </p>
+  <hr>
+  <% if ! page.hide_date_and_time %>
+    <p>
+      <%= apphelp_label(f, :date) %>
+      <%= f.date_field :date, min: Date.current + 2.days %>
+    </p>
+    <p>
+      <%= apphelp_label(f, :time) %>
+      <%= f.time_field :time, min: '10:00', max: '19:00', step: 1.minute %>
+    </p>
+  <% end %>
+  <% unless page.form_selection_list_contents.strip.blank? %>
+    <p>
+      <%= apphelp_label(f, :menu_selection, text: page.form_selection_list_label) %>
+      <%= pageshelp_form_page_selection_list(f, page) %>
+    <p>
+  <% end %>
+  <p>
+    <%= apphelp_label(f, :notes) %>
+    <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'List of attendees, special date/time requests, questions etc.' %>
+    <%= f.error_markup_for(:notes) %>
+  </p>
+
+  <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
+    <%= recaptcha_tags() %>
+  <% else %>
+    <%= recaptcha_v3(action: 'contact') %>
+  <% end %>
+
+  <p>
+    <%= submit_tag 'Send enquiry' %>
+  </p>
+<% end %>

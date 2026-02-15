@@ -1,0 +1,54 @@
+<h1 id="admin-header-main">
+  Orders for &ldquo;<%= @event.title %>&rdquo;
+  in event list &ldquo;<%= @page.title %>&rdquo;
+</h1>
+
+<ul>
+  <li><%= evtshelp_datetime(@event) %></li>
+  <li><%= @event.location %></li>
+  <li>
+    <% if @event.unrestricted_seating? %>
+      Seats not counted
+    <% else %>
+      <%= t('views.orders.seats', count: @event.number_of_seats) %> &ndash;
+      <% if @event.confirmed_seats_remaining < 0 %>
+        <strong>oversold by <%= -@event.confirmed_seats_remaining %> seat(s)</strong>
+      <% elsif @event.confirmed_seats_remaining.zero? %>
+        <strong>sold out</strong>
+      <% else %>
+        <%= @event.confirmed_seats_taken %> taken,
+        <%= @event.confirmed_seats_remaining %> remaining
+      <% end %>
+      <%= evtshelp_seat_state_glyph(@event) %>
+    <% end %>
+  </li>
+</ul>
+
+<div id="admin-header-with-nav">
+  <h2>All Orders</h2>
+  <span>▶︎</span>
+  <nav>
+    <%= link_to 'Manually add order',       new_admin_page_event_order_path(page_id: @page.slug, event_id: @event.slug) %> |
+    <%= link_to 'View events list',         admin_page_events_path(page_id: @page.slug) %> |
+    <%= link_to 'Back to "All pages" list', admin_pages_path() %>
+  </nav>
+</div>
+
+<% if @orders.problematic.any? %>
+  <h3>Problematic</h3>
+  <%= render partial: 'index', locals: { event: @event, orders: @orders.problematic } %>
+<% end %>
+
+<% if @orders.confirmed.any? %>
+  <h3>Reserved or Paid</h3>
+  <%= render partial: 'index', locals: { event: @event, orders: @orders.confirmed } %>
+<% end %>
+
+<% if @orders.miscellaneous.any? %>
+  <h3>Others</h3>
+  <%= render partial: 'index', locals: { event: @event, orders: @orders.miscellaneous } %>
+<% end %>
+
+<% if @orders.empty? %>
+  <p>None just yet.</p>
+<% end %>

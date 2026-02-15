@@ -1,0 +1,174 @@
+<%= form_with(model: [:admin, @page, @event], builder: FormBuilderWithInlineErrors) do | f | %>
+  <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
+
+  <details <%= @event.collapse_metadata_in_form? ? '' : 'open' %>>
+    <summary <%= @event.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit other attributes</summary>
+
+    <div class="two_column" <%= @event.collapse_metadata_in_form? ? 'style="margin-top: 1em"'.html_safe : '' %>>
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :title) %>
+          <%= f.text_field :title %>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :event_hero_image) %>
+          <%= f.file_field :event_hero_image %>
+          <% if @event.persisted? %>
+            <br>
+            <small><em>
+              You only need to choose an image if changing the one that's already attached to the event
+            </em></small>
+          <% end %>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :summary) %>
+          <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+          <%= f.error_markup_for(:summary) %><br>
+          <small><em>A brief, plain text (no styling) summary used in the list of events</em></small>
+        </div>
+      </div>
+
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :location, hint: 'this is both shown as-is and used as a Google Maps search string') %>
+          <%= f.text_field :location %>
+        </div>
+
+        <div class="two_column">
+          <div class="field">
+            <%= apphelp_label(f, :starts_at) %>
+            <%= f.datetime_field :starts_at %>
+          </div>
+          <div class="field">
+            <%= apphelp_label(f, :ends_at) %>
+            <%= f.datetime_field :ends_at %>
+          </div>
+        </div>
+
+        <div class="two_column">
+          <div class="field">
+            <%= apphelp_label(f, :number_of_seats, hint: 'set to zero if there is no limit') %>
+            <%= f.number_field :number_of_seats, min: 0, step: 1 %>
+          </div>
+
+          <% if Hcms.config.currency.present? %>
+            <div class="field">
+              <%= apphelp_label(f, :price_per_seat, hint: 'set to zero if free of charge') %>
+              <%= Money::Currency.new(Hcms.config.currency).symbol %>
+              <%=
+                parsed_amount = Money.from_cents(
+                  f.object.price_per_seat,
+                  @event.currency
+                )
+
+                f.text_field(
+                  :price_per_seat,
+                  value: parsed_amount.format(symbol: false),
+                  class: 'not_full_width_in_two_column'
+                )
+              %>
+              <small><%= Hcms.config.currency %></small>
+            </div>
+          <% end %>
+        </div>
+
+        <% if f.object.new_record? %>
+          <div class="field">
+            <%
+              presales = ::EventState.new(Event.states[:presales])
+              normal   = ::EventState.new(Event.states[:public_purchases])
+
+              [presales, normal].each do | radio_state |
+            %>
+              <%= f.label "state_#{radio_state.internal_name}" do %>
+                <%= f.radio_button :state, radio_state.internal_name %> <%= radio_state.human_name %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="field">
+          <div class="checkbox">
+            <%= f.check_box :hidden %> <%= f.label :hidden %>
+          </div>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :on_archive_action) %>
+          <% if f.object.has_ended? %>
+            <%=
+              f.collection_select(
+                :on_archive_action,
+                [::EventOnArchiveAction.new(f.object.on_archive_action)],
+                :internal_name,
+                :human_name,
+                {},
+                disabled: true
+              )
+            %>
+            <div id="on-archive-action-move-fields", style="display: none"></div>
+            <br>
+            <small><em>
+              Since the event has now concluded, this behaviour cannot be changed.
+            </em></small>
+          <% else %>
+            <%= f.collection_select :on_archive_action, ::EventOnArchiveAction.types, :internal_name, :human_name %>
+
+            <div id="on-archive-action-move-fields", style="display: <%= @event.on_archive_action == Event.on_archive_actions[:move] ? 'block' : 'none' %>">
+              <%= f.fields_for :on_archive_params do |on_archive_fields| %>
+                <%= on_archive_fields.label(:blog_id, 'Move into which blog?') %>
+                <%=
+                  on_archive_fields.collection_select(
+                    :blog_id,
+                    Page.blogs.order(:title),
+                    :id,
+                    :title,
+                    selected: @event.on_archive_params&.dig('blog_id')
+                  )
+                %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="checkbox">
+        <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+      </div>
+      <small><em>
+        You must <strong>save</strong> then <strong>re-edit</strong> the event if you change this setting
+      </em></small>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :body) %>
+    </div>
+  </details>
+
+  <% if @event.raw_editor %>
+    <div class="redactor_container">
+      <div class="redactor-box redactor-styles-on">
+        <%= f.text_area :body, class: 'not_redactor', rows: 40, cols: 120 %>
+      </div>
+    </div>
+  <% else %>
+    <div class="redactor_container">
+      <div id="redactor_toolbar"></div>
+      <%= f.text_area :body, class: 'custom_redactor', rows: 40, cols: 120 %>
+    </div>
+  <% end %>
+  <%= f.error_markup_for(:body) %>
+
+  <div class="actions with_note">
+    <%= f.button 'Publish event', name: 'publish', value: true %>
+    <%= f.button 'Save draft', name: 'submit' %>
+    <div class="note">
+      Only the title, summary and event detail text save into revisions.
+      <strong><em>All other changes</em> always save permanently.</strong>
+    </diV>
+  </div>
+<% end %>

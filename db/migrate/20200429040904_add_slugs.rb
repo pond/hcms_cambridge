@@ -10,5 +10,7 @@ class AddSlugs < ActiveRecord::Migration[5.2]
     end
 
     add_index :pages, :slug, unique: true
+
+    Page.reset_column_information
   end
 end

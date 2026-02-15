@@ -1,0 +1,26 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+<% if @order.event.state_cancelled? %>
+Unfortunately, this event has been cancelled. We are very sorry for any
+disappointment or inconvenience this may cause.
+
+<% end %>
+<%
+  str = <<~TEXT.squish()
+    Your payment of #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}
+    has been refunded. Depending on your bank, it might take a few days for this to appear
+    in your account.
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+
+<%= render partial: 'order', object: @order %>
+<% if @order.event.state_cancelled? %>
+If you have any questions about the cancellation or your refund, please get
+in touch:
+<% else %>
+If you have any questions about your refund, please get in touch:
+<% end %>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

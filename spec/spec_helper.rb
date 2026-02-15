@@ -42,6 +42,15 @@ rescue ActiveRecord::PendingMigrationError => e
   exit 1
 end
 
+# Things like 'Faker::Address.full_address' tend to respect this setting.
+#
+Faker::Config.locale = "en-NZ"
+
+# Some tests may make assumptions about currency precision or other formatting
+# rules; they should use #spechelp_format_money or an equivalent.
+#
+SUPPORTED_TEST_CURRENCIES = ["NZD", "EUR", "GBP", "JPY", "TND"]
+
 # https://thoughtbot.com/blog/acceptance-tests-with-subdomains
 #
 Capybara.configure do |config|
@@ -70,6 +79,7 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include ActiveSupport::Testing::TimeHelpers
   config.include ActiveJob::TestHelper
+  config.include ActiveSupport::NumberHelper
 
   config.color                            = true
   config.tty                              = true
@@ -79,6 +89,12 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   Kernel.srand(config.seed)
+
+  config.before :each do
+    Faker::UniqueGenerator.clear()
+
+    allow(Hcms.config).to receive(:tax_threshold).and_return(nil)
+  end
 
   config.before :each, type: :system do |example|
     if example&.metadata&.dig(:js) == true
@@ -202,6 +218,47 @@ def spechelp_strip_markup(rich_text)
   return plain_text.strip()
 end
 
+# Format a currency amount for known currencies using a hard-coded method, in
+# order to catch any "holding it wrong" errors for the Money gem. Assumes an
+# English-like locale, so decimals are "." not "," and the position of e.g. an
+# EUR symbol is before, not after the numerical amount.
+#
+def spechelp_format_money(amount, currency)
+  raise "Unsupported currency #{currency.inspect}" unless SUPPORTED_TEST_CURRENCIES.include?(currency)
+
+  c_to_sym = {
+    "NZD" => "$",
+    "GBP" => "£",
+    "EUR" => "€",
+    "JPY" => "¥",
+    "TND" => "د.ت",
+  }
+
+  c_to_d_p = {
+    "NZD" => 2,
+    "GBP" => 2,
+    "EUR" => 2,
+    "JPY" => 0,
+    "TND" => 3,
+  }
+
+  sym = c_to_sym[currency]
+  d_p = c_to_d_p[currency]
+
+  amount = number_to_rounded(
+    BigDecimal(amount) / 10.pow(d_p),
+    precision:  d_p,
+    round_mode: :half_up,
+    delimiter:  I18n.t("number.format.delimiter"),
+  )
+
+  if currency == 'TND'
+    "#{amount} #{sym}"
+  else
+    "#{sym}#{amount}"
+  end
+end
+
 # Log in via UI navigation. Pass a user (else one is made by default factory).
 # The logged in User is returned, for convenience.
 #
@@ -245,25 +302,28 @@ end
 
 # Call after an e-mail should have been delivered. Returns a Data object with
 # members "email" (raw object), "text" (decoded text), "html" (decoded HTML).
-# Expects one message with two parts, one text, one HTML.
 #
-def spechelp_decode_multipart
+# Expects one message with two parts, one text, one HTML - *unless* named
+# parameter "count" is set to a number > 1. In _that_ case the integer gives
+# the number of expected messages and the return value is an array of decoded
+# data objects containing the e-mail contents. Order is probably undefined, so
+# tests should try not to rely upon it - see #spechelper_find_in_decoded.
+#
+def spechelp_decode_multipart(count: 1)
   perform_enqueued_jobs() # (from ActiveJob::TestHelper)
 
-  expect(ActionMailer::Base.deliveries.count).to eq(1)
+  expect(ActionMailer::Base.deliveries.count).to eq(count)
 
-  email = ActionMailer::Base.deliveries.last
+  result = ActionMailer::Base.deliveries.map do | email |
+    expect(email).to be_multipart()
+    expect(email.parts.size).to eql(2)
 
-  expect(email).to be_multipart()
-  expect(email.parts.size).to eql(2)
+    text_part = email.parts.find { |part| part.content_type.include?('text/plain') }
+    html_part = email.parts.find { |part| part.content_type.include?('text/html') }
 
-  text_part = email.parts.find { |part| part.content_type.include?('text/plain') }
-  html_part = email.parts.find { |part| part.content_type.include?('text/html') }
+    expect(text_part).to be_present
+    expect(html_part).to be_present
 
-  expect(text_part).to be_present
-  expect(html_part).to be_present
-
-  return(
     Data
       .define(:email, :text, :html)
       .new(
@@ -271,7 +331,34 @@ def spechelp_decode_multipart
         text:  text_part.body.decoded,
         html:  html_part.body.decoded
       )
-  )
+  end
+
+  return count == 1 ? result.first : result
+end
+
+# Helper for #spechelp_decode_multipart - in an array of results, returns the
+# entry with an exactly matching single 'to' e-mail address, else +nil+.
+#
+def spechelper_find_in_decoded(messages, to:)
+  messages.find { | msg | msg.email.to == [to] }
+end
+
+# Given HTML from an ActionMailer-sent e-mail along with an e-mail address,
+# expect to find a "mailto" link for that address. Optional "body" and
+# "subject" contents can be checked for too.
+#
+def spechelp_check_mailto(html:, email:, body: nil, subject: nil)
+  helper = Object.new.extend(ActionView::Helpers::UrlHelper)
+
+  expect(html).to include(helper.mail_to(email, subject: subject, body: body))
+end
+
+# Similar to #spechelp_check_mailto, but for telephone number links in e-mails.
+#
+def spechelp_check_tel(html:, phone:)
+  helper = Object.new.extend(ActionView::Helpers::UrlHelper)
+
+  expect(html).to include(helper.link_to(phone, "tel:#{phone.gsub(' ', '%20')}"))
 end
 
 # Wait for a default jQuery animation to complete.

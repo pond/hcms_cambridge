@@ -1,12 +1,12 @@
 RSpec.shared_examples "a public page footer" do
   before :each do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(false)
+    allow(Hcms.config).to receive(:hide_contact_info).and_return(false)
   end
 
   it "shows telephone and e-mail" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+    allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+    allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+    allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
     visit(path_to_test())
     cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -16,9 +16,9 @@ RSpec.shared_examples "a public page footer" do
   end
 
   it "handles absent telephone and e-mail" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return(nil)
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("")
+    allow(Hcms.config).to receive(:contact_tel_human).and_return(nil)
+    allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
+    allow(Hcms.config).to receive(:contact_email    ).and_return("")
 
     visit(path_to_test())
     cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -27,9 +27,9 @@ RSpec.shared_examples "a public page footer" do
   end
 
   it "shows social media" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("facebook-href")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return("twitter-href")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return("instagram-href")
+    allow(Hcms.config).to receive(:facebook ).and_return("facebook-href")
+    allow(Hcms.config).to receive(:twitter  ).and_return("twitter-href")
+    allow(Hcms.config).to receive(:instagram).and_return("instagram-href")
 
     visit(path_to_test())
     social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -40,9 +40,9 @@ RSpec.shared_examples "a public page footer" do
   end
 
   it "handles absent social media" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return(" ")
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return(nil)
+    allow(Hcms.config).to receive(:facebook ).and_return("")
+    allow(Hcms.config).to receive(:twitter  ).and_return(" ")
+    allow(Hcms.config).to receive(:instagram).and_return(nil)
 
     visit(path_to_test())
     social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -51,7 +51,7 @@ RSpec.shared_examples "a public page footer" do
   end
 
   it "shows the footer summary" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("Summary text")
+    allow(Hcms.config).to receive(:footer_summary).and_return("Summary text")
 
     visit(path_to_test())
 
@@ -59,12 +59,12 @@ RSpec.shared_examples "a public page footer" do
   end
 
   it "handles an absent footer summary" do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("")
+    allow(Hcms.config).to receive(:footer_summary).and_return("")
     visit(path_to_test())
 
     expect(page).to_not have_css("footer section.footer_suffix")
 
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return(nil)
+    allow(Hcms.config).to receive(:footer_summary).and_return(nil)
     visit(path_to_test())
 
     expect(page).to_not have_css("footer section.footer_suffix")
@@ -72,11 +72,11 @@ RSpec.shared_examples "a public page footer" do
 
   context "when asked to hide telephone and e-mail", if: Page.where(page_type: Page::PAGE_TYPE_CONTACT_FORM).none? do
     before :each do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+      allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+      allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+      allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(true)
+      allow(Hcms.config).to receive(:hide_contact_info).and_return(true)
     end
 
     # Can't really do these if there is an existing contact form, since that

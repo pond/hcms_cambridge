@@ -1,4 +1,5 @@
 require "spec_helper.rb"
+require_relative "shared_examples/footer_spec.rb"
 
 RSpec.describe "Pages" do
   before :each do
@@ -43,7 +44,7 @@ RSpec.describe "Pages" do
 
     visit page_path(p)
 
-    expect(page).to     have_text("No articles")
+    expect(page).to     have_text("No articles have been written")
     expect(page).to_not have_text(article_1.title)
     expect(page).to_not have_text(article_2.title)
 
@@ -57,7 +58,7 @@ RSpec.describe "Pages" do
 
     visit page_path(p)
 
-    expect(page).to_not have_text("No articles")
+    expect(page).to_not have_text("No articles have been written")
 
     expect(page).to     have_text(article_1.title)
     expect(page).to     have_text(article_1.summary)
@@ -155,7 +156,6 @@ RSpec.describe "Pages" do
     end
   end # 'context "navigation" do'
 
-  require_relative "shared_examples/footer_spec.rb"
   context "shared" do
     let(:path_to_test) { root_path() }
 

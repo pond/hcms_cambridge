@@ -1,0 +1,885 @@
+require "spec_helper.rb"
+
+RSpec.describe "Admin - encounters" do
+  include ApplicationHelper
+
+  before :each do
+    spechelp_log_in()
+  end
+
+  context "creation" do
+    it "can create in a draft state " do
+      visit(admin_encounters_path())
+
+      click_on("New encounter")
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      seats    = "15"
+      price    = "49.99"
+      physical = "4.99"
+      physname = "gift card"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+      fill_in("encounter_price_physical", with: physical)
+      fill_in("encounter_name_physical",  with: physname)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      click_on("Save draft")
+      spechelp_check_flash(:notice, "New draft encounter created")
+
+      expect(Encounter.count).to eql(1)
+      expect( Revision.count).to eql(1)
+
+      expect(Encounter.first.title         ).to eql(title)
+      expect(Encounter.first.slug          ).to eql(title.parameterize)
+      expect(Encounter.first.summary       ).to eql(summary)
+      expect(Encounter.first.body          ).to eql(body)
+      expect(Encounter.first.location      ).to eql(location)
+      expect(Encounter.first.price_per_seat).to eql((price.to_f * 100).to_i)
+      expect(Encounter.first.price_physical).to eql((physical.to_f * 100).to_i)
+      expect(Encounter.first.name_physical ).to eql(physname)
+
+      expect(Encounter.first.revisions.size           ).to eql(1)
+      expect(Encounter.first.revisions.first.current  ).to eql(true)
+      expect(Encounter.first.revisions.first.published).to eql(false)
+
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing encounter draft", href: edit_admin_encounter_path(Encounter.first))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Add encounter",                    href: new_admin_encounter_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List encounters",                  href: admin_encounters_path())
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",                  href: admin_pages_path())
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing encounter draft")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      expect(page).to have_current_path(edit_admin_encounter_path(Encounter.first))
+      expect(page).to have_field("encounter_title", with: title)
+    end
+
+    it "can create in a published state" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49" # Note no ".00", but we're still expecting 4900 "cents"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "New encounter published")
+
+      expect(Encounter.count).to eql(1)
+      expect( Revision.count).to eql(1)
+
+      expect(Encounter.first.title         ).to eql(title)
+      expect(Encounter.first.slug          ).to eql(title.parameterize)
+      expect(Encounter.first.summary       ).to eql(summary)
+      expect(Encounter.first.body          ).to eql(body)
+      expect(Encounter.first.location      ).to eql(location)
+      expect(Encounter.first.price_per_seat).to eql((price.to_f * 100).to_i)
+
+      expect(Encounter.first.revisions.size           ).to eql(1)
+      expect(Encounter.first.revisions.first.current  ).to eql(true)
+      expect(Encounter.first.revisions.first.published).to eql(true)
+
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit encounter")
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      expect(page).to have_current_path(edit_admin_encounter_path(Encounter.first))
+      expect(page).to have_field("encounter_title", with: title)
+    end
+
+    it "validates" do
+      visit(new_admin_encounter_path())
+
+      click_on("Publish encounter")
+
+      expect(page).to have_css(".field_error_messages", text: "Title must be provided")
+      expect(page).to have_css(".field_error_messages", text: "Poster photo must be provided")
+      expect(page).to have_css(".field_error_messages", text: "Brief summary must be provided")
+      expect(page).to have_css(".field_error_messages", text: "Encounter details must be provided")
+    end
+
+    context "dynamic behaviour", js: true do
+      it "Redactor text entry works" do
+        visit(new_admin_encounter_path())
+
+        title    = "Quick Brown Fox"
+        summary  = "Jumps Over The"
+        body     = "Lazy Dog"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+        seats    = "15"
+        price    = "48.1" # Deliberate "mis-type"; expecting 4810 "cents"
+        physical = "4.99"
+        physname = "gift card"
+
+        fill_in("encounter_title",          with: title)
+        fill_in("encounter_summary",        with: summary)
+        fill_in("encounter_location",       with: location)
+        fill_in("encounter_price_per_seat", with: price)
+        fill_in("encounter_price_physical", with: physical)
+        fill_in("encounter_name_physical",  with: physname)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+
+        spechelp_fill_in_redactor(body, for_type: "encounter")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft encounter created")
+
+        expect(Encounter.count).to eql(1)
+        expect( Revision.count).to eql(1)
+
+        expect(Encounter.first.title         ).to eql(title)
+        expect(Encounter.first.slug          ).to eql(title.parameterize)
+        expect(Encounter.first.summary       ).to eql(summary)
+        expect(Encounter.first.body          ).to eql("<p>#{body}</p>")
+        expect(Encounter.first.location      ).to eql(location)
+        expect(Encounter.first.price_per_seat).to eql((price.to_f * 100).to_i)
+        expect(Encounter.first.price_physical).to eql((physical.to_f * 100).to_i)
+        expect(Encounter.first.name_physical ).to eql(physname)
+
+        expect(Encounter.first.revisions.size           ).to eql(1)
+        expect(Encounter.first.revisions.first.current  ).to eql(true)
+        expect(Encounter.first.revisions.first.published).to eql(false)
+      end
+
+      it "Redactor image uploads work" do
+        visit(new_admin_encounter_path())
+
+        title    = "Quick Brown Fox"
+        summary  = "Jumps Over The"
+        body     = "Lazy Dog"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+        price    = "49.99"
+
+        fill_in("encounter_title",           with: title)
+        fill_in("encounter_summary",         with: summary)
+        fill_in("encounter_location",        with: location)
+        fill_in("encounter_price_per_seat",  with: price)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+
+        editor = find(:css, ".redactor_container .redactor-in")
+        editor.click()
+
+        find(:css, "#redactor_toolbar a.re-button.re-image").click()
+
+        # See similar test in 'admin/pages_spec.rb' for commentary.
+        #
+        within(".redactor-modal-box") do
+          expect(page).to have_css(".redactor-modal-header", text: "Image")
+          expect(page).to have_css('input[name="file"][type="file"]', visible: false)
+
+          image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+          find(".upload-redactor-box").click()
+          attach_file("file", image_path, make_visible: true)
+        end
+
+        expect(page).to     have_field("encounter_body", visible: false, with: /\<figure/)
+        expect(page).to_not have_css(".redactor-modal-box")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft encounter created")
+
+        expect(Encounter.first.title  ).to eql(title)
+        expect(Encounter.first.slug   ).to eql(title.parameterize)
+        expect(Encounter.first.summary).to eql(summary)
+        expect(Encounter.first.body   ).to include("<figure")
+        expect(Encounter.first.body   ).to include("example.jpg")
+
+        expect(Encounter.first.revisions.size           ).to eql(1)
+        expect(Encounter.first.revisions.first.current  ).to eql(true)
+        expect(Encounter.first.revisions.first.published).to eql(false)
+
+        expect(Redactor3Rails::Asset.count                  ).to eql(1)
+        expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.jpg")
+        expect(Redactor3Rails::Asset.first.data_content_type).to eql("image/jpeg")
+      end
+
+      it "Redactor file uploads work" do
+        visit(new_admin_encounter_path())
+
+        title    = "Quick Brown Fox"
+        summary  = "Jumps Over The"
+        body     = "Lazy Dog"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+        price    = "49.99"
+
+        fill_in("encounter_title",          with: title)
+        fill_in("encounter_summary",        with: summary)
+        fill_in("encounter_location",       with: location)
+        fill_in("encounter_price_per_seat", with: price)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+
+        editor = find(:css, ".redactor_container .redactor-in")
+        editor.click()
+
+        find(:css, "#redactor_toolbar a.re-button.re-file").click()
+
+        within(".redactor-modal-box") do
+          expect(page).to have_css(".redactor-modal-header", text: "File")
+          expect(page).to have_css('input[name="file"][type="file"]', visible: false)
+
+          file_path = Rails.root.join("spec", "fixtures", "example.pdf")
+
+          find(".upload-redactor-box").click()
+          attach_file("file", file_path, make_visible: true)
+          fill_in("modal-file-title", with: "Example PDF file")
+        end
+
+        expect(page).to     have_field("encounter_body", visible: false, with: /example\.pdf/)
+        expect(page).to_not have_css(".redactor-modal-box")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft encounter created")
+
+        expect(Encounter.first.title  ).to eql(title)
+        expect(Encounter.first.slug   ).to eql(title.parameterize)
+        expect(Encounter.first.summary).to eql(summary)
+        expect(Encounter.first.body   ).to include('/example.pdf" data-file="')
+        expect(Encounter.first.body   ).to include(">Example PDF file</a>")
+
+        expect(Encounter.first.revisions.size           ).to eql(1)
+        expect(Encounter.first.revisions.first.current  ).to eql(true)
+        expect(Encounter.first.revisions.first.published).to eql(false)
+
+        expect(Redactor3Rails::Asset.count                  ).to eql(1)
+        expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
+        expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
+      end
+    end # context "dynamic behaviour", js: true do'
+  end # 'context "creation" do'
+
+  context "revision management" do
+    context "with only one revision" do
+      it "which is not published" do
+        travel_to(Time.now) do
+          encounter = create(:encounter)
+
+          visit(admin_encounter_path(encounter))
+
+          within "#publishing-info" do
+            expect(page).to_not have_link("←")
+            expect(page).to_not have_link("→")
+            expect(page).to_not have_select("revision")
+            expect(page).to     have_text("Draft (#{TimeZoneHelp.in_configured_time_zone(Time.now)})")
+          end
+        end
+      end
+
+      it "which is published" do
+        encounter = create(:encounter)
+        encounter.revisions.first.update!(published: true)
+
+        visit(admin_encounter_path(encounter))
+
+        within "#publishing-info" do
+          expect(page).to_not have_link("←")
+          expect(page).to_not have_link("→")
+          expect(page).to_not have_select("revision")
+          expect(page).to     have_text("Published")
+        end
+      end
+    end # 'context "with only one revision" do'
+
+    context "navigation with many revisions" do
+      around :each do | example |
+        travel_to(Time.now) do
+          example.run()
+        end
+      end
+
+      before :each do
+        encounter = create(
+          :encounter,
+          revisions: [
+            build(:revision, :for_encounter, created_at: Time.now - 4.days, current: false, published: false),
+            build(:revision, :for_encounter, created_at: Time.now - 3.days, current: false, published: true ),
+            build(:revision, :for_encounter, created_at: Time.now - 2.days, current: true,  published: false),
+          ]
+        )
+
+        # Automated maintenance of 'current' will lead to updated-at changes
+        # so we can't set that in the factories above.
+        #
+        Revision.for_encounters.each { | revision | revision.update_column(:updated_at, revision.created_at) }
+
+        visit(admin_encounter_path(encounter))
+
+        # Should default to the published revision - that's the second in the
+        # ordered-by-creation-date set.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.second.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.summary)
+      end
+
+      def revision_options
+        [
+          "Old (#{TimeZoneHelp.in_configured_time_zone(Time.now - 4.days)})",
+          "Published",
+          "Draft (#{TimeZoneHelp.in_configured_time_zone(Time.now - 2.days)})",
+        ]
+      end
+
+      it "navigation via the back/foward arrows" do
+        within "#publishing-info" do
+          expect(page).to have_button("←")
+          expect(page).to have_button("→")
+          expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
+
+          click_on("←")
+        end
+
+        # Should now be on the oldest revision.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.third.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.third.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.third.summary)
+
+        within "#publishing-info" do
+          expect(page).to_not have_button("←")
+          expect(page).to     have_button("→")
+          expect(page).to     have_select("revision", with_options: revision_options(), selected: revision_options()[0])
+
+          click_on("→")
+        end
+
+        # Returned to the published one.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.second.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.summary)
+
+        within "#publishing-info" do
+          expect(page).to have_button("→")
+          expect(page).to have_button("←")
+          expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
+
+          click_on("→")
+        end
+
+        # Now showing the newest, a current draft.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.first.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.first.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.first.summary)
+
+        within "#publishing-info" do
+          expect(page).to     have_button("←")
+          expect(page).to_not have_button("→")
+          expect(page).to     have_select("revision", with_options: revision_options(), selected: revision_options()[2])
+
+          click_on("←")
+        end
+
+        # Returned to the published one.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.second.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.summary)
+
+        within "#publishing-info" do
+          expect(page).to have_button("←")
+          expect(page).to have_button("→")
+          expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
+        end
+      end
+
+      it "navigation via the menu", js: true do
+        within "#publishing-info" do
+          expect(page).to have_button("←")
+          expect(page).to have_button("→")
+          expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
+
+          select(revision_options()[0], from: "revision")
+        end
+
+        # Should now be on the oldest revision.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.third.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.third.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.third.summary)
+
+        within "#publishing-info" do
+          expect(page).to_not have_button("←")
+          expect(page).to     have_button("→")
+          expect(page).to     have_select("revision", with_options: revision_options(), selected: revision_options()[0])
+
+          select(revision_options()[2], from: "revision")
+        end
+
+        # Now showing the newest, a current draft.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.first.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.first.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.first.summary)
+
+        within "#publishing-info" do
+          expect(page).to     have_button("←")
+          expect(page).to_not have_button("→")
+          expect(page).to     have_select("revision", with_options: revision_options(), selected: revision_options()[2])
+
+          select(revision_options()[1], from: "revision")
+        end
+
+        # Returned to the published one.
+        #
+        displayed_encounter = find(:css, "section.main_content article")
+        expect(displayed_encounter).to have_text(spechelp_strip_markup Revision.for_encounters.second.body)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.title)
+        expect(displayed_encounter).to have_text(                      Revision.for_encounters.second.summary)
+
+        within "#publishing-info" do
+          expect(page).to have_button("←")
+          expect(page).to have_button("→")
+          expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
+        end
+      end
+    end # 'context "navigation with many revisions" do'
+
+    it "can roll back and edit, creating a new draft after a published revision" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49.99"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "New encounter published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      fill_in("encounter_title", with: title + " 2")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(2)
+
+      expect(Revision.for_encounters.pluck(:published)).to eql([true, false])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false])
+
+      within "#publishing-info" do
+        click_on("←")
+      end
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit using this encounter revision")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      expect(page).to have_field("encounter_title", with: title) # (without the newer revision's " 2" appended)
+
+      fill_in("encounter_title", with: title + " 3")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(3)
+
+      expect(Revision.for_encounters.pluck(:title    )).to eql([title + " 3", title + " 2", title])
+      expect(Revision.for_encounters.pluck(:published)).to eql([true, false, false])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false, false])
+    end
+
+    # Copy-paste of the above test, but note the second edit is saved as a
+    # draft rather than published.
+    #
+    it "can roll back and edit, creating a new draft after a now-abandoned prior current draft revision" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49.99"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "New encounter published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      fill_in("encounter_title", with: title + " 2")
+
+      # This is where this test starts to differ from the previous test.
+      #
+      click_on("Save draft")
+      spechelp_check_flash(:notice, "Changes saved as draft")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(2)
+
+      # Note that we've now still got an older published draft and a new,
+      # current draft; but we're going to step back and edit the published
+      # original. The current draft should now end up a non-current abandoned
+      # draft, with our edits appearing in a newest, third revision.
+      #
+      expect(Revision.for_encounters.pluck(:published)).to eql([false, true])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false])
+
+      within "#publishing-info" do
+        click_on("←")
+      end
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter, ignoring current draft")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      expect(page).to have_field("encounter_title", with: title) # (without the newer revision's " 2" appended)
+
+      fill_in("encounter_title", with: title + " 3")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(3)
+
+      expect(Revision.for_encounters.pluck(:title    )).to eql([title + " 3", title + " 2", title])
+      expect(Revision.for_encounters.pluck(:published)).to eql([true, false, false])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false, false])
+    end
+
+    # This test starts much like the one above, up until stepping back to the
+    # published revision after saving a draft. Then, though, it steps forward
+    # and makes sure it can edit that still-current draft.
+    #
+    it "can 'roll back and forward again' and edit the current draft revision" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49.99"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "New encounter published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      fill_in("encounter_title", with: title + " 2")
+
+      click_on("Save draft")
+      spechelp_check_flash(:notice, "Changes saved as draft")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(2)
+
+      expect(Revision.for_encounters.pluck(:published)).to eql([false, true])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false])
+
+      # This works because we're using the Rack driver - synchronous, no wait
+      # states / race conditions.
+      #
+      within "#publishing-info" do
+        click_on("←")
+      end
+
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit")
+
+      within "#publishing-info" do
+        click_on("→")
+      end
+
+      find(:css, "section.footer_content nav.cms_menu").click_on("Continue editing encounter draft")
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      expect(page).to have_field("encounter_title", with: title + " 2")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(2)
+
+      expect(Revision.for_encounters.pluck(:published)).to eql([true, false])
+      expect(Revision.for_encounters.pluck(:current  )).to eql([true, false])
+    end
+  end # 'context "revision management" do'
+
+  context "raw editor" do
+    it "can be selected when creating a draft" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49.99"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      check("encounter_raw_editor")
+
+      click_on("Save draft")
+      spechelp_check_flash(:notice, "Editor selection altered.")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      expect(Encounter.first.raw_editor).to eql(true)
+
+      expect(page).to have_current_path(edit_admin_encounter_path(Encounter.first))
+      expect(page).to have_css("textarea#encounter_body")
+      expect(page).to have_field("encounter_body", with: body)
+
+      fill_in("encounter_body", with: body + "<p>!</p>")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      expect(Encounter.first.body).to eql(body + "<p>!</p>")
+    end
+
+    it "can be selected when creating a new published page" do
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+      price    = "49.99"
+
+      fill_in("encounter_title",          with: title)
+      fill_in("encounter_summary",        with: summary)
+      fill_in("encounter_body",           with: body)
+      fill_in("encounter_location",       with: location)
+      fill_in("encounter_price_per_seat", with: price)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      check("encounter_raw_editor")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Editor selection altered and other changes, if any, published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1)
+
+      expect(Encounter.first.raw_editor).to eql(true)
+
+      expect(page).to have_current_path(edit_admin_encounter_path(Encounter.first))
+      expect(page).to have_css("textarea#encounter_body")
+      expect(page).to have_field("encounter_body", with: body)
+
+      fill_in("encounter_body", with: body + "<p>!</p>")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(2) # (we edited a published encounter, so there's a new revision)
+
+      expect(Encounter.first.body).to eql(body + "<p>!</p>")
+    end
+
+    it "can be selected when saving an edit of an existing page as a draft" do
+      encounter = create(:encounter)
+
+      expect(encounter.raw_editor).to eql(false) # (self-check)
+
+      visit(edit_admin_encounter_path(encounter))
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      check("encounter_raw_editor")
+
+      click_on("Save draft")
+      spechelp_check_flash(:notice, "Editor selection altered.")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1) # (existing draft was altered)
+
+      expect(encounter.reload.raw_editor).to eql(true)
+
+      expect(page).to have_current_path(edit_admin_encounter_path(encounter))
+      expect(page).to have_css("textarea#encounter_body")
+      expect(page).to have_field("encounter_body", with: encounter.body)
+    end
+
+    it "can be selected when publishing an edit of an existing page" do
+      encounter = create(:encounter)
+
+      expect(encounter.raw_editor).to eql(false) # (self-check)
+
+      visit(edit_admin_encounter_path(encounter))
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+      check("encounter_raw_editor")
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Editor selection altered and other changes, if any, published")
+
+      expect(              Encounter.count).to eql(1)
+      expect(Revision.for_encounters.count).to eql(1) # (existing draft was altered)
+
+      expect(encounter.reload.raw_editor).to eql(true)
+
+      expect(page).to have_current_path(edit_admin_encounter_path(encounter))
+      expect(page).to have_css("textarea#encounter_body")
+      expect(page).to have_field("encounter_body", with: encounter.body)
+    end
+  end # 'context "raw editor" do'
+
+  context "lists" do
+    context "display" do
+      it "shows details" do
+        encounter_1 = create(:encounter) # Draft
+        encounter_2 = create(:encounter); encounter_2.revisions.first.update!(published: true)
+        encounter_3 = create(:encounter); encounter_3.revisions.first.update!(published: true)
+
+        encounter_1.update(created_at: Time.now + 1.day - 3.seconds)
+        encounter_2.update(created_at: Time.now + 1.day - 4.seconds)
+        encounter_3.update(created_at: Time.now + 1.day - 5.seconds)
+
+        encounter_3.revisions << build(:revision, :for_encounter)
+        encounter_3.save!
+
+        encounter_order = EncounterOrder.create!(
+          encounter:       encounter_3,
+          name:            "Fred Flintstone",
+          email:           "fred@example.com",
+          address:         "Wellington",
+          starts_at:       Time.now + 1.week,
+          number_of_seats: 3,
+          amount_owed:     3 * encounter_3.price_per_seat
+        )
+
+        encounter_order.pay_state!
+
+        visit(admin_encounters_path())
+
+        expect(find(:css, "section.main_content h1")).to have_text("Encounters")
+
+        row_1 = find(:css, "table tbody > tr:nth-child(1)")
+        row_2 = find(:css, "table tbody > tr:nth-child(2)")
+        row_3 = find(:css, "table tbody > tr:nth-child(3)")
+
+        # Title / Published? / Draft? / Actions
+        #
+        # Note reverse order - created-at ASC sorting.
+        #
+        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Orders Show Edit Delete", exact: true)
+        expect(row_2).to have_text("#{encounter_2.title} Yes No Orders Show Edit Delete", exact: true)
+        expect(row_3).to have_text("#{encounter_1.title} No Yes – Show Edit Delete", exact: true)
+
+        # Check a few links. Column 1 - encounter title, 2-3 - boolean,
+        # 4 - order action, 5 - main actions, 6 - delete action.
+        #
+        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",    href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
+        expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Orders", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
+        expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show",   href: admin_encounter_path(id: encounter_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(5)")).to have_link("Edit",   href: edit_admin_encounter_path( encounter_1.id))
+      end
+
+      it "links to the main 'all pages' list" do
+        visit(admin_encounters_path())
+
+        expect(page).to have_link('Back to "All pages" list', href: admin_pages_path())
+      end
+    end # 'context "display" do'
+
+    context "actions" do
+      it "deletes with confirmation", js: true do
+        encounter = create(:encounter)
+
+        expect(Revision.count).to eql(1) # (self-check)
+
+        visit(admin_encounters_path())
+
+        accept_confirm do
+          find(:css, "table tbody tr td:last-child").click_link("Delete")
+        end
+
+        spechelp_check_flash(:notice, "Encounter deleted")
+
+        expect(Encounter.exists?(encounter.id)).to eql(false)
+
+        expect(Revision.count).to eql(0)
+      end
+    end # 'context "actions" do'
+  end # 'context "lists" do'"
+end

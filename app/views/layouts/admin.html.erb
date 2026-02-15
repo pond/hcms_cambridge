@@ -4,19 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=0.8">
 
-    <title><%= Rails.application.config.uk_org_pond_hcms.site_name %>: Admin</title>
+    <title><%= Hcms.config.site_name %>: Admin</title>
 
     <%= stylesheet_link_tag    'admin', media: 'all' %>
     <%= javascript_include_tag 'admin'               %>
 
     <%= csrf_meta_tags %>
     <%= render partial: 'layouts/google_tags' %>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   </head>
 
   <body>
     <header>
       <section class="header_content">
-        <img id="logo" alt="Logo" src="<%= image_path('logo.svg')%>" width="<%= Rails.application.config.uk_org_pond_hcms.logo_w %>" height="<%= Rails.application.config.uk_org_pond_hcms.logo_h %>">
+        <img id="logo" alt="Logo" src="<%= image_path('logo.svg')%>" width="<%= Hcms.config.logo_w %>" height="<%= Hcms.config.logo_h %>">
 
         <nav class="main_menu">
           <h1 id="navigation_title">Site administration</h1>
@@ -26,6 +27,11 @@
               <li class="pure-menu-item pure-menu-allow-hover">
                 <%= link_to('Pages', admin_pages_path(), class: 'pure-menu-link') %>
               </li>
+              <% if Hcms.config.enable_encounters %>
+                <li class="pure-menu-item pure-menu-allow-hover">
+                  <%= link_to('Encounters', admin_encounters_path(), class: 'pure-menu-link') %>
+                </li>
+              <% end %>
               <li class="pure-menu-item pure-menu-allow-hover">
                 <%= link_to('Statistics', admin_statistics_path(), class: 'pure-menu-link') %>
               </li>

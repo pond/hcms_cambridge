@@ -1,0 +1,21 @@
+Event:          <%= order.event&.title || 'Unknown' %>
+From:           <%= order.name.presence || 'Unknown' %>
+E-mail address: <%= order.email.presence || 'Unknown' %>
+Phone number:   <%= order.phone_number.presence || 'Not given' %>
+Manage:         <%= order.event&.page.blank? ? admin_pages_url() : admin_page_event_order_url(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id) %>
+<% if order.event&.page.present? %>
+
+You can find a list of all orders at:
+
+* <%= admin_page_event_orders_url(page_id: order.event.page.slug, event_id: order.event.slug) %>.
+<% end %>
+
+Following up
+------------
+
+<% if order.email.blank? %>
+There was no e-mail address captured for this order!
+<% else %>
+Do not reply to this message - to compose a reply, please send e-mail to
+<%= order.email %> directly.
+<% end %>

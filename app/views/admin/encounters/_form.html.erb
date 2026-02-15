@@ -1,0 +1,137 @@
+<%= form_with(model: [:admin, @encounter], builder: FormBuilderWithInlineErrors) do | f | %>
+  <%= hidden_field_tag(:revision, params[:revision]) if params.key?(:revision) %>
+
+  <details <%= @encounter.collapse_metadata_in_form? ? '' : 'open' %>>
+    <summary <%= @encounter.collapse_metadata_in_form? ? '' : 'style="display: none"'.html_safe %>>Expand to edit other attributes</summary>
+
+    <div class="two_column" <%= @encounter.collapse_metadata_in_form? ? 'style="margin-top: 1em"'.html_safe : '' %>>
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :title) %>
+          <%= f.text_field :title %>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :encounter_hero_image) %>
+          <%= f.file_field :encounter_hero_image %>
+          <% if @encounter.persisted? %>
+            <br>
+            <small><em>
+              You only need to choose an image if changing the one that's already attached to the encounter
+            </em></small>
+          <% end %>
+        </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :summary) %>
+          <%= f.text_area :summary, cols: '60', rows: '5', style: "margin-bottom: 0" %>
+          <%= f.error_markup_for(:summary) %><br>
+          <small><em>A brief, plain text (no styling) summary used in the list of encounters</em></small>
+        </div>
+      </div>
+
+      <div class="field_column">
+        <div class="field">
+          <%= apphelp_label(f, :location, hint: 'this is both shown as-is and used as a Google Maps search string') %>
+          <%= f.text_field :location %>
+        </div>
+
+        <% if Hcms.config.currency.present? %>
+          <div class="two_column">
+            <div class="field">
+              <%= apphelp_label(f, :price_per_seat) %>
+              <%= Money::Currency.new(Hcms.config.currency).symbol %>
+              <%=
+                parsed_per_seat_amount = Money.from_cents(
+                  f.object.price_per_seat,
+                  @encounter.currency
+                ) if f.object.price_per_seat.present?
+
+                f.text_field(
+                  :price_per_seat,
+                  value: parsed_per_seat_amount&.format(symbol: false),
+                  class: 'not_full_width_in_two_column'
+                )
+              %>
+              <small><%= Hcms.config.currency %></small>
+              <br>
+              <small><em>
+                Set to zero if free of charge.
+              </em></small>
+            </div>
+
+            <div>
+              <div class="field">
+                <%= apphelp_label(f, :price_physical) %>
+                <%= Money::Currency.new(Hcms.config.currency).symbol %>
+                <%=
+                  parsed_physical_amount = Money.from_cents(
+                    f.object.price_physical,
+                    @encounter.currency
+                  ) if f.object.price_physical.present?
+
+                  f.text_field(
+                    :price_physical,
+                    value: parsed_physical_amount&.format(symbol: false),
+                    class: 'not_full_width_in_two_column'
+                  )
+                %>
+                <small><%= Hcms.config.currency %></small>
+                <br>
+                <small><em>
+                  Set to zero if physical item is free of charge.
+                  Set to blank if there is no physical item available at all.
+                </em></small>
+              </div>
+              <div class="field">
+                <%= apphelp_label(f, :name_physical) %>
+                <%= f.text_field(:name_physical) %>
+                <br>
+                <small><em>
+                  Required if a physical item price is filled in.
+                  Use lower case except for acronyms, e.g. "gift card".
+                </em></small>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="checkbox">
+        <%= f.check_box :raw_editor %> <%= f.label :raw_editor %>
+      </div>
+      <small><em>
+        You must <strong>save</strong> then <strong>re-edit</strong> the encounter if you change this setting
+      </em></small>
+    </div>
+
+    <div class="field">
+      <%= apphelp_label(f, :body) %>
+    </div>
+  </details>
+
+  <% if @encounter.raw_editor %>
+    <div class="redactor_container">
+      <div class="redactor-box redactor-styles-on">
+        <%= f.text_area :body, class: 'not_redactor', rows: 40, cols: 120 %>
+      </div>
+    </div>
+  <% else %>
+    <div class="redactor_container">
+      <div id="redactor_toolbar"></div>
+      <%= f.text_area :body, class: 'custom_redactor', rows: 40, cols: 120 %>
+    </div>
+  <% end %>
+  <%= f.error_markup_for(:body) %>
+
+  <div class="actions with_note">
+    <%= f.button 'Publish encounter', name: 'publish', value: true %>
+    <%= f.button 'Save draft', name: 'submit' %>
+    <div class="note">
+      Only the title, summary and encounter detail text save into revisions.
+      <strong><em>All other changes</em> always save permanently.</strong>
+    </diV>
+  </div>
+<% end %>

@@ -1,4 +1,5 @@
 require "spec_helper.rb"
+require_relative "shared_examples/footer_spec.rb"
 
 RSpec.describe "Pages" do
   context "navigation" do
@@ -19,7 +20,7 @@ RSpec.describe "Pages" do
       main_menu    = find(:css, "nav.main_menu")
       main_content = find(:css, "section.main_content")
 
-      expect(main_menu.find(:css, 'h1')).to have_text(page_1.navigation_title)
+      expect(main_menu.find(:css, "h1")).to have_text(page_1.navigation_title)
       expect(main_content).to have_text(spechelp_strip_markup page_1.body)
 
       expect(main_menu).to     have_link(page_3.title, href: page_path(page_3.slug))
@@ -141,13 +142,13 @@ RSpec.describe "Pages" do
   context "footer" do
     before :each do
       create(:page)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(false)
+      allow(Hcms.config).to receive(:hide_contact_info).and_return(false)
     end
 
     it "shows telephone and e-mail" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+      allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+      allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+      allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
       visit(root_path())
       cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -157,9 +158,9 @@ RSpec.describe "Pages" do
     end
 
     it "handles absent telephone and e-mail" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return(nil)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("")
+      allow(Hcms.config).to receive(:contact_tel_human).and_return(nil)
+      allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678") # (sic.)
+      allow(Hcms.config).to receive(:contact_email    ).and_return("")
 
       visit(root_path())
       cms_menu = find(:css, "footer section.footer_content nav.cms_menu")
@@ -168,9 +169,9 @@ RSpec.describe "Pages" do
     end
 
     it "shows social media" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("facebook-href")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return("twitter-href")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return("instagram-href")
+      allow(Hcms.config).to receive(:facebook ).and_return("facebook-href")
+      allow(Hcms.config).to receive(:twitter  ).and_return("twitter-href")
+      allow(Hcms.config).to receive(:instagram).and_return("instagram-href")
 
       visit(root_path())
       social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -181,9 +182,9 @@ RSpec.describe "Pages" do
     end
 
     it "handles absent social media" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:facebook ).and_return("")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:twitter  ).and_return(" ")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:instagram).and_return(nil)
+      allow(Hcms.config).to receive(:facebook ).and_return("")
+      allow(Hcms.config).to receive(:twitter  ).and_return(" ")
+      allow(Hcms.config).to receive(:instagram).and_return(nil)
 
       visit(root_path())
       social_menu = find(:css, "footer section.footer_content nav.social_menu")
@@ -192,7 +193,7 @@ RSpec.describe "Pages" do
     end
 
     it "shows the footer summary" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("Summary text")
+      allow(Hcms.config).to receive(:footer_summary).and_return("Summary text")
 
       visit(root_path())
 
@@ -200,12 +201,12 @@ RSpec.describe "Pages" do
     end
 
     it "handles an absent footer summary" do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return("")
+      allow(Hcms.config).to receive(:footer_summary).and_return("")
       visit(root_path())
 
       expect(page).to_not have_css("footer section.footer_suffix")
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:footer_summary).and_return(nil)
+      allow(Hcms.config).to receive(:footer_summary).and_return(nil)
       visit(root_path())
 
       expect(page).to_not have_css("footer section.footer_suffix")
@@ -213,11 +214,11 @@ RSpec.describe "Pages" do
 
     context "when asked to hide telephone and e-mail" do
       before :each do
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_human).and_return("0 345 678")
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_tel_full ).and_return("+12 345 678")
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email    ).and_return("test@example.com")
+        allow(Hcms.config).to receive(:contact_tel_human).and_return("0 345 678")
+        allow(Hcms.config).to receive(:contact_tel_full ).and_return("+12 345 678")
+        allow(Hcms.config).to receive(:contact_email    ).and_return("test@example.com")
 
-        allow(Rails.application.config.uk_org_pond_hcms).to receive(:hide_contact_info).and_return(true)
+        allow(Hcms.config).to receive(:hide_contact_info).and_return(true)
       end
 
       it "shows nothing by default" do
@@ -250,10 +251,10 @@ RSpec.describe "Pages" do
     end
 
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:contact_email).and_return("contact@example.com")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:site_name    ).and_return("Site Under Test")
+      allow(Hcms.config).to receive(:contact_email).and_return("contact@example.com")
+      allow(Hcms.config).to receive(:site_name    ).and_return("Site Under Test")
     end
 
     it "display, validate and submit (no menu)" do
@@ -291,26 +292,34 @@ RSpec.describe "Pages" do
       fill_in("forms_contact_name",    with: "Fred Flintstone")
       fill_in("forms_contact_email",   with: "fred@example.com")
       fill_in("forms_contact_phone",   with: "+64 21 000 000")
-      fill_in("forms_contact_message", with: "Quick Brown Fox")
+      fill_in("forms_contact_message", with: "Quick Brown Fox\nOther text")
 
       click_on("Send message")
       spechelp_check_flash(:notice, "Your message has been sent")
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["contact@example.com"])
       expect(delivered.email.to     ).to eql(["contact@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - message")
 
       expect(delivered.text).to include("Fred Flintstone")
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("+64 21 000 000")
-      expect(delivered.text).to include("Quick Brown Fox")
+      expect(delivered.text).to include("Quick Brown Fox\nOther text")
 
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<dd><a href=\"tel:+64 21 000 000\">+64 21 000 000</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        body:    "You asked:\n\n> Quick Brown Fox\n> Other text\n\n",
+        subject: "Your Site Under Test enquiry"
+      )
+      spechelp_check_tel(
+        html:  delivered.html,
+        phone: "+64 21 000 000"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox\n<br>Other text</p>")
     end
 
     it "are OK with no phone number" do
@@ -328,7 +337,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["contact@example.com"])
       expect(delivered.email.to     ).to eql(["contact@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - message")
 
@@ -336,9 +345,14 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        body:    "You asked:\n\n> Quick Brown Fox\n\n",
+        subject: "Your Site Under Test enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
 
     it "support a menu with a default label" do
@@ -362,7 +376,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["contact@example.com"])
       expect(delivered.email.to     ).to eql(["contact@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - message")
 
@@ -372,11 +386,16 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dt>Menu selection</dt>")
-      expect(delivered.html).to include("<dd>This is item two</dd>")
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dt", text: "Menu selection")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        body:    "You asked:\n\n> Quick Brown Fox\n\n",
+        subject: "Your Site Under Test enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
 
     it "support a menu with a custom label" do
@@ -401,7 +420,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["contact@example.com"])
       expect(delivered.email.to     ).to eql(["contact@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - message")
 
@@ -411,11 +430,16 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dt>How did you hear about us?</dt>")
-      expect(delivered.html).to include("<dd>This is item two</dd>")
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        body:    "You asked:\n\n> Quick Brown Fox\n\n",
+        subject: "Your Site Under Test enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
   end # 'context "contact forms" do'
 
@@ -429,11 +453,11 @@ RSpec.describe "Pages" do
     end
 
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
 
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_email    ).and_return("booking@example.com")
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:site_name        ).and_return("Site Under Test")
+      allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
+      allow(Hcms.config).to receive(:booking_email    ).and_return("booking@example.com")
+      allow(Hcms.config).to receive(:site_name        ).and_return("Site Under Test")
     end
 
     it "display, validate and submit (no menu)" do
@@ -474,14 +498,14 @@ RSpec.describe "Pages" do
       fill_in("forms_booking_phone", with: "+64 021 000 000") # (note intentional "+64 0...", which should be accepted)
       fill_in("forms_booking_date",  with: "20/01/#{Date.today.year + 2}")
       fill_in("forms_booking_time",  with: "11:30")
-      fill_in("forms_booking_notes", with: "Quick Brown Fox")
+      fill_in("forms_booking_notes", with: "Quick Brown Fox\nOther text")
 
       click_on("Send enquiry")
       spechelp_check_flash(:notice, "Your booking enquiry has been sent")
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["booking@example.com"])
       expect(delivered.email.to     ).to eql(["booking@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - booking enquiry")
 
@@ -490,16 +514,23 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("+64 021 000 000")
       expect(delivered.text).to include("20/01/#{Date.today.year + 2}")
       expect(delivered.text).to include("11:30")
-      expect(delivered.text).to include("Quick Brown Fox")
+      expect(delivered.text).to include("Quick Brown Fox\nOther text")
 
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<dd><a href=\"tel:+64 021 000 000\">+64 021 000 000</a></dd>")
-      expect(delivered.html).to include("<dt>Date</dt>")
-      expect(delivered.html).to include("<dd>20/01/#{Date.today.year + 2}</dd>")
-      expect(delivered.html).to include("<dt>Preferred time</dt>")
-      expect(delivered.html).to include("<dd>11:30</dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
+      )
+      spechelp_check_tel(
+        html:  delivered.html,
+        phone: '+64 021 000 000'
+      )
+      expect(delivered.html).to have_css("dt", text: "Date")
+      expect(delivered.html).to have_css("dd", text: "20/01/#{Date.today.year + 2}")
+      expect(delivered.html).to have_css("dt", text: "Preferred time")
+      expect(delivered.html).to have_css("dd", text: "11:30")
+      expect(delivered.html).to include(">Quick Brown Fox\n<br>Other text</p>")
     end
 
     it "are OK with no phone number, date or time" do
@@ -517,7 +548,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["booking@example.com"])
       expect(delivered.email.to     ).to eql(["booking@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - booking enquiry")
 
@@ -525,9 +556,13 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
 
     it "support a menu with a default label" do
@@ -551,7 +586,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["booking@example.com"])
       expect(delivered.email.to     ).to eql(["booking@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - booking enquiry")
 
@@ -561,11 +596,15 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dt>Menu selection</dt>")
-      expect(delivered.html).to include("<dd>This is item two</dd>")
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dt", text: "Menu selection")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
 
     it "support a menu with a custom label" do
@@ -590,7 +629,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["booking@example.com"])
       expect(delivered.email.to     ).to eql(["booking@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - booking enquiry")
 
@@ -600,11 +639,15 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to include("<dt>How did you hear about us?</dt>")
-      expect(delivered.html).to include("<dd>This is item two</dd>")
-      expect(delivered.html).to include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to have_css("dd", text: "This is item two")
+      expect(delivered.html).to have_css("dd", text: "Fred Flintstone")
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
+      )
+      expect(delivered.html).to include(">Quick Brown Fox</p>")
     end
 
     it "obey the hide-date/time setting" do
@@ -637,7 +680,7 @@ RSpec.describe "Pages" do
 
       delivered = spechelp_decode_multipart()
 
-      expect(delivered.email.from   ).to eql(["fred@example.com"])
+      expect(delivered.email.from   ).to eql(["booking@example.com"])
       expect(delivered.email.to     ).to eql(["booking@example.com"])
       expect(delivered.email.subject).to eql("[Site Under Test] \"#{p.title}\" - booking enquiry")
 
@@ -647,13 +690,17 @@ RSpec.describe "Pages" do
       expect(delivered.text).to include("fred@example.com")
       expect(delivered.text).to include("Quick Brown Fox")
 
-      expect(delivered.html).to     include("<dt>How did you hear about us?</dt>")
-      expect(delivered.html).to     include("<dd>This is item two</dd>")
-      expect(delivered.html).to     include("<dd>Fred Flintstone</dd>")
-      expect(delivered.html).to     include("<dd><a href=\"mailto:fred@example.com\">fred@example.com</a></dd>")
-      expect(delivered.html).to_not include("<dt>Date</dt>")
-      expect(delivered.html).to_not include("<dt>Preferred time</dt>")
-      expect(delivered.html).to     include("<p>Quick Brown Fox</p>")
+      expect(delivered.html).to have_css('dd', text: 'Fred Flintstone')
+      spechelp_check_mailto(
+        html:    delivered.html,
+        email:   "fred@example.com",
+        subject: "Your Site Under Test booking enquiry"
+      )
+      expect(delivered.html).to     have_css("dt", text: "How did you hear about us?")
+      expect(delivered.html).to     have_css("dd", text: "This is item two")
+      expect(delivered.html).to_not have_css("dt", text: "Date")
+      expect(delivered.html).to_not have_css("dt", text: "Preferred time")
+      expect(delivered.html).to     include(">Quick Brown Fox</p>")
      end
   end # 'context "booking forms" do'
 
@@ -661,7 +708,10 @@ RSpec.describe "Pages" do
     # Nothing to do here; it's all in 'articles_spec.rb'
   end # 'context "blog containers" do'
 
-  require_relative "shared_examples/footer_spec.rb"
+  context "event containers" do
+    # Nothing to do here; it's all in 'events_spec.rb'
+  end # 'context "event containers" do'
+
   context "shared" do
     let(:path_to_test) { root_path() }
 
@@ -699,5 +749,9 @@ RSpec.describe "Pages" do
     context "blog container" do
       # Nothing to do here; it's all in 'articles_spec.rb'
     end # 'context "blog container" do'
+
+    context "event container" do
+      # Nothing to do here; it's all in 'events_spec.rb'
+    end # 'context "event container" do'
   end # 'context "shared" do'
 end

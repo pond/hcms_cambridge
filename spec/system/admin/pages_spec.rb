@@ -2,7 +2,7 @@ require "spec_helper.rb"
 
 RSpec.describe "Admin - pages" do
   before :each do
-    allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(false)
+    allow(Hcms.config).to receive(:hide_booking_date).and_return(false)
     spechelp_log_in()
   end
 
@@ -164,7 +164,7 @@ RSpec.describe "Admin - pages" do
 
         expect(new_page.parent).to be_nil
       end
-    end # "context "parent-child" do"
+    end # 'context "parent-child" do'
 
     context "dynamic form behaviour", js: true do
       it "Redactor text entry works" do
@@ -219,7 +219,7 @@ RSpec.describe "Admin - pages" do
           #
           image_path = Rails.root.join("spec", "fixtures", "example.jpg")
           find(".upload-redactor-box").click()
-          attach_file('file', image_path, make_visible: true)
+          attach_file("file", image_path, make_visible: true)
         end
 
         # Must wait for the upload to be processed and written with <figure>
@@ -268,7 +268,7 @@ RSpec.describe "Admin - pages" do
           file_path = Rails.root.join("spec", "fixtures", "example.pdf")
 
           find(".upload-redactor-box").click()
-          attach_file('file', file_path, make_visible: true)
+          attach_file("file", file_path, make_visible: true)
           fill_in("modal-file-title", with: "Example PDF file")
         end
 
@@ -326,6 +326,12 @@ RSpec.describe "Admin - pages" do
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
+
+          select("Events", from: "page_page_type")
+
+          expect(page).to_not have_css(".redactor_container")
+          expect(page).to_not have_field("page_form_selection_list_label")
+          expect(page).to_not have_field("page_form_selection_list_contents")
         end
 
         it "shows contact form fields initially for contact form page types" do
@@ -348,19 +354,30 @@ RSpec.describe "Admin - pages" do
           expect(page).to have_field("page_form_selection_list_contents")
         end
 
-        it "hides non-blog fields initially for blog page types" do
+        it "does not hide metadata fields initially for blog page types" do
           p = create(:page, :blog)
           visit(edit_admin_page_path(p))
-          find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
+          expect(page).to_not have_css("details > summary", text: "Expand to edit page attributes")
           expect(page).to     have_select("page_page_type", selected: "Blog")
           expect(page).to_not have_css(".redactor_container")
           expect(page).to_not have_field("page_form_selection_list_label")
           expect(page).to_not have_field("page_form_selection_list_contents")
         end
-      end # "context "changes in page type" do"
-    end # "context "dynamic form behaviour", js: true do"
-  end # "context "creation" do"
+
+        it "does not hide metadata fields initially for events page types" do
+          p = create(:page, :events)
+          visit(edit_admin_page_path(p))
+
+          expect(page).to_not have_css("details > summary", text: "Expand to edit page attributes")
+          expect(page).to     have_select("page_page_type", selected: "Events")
+          expect(page).to_not have_css(".redactor_container")
+          expect(page).to_not have_field("page_form_selection_list_label")
+          expect(page).to_not have_field("page_form_selection_list_contents")
+        end
+      end # 'context "changes in page type" do'
+    end # "'context "dynamic form behaviour", js: true do'
+  end # 'context "creation" do'
 
   context "revision management" do
     context "with only one revision" do
@@ -392,7 +409,7 @@ RSpec.describe "Admin - pages" do
           expect(page).to     have_text("Published")
         end
       end
-    end # "context "with only one revision" do"
+    end # 'context "with only one revision" do'
 
     context "navigation with many revisions" do
       around :each do | example |
@@ -547,7 +564,7 @@ RSpec.describe "Admin - pages" do
           expect(page).to have_select("revision", with_options: revision_options(), selected: revision_options()[1])
         end
       end
-    end # "context "navigation with many revisions" do"
+    end # 'context "navigation with many revisions" do'
 
     it "can roll back and edit, creating a new draft after a published revision" do
       visit(new_admin_page_path())
@@ -721,7 +738,7 @@ RSpec.describe "Admin - pages" do
       expect(Revision.pluck(:published)).to eql([true, false])
       expect(Revision.pluck(:current  )).to eql([true, false])
     end
-  end # "context "revision management" do"
+  end # 'context "revision management" do'
 
   context "raw editor" do
     it "can be selected when creating a draft" do
@@ -837,11 +854,11 @@ RSpec.describe "Admin - pages" do
       expect(page).to have_css("textarea#page_body")
       expect(page).to have_field("page_body", with: p.body)
     end
-  end # "context "raw editor" do"
+  end # 'context "raw editor" do'
 
   context "contact forms" do
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
     end
 
     it "allows menu items to be specified", js: true do
@@ -911,11 +928,11 @@ RSpec.describe "Admin - pages" do
       expect(page).to     have_field("forms_contact_message")
       expect(page).to     have_button("Send message")
     end
-  end # "context "contact forms" do"
+  end # 'context "contact forms" do'
 
   context "booking forms" do
     before :each do
-      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return('')
+      allow_any_instance_of(ActionView::Base).to receive(:recaptcha_v3).and_return("")
     end
 
     it "allows menu items to be specified", js: true do
@@ -995,7 +1012,7 @@ RSpec.describe "Admin - pages" do
     end
 
     it "uses the default date-time hiding setting", js: true do
-      allow(Rails.application.config.uk_org_pond_hcms).to receive(:booking_hide_date).and_return(true)
+      allow(Hcms.config).to receive(:hide_booking_date).and_return(true)
 
       visit(new_admin_page_path())
       select("Booking form", from: "page_page_type")
@@ -1025,7 +1042,7 @@ RSpec.describe "Admin - pages" do
       expect(page).to     have_field("forms_booking_notes")
       expect(page).to     have_button("Send enquiry")
     end
-  end # "context "booking forms" do"
+  end # 'context "booking forms" do'
 
   # Blog articles are fully tested in 'articles_spec.rb', but basic blog
   # container tests are done here.
@@ -1054,7 +1071,6 @@ RSpec.describe "Admin - pages" do
     it "shows the expected CMS options" do
       p = create(:page, :blog)
       visit(edit_admin_page_path(p))
-      find(:css, "details > summary", text: "Expand to edit page attributes").click()
 
       click_on("Publish page")
       spechelp_check_flash(:notice, "Page changes published")
@@ -1066,6 +1082,44 @@ RSpec.describe "Admin - pages" do
     end
   end
 
+  # Blog articles are fully tested in 'events_spec.rb', but basic events
+  # container tests are done here.
+  #
+  context "events containers" do
+    it "allows a container to be created", js: true do
+      visit(new_admin_page_path())
+
+      title            = "Quick Brown Fox"
+      navigation_title = "Jumps Over The"
+
+      fill_in("page_title", with: title)
+      fill_in("page_navigation_title", with: navigation_title)
+      select("Events", from: "page_page_type")
+      spechelp_wait_for_animation()
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "New page published")
+
+      expect(Page.first.page_type       ).to eql(Page::PAGE_TYPE_EVENTS)
+      expect(Page.first.title           ).to eql(title)
+      expect(Page.first.navigation_title).to eql(navigation_title)
+      expect(Page.first.body            ).to be_empty
+    end
+
+    it "shows the expected CMS options" do
+      p = create(:page, :events)
+      visit(edit_admin_page_path(p))
+
+      click_on("Publish page")
+      spechelp_check_flash(:notice, "Page changes published")
+
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Add event",        href: new_admin_page_event_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List events",      href: admin_page_events_path(page_id: p.id))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit events page", href: edit_admin_page_path(p))
+      expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Page management",  href: admin_pages_path())
+    end
+  end
+
   context "lists" do
     context "display" do
       it "shows parents and children" do
@@ -1074,6 +1128,7 @@ RSpec.describe "Admin - pages" do
         page_3 = create(:page                ); page_3.revisions.first.update!(published: true)
         page_4 = create(:page, parent: page_3); page_4.revisions.first.update!(published: true)
         page_5 = create(:page, :blog         ); page_5.revisions.first.update!(published: true)
+        page_6 = create(:page, :events       ); page_6.revisions.first.update!(published: true)
 
         page_3.revisions << build(:revision, :for_page)
         page_3.save!
@@ -1085,6 +1140,7 @@ RSpec.describe "Admin - pages" do
         row_3 = find(:css, "table tbody > tr:nth-child(3)")
         row_4 = find(:css, "table tbody > tr:nth-child(4)")
         row_5 = find(:css, "table tbody > tr:nth-child(5)")
+        row_6 = find(:css, "table tbody > tr:nth-child(6)")
 
         # Title / Published? / Draft? / In menu? / Actions
         #
@@ -1093,6 +1149,7 @@ RSpec.describe "Admin - pages" do
         expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show Edit Delete", exact: true)
         expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show Edit Delete", exact: true) # "— " prefix for is-child
         expect(row_5).to have_text("#{page_5.title} Yes No Yes Show Edit Articles Delete", exact: true)
+        expect(row_6).to have_text("#{page_6.title} Yes No Yes Show Edit Events Delete", exact: true)
 
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
@@ -1102,6 +1159,7 @@ RSpec.describe "Admin - pages" do
         expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit", href: edit_admin_page_path(page_3.id))
         expect(row_4.find(:css, "> td:nth-child(8)")).to have_link("Delete", href: admin_page_path(page_4.id))
         expect(row_5.find(:css, "> td:nth-child(7)")).to have_link("Articles", href: admin_page_articles_path(page_5.id))
+        expect(row_6.find(:css, "> td:nth-child(7)")).to have_link("Events", href: admin_page_events_path(page_6.id))
       end
     end # 'context "display" do'
 

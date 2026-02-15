@@ -1,0 +1,17 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+<%
+  str = <<~TEXT.squish()
+    Unfortunately, there was a problem with your payment of
+    #{apphelp_money(@order.amount_owed, currency: @order.event.currency)} for this
+    event and your booking is not yet confirmed. To work out what went wrong and
+    how to resolve it, please get in touch:
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+
+<%= render partial: 'contact' %>
+The booking details are:
+
+<%= render partial: 'order', object: @order %>
+<%= render partial: 'signature' %>

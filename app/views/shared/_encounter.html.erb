@@ -1,0 +1,106 @@
+<%
+  # Render with locals 'encounter' giving the Encounter to render, with
+  # delegation set up to pull data from an appropriate Revision (by default -
+  # published, falling back the only unpublished revision if nothing is
+  # published).
+  #
+  #   render partial: 'shared/encounter', locals: { encounter: @encounter }
+  #
+  # OPTIONALLY also provide local "encounter_order", with an EncounterOrder
+  # instance. In that case, the view renders with additional information from
+  # that order and doesn't offer things like an "enquire" button or similar;
+  # this is part of the way that pages for a gift-receiving-user are presented.
+
+%>
+<% unless defined?(encounter_order) %>
+  <%= render partial: 'shared/editable_revisions', locals: { editable: encounter, form_path: admin_encounter_path(encounter) } %>
+<% end %>
+
+<article class="encounter">
+  <section class="encounter-header">
+    <div class="encounter-date-and-heading-container">
+      <h2 class="encounter-heading"><%= encounter.title %></h2>
+      <div class="encounter-date-and-location">
+        <% if encounter.location.present? %>
+          <address class="encounter-location"><%= encshelp_location(encounter) %></address>
+        <% end %>
+        <% if defined?(encounter_order) %>
+          <%= encordshelp_datetime(encounter_order) %>
+        <% end %>
+      </div>
+    </div>
+    <div class="encounter-summary-and-links-container">
+      <% if defined?(encounter_order) %>
+        <div class="encounter-summary-prominent">
+          <%= encounter.summary %>
+        </div>
+      <% else %>
+        <div class="encounter-summary">
+          <%= encounter.summary %>
+        </div>
+        <div class="encounter-next-prev">
+          <%= encshelp_booking_button(encounter) %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <% if defined?(encounter_order) %>
+    <section class="encounter-meta" style="margin: 1.3em 0;">
+      <div class="highlighted-area-container">
+        <% if encounter_order.gift_note.present? %>
+          <div class="encounter-gift-note">
+            <h3>
+              <%= encounter_order.gift_note %>
+            </h3>
+          </div>
+        <% end %>
+
+        <dl>
+          <dt><%= EncounterOrder.human_attribute_name(:starts_at) %></dt>
+          <dd><%= encordshelp_datetime(encounter_order) %></dd>
+          <% if encounter.location.present? %>
+            <dt><%= Encounter.human_attribute_name(:location) %></dt>
+            <dd><%= encshelp_location(encounter) %></dd>
+          <% end %>
+          <dt><%= EncounterOrder.human_attribute_name(:number_of_seats) %></dt>
+          <dd><%= encounter_order.number_of_seats %> booked for this encounter</dd>
+        </dl>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="encounter-body-and-poster">
+    <section class="encounter-body">
+      <%= encounter.body.html_safe() %>
+    </section>
+
+    <section class="encounter-poster">
+      <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title) %>
+    </section>
+  </section>
+
+  <% unless defined?(encounter_order) %>
+    <section class="encounter-meta">
+      <dl>
+        <% if encounter.location.present? %>
+          <dt><%= Encounter.human_attribute_name(:location) %></dt>
+          <dd><%= encshelp_location(encounter) %></dd>
+        <% end %>
+
+        <% unless encounter.free_of_charge? %>
+          <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
+          <dd>
+            <%= encshelp_price(encounter) %>
+            <% if encounter.has_physical_aspect? %>
+              (with optional <%= encounter.name_physical %> for
+              <%= encshelp_price(encounter, for_physical_aspect: true) %>)
+            <% end %>
+            &nbsp;
+            <%= encshelp_booking_button(encounter) %>
+          </dd>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+</article>

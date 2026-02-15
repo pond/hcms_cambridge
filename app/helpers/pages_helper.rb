@@ -1,4 +1,25 @@
 module PagesHelper
+  LINK_TEXTS = {
+    page: {
+      edit:                'Edit',
+      edit_ignore_draft:   'Edit page, ignoring current draft',
+      edit_continue_draft: 'Continue editing draft',
+      edit_old_revision:   'Edit using this revision',
+    },
+    blog: {
+      edit:                'Edit blog page',
+      edit_ignore_draft:   'Edit blog page, ignoring current draft',
+      edit_continue_draft: 'Continue editing blog page draft',
+      edit_old_revision:   'Edit using this blog page revision',
+    },
+    events: {
+      edit:                'Edit events page',
+      edit_ignore_draft:   'Edit events page, ignoring current draft',
+      edit_continue_draft: 'Continue editing events page draft',
+      edit_old_revision:   'Edit using this events page revision',
+    },
+  }
+
   def pageshelp_form_page_selection_list(f, page)
     text  = page.form_selection_list_contents.strip
     items = text.split("\n")
@@ -11,34 +32,28 @@ module PagesHelper
   end
 
   def pageshelp_edit_link_for(page, params)
-    link_text = if page.is_blog_type?
-      if page.displayed_revision.published?
-        if page.displayed_revision.current?
-          'Edit blog page'
-        else
-          'Edit blog page, ignoring current draft'
-        end
-      elsif page.displayed_revision.current?
-        'Continue editing blog page draft'
-      else
-        'Edit using this blog page revision'
-      end
+    key = if page.is_blog_type?
+      :blog
+    elsif page.is_events_type?
+      :events
     else
-      if page.displayed_revision.published?
-        if page.displayed_revision.current?
-          'Edit'
-        else
-          'Edit page, ignoring current draft'
-        end
-      elsif page.displayed_revision.current?
-        'Continue editing draft'
+      :page
+    end
+
+    link_text = if page.displayed_revision.published?
+      if page.displayed_revision.current?
+        LINK_TEXTS[key][:edit]
       else
-        'Edit using this revision'
+        LINK_TEXTS[key][:edit_ignore_draft]
       end
+    elsif page.displayed_revision.current?
+      LINK_TEXTS[key][:edit_continue_draft]
+    else
+      LINK_TEXTS[key][:edit_old_revision]
     end
 
     revision_id = params[:revision]
-    revision_id = nil if revision_id&.to_i == page.current_revision.id
+    revision_id = nil if revision_id.to_i == page.current_revision.id
 
     return link_to(link_text, edit_admin_page_path(page, revision: revision_id))
   end

@@ -137,17 +137,17 @@ RSpec.describe "Redirections" do
     end
 
     context "ignore paths" do
-      Rails.application.config.uk_org_pond_hcms.statistics_ignore.each do | section, list |
+      Hcms.config.statistics_ignore.each do | section, list |
         list.each do | item |
           random = SecureRandom.uuid
           case section
-            when 'match_exactly'
+            when "match_exactly", :match_exactly
               test_positive = item
               test_negative = "#{item}#{random}"
-            when 'starts_with'
+            when "starts_with", :starts_with
               test_positive = "#{item}#{random}"
               test_negative = "#{random}#{item}#{random}"
-            when 'found_anywhere'
+            when "found_anywhere", :found_anywhere
               test_positive = "#{random}#{item}#{random}"
               test_negative = "#{random}#{item[...-1]}#{random}"
           end
@@ -187,7 +187,7 @@ RSpec.describe "Redirections" do
   end
 
   context "custom mappings" do
-    Rails.application.config.uk_org_pond_hcms.page_mappings.each do | match_path, mapped_page_slug |
+    Hcms.config.page_mappings.each do | match_path, mapped_page_slug |
       before :each do
         if Page.find_by_slug(mapped_page_slug).nil?
           mapped_page = create(:page, slug: mapped_page_slug)
@@ -216,7 +216,7 @@ RSpec.describe "Redirections" do
   end
 
   context "blog mappings" do
-    Rails.application.config.uk_org_pond_hcms.blog_mappings.each do | match_path, mapped_blog_page_slug |
+    Hcms.config.blog_mappings.each do | match_path, mapped_blog_page_slug |
       before :each do
         if Page.find_by_slug(mapped_blog_page_slug).nil?
           mapped_page = create(:page, :blog, slug: mapped_blog_page_slug)

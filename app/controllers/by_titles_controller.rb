@@ -2,6 +2,7 @@
 # are supported properly, but kept around in case of historical bookmarks etc.
 #
 class ByTitlesController < ApplicationController
+
   layout 'pages'
 
   def show

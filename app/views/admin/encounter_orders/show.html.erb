@@ -1,0 +1,142 @@
+<h1>Details of encounter booking for &ldquo;<%= @encounter_order.encounter.title %>&rdquo;</h1>
+
+<dl>
+  <dt>Customer name</dt>
+  <dd><%= @encounter_order.name %>
+  <dt>Customer e-mail address<dt>
+  <dd><code><%= mail_to(@encounter_order.email) %></code></dd>
+  <dt>Customer phone number</dt>
+  <dd>
+    <% if @encounter_order.phone_number.blank? %>
+      Not given
+    <% else %>
+      <%= tag.code(link_to(@encounter_order.phone_number, "tel:#{@encounter_order.phone_number}")) %>
+    <% end %>
+  </dd>
+  <% if @encounter_order.address.present? %>
+    <dt>Customer address</dt>
+    <dd><%= @encounter_order.address %></dd>
+  <% end %>
+</dl>
+
+<dl>
+  <dt>Date and time</dt>
+  <dd><%= encordshelp_datetime(@encounter_order) %></dd>
+  <dt>Seats and price</dt>
+  <dd>
+    <%= @encounter_order.number_of_seats %> →
+    <% if @encounter_order.amount_owed.zero? %>
+      No charge
+    <% else %>
+      <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency) %>
+    <% end %>
+  </dd>
+  <dt>Physical product included?</dt>
+  <dd>
+    <% if ! @encounter_order.encounter.has_physical_aspect? %>
+      N/A
+    <% elsif @encounter_order.has_physical.nil? %>
+      Customer has not yet decided
+    <% else %>
+      <%= apphelp_boolean(@encounter_order.has_physical) %>
+    <% end %>
+  </dd>
+</dl>
+
+<dl>
+  <% if @encounter_order.notes_to_buyer.present? %>
+    <dt>Notes to buyer</dt>
+    <dd><%= @encounter_order.notes_to_buyer %></dd>
+  <% end %>
+  <dt>Gift note written by customer at checkout</dt>
+  <dd><%= @encounter_order.gift_note.presence || "N/A" %></dd>
+  <dt>Encounter information "share / gift link" (hides prices)</dt>
+  <dd>
+    <% share_link = encordshelp_share_link(@encounter_order) %>
+    <%=
+      button_tag(
+        title: 'Copy link',
+        class: 'copy_from_data',
+        style: 'font-size: 85%',
+        data:  { text: share_link }
+      ) do
+    %><i class="fa fa-copy"></i><% end %>
+    <small>
+      <code><%= share_link %></code>
+    </small>
+  </dd>
+  <dt>Customer's order management "magic link" (shows prices)</dt>
+  <dd>
+    <% magic_link = encordshelp_magic_link(@encounter_order) %>
+    <%=
+      button_tag(
+        title: 'Copy link',
+        class: 'copy_from_data',
+        style: 'font-size: 85%',
+        data:  { text: magic_link }
+      ) do
+    %><i class="fa fa-copy"></i><% end %>
+    <small>
+      <code><%= magic_link %></code>
+    </small>
+  </dd>
+</dl>
+
+<dl>
+  <dt>Order first created at</dt>
+  <dd><%= apphelp_human_time(@encounter_order.created_at, date_only: false) %></dd>
+  <dt>Order most recently updated at</dt>
+  <dd><%= apphelp_human_time(@encounter_order.updated_at, date_only: false) %></dd>
+</dl>
+
+<div class="row-wide-column-small-container" style="margin-top: 2em;">
+  <div class="row-wide-column-small">
+    <span>
+      Current state: <%= @encounter_order.human_state %>
+    </span>
+  </div>
+
+  <div class="row-wide-column-small">
+    <% if @encounter_order.valid_events.empty? %>
+      <span>
+        This order is in a finalised state. No further actions are available.
+      </span>
+    <% else %>
+      <span>
+        <% @encounter_order.valid_events.each do | event | %>
+          <% next if event.name == :payment_failed %>
+          <%=
+            button_to(
+              ordershelp_event_title(@encounter_order, event), # EncounterOrder reuses Order states
+              admin_encounter_encounter_order_path(
+                encounter_id: @encounter_order.encounter.slug,
+                id:           @encounter_order.id,
+                process:      'state',
+                event:        event.name,
+              ),
+              {
+                method: :patch,
+                data:   { confirm: 'Are you sure? This cannot be undone. The customer will be notified by e-mail.' }
+              }
+            )
+          %>
+        <% end %>
+      </span>
+    <% end %>
+    <% if @encounter_order.state_paid? %>
+      <%=
+        button_to(
+          'Invoice',
+          encounter_encounter_order_invoice_path(
+            encounter_id:       @encounter_order.encounter.slug,
+            encounter_order_id: @encounter_order.id,
+          ),
+          {
+            method: :get,
+            form:   { target: '_blank' }
+          }
+        )
+      %>
+    <% end %>
+  </div>
+</div>

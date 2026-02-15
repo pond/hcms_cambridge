@@ -16,6 +16,10 @@ end
 Bundler.require(*Rails.groups)
 
 module Hcms
+  def self.config
+    @config ||= Rails.application.config_for(:hcms) # See "config/hcms.yml"
+  end
+
   class Application < Rails::Application
     config.load_defaults 8.0
 
@@ -25,18 +29,9 @@ module Hcms
 
     config.autoload_lib(ignore: %w(assets tasks))
 
-    # Load this here so it's available for config/environments/* - if we did this
-    # instead in a config/initializers/* file, it wouldn't be executed in time.
-    #
-    Rails.application.config.uk_org_pond_hcms = OpenStruct.new( YAML.load_file( Rails.root.join( 'config' ).join( 'config.yml' ) ) )
-
     # Set time zone for things like "Time.current".
     #
-    config.time_zone = Rails.application.config.uk_org_pond_hcms.time_zone || 'London'
-
-    # Preserve the full timezone rather than offset of the receiver.
-    #
-    config.active_support.to_time_preserves_timezone = :zone
+    config.time_zone = Hcms.config.time_zone || 'London'
 
   end
 end

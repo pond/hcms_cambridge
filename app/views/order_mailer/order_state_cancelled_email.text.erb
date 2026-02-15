@@ -1,0 +1,16 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+<% if @order.event.state_cancelled? %>
+Unfortunately, this event has been cancelled. We are very sorry for any
+disappointment or inconvenience this may cause.
+<% else %>
+Your reservation for this event has been cancelled. We're sorry you could not
+attend this time, but hope to see you again in future.
+<% end %>
+
+<%= render partial: 'order', object: @order %>
+If you have any questions about the cancellation, please get in touch:
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

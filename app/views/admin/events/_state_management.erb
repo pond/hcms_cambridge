@@ -1,0 +1,75 @@
+<div class="row-wide-column-small-container">
+  <div class="row-wide-column-small">
+    <span style="line-height: 150%; margin: 5px 0;">
+      Current state: <%= event.human_state %>.
+      <%= event.orders.enum_state_reserved.sum(:number_of_seats) %> reserved and
+      <%= event.orders.enum_state_paid.sum(:number_of_seats) %> paid, with
+      <%= event.unrestricted_seating? ? 'unlimited' : event.confirmed_seats_remaining %> seats remaining.
+    </span>
+  </div>
+  <div class="row-wide-column-small">
+    <strong>Actions:</strong>
+    <% if event.valid_events.empty? %>
+      <span>
+        This event is in a finalised state. No further actions are available.
+      </span>
+    <% else %>
+      <% event.valid_events.each do | aasm_event | %>
+        <%=
+          data = if aasm_event.name == :cancel
+            { confirm: 'Are you sure? This cannot be undone. Orders where appropriate will be cancelled or refunded, with customers notified by e-mail.' }
+          else
+            {}
+          end
+
+          button_to(
+            t("models.event_state_aasm_events.#{aasm_event.name}", default: aasm_event.name.to_s.titleize),
+            admin_page_event_path(
+              page_id:  event.page.slug,
+              event_id: event.slug,
+              process:  'state',
+              event:    aasm_event.name,
+            ),
+            {
+              method: :patch,
+              data:   data
+            }
+          )
+        %>
+      <% end %>
+    <% end %>
+
+    <span></span>
+
+    <% if action_name == 'edit' %>
+      <%=
+        button_to(
+          @event.hidden == true ? 'Make visible to everyone' : "Hide unless you've a link",
+          admin_page_event_path(
+            page_id:  event.page.slug,
+            event_id: event.slug,
+            process:  'toggle-hidden',
+          ),
+          { method: :patch }
+        )
+      %>
+    <% end %>
+    <%=
+      button_to(
+        'Edit event',
+        edit_admin_page_event_path(event.page, event),
+        { method: :get }
+      )
+    %>
+    <%=
+      button_to(
+        'Manage orders',
+        admin_page_event_orders_path(
+          page_id:  event.page.slug,
+          event_id: event.slug,
+        ),
+        { method: :get }
+      )
+    %>
+  </div>
+</div>

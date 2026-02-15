@@ -1,0 +1,116 @@
+<h1>Details of order for &ldquo;<%= @order.event.title %>&rdquo;</h1>
+
+<p>
+  <%= evtshelp_datetime(@order.event) %>
+</p>
+
+<dl>
+  <dt>Customer name</dt>
+  <dd><%= @order.name %>
+  <dt>Customer e-mail address<dt>
+  <dd><code><%= mail_to(@order.email) %></code></dd>
+  <dt>Customer phone number</dt>
+  <dd>
+    <% if @order.phone_number.blank? %>
+      Not given
+    <% else %>
+      <%= tag.code(link_to(@order.phone_number, "tel:#{@order.phone_number}")) %>
+    <% end %>
+  </dd>
+  <% if @order.address.present? %>
+    <dt>Customer address</dt>
+    <dd><%= @order.address %></dd>
+  <% end %>
+</dl>
+
+<dl>
+  <dt>Seats and price</dt>
+  <dd>
+    <%= @order.number_of_seats %> →
+    <% if @order.amount_owed.zero? %>
+      No charge
+    <% else %>
+      <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
+    <% end %>
+  </dd>
+  <% if @order.notes.present? %>
+    <dt>Other notes</dt>
+    <dd><%= @order.notes %></dd>
+  <% end %>
+  <dt>Customer's order management "magic link"</dt>
+  <dd>
+    <% magic_link = ordershelp_magic_link(@order) %>
+    <%=
+      button_tag(
+        title: 'Copy link',
+        class: 'copy_from_data',
+        style: 'font-size: 85%',
+        data:  { text: magic_link }
+      ) do
+    %><i class="fa fa-copy"></i><% end %>
+    <small>
+      <code><%= magic_link %></code>
+    </small>
+  </dd>
+</dl>
+
+<dl>
+  <dt>Order first created at</dt>
+  <dd><%= apphelp_human_time(@order.created_at, date_only: false) %></dd>
+  <dt>Order most recently updated at</dt>
+  <dd><%= apphelp_human_time(@order.updated_at, date_only: false) %></dd>
+</dl>
+
+<div class="row-wide-column-small-container" style="margin-top: 2em;">
+  <div class="row-wide-column-small">
+    <span>
+      Current state: <%= @order.human_state %>
+    </span>
+  </div>
+
+  <div class="row-wide-column-small">
+    <% if @order.valid_events.empty? %>
+      <span>
+        This order is in a finalised state. No further actions are available.
+      </span>
+    <% else %>
+      <span>
+        <% @order.valid_events.each do | event | %>
+          <% next if event.name == :payment_failed %>
+          <%=
+            button_to(
+              ordershelp_event_title(@order, event),
+              admin_page_event_order_path(
+                page_id:  @order.event.page.slug,
+                event_id: @order.event.slug,
+                id:       @order.id,
+                process:  'state',
+                event:    event.name,
+              ),
+              {
+                method: :patch,
+                data:   { confirm: 'Are you sure? This cannot be undone. The customer will be notified by e-mail.' }
+              }
+            )
+          %>
+        <% end %>
+      </span>
+    <% end %>
+    <% if @order.state_paid? %>
+      <%=
+        button_to(
+          'Invoice',
+          page_event_order_invoice_path(
+            page_id:  @order.event.page.slug,
+            event_id: @order.event.slug,
+            order_id: @order.id,
+          ),
+          {
+            method: :get,
+            form:   { target: '_blank' }
+          }
+        )
+      %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+Thank you for your reservation.
+<% unless @order.amount_owed.zero? %>
+
+<%
+  str = <<~TEXT.squish()
+    Closer to the event, we will contact you on this e-mail address to finalise the booking by
+    paying #{apphelp_money(@order.amount_owed, currency: @order.event.currency)}. No payment
+    is needed until then.
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+<% end %>
+
+<%= render partial: 'order', object: @order %>
+<%= ordershelp_magic_link_markup(@order, plain_text: true) %>
+If there are any problems with the reservation, please get in touch:
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

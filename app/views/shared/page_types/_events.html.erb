@@ -1,0 +1,41 @@
+<%
+  # Render the body for an 'events' type page. Usually only rendered via the
+  # "shared/_page.html.erb" Partial. Requires local "page", holding the Page
+  # instance that is being rendered.
+  #
+  found_archived_section = false
+%>
+
+<% if page.events.for_navigation.any? %>
+  <section class="events with-poster-grid">
+    <% page.events.for_navigation.each do | event | %>
+      <% if event.state_archived? && found_archived_section == false %>
+        <% found_archived_section = true %>
+        </section>
+        <h2 style="margin-top: 80px;">From the archives</h2>
+        <section class="events with-poster-grid">
+      <% end %>
+
+      <article class="event">
+        <%= link_to page_event_path(page_id: page.slug, id: event.slug), class: 'event-link' do %>
+          <img class="event-hero-image" src="<%= event.event_hero_image.url %>" alt="<%= event.title %>">
+          <div class="event-date-and-heading-container">
+            <h4 class="event-heading"><%= event.title %></h4>
+            <div class="event-date-and-location"><%= apphelp_human_time(event.starts_at) %></div>
+          </div>
+          <div class="event-summary"><%= event.summary %></div>
+        <% end %>
+      </article>
+    <% end %>
+  </section>
+<% else %>
+  <p>
+    There are no events scheduled for the near future, but please check back later!
+  </p>
+
+  <% if current_user %>
+    <p>
+      <%= link_to 'Add new event now', new_admin_page_event_path(page_id: page.id) %>
+    </p>
+  <% end %>
+<% end %>

@@ -3,7 +3,7 @@ require "spec_helper.rb"
 RSpec.describe "Admin - statistics" do
   before :each do
     @page_1    = create(:page);                      @page_1.revisions.first.update!(published: true)
-    @page_2    = create(:page, :blog, slug: 'blog'); @page_2.revisions.first.update!(published: true)
+    @page_2    = create(:page, :blog, slug: "blog"); @page_2.revisions.first.update!(published: true)
     @article_1 = create(:article, page: @page_2); @article_1.revisions.first.update!(published: true)
     @article_2 = create(:article, page: @page_2); @article_2.revisions.first.update!(published: true)
   end
@@ -179,17 +179,16 @@ RSpec.describe "Admin - statistics" do
 
       visit(admin_statistics_path())
 
-      # Expected sort by controller then path. Expect Article, Page, then the
-      # nonsense Testone set.
+      # Expect sort success-fail, count descending, controller, path.
       #
       table = find(:css, "section.main_content table tbody")
 
       expect(table.find_all(:css, "tr").size).to eql(5)
-      expect(table.find(:css, "tr:nth-child(1)")).to have_text("Article - #{@article_2.title} #{page_article_path(@page_2.slug, @article_2.slug)} Yes 2 Show", exact: true)
-      expect(table.find(:css, "tr:nth-child(2)")).to have_text("Page - #{@page_1.title} #{page_path(@page_1.slug)} Yes 3 Show", exact: true)
+      expect(table.find(:css, "tr:nth-child(1)")).to have_text("Page - #{@page_1.title} #{page_path(@page_1.slug)} Yes 3 Show", exact: true)
+      expect(table.find(:css, "tr:nth-child(2)")).to have_text("Article - #{@article_2.title} #{page_article_path(@page_2.slug, @article_2.slug)} Yes 2 Show", exact: true)
       expect(table.find(:css, "tr:nth-child(3)")).to have_text("Testone - testtwo /foo-150 Yes 1 Show", exact: true)
-      expect(table.find(:css, "tr:nth-child(4)")).to have_text("Testone - list /foo-401 No 1 Show", exact: true)
-      expect(table.find(:css, "tr:nth-child(5)")).to have_text("Testone - testtwo /foo-450-and-500 No 2 Show", exact: true)
+      expect(table.find(:css, "tr:nth-child(4)")).to have_text("Testone - testtwo /foo-450-and-500 No 2 Show", exact: true)
+      expect(table.find(:css, "tr:nth-child(5)")).to have_text("Testone - list /foo-401 No 1 Show", exact: true)
     end
 
     it "shows details with simple success status and no referrer" do

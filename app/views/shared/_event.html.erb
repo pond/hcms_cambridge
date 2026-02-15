@@ -1,0 +1,72 @@
+<%
+  # Render with locals 'event' giving the Event to render, with delegation
+  # set up to pull data from an appropriate Revision (by default - published,
+  # falling back the only unpublished revision if nothing is published).
+  #
+  #   render partial: 'shared/event', locals: { event: @event }
+%>
+<%= render partial: 'shared/editable_revisions', locals: { editable: event, form_path: admin_page_event_path(event.page, event) } %>
+
+<article class="event">
+  <section class="event-header">
+    <div class="event-date-and-heading-container">
+      <h2 class="event-heading"><%= event.title %></h2>
+      <div class="event-date-and-location">
+        <% if event.state_archived? %>
+          Took place on <%= apphelp_human_time(event.starts_at, date_only: true) %>
+        <% else %>
+          <%= evtshelp_datetime(event) %>
+        <% end %>
+        <% if event.location.present? %>
+          <address class="event-location"><%= evtshelp_location(event) %></address>
+        <% end %>
+      </div>
+    </div>
+    <div class="event-summary-and-links-container">
+      <div class="event-summary">
+        <%= event.summary %>
+      </div>
+      <div class="event-next-prev">
+        <%= evtshelp_booking_button(event) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="event-body">
+    <%= event.body.html_safe() %>
+  </section>
+
+  <section class="event-meta">
+    <dl>
+      <dt>When<dt>
+      <dd><%= evtshelp_datetime(event) %></dd>
+
+      <% if event.location.present? %>
+        <dt>Where</dt>
+        <dd><%= evtshelp_location(event) %></dd>
+      <% end %>
+
+      <% unless event.unrestricted_seating? || event.number_of_seats == 1 %>
+        <dt>Seats</dt>
+        <dd>
+          <% if event.confirmed_seats_remaining > 5 %>
+            Limited seats available
+          <% elsif event.confirmed_seats_remaining > 0 %>
+            Five or fewer seats remaining
+          <% else %>
+            Sorry, sold out!
+          <% end %>
+        </dd>
+      <% end %>
+
+      <% unless event.free_of_charge? %>
+        <dt>Price</dt>
+        <dd>
+          <%= evtshelp_price(event) %>
+          &nbsp;
+          <%= evtshelp_booking_button(event) %>
+        </dd>
+      <% end %>
+    </dl>
+  </section>
+</article>

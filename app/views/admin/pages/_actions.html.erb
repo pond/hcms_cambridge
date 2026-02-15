@@ -23,13 +23,15 @@
     <% end %>
   <% end %>
 </td>
-<td class="admin_actions" style="padding-right: 1em">
+<td class="admin_actions">
   <%= link_to 'Show', admin_page_path(page.slug) %>
   <%= link_to 'Edit', edit_admin_page_path(page) %>
   <% if page.is_blog_type? %>
     <%= link_to 'Articles', admin_page_articles_path(page) %>
+  <% elsif page.is_events_type? %>
+    <%= link_to 'Events', admin_page_events_path(page) %>
   <% end %>
 </td>
-<td class="admin_actions">
+<td class="admin_actions for_delete">
   <%= link_to 'Delete', admin_page_path(page), method: :delete, data: { confirm: apphelp_destroy_confirm(page) } %>
 </td>

@@ -1,4 +1,5 @@
 <%= @page.title.upcase %>
+<%= '=' * @page.title.size %>
 
 You have received a new booking enquiry.
 
@@ -14,6 +15,14 @@ Preferred time: <%= @time.presence || 'None specified' %>
 <%= @page.form_selection_list_label.presence || 'Menu selection' %>: <%= @menu %>
 
 <% end %>
-Other notes:
+
+Other notes
+-----------
 
 <%= @notes.presence || 'None' %>
+
+Following up
+------------
+
+Do not reply to this message - to compose a reply, please send e-mail to
+<%= @email %> directly.

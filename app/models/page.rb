@@ -1,8 +1,24 @@
 class Page < Editable
+  PAGE_TYPE_NORMAL       = 'normal'
+  PAGE_TYPE_BLOG         = 'blog'
+  PAGE_TYPE_EVENTS       = 'events'
+  PAGE_TYPE_BOOKING_FORM = 'booking_form'
+  PAGE_TYPE_CONTACT_FORM = 'contact_form'
+
+  ORDERED_PAGE_TYPES = [
+    PAGE_TYPE_NORMAL,
+    PAGE_TYPE_BOOKING_FORM,
+    PAGE_TYPE_CONTACT_FORM,
+    PAGE_TYPE_BLOG,
+    PAGE_TYPE_EVENTS
+  ]
+
   belongs_to :parent, class_name: 'Page', foreign_key: 'page_id', optional: true
   has_many :children, class_name: 'Page'
   has_many :children_for_navigation, -> { for_navigation }, class_name: 'Page'
+
   has_many :articles, dependent: :destroy
+  has_many :events,   dependent: :destroy
 
   acts_as_list scope: :page
   default_scope -> { order(position: :asc) }
@@ -13,19 +29,9 @@ class Page < Editable
     where(hidden: false)
     .where(id: Revision.published.where(revisable_type: 'Page').select(:revisable_id))
   }
+  scope :blogs, -> { where(page_type: PAGE_TYPE_BLOG) }
 
-  validates_presence_of :body, unless: :is_blog_type?
-
-  PAGE_TYPE_NORMAL       = 'normal'
-  PAGE_TYPE_BLOG         = 'blog'
-  PAGE_TYPE_BOOKING_FORM = 'booking_form'
-  PAGE_TYPE_CONTACT_FORM = 'contact_form'
-  ORDERED_PAGE_TYPES     = [
-    PAGE_TYPE_NORMAL,
-    PAGE_TYPE_BOOKING_FORM,
-    PAGE_TYPE_CONTACT_FORM,
-    PAGE_TYPE_BLOG,
-  ]
+  validates_presence_of :body, unless: :can_omit_body?
 
   def self.home
     Page.top_level.reorder(created_at: :asc).first # (whether or not it yet has a published revision)
@@ -35,12 +41,16 @@ class Page < Editable
     self.page_type == PAGE_TYPE_NORMAL
   end
 
+  def is_form_type?
+    self.is_contact_form? || self.is_booking_form?
+  end
+
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
   end
 
-  def is_form_type?
-    self.is_contact_form? || self.is_booking_form?
+  def is_events_type?
+    self.page_type == PAGE_TYPE_EVENTS
   end
 
   def for_navigation?
@@ -63,5 +73,15 @@ class Page < Editable
     else
       nil
     end
+  end
+
+  def can_omit_body?
+    self.is_blog_type? || self.is_events_type?
+  end
+
+  def collapse_metadata_in_form?
+    ! self.new_record? &&
+    ! self.can_omit_body? &&
+    self.valid?
   end
 end

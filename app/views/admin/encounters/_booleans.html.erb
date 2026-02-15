@@ -1,0 +1,21 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'booleans', locals: {
+  #     encounter: Encounter model instance
+  #   }
+
+  any_published    = encounter.revisions.any?(&:published?)
+  active_draft     = encounter.current_revision.present? && ! encounter.current_revision.published
+
+  published_markup = apphelp_boolean(any_published, no_class: 'boolean_no_highlight')
+  draft_markup     = apphelp_boolean(active_draft, no_class: nil, yes_class: 'boolean_yes_highlight')
+%>
+<td class="centre"><%= published_markup %></td>
+<td class="centre">
+  <% if active_draft %>
+    <%= link_to(draft_markup, [:admin, encounter, {revision: encounter.current_revision.id}]) %>
+  <% else %>
+    <%= draft_markup %>
+  <% end %>
+</td>

@@ -1,0 +1,75 @@
+<%
+  # Render with locals 'orders' containing items to list and 'event' holding
+  # the event that the orders are all for.
+%>
+
+<table class="full_width">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>E-mail address</th>
+      <th>Creation date</th>
+      <th>Seats</th>
+      <th>Amount</th>
+      <th>State</th>
+      <th class="centre" colspan="2">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% orders.each do | order | %>
+
+      <tr class="<%= cycle( 'even', 'odd' ) %>">
+        <td><%= order.name %></td>
+        <td><code><%= mail_to(order.email) %></code></td>
+        <td><%= apphelp_human_time(order.created_at, date_only: true) %></td>
+        <td><%= order.number_of_seats %></td>
+        <td>
+          <% if event.free_of_charge? %>
+            &ndash;
+          <% else %>
+            <%= ordershelp_amount(order) %>
+          <% end %>
+        </td>
+        <td><%= order.human_state %></td>
+        <%= render partial: 'actions', locals: { order: order } %>
+      </tr>
+
+    <% end %>
+  </tbody>
+
+  <tfoot>
+    <tr>
+      <td>&nbsp;</td>
+      <td>
+        <div style="display: flex; align-items: center; gap: 0.5em;">
+          Copy all
+          <%=
+            button_tag(
+              title: 'Copy all addresses',
+              class: 'copy_from_data',
+              style: 'font-size: 80%',
+              data:  { text: orders.map(&:email).each { |e| e.gsub(',', '=2C') }.join(',') }
+            ) do
+          %><i class="fa fa-copy"></i><% end %>
+        </div>
+      </td>
+      <td>&nbsp;</td>
+      <td>
+        <% if event.unrestricted_seating? %>
+          &ndash;
+        <% else %>
+          <%= orders.sum(:number_of_seats) %>
+        <% end %>
+      </td>
+      <td>
+        <% if event.free_of_charge? %>
+          &ndash;
+        <% else %>
+          <%= apphelp_money(orders.sum(:amount_owed), currency: event.currency) %>
+        <% end %>
+      </td>
+      <td colspan="3">&nbsp;</td>
+    </tr>
+  </tfoot>
+</table>

@@ -1,0 +1,45 @@
+// IMPORTANT: The font face data is fetched via "layouts/mailer.html.erb"; it
+//            doesn't work if @import'd here.
+//
+@import 'config/variables';
+
+body {
+  color: $base_colour;
+  background: $base_background;
+
+  font-size: $base_font_size;
+  font-family: $primary_font_family;
+  font-weight: $primary_font_weight;
+}
+
+p {
+  line-height: $base_paragraph_line_height;
+}
+
+h1 {
+  font-weight: $h1_font_weight;
+  color: $h1_and_figure_colour;
+}
+
+h2, h3, h4, h5, h6, nav a {
+  font-family: $secondary_font_family;
+  font-weight: $secondary_font_weight;
+}
+
+h1 { font-size: 30px; margin: $h1_margin 0; }
+h2 { font-size: 28px; margin: $h2_margin 0; }
+
+img#logo {
+  float: right;
+}
+
+@media(max-width: $container_width_narrow) {
+  img#logo {
+    float: none !important;
+    display: block;
+    margin: $h1_margin auto;
+  }
+}
+
+dl dt { font-style: italic; }
+dl dd:not(:last-child) { margin-bottom: 1em; }

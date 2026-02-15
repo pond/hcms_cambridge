@@ -1,3 +1,4 @@
+<%# Render flash data, via 'notice' or 'alert' locals %>
 <% if notice.present? || alert.present? %>
       <section class="messages">
 <%   if notice.present? %>
@@ -8,4 +9,3 @@
 <%   end %>
       </section>
 <% end %>
-

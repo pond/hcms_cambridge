@@ -1,0 +1,11 @@
+<h1>Edit event &ldquo;<%= @event.title %>&rdquo;</h1>
+
+<%= render partial: 'state_management', locals: { event: @event } %>
+<%= render 'form' %>
+
+<% content_for :extra_footer_links do %>
+  <div class="extra_footer_links">
+    <%= link_to 'Show', admin_page_event_path(page_id: @page.slug, id: @event.slug) %> |
+    <%= link_to 'Back', :back %>
+  </div>
+<% end %>

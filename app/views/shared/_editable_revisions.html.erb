@@ -8,6 +8,7 @@
 %>
 
 <% if user_signed_in? %>
+  <%= javascript_include_tag 'admin' %>
   <%
     displayed_index = editable.revisions.index(editable.displayed_revision)
     newer_revisions = editable.revisions.first(displayed_index)
@@ -56,6 +57,8 @@
           page_path(editable.slug)
         elsif editable.is_a?(Article)
           page_article_path(editable.page.slug, editable.slug)
+        elsif editable.is_a?(Event)
+          page_event_path(editable.page.slug, editable.slug)
         else
           nil
         end
@@ -63,11 +66,17 @@
         share_link = if share_path.nil?
           nil
         else
-          "https://www.#{Rails.application.config.uk_org_pond_hcms.mail_domain}#{share_path}"
+          "https://www.#{Hcms.config.mail_domain}#{share_path}"
         end
       %>
       <% if share_link.present? %>
-        <button class="share_link" onclick="navigator.clipboard.writeText('<%= j(share_link) %>');"><i class="fa fa-copy"></i></button>
+        <%=
+          button_tag(
+            title: 'Copy link',
+            class: 'copy_from_data',
+            data:  { text: share_link }
+          ) do
+        %><i class="fa fa-copy"></i><% end %>
       <% end %>
     <% end %>
   <% end %>

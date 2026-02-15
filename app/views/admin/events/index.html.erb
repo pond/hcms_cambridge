@@ -1,0 +1,42 @@
+<h1 id="admin-header-main">
+  Event list &ldquo;<%= @page.title %>&rdquo;
+</h1>
+
+<div id="admin-header-with-nav">
+  <h2>All events</h2>
+  <span>▶︎</span>
+  <nav>
+    <%= link_to 'New event',                new_admin_page_event_path(@page) %> |
+    <%= link_to 'View event grid',          admin_page_path(@page.slug) %> |
+    <%= link_to 'Back to "All pages" list', admin_pages_path() %>
+  </nav>
+</div>
+
+<table class="full_width">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th class="centre">Published?</th>
+      <th class="centre">Hidden?</th>
+      <th class="centre">Has draft?</th>
+      <th class="centre" colspan="3">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @events.each do | event | %>
+
+      <tr class="<%= cycle( 'even', 'odd' ) %> <%= "event-state-#{event.state}" %>">
+        <td class="event-title">
+          <%= event.title %><br>
+          <div class="event-state"><%= event.human_state %></div>
+        </td>
+        <td class="event-starts-at"><%= apphelp_human_time(event.starts_at, date_only: true) %>
+        <%= render partial: 'booleans', locals: { event: event } %>
+        <%= render partial: 'actions', locals: { event: event } %>
+      </tr>
+
+    <% end %>
+  </tbody>
+</table>

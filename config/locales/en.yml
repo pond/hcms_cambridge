@@ -22,9 +22,11 @@
 en:
   time:
     formats:
-      short: "%b %-d %Y, %-l:%M%P"
-      short_no_year: "%b %-d, %-l:%M%P"
-      date_only: "%b %-d %Y"
+      short: "%b %-d %Y (%A), %-l:%M%P"
+      short_no_year: "%b %-d (%A), %-l:%M%P"
+      time_only: "%-l:%M%P"
+      date_only: "%b %-d %Y (%A)"
+      invoice_date: "%b %-d %Y"
 
   activemodel:
     models:
@@ -88,9 +90,57 @@ en:
       article:
         title: "Title"
         summary: "Brief summary"
-        article_hero_image: "Thumbnail photo"
+        article_hero_image: "Poster photo"
         raw_editor: "Use the low-level HTML editor?"
         body: "Main article"
+
+      encounter:
+        title: "Title"
+        summary: "Brief summary"
+        encounter_hero_image: "Poster photo"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Encounter details"
+        location: "Location"
+        price_per_seat: "Price per seat"
+        price_physical: "Optional physical item price"
+        name_physical: "Optional physical item name"
+
+      encounter_order:
+        name: "Name"
+        email: "E-mail address"
+        phone_number: "Phone number"
+        address: "Postal address to show on tax invoice"
+        starts_at: "Starting date and time"
+        has_physical: "Include physical product in price?"
+        gift_note: "If this is a gift, do you want to add a message for the recipient?"
+        notes_to_buyer: "Any other notes?"
+        number_of_seats: "Number of seats"
+        amount_owed: "Total price"
+
+      event:
+        title: "Title"
+        summary: "Brief summary"
+        event_hero_image: "Poster photo"
+        raw_editor: "Use the low-level HTML editor?"
+        body: "Event details"
+        hidden: "Only visible if you have the link to it?"
+        location: "Location"
+        starts_at: "Start date and time"
+        ends_at: "End date and time"
+        number_of_seats: "Number of seats available"
+        price_per_seat: "Price per seat"
+        event_state: "Ticket sales"
+        on_archive_action: "After it has taken place"
+
+      order:
+        name: "Name"
+        email: "E-mail address"
+        phone_number: "Phone number"
+        address: "Home postal address"
+        number_of_seats: "Number of seats"
+        notes: "Any other notes?"
+        amount_owed: "Total price"
+        invoice_number: "Invoice number"
 
       page:
         title: "Page title"
@@ -116,13 +166,72 @@ en:
     optional: "(optional)"
 
   models:
+    event_state:
+      presales: "Reservations only (pre-sale)"
+      reserver_purchases: "Purchase by reservation holders only"
+      public_purchases: "Selling to general public"
+      archived: "Archived"
+      cancelled: "Cancelled"
+
+    event_state_aasm_events:
+      start_reserver_purchases: "Ask reservation holders to pay"
+      start_public_purchases: "Open up for public purchases"
+      archive: "Archive"
+      cancel: "Cancel event"
+
+    on_archive_action:
+      keep: "Keep on page as a past event"
+      hide: "Hide from page"
+      move: "Move into a blog article"
+
+    order_state:
+      new: "In progress"
+      reserved: "Reserved"
+      paid: "Paid"
+      payment_failed: "Payment failed"
+      cancelled: "Cancelled"
+      refunded: "Refunded"
+
+      getting_older: "Dormant" # I18n for pseudo-state related to "new"
+      stale: "Abandoned"       # I18n for pseudo-state related to "new"
+
+    order_state_aasm_events:
+      reserve: "Mark as 'reservation confirmed'"
+      pay: "Mark as 'paid'"
+      cancel: "Cancel order"
+      refund: "Refund customer"
+      force_refund: "Ignore no-refunds period and refund customer"
+
     page_type:
       normal: "Normal"
       contact_form: "Contact form"
       booking_form: "Booking form"
       blog: "Blog"
+      events: "Events"
 
     revision:
       published: "Published"
       current: "Draft (%{time})"
       unpublished: "Old (%{time})"
+
+  views:
+    encounter_orders:
+      seats:
+        one: "One seat"
+        other: "%{count} seats"
+      confirm:
+        booking:
+          one: "Please check the details of your booking for one seat at “%{encounter_title}”."
+          other: "Please check the details of your booking for %{count} seats at “%{encounter_title}”."
+
+    orders:
+      seats:
+        one: "One seat"
+        other: "%{count} seats"
+      confirm:
+        reservation:
+          one: "Please confirm your reservation of one seat at “%{event_title}”."
+          other: "Please confirm your reservation of %{count} seats at “%{event_title}”."
+        booking:
+          one: "Please check the details of your booking for one seat at “%{event_title}”."
+          other: "Please check the details of your booking for %{count} seats at “%{event_title}”."

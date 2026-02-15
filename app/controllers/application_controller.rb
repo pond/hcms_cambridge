@@ -18,11 +18,11 @@ class ApplicationController < ActionController::Base
     helper_method :user_session
 
     def redactor3_authenticate_user!
-      authenticate_admin_user! # devise before_action
+      authenticate_admin_user! # (via Devise)
     end
 
     def redactor3_current_user
-      current_admin_user # devise user helper
+      current_admin_user() # (via Devise)
     end
 
   private
@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
       #     action: action_name,
       #   },
       #   tags: {
-      #     page: "#{controller_name}##{action_name}",
+      #     page: "#{controller_name}\##{action_name}",
       #     path: request.path
       #   }
       # )

@@ -1,0 +1,15 @@
+<%= @order.event.title.upcase %>
+<%= '=' * @order.event.title.size %>
+
+You have received a request to join the waitlist for this event.
+
+From:            <%= @order.name %>
+E-mail address:  <%= @order.email %>
+Phone number:    <%= @order.phone_number.presence || 'Not given' %>
+Number of seats: <%= @order.number_of_seats %>
+
+Following up
+------------
+
+Do not reply to this message - to compose a reply, please send e-mail to
+<%= @order.email %> directly.

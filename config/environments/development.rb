@@ -38,7 +38,7 @@ Rails.application.configure do
   # For Devise messages.
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
-  if ENV['MAILGUN_API_KEY'].present?
+  if ENV['MAILGUN_API_KEY'].present? && ENV['MAILCATCHER_OVERRIDES_MAILGUN'].blank?
     # For MailGun - visit Heroku, go to app resources, open Mailgun from there
     config.action_mailer.delivery_method  = :mailgun
     config.action_mailer.mailgun_settings = {
