@@ -13,7 +13,7 @@ module EventsHelper
     end
 
     revision_id = params[:revision]
-    revision_id = nil if revision_id&.to_i == event.current_revision.id
+    revision_id = nil if revision_id.to_i == event.current_revision.id
 
     return link_to(link_text, edit_admin_page_event_path(event.page, event, revision: revision_id))
   end
@@ -60,7 +60,7 @@ module EventsHelper
     end
   end
 
-  def evntshelp_booking_button(event)
+  def evtshelp_booking_button(event)
     return nil if event.free_of_charge? # NOTE EARLY EXIT
 
     if controller_name == 'waitlists'

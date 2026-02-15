@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
       #     action: action_name,
       #   },
       #   tags: {
-      #     page: "#{controller_name}##{action_name}",
+      #     page: "#{controller_name}\##{action_name}",
       #     path: request.path
       #   }
       # )

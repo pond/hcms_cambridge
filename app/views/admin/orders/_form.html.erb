@@ -11,6 +11,9 @@
              admin_page_event_order_path(page_id: order.event.page.slug, event_id: order.event.slug, id: order.id)
   ) do | f |
 %>
+  <%= hidden_field_tag(:price_currency,       order.event.currency) %>
+  <%= hidden_field_tag(:price_per_seat_cents, order.event.price_per_seat.to_s) %>
+
   <p>
     <%= apphelp_label(f, :name, required: true) %>
     <%= f.text_field :name %>
@@ -31,14 +34,12 @@
   </p>
 
   <p>
-    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount") %>
+    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
     <%= Money::Currency.new(Hcms.config.currency).symbol %>
-    <%= hidden_field_tag(:price_per_seat_cents,    f.object.event.price_per_seat.to_s) %>
-    <%= hidden_field_tag(:price_per_seat_currency, f.object.event.currency) %>
     <%=
       parsed_amount = Money.from_cents(
-        f.object.amount_owed,
-        @event.currency
+        order.amount_owed,
+        order.event.currency
       )
 
       f.text_field(
@@ -48,20 +49,22 @@
       )
     %>
     <small><%= Hcms.config.currency %></small>
-    <br>
-    <small><em>
-      The customer will be notified of the order details automatically, but
-      payment must be manually requested (e.g. by separately e-mailing them a
-      one-off Stripe payment link or bank transfer details).
-    </em></small>
   </p>
 
   <p>
     <%= apphelp_label(f, :notes, hint: 'the customer will be able to see these') %>
     <%= f.text_area :notes, rows: 3, cols: 80 %>
+    <%= f.error_markup_for(:notes) %>
   </p>
 
-  <p>
-    <%= submit_tag(button_text, class: 'bold_button') %>
-  </p>
+  <div class="field">
+    <div class="field-row">
+      <%= submit_tag(button_text, class: 'bold_button') %>
+      <span>
+        The customer will be notified of the order details automatically, but
+        payment must be manually requested (e.g. by separately e-mailing them a
+        one-off Stripe payment link or bank transfer details).
+      </span>
+    </div>
+  </div>
 <% end %>

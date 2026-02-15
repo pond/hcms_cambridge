@@ -3,8 +3,8 @@
 <p>
   Unfortunately, <strong>there was a problem with your payment</strong> of
   <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %> for
-  this event</strong> and your booking is not yet confirmed. To work out what
-  went wrong and how to resolve it, please get in touch:
+  this event and your booking is not yet confirmed. To work out what went wrong
+  and how to resolve it, please get in touch:
 </p>
 
 <%= render partial: 'contact' %>

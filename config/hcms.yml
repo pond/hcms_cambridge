@@ -20,10 +20,14 @@ default: &default
 
   # If supporting events and orders and you want local invoices to be proper
   # tax invoices, provide your business's tax (e.g. GST, VAT) number here and
-  # the name of tax type you want to show therein (e.g. GST, "taxes", etc.)
+  # the name of tax type you want to show therein (e.g. GST, "taxes", etc.).
+  # Provide also the threshold of invoice value at or above which a postal
+  # address is required, in the smallest unit of your currency (e.g. pennies
+  # or cents), else set 'false' if there is no such threshold.
   #
   tax_number:        '65-749-556'
   tax_name:          'GST'
+  tax_threshold:     100000 # $1000.00
 
   # Enable the Encounters system (reusable, bespoke, "one off" events)?
   #

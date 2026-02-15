@@ -223,6 +223,8 @@ class Event < Editable
     end
   end
 
+  # Sync with Stripe, creating a Stripe Price for this Event if need be.
+  #
   def get_or_create_stripe_price(with_event_url:)
     return self.stripe_price || begin
       product_result = Stripe::Product.create(
@@ -388,10 +390,10 @@ class Event < Editable
           blog     = Page.blogs.find_by_id(self.on_archive_params&.dig("blog_id"))
           revision = self.current_revision || self.revisions.order(created_at: :desc).first
 
-          if blog.present? && revision.present?
-            ActiveRecord::Base.transaction do
-              self.update_column(:hidden, true)
+          ActiveRecord::Base.transaction do
+            self.update_column(:hidden, true)
 
+            if blog.present? && revision.present?
               article = Article.new(
                 page_id:            blog.id,
                 created_at:         self.starts_at,

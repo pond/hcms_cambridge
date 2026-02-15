@@ -1,7 +1,7 @@
 require "spec_helper.rb"
 require_relative "shared_examples/footer_spec.rb"
 
-RSpec.describe "Pages" do
+RSpec.describe "Events" do
   before :each do
     @page = create(:page, :events)
     @page.revisions.first.update!(published: true)
@@ -154,6 +154,8 @@ RSpec.describe "Pages" do
 
       expect(page).to have_current_path(page_event_path(@page.slug, @event.slug))
       expect(page).to have_text(@event.title)
+      expect(page).to have_text(@event.summary)
+      expect(page).to have_text(spechelp_strip_markup @event.body)
     end
   end # 'context "hidden events" do'
 

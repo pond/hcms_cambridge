@@ -1,3 +1,6 @@
+<% if defined?(show_price) -%>
+* <%= apphelp_money(@order.amount_owed, currency: @order.event.currency) %>
+<% end -%>
 * <%= I18n.t('views.orders.seats', count: order.number_of_seats) %> to <%= order.event.title %>
 * <%= evtshelp_datetime(order.event) %>
 * <%= order.event.location %>

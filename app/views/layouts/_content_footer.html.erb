@@ -15,7 +15,7 @@
         <%= link_to Hcms.config.contact_tel_human, "tel:#{ Hcms.config.contact_tel_full }" %> |
       <% end %>
       <% if Hcms.config.contact_email.present? %>
-        <%= link_to Hcms.config.contact_email, "mailto:#{ Hcms.config.contact_email }" %>
+        <%= mail_to Hcms.config.contact_email %>
       <% end %>
     <% end %>
   </nav>

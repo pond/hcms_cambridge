@@ -27,7 +27,7 @@
         <%= event.summary %>
       </div>
       <div class="event-next-prev">
-        <%= evntshelp_booking_button(event) %>
+        <%= evtshelp_booking_button(event) %>
       </div>
     </div>
   </section>
@@ -59,12 +59,12 @@
         </dd>
       <% end %>
 
-      <% if event.price_per_seat > 0 %>
+      <% unless event.free_of_charge? %>
         <dt>Price</dt>
         <dd>
           <%= evtshelp_price(event) %>
           &nbsp;
-          <%= evntshelp_booking_button(event) %>
+          <%= evtshelp_booking_button(event) %>
         </dd>
       <% end %>
     </dl>

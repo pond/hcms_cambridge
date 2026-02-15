@@ -196,7 +196,7 @@ class Editable < ApplicationRecord
   #
   def self.find_by_id_or_slug!(thing)
     if thing.is_a?(Integer) || IS_INTEGER.match?(thing.to_s)
-      self.find(thing)
+      self.find_by_id!(thing)
     else
       self.find_by_slug!(thing)
     end

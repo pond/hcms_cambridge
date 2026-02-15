@@ -42,6 +42,8 @@ body, .redactor-styles {
 
   h1 { font-size: 30px; margin: $h1_margin 0; }
   h2 { font-size: 28px; margin: $h2_margin 0; }
+
+  dl + dl { margin-top: 2em; }
 }
 
 hr {
@@ -90,7 +92,7 @@ form div.field div.checkbox {
   align-items: baseline;
 }
 
-div.row-wide-column-small-container {
+div.row-wide-column-small-container, div.highlighted-area-container {
   @include standard_shadow;
 
   border: 1px solid $head_foot_border_colour;
@@ -114,6 +116,13 @@ div.row-wide-column-small {
     margin: 5px 0;
     flex-grow: 1;
   }
+
+  // For "button_to" use cases, stop the wrapper form from taking up the whole
+  // container width.
+  //
+  form {
+    display: inline-block;
+  }
 }
 
 input, select, button {
@@ -134,6 +143,10 @@ input {
 
 label {
   display: block;
+}
+
+label + label, div.field_with_errors + label {
+  margin-top: 10px;
 }
 
 textarea {
@@ -323,6 +336,35 @@ article.encounter {
     margin-bottom: 20px;
   }
 
+  section.article-body   > p:first-child,
+  section.event-body     > p:first-child,
+  section.encounter-body > p:first-child {
+    margin-top: 0;
+  }
+
+  div.encounter-gift-note {
+    margin: 1em 0;
+    text-align: center;
+
+    h3 {
+      margin: 0;
+      font-weight: bold;
+    }
+  }
+
+  section.encounter-body-and-poster {
+    display: flex;
+    flex-direction: flex-row;
+
+    section.encounter-poster img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      aspect-ratio: 2/3;
+      border-radius: 0.5em;
+    }
+  }
+
   .article-date-and-heading-container,  .event-date-and-heading-container,  .encounter-date-and-heading-container,
   .article-summary-and-links-container, .event-summary-and-links-container, .encounter-summary-and-links-container {
     display: flex;
@@ -369,6 +411,11 @@ article.encounter {
     font-style: italic;
   }
 
+  .encounter-summary-prominent {
+    display: inline-block;
+    margin: 0 auto;
+  }
+
   .article-next-prev, .event-next-prev, .encounter-next-prev {
     font-size: 18px;
     line-height: 110%;
@@ -381,6 +428,8 @@ article.encounter {
   }
 }
 
+// Lists of articles and events - not relevant for encounters.
+//
 section.blog-articles,
 section.events {
   display: grid;
@@ -812,6 +861,8 @@ nav {
       height: auto !important;
     }
 
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       article.article,
@@ -885,6 +936,21 @@ nav {
       height: auto !important;
     }
 
+    article.encounter {
+       section.encounter-body-and-poster {
+          flex-direction: column-reverse;
+
+          section.encounter-poster {
+            text-align: center;
+            img {
+              width: 75%;
+            }
+          }
+       }
+    }
+
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       grid-template-columns: 1fr 1fr;
@@ -953,6 +1019,13 @@ nav {
       height: auto !important;
     }
 
+    article.encounter {
+       section.encounter-body-and-poster {
+          flex-direction: column-reverse;
+       }
+    }
+    // Lists of articles and events - not relevant for encounters.
+    //
     section.blog-articles,
     section.events {
       grid-template-columns: 1fr;

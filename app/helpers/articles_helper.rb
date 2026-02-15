@@ -13,7 +13,7 @@ module ArticlesHelper
     end
 
     revision_id = params[:revision]
-    revision_id = nil if revision_id&.to_i == article.current_revision.id
+    revision_id = nil if revision_id.to_i == article.current_revision.id
 
     return link_to(link_text, edit_admin_page_article_path(article.page, article, revision: revision_id))
   end

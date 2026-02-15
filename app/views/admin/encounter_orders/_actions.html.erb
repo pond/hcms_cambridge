@@ -1,0 +1,29 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'actions', locals: {
+  #     encounter_order: EncounterOrder model instance
+  #   }
+%>
+<td class="admin_actions">
+  <%= link_to 'Show', admin_encounter_encounter_order_path(encounter_id: encounter_order.encounter.slug, id: encounter_order.id) %>
+</td>
+<td class="admin_actions for_delete">
+  <%=
+    warning = 'Are you sure? This cannot be undone. If the customer has web links to the encounter booking, they will stop working if it is deleted.'
+
+    if encounter_order.may_cancel_state?
+      warning << "\n\nShowing the encounter order details and then Cancelling it from there may be a better option."
+    end
+
+    link_to(
+      'Delete',
+      admin_encounter_encounter_order_path(
+        encounter_order.encounter,
+        encounter_order,
+      ),
+      method: :delete,
+      data:   { confirm: warning }
+    )
+  %>
+</td>

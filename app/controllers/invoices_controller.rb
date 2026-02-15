@@ -1,4 +1,4 @@
-class InvoicesController < OrdersController
+class InvoicesController < ApplicationController
 
   layout 'invoices'
 

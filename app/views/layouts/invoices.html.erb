@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <%= render partial: 'layouts/content_preamble', locals: { content: @event } %>
-    <title><%= Hcms.config.site_name %>: Tax Invoice <%= @order.human_invoice_number %></title>
+    <%= render partial: 'layouts/content_preamble', locals: { content: (@event || @encounter) } %>
+    <title><%= Hcms.config.site_name %>: Tax Invoice <%= (@order || @encounter_order).human_invoice_number %></title>
   </head>
 
   <body>
@@ -25,7 +25,7 @@
     </header>
 
     <main>
-      <%= render partial: 'layouts/content_main', locals: { content: @event } %>
+      <%= render partial: 'layouts/content_main', locals: { content: (@event || @encounter) } %>
 
       <p style="text-align: center">
         <a onclick='window.print()' class='bold_button print_button'>Print</a>

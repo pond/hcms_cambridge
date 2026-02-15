@@ -1,0 +1,36 @@
+<h1 id="admin-header-main">
+  Bookings for &ldquo;<%= @encounter.title %>&rdquo;
+</h1>
+
+<ul>
+  <li><%= @encounter.location %></li>
+</ul>
+
+<div id="admin-header-with-nav">
+  <h2>All Bookings</h2>
+  <span>▶︎</span>
+  <nav>
+    <%= link_to 'Set up encounter',         new_admin_encounter_encounter_order_path(encounter_id: @encounter.slug) %> |
+    <%= link_to 'View encounters list',     admin_encounters_path() %> |
+    <%= link_to 'Back to "All pages" list', admin_pages_path() %>
+  </nav>
+</div>
+
+<% if @encounter_orders.problematic.any? %>
+  <h3>Problematic</h3>
+  <%= render partial: 'index', locals: { encounter: @encounter, encounter_orders: @encounter_orders.problematic } %>
+<% end %>
+
+<% if @encounter_orders.confirmed.any? %>
+  <h3>Paid</h3>
+  <%= render partial: 'index', locals: { encounter: @encounter, encounter_orders: @encounter_orders.confirmed } %>
+<% end %>
+
+<% if @encounter_orders.miscellaneous.any? %>
+  <h3>Others</h3>
+  <%= render partial: 'index', locals: { encounter: @encounter, encounter_orders: @encounter_orders.miscellaneous } %>
+<% end %>
+
+<% if @encounter_orders.empty? %>
+  <p>None just yet.</p>
+<% end %>

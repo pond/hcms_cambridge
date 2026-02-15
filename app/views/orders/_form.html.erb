@@ -27,7 +27,7 @@
 
   <%# TODO: Fix me; obviously, this should be dynamic depending on multiplied total %>
   <%# TODO: Fix me; configurable address-required threshold %>
-  <% if @event.price_per_seat > 100000 %>
+  <% if Hcms.config.tax_threshold.is_a?(Integer) && @event.price_per_seat > Hcms.config.tax_threshold %>
     <p>
       For this event, a full tax invoice and receipt needs to include an address.
     </p>
@@ -54,6 +54,7 @@
     <p>
       <%= apphelp_label(f, :notes) %>
       <%= f.text_area :notes, rows: 3, cols: 80, placeholder: 'Optional booking notes, questions etc.' %>
+      <%= f.error_markup_for(:notes) %>
     </p>
   <% end %>
 

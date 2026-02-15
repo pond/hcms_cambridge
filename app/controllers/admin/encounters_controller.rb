@@ -8,18 +8,19 @@ class Admin::EncountersController < ApplicationController
   before_action :build_editable_encounter, only: [:new,  :create]
   before_action :check_for_revision,       only: [:show, :edit, :update]
 
-  PERMITTED_EVENT_PARAMS = [
-    :title,
-    :slug,
-    :encounter_hero_image,
-    :summary,
-    :body,
-    :raw_editor,
+  PERMITTED_ENCOUNTER_PARAMS = %i{
+    title
+    slug
+    encounter_hero_image
+    summary
+    body
+    raw_editor
 
-    :location,
-    :price_per_seat,
-    :price_physical,
-  ]
+    location
+    price_per_seat
+    price_physical
+    name_physical
+  }
 
   public
 
@@ -32,6 +33,9 @@ class Admin::EncountersController < ApplicationController
 
     # GET /admin/encounters/<id>
     def show
+      if @encounter.might_include_price_details?
+        flash.now[:alert] = "There might be price information included in this encounter's summary or description. Be careful to avoid price details in the summary or details areas, since these are seen by people who are sent details of the encounter as part of a gift."
+      end
     end
 
     # GET /admin/encounters/new
@@ -136,19 +140,16 @@ class Admin::EncountersController < ApplicationController
 
       if safe_params[:price_physical].blank?
         safe_params[:price_physical] = nil
+        safe_params[:name_physical ] = nil
       end
 
       [:price_per_seat, :price_physical].each do | attr |
-        if encounter.currency.present?
+        if safe_params[attr].present?
           parsed_amount = Monetize.parse(
             safe_params[attr],
             encounter.currency
           )
           safe_params[attr] = parsed_amount.cents
-        elsif attr == :price_per_seat
-          safe_params[attr] = 0
-        else
-          safe_params[attr] = nil
         end
       end
 
@@ -172,7 +173,7 @@ class Admin::EncountersController < ApplicationController
     end
 
     def encounter_params
-      return params.require(:encounter).permit(PERMITTED_EVENT_PARAMS)
+      return params.require(:encounter).permit(PERMITTED_ENCOUNTER_PARAMS)
     end
 end
 #

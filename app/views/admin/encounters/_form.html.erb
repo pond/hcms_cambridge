@@ -60,27 +60,38 @@
               </em></small>
             </div>
 
-            <div class="field">
-              <%= apphelp_label(f, :price_physical) %>
-              <%= Money::Currency.new(Hcms.config.currency).symbol %>
-              <%=
-                parsed_physical_amount = Money.from_cents(
-                  f.object.price_physical,
-                  @encounter.currency
-                ) if f.object.price_physical.present?
+            <div>
+              <div class="field">
+                <%= apphelp_label(f, :price_physical) %>
+                <%= Money::Currency.new(Hcms.config.currency).symbol %>
+                <%=
+                  parsed_physical_amount = Money.from_cents(
+                    f.object.price_physical,
+                    @encounter.currency
+                  ) if f.object.price_physical.present?
 
-                f.text_field(
-                  :price_physical,
-                  value: parsed_physical_amount&.format(symbol: false),
-                  class: 'not_full_width_in_two_column'
-                )
-              %>
-              <small><%= Hcms.config.currency %></small>
-              <br>
-              <small><em>
-                Set to zero if physical item is free of charge.
-                Set to blank if there is no physical item available at all.
-              </em></small>
+                  f.text_field(
+                    :price_physical,
+                    value: parsed_physical_amount&.format(symbol: false),
+                    class: 'not_full_width_in_two_column'
+                  )
+                %>
+                <small><%= Hcms.config.currency %></small>
+                <br>
+                <small><em>
+                  Set to zero if physical item is free of charge.
+                  Set to blank if there is no physical item available at all.
+                </em></small>
+              </div>
+              <div class="field">
+                <%= apphelp_label(f, :name_physical) %>
+                <%= f.text_field(:name_physical) %>
+                <br>
+                <small><em>
+                  Required if a physical item price is filled in.
+                  Use lower case except for acronyms, e.g. "gift card".
+                </em></small>
+              </div>
             </div>
           </div>
         <% end %>

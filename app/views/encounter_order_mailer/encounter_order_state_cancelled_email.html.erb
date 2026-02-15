@@ -1,0 +1,14 @@
+<h1><%= @encounter_order.encounter.title %></h1>
+
+<p>
+  Your booking has been cancelled. We're sorry you could not attend this time,
+  but hope to see you again in future.
+</p>
+
+<%= render partial: 'encounter_order', object: @encounter_order %>
+<p>
+  If you have any questions about the cancellation, please get in touch:
+</p>
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>

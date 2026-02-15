@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_08_232402) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,11 +34,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_08_232402) do
     t.index ["slug"], name: "index_articles_on_slug", unique: true
   end
 
+  create_table "encounter_orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "address"
+    t.integer "amount_owed", null: false
+    t.datetime "created_at", null: false
+    t.text "email", null: false
+    t.bigint "encounter_id", null: false
+    t.text "gift_note"
+    t.boolean "has_physical"
+    t.bigserial "invoice_number", null: false
+    t.text "name", null: false
+    t.text "notes_to_buyer"
+    t.integer "number_of_seats", null: false
+    t.text "phone_number"
+    t.datetime "starts_at"
+    t.enum "state", default: "new", null: false, enum_type: "order_states"
+    t.text "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["encounter_id"], name: "index_encounter_orders_on_encounter_id"
+    t.index ["invoice_number"], name: "index_encounter_orders_on_invoice_number", unique: true
+    t.index ["state"], name: "index_encounter_orders_on_state"
+  end
+
   create_table "encounters", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "currency", limit: 3, null: false
     t.text "encounter_hero_image", null: false
     t.text "location"
+    t.text "name_physical"
     t.integer "price_per_seat", null: false
     t.integer "price_physical"
     t.boolean "raw_editor", default: false, null: false
@@ -153,10 +176,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_08_232402) do
 
   create_table "stripe_payments", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.uuid "order_id", null: false
+    t.uuid "payable_id", null: false
+    t.string "payable_type"
     t.text "stripe_payment_intent", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_stripe_payments_on_order_id"
+    t.index ["payable_id"], name: "index_stripe_payments_on_payable_id"
   end
 
   create_table "stripe_prices", force: :cascade do |t|

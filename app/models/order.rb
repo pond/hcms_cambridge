@@ -4,7 +4,7 @@ class Order < ApplicationRecord
   has_secure_token()
 
   belongs_to :event
-  has_one :stripe_payment, required: false, dependent: :destroy
+  has_one :stripe_payment, as: :payable, required: false, dependent: :destroy
 
   # Uses the site name first letters capitalised plus "I-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSI-".
@@ -19,7 +19,7 @@ class Order < ApplicationRecord
   # ============================================================================
 
   # NB: This is backed by a PostgreSQL enum, so changes require corresponding
-  # migrations. Enum originally created by "20251010032150_add_events.rb".
+  # migrations. Enum originally created by "20251010035603_add_orders.rb".
   #
   # Using 'enum' will cause Rails to generate a bunch of accessors which use
   # "enum_state_" as a prefix, to avoid collision with an AASM state machine
@@ -135,16 +135,38 @@ class Order < ApplicationRecord
     state
   }
 
-  validates_presence_of :address, if: -> (order) { order.event.price_per_seat > 100000 }
+  validates_presence_of :address, if: -> (order) {
+    Hcms.config.tax_threshold.is_a?(Integer) &&
+    order.amount_owed.is_a?(Integer) &&
+    order.amount_owed >= Hcms.config.tax_threshold
+  }
 
   # Note that the state machine enum is validated automatically.
 
-  validates :email,                         format:       { with: URI::MailTo::EMAIL_REGEXP }
-  validates :number_of_seats, :amount_owed, numericality: { only_integer: true, message: 'must be a whole number' }
+  validates(
+    :email,
+    format: {
+      with:    URI::MailTo::EMAIL_REGEXP,
+      message: 'must be a valid e-mail address'
+    }
+  )
 
-  validate :number_of_seats do |order|
-    if order.event.present? && order.event.number_of_seats > 0
-      event        = order.event
+  validates(
+    :number_of_seats, :amount_owed,
+    numericality: {
+      only_integer: true,
+      message:      'must be a whole number'
+    }
+  )
+
+  validate :number_of_seats do
+    if (
+      self.number_of_seats.present?  &&
+      self.number_of_seats > 0       &&
+      self.event.present?            &&
+      self.event.number_of_seats > 0
+    )
+      event        = self.event
       other_orders = event.orders.inflight.where.not(id: self.id)
       remaining    = [0, event.number_of_seats - other_orders.sum(:number_of_seats)].max()
 
@@ -165,8 +187,8 @@ class Order < ApplicationRecord
   # phone numbers on older orders and might even clear them out now and again
   # to avoid unnecessary accumulation of unwanted PII.
   #
-  validate :phone_number do |order|
-    if order.phone_number.present?
+  validate :phone_number do
+    if self.phone_number.present?
       parsed = Phonelib.parse(self.phone_number)
       if parsed.valid?
         if parsed.countries.include?(Hcms.config.country_code)
@@ -192,7 +214,7 @@ class Order < ApplicationRecord
 
     # See "en.yml", models.order_state
     #
-    if self.state_new?
+    if self.state_new? && self.updated_at.present?
       if self.updated_at < INFLIGHT_WINDOW.ago
         if self.updated_at > STALE_WINDOW.ago
           state_for_i18n = 'getting_older'
@@ -219,6 +241,10 @@ class Order < ApplicationRecord
     self.customer_can_pay_for_booking?
   end
 
+  # Reservations mean you've essentially expressed an interest in an event which
+  # was accepting such things ("presales" state) previously, and now things have
+  # changed so that this reservation can be solidified into a booking.
+  #
   def customer_can_pay_for_reservation?
     ! self.event.has_started? &&
     (self.state_reserved? || self.state_payment_failed?) &&
@@ -228,6 +254,10 @@ class Order < ApplicationRecord
     )
   end
 
+  # You can pay for an event booking if you either could pay for a prior
+  # reservation, *or* if this is a new order for an event that's accepting
+  # public purchases.
+  #
   def customer_can_pay_for_booking?
     self.customer_can_pay_for_reservation? ||
     (
@@ -321,6 +351,14 @@ class Order < ApplicationRecord
     ! self.event.has_started?
   end
 
+  # Is this order *outside* the no-refunds window - that is, should a refund be
+  # allowed under normal circumstances?
+  #
+  # * Always allowed if the event was cancelled
+  # * Always allowed if the configured window period is zero
+  # * Otherwise the event cannot start within the configured number of days
+  #   from now.
+  #
   def outside_no_refunds_window?
     self.event.state_cancelled? ||
     Hcms.config.no_refunds_window.zero? ||

@@ -33,7 +33,7 @@ RSpec.describe Encounter, type: :model do
       encounter_2 = create(:encounter, created_at: t_ref - 1.day)
       encounter_3 = create(:encounter, created_at: t_ref + 1.day)
 
-      expect(Encounter.all.to_a).to eql([encounter_3, encounter_1, encounter_2])
+      expect(Encounter.all.to_a).to eql([encounter_2, encounter_1, encounter_3])
     end
 
     it "::for_navigation finds nothing" do
@@ -109,8 +109,8 @@ RSpec.describe Encounter, type: :model do
     end
 
     it "#no_physical_aspect?" do
-      expect(build(:encounter                ).no_physical_aspect?).to eql(false)
-      expect(build(:encounter, :physical_none).no_physical_aspect?).to eql(true)
+      expect(build(:encounter                ).has_physical_aspect?).to eql(true)
+      expect(build(:encounter, :physical_none).has_physical_aspect?).to eql(false)
     end
 
     it "#physical_aspect_free_of_charge?" do

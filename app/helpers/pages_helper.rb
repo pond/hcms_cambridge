@@ -53,7 +53,7 @@ module PagesHelper
     end
 
     revision_id = params[:revision]
-    revision_id = nil if revision_id&.to_i == page.current_revision.id
+    revision_id = nil if revision_id.to_i == page.current_revision.id
 
     return link_to(link_text, edit_admin_page_path(page, revision: revision_id))
   end

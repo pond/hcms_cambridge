@@ -22,6 +22,7 @@ class OrdersSelfServiceController < ApplicationController
     #
     if event == 'cancel'
       @order.cancel_state!
+
       redirect_to(
         page_event_path(page_id: @page.slug, id: @event.slug),
         notice: "OK, that's cancelled."
@@ -49,10 +50,10 @@ class OrdersSelfServiceController < ApplicationController
           level: :error,
           extra: {
             controller: controller_name,
-            action: action_name,
+            action:     action_name,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )
@@ -77,8 +78,8 @@ class OrdersSelfServiceController < ApplicationController
         return # NOTE EARLY EXIT
       end
 
-      event_url    = page_event_url(page_id: @order.event.page.slug, id: @order.event.slug)
-      stripe_price = @order.event.get_or_create_stripe_price(with_event_url: event_url)
+      event_url    = page_event_url(page_id: @event.page.slug, id: @event.slug)
+      stripe_price = @event.get_or_create_stripe_price(with_event_url: event_url)
 
       branding_settings = {
         background_color: (Hcms.config.stripe[:checkout_background] rescue '#ffffff'),
@@ -90,12 +91,12 @@ class OrdersSelfServiceController < ApplicationController
       }
 
       invoice_data = {
-        description: @order.event.title,
+        description: @event.title,
         footer:      [Hcms.config.site_name, Hcms.config.orders_email].reject(&:blank?).join(' / '),
       }
 
-      base_success_url      = stripe_payment_succeeded_url(order_id: @order.id, token: @order.token)
-      base_cancel_url       = stripe_payment_cancelled_url(order_id: @order.id, token: @order.token)
+      base_success_url      = stripe_order_payment_succeeded_url(order_id: @order.id, token: @order.token)
+      base_cancel_url       = stripe_order_payment_cancelled_url(order_id: @order.id, token: @order.token)
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
@@ -103,12 +104,12 @@ class OrdersSelfServiceController < ApplicationController
         line_items = [{
           quantity:   1,
           price_data: {
-            currency:     @order.event.currency,
+            currency:     @event.currency,
             unit_amount:  @order.amount_owed,
             product_data: {
-              name:        @order.event.title,
-              description: helpers.evtshelp_datetime(@order.event),
-              images:      [@order.event.product_image_url],
+              name:        @event.title,
+              description: helpers.evtshelp_datetime(@event),
+              images:      [@event.product_image_url],
               unit_label:  "booking",
             }
           }
@@ -192,7 +193,7 @@ class OrdersSelfServiceController < ApplicationController
             order_email: @order&.email,
           },
           tags: {
-            page: "#{controller_name}##{action_name}",
+            page: "#{controller_name}\##{action_name}",
             path: request.path
           }
         )
@@ -209,7 +210,7 @@ class OrdersSelfServiceController < ApplicationController
       begin
         session = Stripe::Checkout::Session.retrieve(params[:csid])
         StripePayment.create!(
-          order:                 @order,
+          payable:               @order,
           stripe_payment_intent: session.payment_intent
         )
       rescue StandardError => e

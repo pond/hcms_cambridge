@@ -17,10 +17,13 @@
       <%= tag.code(link_to(@order.phone_number, "tel:#{@order.phone_number}")) %>
     <% end %>
   </dd>
-  <dt>Order first created at</dt>
-  <dd><%= apphelp_human_time(@order.created_at, date_only: false) %></dd>
-  <dt>Order most recently updated at</dt>
-  <dd><%= apphelp_human_time(@order.updated_at, date_only: false) %></dd>
+  <% if @order.address.present? %>
+    <dt>Customer address</dt>
+    <dd><%= @order.address %></dd>
+  <% end %>
+</dl>
+
+<dl>
   <dt>Seats and price</dt>
   <dd>
     <%= @order.number_of_seats %> →
@@ -39,6 +42,7 @@
     <% magic_link = ordershelp_magic_link(@order) %>
     <%=
       button_tag(
+        title: 'Copy link',
         class: 'copy_from_data',
         style: 'font-size: 85%',
         data:  { text: magic_link }
@@ -50,7 +54,14 @@
   </dd>
 </dl>
 
-<div class="row-wide-column-small-container">
+<dl>
+  <dt>Order first created at</dt>
+  <dd><%= apphelp_human_time(@order.created_at, date_only: false) %></dd>
+  <dt>Order most recently updated at</dt>
+  <dd><%= apphelp_human_time(@order.updated_at, date_only: false) %></dd>
+</dl>
+
+<div class="row-wide-column-small-container" style="margin-top: 2em;">
   <div class="row-wide-column-small">
     <span>
       Current state: <%= @order.human_state %>

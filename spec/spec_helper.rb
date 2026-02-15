@@ -92,6 +92,8 @@ RSpec.configure do |config|
 
   config.before :each do
     Faker::UniqueGenerator.clear()
+
+    allow(Hcms.config).to receive(:tax_threshold).and_return(nil)
   end
 
   config.before :each, type: :system do |example|

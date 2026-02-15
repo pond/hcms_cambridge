@@ -103,6 +103,19 @@ en:
         location: "Location"
         price_per_seat: "Price per seat"
         price_physical: "Optional physical item price"
+        name_physical: "Optional physical item name"
+
+      encounter_order:
+        name: "Name"
+        email: "E-mail address"
+        phone_number: "Phone number"
+        address: "Postal address to show on tax invoice"
+        starts_at: "Starting date and time"
+        has_physical: "Include physical product in price?"
+        gift_note: "If this is a gift, do you want to add a message for the recipient?"
+        notes_to_buyer: "Any other notes?"
+        number_of_seats: "Number of seats"
+        amount_owed: "Total price"
 
       event:
         title: "Title"
@@ -122,9 +135,12 @@ en:
       order:
         name: "Name"
         email: "E-mail address"
+        phone_number: "Phone number"
+        address: "Home postal address"
         number_of_seats: "Number of seats"
         notes: "Any other notes?"
         amount_owed: "Total price"
+        invoice_number: "Invoice number"
 
       page:
         title: "Page title"
@@ -199,6 +215,15 @@ en:
       unpublished: "Old (%{time})"
 
   views:
+    encounter_orders:
+      seats:
+        one: "One seat"
+        other: "%{count} seats"
+      confirm:
+        booking:
+          one: "Please check the details of your booking for one seat at “%{encounter_title}”."
+          other: "Please check the details of your booking for %{count} seats at “%{encounter_title}”."
+
     orders:
       seats:
         one: "One seat"

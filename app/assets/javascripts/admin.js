@@ -9,7 +9,8 @@
 //= require redactor_plugins/table
 //= require redactor_plugins/video
 //= require redactor_plugins/widget
-//= require redactor_config.js
+//= require redactor_config
+//= require shared
 
 $(document).ready(function() {
 
@@ -74,44 +75,54 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
-  // Copy buttons
+  // Handle changes of kind of encounter order starting date/time
   // ===========================================================================
   //
-  const copyFromDataButtons = $('button.copy_from_data[data-text]');
+  const encounterOrderStartsAtKindRadios = $('[id^="encounter_order_starts_at_kind_"]');
 
-  if (copyFromDataButtons.length > 0) {
-    copyFromDataButtons.on('click', function(e) {
-      const targetButton = $(this);
+  if (encounterOrderStartsAtKindRadios.length > 0) {
+    const encounterOrderStartsAtKindFixedDateRadio = $('#encounter_order_starts_at_kind_fixed_date');
+    const encounterOrderDateTimeInput = $('#encounter_order_starts_at');
 
-      text = targetButton.data('text');
-      navigator.clipboard.writeText(text);
+    function enableOrDisableDateTimeInput() {
+      if (encounterOrderStartsAtKindFixedDateRadio.is(':checked')) {
+        encounterOrderDateTimeInput.prop('disabled', false);
+      } else {
+        encounterOrderDateTimeInput.prop('disabled', true);
+      }
+    }
 
-      icon = targetButton.find('i.fa');
-      icon.removeClass('fa-copy');
-      icon.addClass('fa-check');
-
-      window.setTimeout(
-        function() {
-          icon.removeClass('fa-check');
-          icon.addClass('fa-copy');
-        },
-        2000
-      );
-    });
+    enableOrDisableDateTimeInput();
+    encounterOrderStartsAtKindRadios.on('change', enableOrDisableDateTimeInput);
   }
 
   // ===========================================================================
-  // For ad-hoc order changes, calculate price based on number of seats
+  // For ad-hoc order or encounter order changes, calculate price based on the
+  // number of seats and (for encounters) physical product addition
   // ===========================================================================
   //
-  const pricePerSeatCentsHidden = $('#price_per_seat_cents');
+  const pricePerSeatCentsHidden  = $('#price_per_seat_cents');
+  const pricePhysicalCentsHidden = $('#price_physical_cents');
 
   if (pricePerSeatCentsHidden.length > 0) {
+    const currency            = $('#price_currency').val();
+    const hasPhysicalInput    = $('#encounter_order_has_physical');
+    const isEncounter         = (hasPhysicalInput.length > 0);
     const pricePerSeatCents   = parseInt(pricePerSeatCentsHidden.val());
-    const currency            = $('#price_per_seat_currency').val();
-    const numberOfSeatsInput  = $('#order_number_of_seats');
-    const amountOwedInput     = $('#order_amount_owed');
+    var   pricePhysicalCents;
+    var   numberOfSeatsInput;
+    var   amountOwedInput;
     var   manualInputDetected = false;
+
+    if (isEncounter) {
+      numberOfSeatsInput = $('#encounter_order_number_of_seats');
+      amountOwedInput    = $('#encounter_order_amount_owed');
+      pricePhysicalCents = parseInt(pricePhysicalCentsHidden.val());
+    } else {
+      numberOfSeatsInput = $('#order_number_of_seats');
+      amountOwedInput    = $('#order_amount_owed');
+      pricePhysicalCents = 0;
+    }
 
     const formatter = new Intl.NumberFormat(
       navigator.language, {
@@ -126,13 +137,17 @@ $(document).ready(function() {
       manualInputDetected = (amountOwedInput.val().trim().length > 0);
     });
 
-    numberOfSeatsInput.on('input', function(e) {
+    function updateTotal() {
       if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
         const inputAmount = numberOfSeatsInput.val();
 
         if (numberOfSeatsInput.val().length > 0) {
           const numberOfSeats   = parseInt(inputAmount);
-          const amountOwedCents = numberOfSeats * pricePerSeatCents;
+          var   amountOwedCents = numberOfSeats * pricePerSeatCents;
+
+          if (isEncounter && hasPhysicalInput.val() == 'true') {
+            amountOwedCents += pricePhysicalCents;
+          }
 
           formatted = formatter.format(amountOwedCents / 100);
           formatted = formatted.replace(currency, '').trim();
@@ -142,6 +157,27 @@ $(document).ready(function() {
           amountOwedInput.val('');
         }
       }
-    });
+    }
+
+    updateTotal();
+    numberOfSeatsInput.on('input', updateTotal);
+
+    if (isEncounter) {
+      const totalExcludesPhysicalHint = $('#encounter_order_total_amount_hint');
+
+      function showOrHideHint() {
+        if (hasPhysicalInput.val() == '') {
+          totalExcludesPhysicalHint.show()
+        } else {
+          totalExcludesPhysicalHint.hide()
+        }
+      }
+
+      showOrHideHint();
+      hasPhysicalInput.on('change', function(e) {
+        updateTotal();
+        showOrHideHint();
+      });
+    }
   }
 });

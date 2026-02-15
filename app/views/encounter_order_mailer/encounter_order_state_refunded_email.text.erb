@@ -1,0 +1,16 @@
+<%= @encounter_order.encounter.title.upcase %>
+<%= '=' * @encounter_order.encounter.title.size %>
+
+<%
+  str = <<~TEXT.squish()
+    Your payment of #{apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency)}
+    has been refunded. Depending on your bank, it might take a few days for this to appear
+    in your account.
+  TEXT
+%><%= word_wrap(str, line_width: 78) %>
+
+<%= render partial: 'encounter_order', object: @encounter_order %>
+If you have any questions about your refund, please get in touch:
+
+<%= render partial: 'contact' %>
+<%= render partial: 'signature' %>
