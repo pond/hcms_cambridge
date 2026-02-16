@@ -20,34 +20,19 @@ RSpec.describe Order, type: :model do
     allow(Stripe::Product).to receive(:retrieve).with(mock_prodid).and_return double(id: mock_prodid)
   end
 
-  xcontext "scopes and associations" do
-    it "default scope orders by state machine, then starts-at-date ascending" do
-      page = create(:page, :events)
+  context "scopes and associations" do
+    it "default scope orders by state machine, then created-at-date ascending" do
 
       # Just test some simple "most important" combinations
       #
       t_ref   = Time.now.midnight + 1.day + 18.hours
-      event_1 = create(:event, page: page, starts_at: t_ref,         ends_at: t_ref + 2.hours)
-      event_2 = create(:event, page: page, starts_at: t_ref,         ends_at: t_ref + 2.hours)
-      event_3 = create(:event, page: page, starts_at: t_ref + 1.day, ends_at: t_ref + 2.hours + 1.day)
+      order_1 = create(:order, event: @event, created_at: t_ref)
+      order_2 = create(:order, event: @event, created_at: t_ref)
+      order_3 = create(:order, event: @event, created_at: t_ref + 1.day)
 
-      event_2.update_column(:state, Event.states[:cancelled])
+      order_2.update_column(:state, Order.states[:cancelled])
 
-      expect(event_1.page).to eql(page) # (basic sanity check)
-      expect(event_2.page).to eql(page)
-      expect(event_3.page).to eql(page)
-
-      expect(Event.all.to_a).to eql([event_1, event_3, event_2])
-    end
-
-    it "::for_navigation only includes published, non-hidden events" do
-      page = create(:page, :events)
-
-      event_1 = create(:event, page: page); event_1.revisions.update_all(published: false)
-      event_2 = create(:event, page: page); event_2.revisions.update_all(published: true)
-      event_3 = create(:event, page: page); event_3.revisions.update_all(published: true); event_3.update!(hidden: true)
-
-      expect(Event.for_navigation).to match_array([event_2])
+      expect(Order.all.to_a).to eql([order_1, order_3, order_2])
     end
   end # 'context "scopes and associations" do'
 
@@ -657,19 +642,86 @@ RSpec.describe Order, type: :model do
         end # 'context "to cancelled" do'
       end # 'context "from a new (initial) state" do'
 
-      xcontext "from a reserved state" do
+      context "from a reserved state" do
+        before :each do
+          @order.reserve_state!
+
+          perform_enqueued_jobs()
+          ActionMailer::Base.deliveries.clear()
+        end
+
+        # Note this is *order* cancellation, so user-initiated (or via admin at,
+        # we assume, a user's behest). Event cancellation and its impact on
+        # orders in various states is covered in 'spec/models/event_spec.rb'.
+        #
         context "to cancelled" do
+          it "updates and notifies" do
+            @order.cancel_state!
+
+            expect(@order.valid_events()).to be_empty
+
+            messages    = spechelp_decode_multipart(count: 2)
+            to_customer = spechelper_find_in_decoded(messages, to: @order.email)
+            to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+            expect(to_customer).to be_present
+            expect(to_customer.email.to).to eql([@order.email])
+            expect(to_customer.email.subject).to include("Confirmation of cancellation")
+
+            expect(to_customer.text).to     include(@order.event.title.upcase)
+            expect(to_customer.text).to     include("Your reservation for this event has been cancelled")
+            expect(to_customer.text).to_not include("Unfortunately, this event has been cancelled.") # (sic.)
+
+            expect(to_customer.html).to     include(@order.event.title)
+            expect(to_customer.html).to     include("Your reservation for this event has been cancelled")
+            expect(to_customer.text).to_not include("Unfortunately, this event has been cancelled.") # (sic.)
+          end
         end # 'context "to cancelled" do'
 
         context "to paid" do
+          before :each do
+            @event.start_public_purchases_state!
+
+            perform_enqueued_jobs()
+            ActionMailer::Base.deliveries.clear()
+          end
+
+          it "updates and notifies" do
+            @order.pay_state!
+
+            expect(@order.valid_events()).to match_array([@refund_event, @force_refund_event])
+
+            messages    = spechelp_decode_multipart(count: 2)
+            to_customer = spechelper_find_in_decoded(messages, to: @order.email)
+            to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+            total       = spechelp_format_money(@order.amount_owed, @event.currency)
+
+            expect(to_customer).to be_present
+            expect(to_customer.email.subject).to include("Booking confirmed")
+
+            expect(to_customer.text).to include(@order.event.title.upcase)
+            expect(to_customer.text).to include("Thank you for your payment")
+            expect(to_customer.text).to include(total)
+
+            expect(to_customer.html).to include(@order.event.title)
+            expect(to_customer.html).to include("Thank you for your payment")
+            expect(to_customer.html).to include(total)
+
+            expect(to_admin).to be_present
+            expect(to_admin.email.subject).to eql("[Site Under Test] New paid booking from #{@order.name}")
+
+            expect(to_admin.text).to include(@order.event.title)
+            expect(to_admin.text).to include("A paid booking has been received.")
+
+            expect(to_admin.html).to include(@order.event.title)
+            expect(to_admin.text).to include("A paid booking has been received.")
+          end
         end # 'context "to paid" do'
       end # 'context "from a reserved state" do'
 
       context "from paid state" do
         before :each do
           @event.start_public_purchases_state!
-
-          @order = create(:order, event: @event)
           @order.pay_state!
 
           perform_enqueued_jobs()
