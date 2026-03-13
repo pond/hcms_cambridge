@@ -223,7 +223,9 @@ end
 # English-like locale, so decimals are "." not "," and the position of e.g. an
 # EUR symbol is before, not after the numerical amount.
 #
-def spechelp_format_money(amount, currency)
+# Pass "omit_symbol: true" to omit the currency symbol.
+#
+def spechelp_format_money(amount, currency, omit_symbol: false)
   raise "Unsupported currency #{currency.inspect}" unless SUPPORTED_TEST_CURRENCIES.include?(currency)
 
   c_to_sym = {
@@ -252,10 +254,14 @@ def spechelp_format_money(amount, currency)
     delimiter:  I18n.t("number.format.delimiter"),
   )
 
-  if currency == 'TND'
-    "#{amount} #{sym}"
+  if omit_symbol
+    amount.to_s()
   else
-    "#{sym}#{amount}"
+    if currency == 'TND'
+      "#{amount} #{sym}"
+    else
+      "#{sym}#{amount}"
+    end
   end
 end
 

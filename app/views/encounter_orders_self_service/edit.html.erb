@@ -10,7 +10,7 @@
 <dl>
   <dt>Date and time</dt>
   <dd><%= encordshelp_datetime(@encounter_order) %></dd>
-  <dt>Seats and price</dt>
+  <dt>People and price</dt>
   <dd>
     <%= @encounter_order.number_of_seats %> →
     <% if @encounter_order.amount_owed.zero? %>
@@ -106,8 +106,8 @@
               end
             %>
             <small><em>
-              (Price excludes postage; please enquire after booking for
-              collection or postage options)
+              (Price <strong><u>excludes</u> postage</strong>; please enquire
+              after booking for collection or postage options)
             </em></small>
           <% end %>
         </div>

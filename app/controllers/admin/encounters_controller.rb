@@ -26,9 +26,7 @@ class Admin::EncountersController < ApplicationController
 
     # GET /admin/encounters
     def index
-      @encounters = Encounter
-        .all
-        .includes(:revisions)#, :encounter_orders, :confirmed_encounter_orders)
+      @encounters = Encounter.all.includes(:revisions)
     end
 
     # GET /admin/encounters/<id>

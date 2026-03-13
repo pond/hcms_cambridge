@@ -1185,7 +1185,7 @@ RSpec.describe "Orders" do
   # A lot of cases for order management were already handled above.
   #
   context "paid order management" do
-    it 'lets paid users view an invoice' do
+    it "lets paid users view an invoice" do
       allow(Hcms.config).to receive(:tax_number).and_return("123-456-789")
       allow(Hcms.config).to receive(:tax_name  ).and_return("IMAGINARYTAX")
 

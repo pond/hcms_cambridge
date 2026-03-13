@@ -82,7 +82,7 @@ class Admin::EncounterOrdersController < ApplicationController
             encounter_id: @encounter_order.encounter.slug,
             id:           @encounter_order.id,
           ),
-          notice: 'Encounter order set up successfully.'
+          notice: 'Encounter booking set up successfully.'
         )
       else
         render :new
@@ -96,7 +96,7 @@ class Admin::EncounterOrdersController < ApplicationController
     # PATCH/PUT /admin/encounters/<encounter_id>/orders/<id>
     def update
       if params[:process] != 'state'
-        return bail_out_with('Unrecognised order change requested') # NOTE EARLY EXIT
+        return bail_out_with('Unrecognised booking change requested') # NOTE EARLY EXIT
       end
 
       all_events   = EncounterOrder.aasm(:state).events.map(&:name).map(&:to_s)
@@ -104,25 +104,25 @@ class Admin::EncounterOrdersController < ApplicationController
       event_name   = params[:event]
 
       if all_events.exclude?(event_name)
-        return bail_out_with('Unrecognised order change requested')
+        return bail_out_with('Unrecognised booking change requested')
       elsif valid_events.exclude?(event_name)
-        return bail_out_with('That order cannot be changed in that way')
+        return bail_out_with('That booking cannot be changed in that way')
       else
         ActiveRecord::Base.transaction do
           stripe_payment_was_present = @encounter_order.stripe_payment.present?
 
           @encounter_order.send("#{event_name}_state!")
-          notification = 'Order updated'
+          notification = 'Booking updated'
 
           if event_name == 'refund'
             if stripe_payment_was_present && @encounter_order.reload.stripe_payment.nil?
               notification = 'Refund successfully processed automatically via Stripe.'
             else
               notification = <<~STR
-                Order marked as refunded locally only. No matter how it was paid
-                for - e.g. bank transfer or a processor such as Stripe - please
-                make sure that this mechansim has been, or is used to actually
-                return the paid money.'
+                Booking marked as refunded locally only. No matter how it was
+                paid for - e.g. bank transfer or a processor such as Stripe -
+                please make sure that this mechansim has been, or is used to
+                actually return the paid money.'
               STR
             end
           end
@@ -145,14 +145,14 @@ class Admin::EncounterOrdersController < ApplicationController
       flash_hash = if @encounter_order.state_paid?
         redirect_to(
           admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: @encounter_order.id),
-          alert: 'You cannot delete a paid-for order; process a refund instead.'
+          alert: 'You cannot delete a paid-for booking; process a refund instead.'
         )
       else
         @encounter_order.destroy!
 
         redirect_to(
           admin_encounter_encounter_orders_path(@encounter.slug),
-          notice: 'Order deleted. Customer web links to this order will no longer work.'
+          notice: 'Booking deleted. Customer web links to this booking will no longer work.'
         )
       end
     end

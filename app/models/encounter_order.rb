@@ -6,13 +6,13 @@ class EncounterOrder < ApplicationRecord
   belongs_to :encounter
   has_one :stripe_payment, as: :payable, required: false, dependent: :destroy
 
-  # Uses the site name first letters capitalised plus "I-" - e.g. for a site
-  # name of "Some web site", the prefix would be "SWSI-".
+  # Uses the site name first letters capitalised plus "EI-" - e.g. for a site
+  # name of "Some web site", the prefix would be "SWSEI-".
   #
   # "Our" invoices are usually only shown for non-Stripe payments, since Stripe
   # can give a 'true' invoice from the actual direct payment otherwise.
   #
-  INVOICE_NUMBER_PREFIX = "#{Hcms.config.site_name.split(' ').map(&:first).join().upcase()}I-"
+  INVOICE_NUMBER_PREFIX = "#{Hcms.config.site_name.split(' ').map(&:first).join().upcase()}EI-"
 
   # Used for form submissions as a transient value only
   #
@@ -78,10 +78,9 @@ class EncounterOrder < ApplicationRecord
   STATE_LIST_SQL = <<~SQL
     CASE state
       WHEN ? THEN 1
-      WHEN ? THEN 4
       WHEN ? THEN 2
       WHEN ? THEN 3
-      WHEN ? THEN 5
+      WHEN ? THEN 4
       WHEN ? THEN 5
       ELSE 100
     END ASC,
@@ -94,9 +93,8 @@ class EncounterOrder < ApplicationRecord
         self.sanitize_sql_array([
           STATE_LIST_SQL,
           self.states[:payment_failed],
-          self.states[:cancelled     ],
           self.states[:paid          ],
-          self.states[:reserved      ], # (not used for EncounterOrders)
+          self.states[:cancelled     ],
           self.states[:refunded      ],
           self.states[:new           ],
         ])
@@ -175,6 +173,11 @@ class EncounterOrder < ApplicationRecord
     :number_of_seats,
     :amount_owed,
     numericality: { only_integer: true, message: 'must be a whole number' }
+  )
+
+  validates(
+    :number_of_seats,
+    numericality: { greater_than: 0 }
   )
 
   # See similar validation in the Order model for rationale.
@@ -282,7 +285,8 @@ class EncounterOrder < ApplicationRecord
     event(
       :refund,
       before:       :process_refund,
-      after_commit: :notify_is_refunded
+      after_commit: :notify_is_refunded,
+      guard:        :refund_state_makes_sense?
     ) do
       transitions from: :paid, to: :refunded
     end
@@ -304,6 +308,10 @@ class EncounterOrder < ApplicationRecord
 
   def paid_state_makes_sense? # (AASM guard)
     self.encounter.present? && self.customer_can_pay_for_booking?
+  end
+
+  def refund_state_makes_sense?
+    self.amount_owed.present? && self.amount_owed > 0
   end
 
   # ============================================================================

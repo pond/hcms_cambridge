@@ -56,9 +56,9 @@ module EncountersHelper
   def encshelp_booking_button(encounter)
     return nil if encounter.free_of_charge? # NOTE EARLY EXIT
 
-    if false && user_signed_in?
+    if user_signed_in?
       link_to(
-        'Set up encounter',
+        'Set up a new booking',
         new_admin_encounter_encounter_order_path(encounter_id: encounter.slug),
         class: 'bold_button'
       )
@@ -87,7 +87,7 @@ module EncountersHelper
   end
 
   def encshelp_admin_orders_link(encounter)
-    link_to('Orders', admin_encounter_encounter_orders_path(encounter.slug))
+    link_to('Bookings', admin_encounter_encounter_orders_path(encounter.slug))
   end
 
   def encshelp_reply_link(encounter_order, link_text: nil)

@@ -356,6 +356,11 @@ article.encounter {
     display: flex;
     flex-direction: flex-row;
 
+    section.encounter-poster {
+      min-width: 20%;
+      margin-left: 1em;
+    }
+
     section.encounter-poster img {
       width: 100%;
       height: auto;
@@ -942,6 +947,9 @@ nav {
 
           section.encounter-poster {
             text-align: center;
+            min-width: auto;
+            margin-left: 0;
+
             img {
               width: 75%;
             }

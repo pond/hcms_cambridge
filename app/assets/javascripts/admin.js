@@ -133,6 +133,8 @@ $(document).ready(function() {
       }
     );
 
+    const integerDivisor = 10 ** formatter.resolvedOptions().maximumFractionDigits;
+
     amountOwedInput.on('input', function(e) {
       manualInputDetected = (amountOwedInput.val().trim().length > 0);
     });
@@ -149,7 +151,7 @@ $(document).ready(function() {
             amountOwedCents += pricePhysicalCents;
           }
 
-          formatted = formatter.format(amountOwedCents / 100);
+          formatted = formatter.format(amountOwedCents / integerDivisor);
           formatted = formatted.replace(currency, '').trim();
 
           amountOwedInput.val(formatted);

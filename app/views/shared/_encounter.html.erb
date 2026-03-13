@@ -64,7 +64,7 @@
             <dd><%= encshelp_location(encounter) %></dd>
           <% end %>
           <dt><%= EncounterOrder.human_attribute_name(:number_of_seats) %></dt>
-          <dd><%= encounter_order.number_of_seats %> booked for this encounter</dd>
+          <dd><%= I18n.t('views.encounter_orders.seats', count: encounter_order.number_of_seats) %></dd>
         </dl>
       </div>
     </section>

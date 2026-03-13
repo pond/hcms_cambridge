@@ -4,7 +4,6 @@ class Encounter < Editable
   mount_uploader :encounter_hero_image, EncounterHeroImageUploader
 
   has_many :encounter_orders
-  has_many :confirmed_emncounter_orders, -> { self.confirmed }, class_name: 'EncounterOrder' # (for eager-loading use only)
   has_one  :stripe_price, as: :priceable, required: false, dependent: :destroy
 
   after_initialize(unless: :persisted?) do

@@ -52,6 +52,9 @@ RSpec.describe "Admin - encounters" do
       expect(Encounter.first.revisions.first.current  ).to eql(true)
       expect(Encounter.first.revisions.first.published).to eql(false)
 
+      expect(page).to     have_current_path(admin_encounter_path(id: Encounter.first.slug), ignore_query: true)
+      expect(page).to_not have_text("There might be price information included in this encounter's summary or description")
+
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Continue editing encounter draft", href: edit_admin_encounter_path(Encounter.first))
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Add encounter",                    href: new_admin_encounter_path())
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("List encounters",                  href: admin_encounters_path())
@@ -99,6 +102,9 @@ RSpec.describe "Admin - encounters" do
       expect(Encounter.first.revisions.first.current  ).to eql(true)
       expect(Encounter.first.revisions.first.published).to eql(true)
 
+      expect(page).to     have_current_path(admin_encounter_path(id: Encounter.first.slug))
+      expect(page).to_not have_text("There might be price information included in this encounter's summary or description")
+
       expect(find(:css, "section.footer_content nav.cms_menu")).to have_link("Edit encounter")
 
       find(:css, "section.footer_content nav.cms_menu").click_on("Edit encounter")
@@ -118,6 +124,70 @@ RSpec.describe "Admin - encounters" do
       expect(page).to have_css(".field_error_messages", text: "Brief summary must be provided")
       expect(page).to have_css(".field_error_messages", text: "Encounter details must be provided")
     end
+
+    context "price warnings" do
+      it "are shown based on the summary" do
+        visit(admin_encounters_path())
+        click_on("New encounter")
+
+        symbol   = Money::Currency.new(Hcms.config.currency).symbol
+        title    = "Quick Brown Fox"
+        summary  = "Jumps #{symbol} Over The"
+        body     = "<p>Lazy Dog</p>"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+        seats    = "15"
+        price    = "49.99"
+        physical = "4.99"
+        physname = "gift card"
+
+        fill_in("encounter_title",          with: title)
+        fill_in("encounter_summary",        with: summary)
+        fill_in("encounter_body",           with: body)
+        fill_in("encounter_location",       with: location)
+        fill_in("encounter_price_per_seat", with: price)
+        fill_in("encounter_price_physical", with: physical)
+        fill_in("encounter_name_physical",  with: physname)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+        click_on("Publish encounter")
+
+        spechelp_check_flash(:notice, "New encounter published")
+        expect(page).to have_current_path(admin_encounter_path(id: Encounter.first.slug))
+        spechelp_check_flash(:alert, "There might be price information included in this encounter's summary or description")
+      end
+
+      it "are shown based on the body" do
+        visit(admin_encounters_path())
+        click_on("New encounter")
+
+        symbol   = Money::Currency.new(Hcms.config.currency).symbol
+        title    = "Quick Brown Fox"
+        summary  = "Jumps Over The"
+        body     = "<p>Lazy #{symbol} Dog</p>"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+        seats    = "15"
+        price    = "49.99"
+        physical = "4.99"
+        physname = "gift card"
+
+        fill_in("encounter_title",          with: title)
+        fill_in("encounter_summary",        with: summary)
+        fill_in("encounter_body",           with: body)
+        fill_in("encounter_location",       with: location)
+        fill_in("encounter_price_per_seat", with: price)
+        fill_in("encounter_price_physical", with: physical)
+        fill_in("encounter_name_physical",  with: physname)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+        click_on("Publish encounter")
+
+        spechelp_check_flash(:notice, "New encounter published")
+        expect(page).to have_current_path(admin_encounter_path(id: Encounter.first.slug))
+        spechelp_check_flash(:alert, "There might be price information included in this encounter's summary or description")
+      end
+    end # 'context "price warnings" do'
 
     context "dynamic behaviour", js: true do
       it "Redactor text entry works" do
@@ -842,17 +912,17 @@ RSpec.describe "Admin - encounters" do
         #
         # Note reverse order - created-at ASC sorting.
         #
-        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Orders Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{encounter_2.title} Yes No Orders Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Bookings Show Edit Delete", exact: true)
+        expect(row_2).to have_text("#{encounter_2.title} Yes No Bookings Show Edit Delete", exact: true)
         expect(row_3).to have_text("#{encounter_1.title} No Yes – Show Edit Delete", exact: true)
 
         # Check a few links. Column 1 - encounter title, 2-3 - boolean,
         # 4 - order action, 5 - main actions, 6 - delete action.
         #
-        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",    href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
-        expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Orders", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
-        expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show",   href: admin_encounter_path(id: encounter_2.slug))
-        expect(row_3.find(:css, "> td:nth-child(5)")).to have_link("Edit",   href: edit_admin_encounter_path( encounter_1.id))
+        expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",      href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
+        expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
+        expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(5)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
       end
 
       it "links to the main 'all pages' list" do

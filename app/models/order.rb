@@ -69,11 +69,11 @@ class Order < ApplicationRecord
   STATE_LIST_SQL = <<~SQL
     CASE state
       WHEN ? THEN 1
-      WHEN ? THEN 4
       WHEN ? THEN 2
       WHEN ? THEN 3
+      WHEN ? THEN 4
       WHEN ? THEN 5
-      WHEN ? THEN 5
+      WHEN ? THEN 6
       ELSE 100
     END ASC,
     created_at ASC
@@ -85,9 +85,9 @@ class Order < ApplicationRecord
         self.sanitize_sql_array([
           STATE_LIST_SQL,
           self.states[:payment_failed],
-          self.states[:cancelled     ],
           self.states[:paid          ],
           self.states[:reserved      ],
+          self.states[:cancelled     ],
           self.states[:refunded      ],
           self.states[:new           ],
         ])

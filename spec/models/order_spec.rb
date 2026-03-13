@@ -5,8 +5,9 @@ RSpec.describe Order, type: :model do
   include OrdersHelper
 
   before :each do
-    allow(Hcms.config).to receive(:orders_email).and_return("orders@example.com")
-    allow(Hcms.config).to receive(:site_name   ).and_return("Site Under Test")
+    allow(Hcms.config).to receive(:orders_email     ).and_return("orders@example.com")
+    allow(Hcms.config).to receive(:contact_tel_human).and_return("022 123 456")
+    allow(Hcms.config).to receive(:site_name        ).and_return("Site Under Test")
 
     default_url_options[:host] = 'www.example.com'
     mock_prodid                = "product_test_1234"
@@ -25,14 +26,80 @@ RSpec.describe Order, type: :model do
 
       # Just test some simple "most important" combinations
       #
-      t_ref   = Time.now.midnight + 1.day + 18.hours
+      t_ref   = Time.now.midnight - 1.day - 18.hours
       order_1 = create(:order, event: @event, created_at: t_ref)
-      order_2 = create(:order, event: @event, created_at: t_ref)
+      order_2 = create(:order, event: @event, created_at: t_ref + 1.hour)
       order_3 = create(:order, event: @event, created_at: t_ref + 1.day)
 
+      # The created-at order should be 1, 2, 3 but if order 2 is cancelled it
+      # gets lifted due to the by-state ordering's prioritisation; "new" state
+      # orders come last, "cancelled" come higher.
+      #
       order_2.update_column(:state, Order.states[:cancelled])
 
-      expect(Order.all.to_a).to eql([order_1, order_3, order_2])
+      expect(Order.all.to_a).to eql([order_2, order_1, order_3])
+
+      # If force order 3 into state "payment_failed", it'll come first.
+      #
+      order_3.update_column(:state, Order.states[:payment_failed])
+
+      expect(Order.all.to_a).to eql([order_3, order_2, order_1])
+    end
+
+    it "collates confirmed orders" do
+      orders = Array.new(5) { create(:order, event: @event, number_of_seats: 1) }
+
+      orders[1].update_column(:state, :reserved)
+      orders[3].update_column(:state, :paid)
+
+      expect(Order.confirmed.to_a).to match_array([orders[1], orders[3]])
+    end
+
+    it "collates problematic orders" do
+      orders = Array.new(5) { create(:order, event: @event, number_of_seats: 1) }
+
+      orders[3].update_column(:state, :payment_failed)
+      orders[4].update_column(:state, :payment_failed)
+
+      expect(Order.problematic.to_a).to match_array([orders[3], orders[4]])
+    end
+
+    it "collates miscellaneous orders" do
+      orders = Array.new(5) { create(:order, event: @event, number_of_seats: 1) }
+
+      orders[2].update_column(:state, :cancelled)
+      orders[3].update_column(:state, :refunded)
+
+      orders[1].update_column(:state, :paid)
+      orders[4].update_column(:state, :payment_failed)
+
+      expect(Order.miscellaneous.to_a).to match_array([orders[0], orders[2], orders[3]])
+    end
+
+    it "considers the inflight window" do
+      orders = Array.new(5) { create(:order, event: @event, number_of_seats: 1) }
+
+      orders[1].update_column(:state, :paid)
+      orders[2].update_column(:updated_at, Time.now - Order::INFLIGHT_WINDOW - 1.second)
+      orders[4].update_column(:state, :cancelled)
+
+      # Confirmed orders *or* inflight-windowed new orders, so 'paid' is
+      # included but 'cancelled' is not
+      #
+      expect(Order.inflight.to_a).to match_array([orders[0], orders[1], orders[3]])
+    end
+
+    it "considers the stale window" do
+      orders = Array.new(5) { create(:order, event: @event, number_of_seats: 1) }
+
+      orders[0].update_column(:state,      :paid) # Not "new", so can't be stale
+      orders[0].update_column(:updated_at, Time.now - Order::STALE_WINDOW - 1.hour)
+
+      orders[1].update_column(:updated_at, Time.now - Order::STALE_WINDOW - 1.hour)
+      orders[2].update_column(:updated_at, Time.now - Order::STALE_WINDOW - 1.second)
+      orders[3].update_column(:updated_at, Time.now - Order::STALE_WINDOW + 1.second)
+
+      expect(Order.stale.to_a).to match_array([orders[1], orders[2]])
     end
   end # 'context "scopes and associations" do'
 
@@ -610,7 +677,7 @@ RSpec.describe Order, type: :model do
             expect(to_admin.text).to include("A paid booking has been received.")
 
             expect(to_admin.html).to include(@order.event.title)
-            expect(to_admin.text).to include("A paid booking has been received.")
+            expect(to_admin.html).to include("A paid booking has been received.")
           end
         end # 'context "to paid" do'
 
@@ -674,7 +741,7 @@ RSpec.describe Order, type: :model do
 
             expect(to_customer.html).to     include(@order.event.title)
             expect(to_customer.html).to     include("Your reservation for this event has been cancelled")
-            expect(to_customer.text).to_not include("Unfortunately, this event has been cancelled.") # (sic.)
+            expect(to_customer.html).to_not include("Unfortunately, this event has been cancelled.") # (sic.)
           end
         end # 'context "to cancelled" do'
 
@@ -714,9 +781,48 @@ RSpec.describe Order, type: :model do
             expect(to_admin.text).to include("A paid booking has been received.")
 
             expect(to_admin.html).to include(@order.event.title)
-            expect(to_admin.text).to include("A paid booking has been received.")
+            expect(to_admin.html).to include("A paid booking has been received.")
           end
         end # 'context "to paid" do'
+
+        # The "payment failed" state at the time of writing is hypothetical as
+        # failures happen 'within Stripe', but the code out to work if it ever
+        # *did* get run.
+        #
+        context "payment failures on 'our side'" do
+          before :each do
+            @event.start_public_purchases_state!
+
+            perform_enqueued_jobs()
+            ActionMailer::Base.deliveries.clear()
+          end
+
+          # We don't notify the admin since they can't really resolve it; the
+          # end user might have some idea of the reason for failure but they're
+          # advised in the e-mail to get in contact with the site admin directly
+          # as resolution is probably best handled by people, not machines.
+          #
+          it "notifies the end-user" do
+            @order.payment_failed!
+
+            expect(@order.valid_events()).to match_array([@pay_event, @cancel_event])
+
+            to_customer = spechelp_decode_multipart()
+            total       = spechelp_format_money(@order.amount_owed, @event.currency)
+
+            expect(to_customer.email.subject).to include("Payment failure")
+            expect(to_customer.email.subject).to include(@event.title)
+
+            expect(to_customer.email.from).to eql(["orders@example.com"])
+
+            expect(to_customer.text).to include(@order.event.title.upcase)
+            expect(to_customer.text).to include("Unfortunately, there was a problem with your payment")
+            expect(to_customer.text).to include("E-mail us by replying")
+            expect(to_customer.text).to include("E-mail us by replying to this message")
+            expect(to_customer.text).to include("022 123 456")
+            expect(to_customer.text).to include(total)
+          end
+        end # 'context "payment failures on 'our side'" do'
       end # 'context "from a reserved state" do'
 
       context "from paid state" do
