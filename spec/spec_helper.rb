@@ -138,7 +138,9 @@ def spechelp_use_chrome
   headless = ENV["FULL_CHROME"].blank?
   slowmo   = headless ? nil : 0.15
 
-  # https://github.com/rubycdp/ferrum#customization
+  # https://docs.rubycdp.com/docs/ferrum/customization/
+  # https://peter.sh/experiments/chromium-command-line-switches/
+  # https://github.com/teamcapybara/capybara/issues/2795#issuecomment-3144417933
   #
   cuprite.options.merge!(
     window_size:               [1280, 1280],
@@ -150,6 +152,7 @@ def spechelp_use_chrome
     browser_options:           {
       "no-sandbox":               nil,
       "disable-smooth-scrolling": nil,
+      "disable-features":         "MacAppCodeSignClone",
     },
   )
 
