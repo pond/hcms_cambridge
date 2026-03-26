@@ -87,7 +87,7 @@ class Encounter < Editable
   # Does the encounter have a free physical associated aspect?
   #
   def physical_aspect_free_of_charge?
-    self.price_physical.zero?
+    self.price_physical.present? && self.price_physical.zero?
   end
 
   # This is mostly here for local development and test purposes, where file

@@ -22,6 +22,18 @@ class EncounterOrder < ApplicationRecord
   STARTS_AT_KIND_FIXED_DATE = 'fixed_date'
 
   # ============================================================================
+  # Attribute overrides
+  # ============================================================================
+
+  def encounter=(encounter)
+    super
+    if self.new_record? and encounter.present?
+      self.frozen_price_per_seat = self.encounter.price_per_seat
+      self.frozen_price_physical = self.encounter.price_physical
+    end
+  end
+
+  # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
   # ============================================================================
 
@@ -230,6 +242,12 @@ class EncounterOrder < ApplicationRecord
     Time.now + 1.year # TODO: FIX ME! - invoice pages are accessed from here.
   end
 
+  def theoretical_amount_owed_without_discounts
+    amount  = self.frozen_price_per_seat * self.number_of_seats
+    amount += self.frozen_price_physical.to_i if self.has_physical
+    amount
+  end
+
   def customer_self_service_possible?
     self.customer_can_pay_for_booking?
   end
@@ -239,10 +257,7 @@ class EncounterOrder < ApplicationRecord
   end
 
   def includes_discount?
-    standard_amount_owed  = self.encounter.price_per_seat * self.number_of_seats
-    standard_amount_owed += self.encounter.price_physical.to_i if self.has_physical
-
-    self.amount_owed < standard_amount_owed
+    self.amount_owed < self.theoretical_amount_owed_without_discounts()
   end
 
   def open_ended?

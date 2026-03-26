@@ -5,7 +5,7 @@ Phone number:   <%= encounter_order.phone_number.presence || 'Not given' %>
 Manage:         <%= encounter_order.encounter.nil? ? admin_encounters_url() : admin_encounter_encounter_order_url(encounter_id: encounter_order.encounter.slug, id: encounter_order.id) %>
 <% if encounter_order.encounter.present? %>
 
-You can find a list of all encounter orders at:
+You can find a list of all encounter bookings at:
 
 * <%= admin_encounter_encounter_orders_url(encounter_id: encounter_order.encounter.slug) %>.
 <% end %>

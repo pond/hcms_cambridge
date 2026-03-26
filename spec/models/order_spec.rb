@@ -515,7 +515,7 @@ RSpec.describe Order, type: :model do
       # * Order permits reservation payment or booking payment
       #
       it '#paid_state_makes_sense?' do
-        order = build(:order)
+        order = build(:order, event: @event)
 
         expect(order.paid_state_makes_sense?).to eql(false)
 
@@ -538,7 +538,7 @@ RSpec.describe Order, type: :model do
       # * Event has not started
       #
       it '#reservation_makes_sense?' do
-        order = build(:order)
+        order = build(:order, event: @event)
 
         expect(order.reservation_makes_sense?).to eql(true) # (due to default factory setup)
 

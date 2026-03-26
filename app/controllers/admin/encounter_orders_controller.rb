@@ -40,7 +40,8 @@ class Admin::EncounterOrdersController < ApplicationController
     # POST /admin/encounters/<encounter_id>/orders
     def create
       @encounter_order = EncounterOrder.new(encounter: @encounter)
-      safe_params = self.order_params()
+
+      safe_params = self.encounter_order_params()
 
       safe_params[:number_of_seats] = safe_params[:number_of_seats].to_i
       if safe_params[:number_of_seats] < 0
@@ -49,11 +50,14 @@ class Admin::EncounterOrdersController < ApplicationController
 
       case safe_params[:has_physical]
         when 'true'
-          safe_params[:has_physical] = true
+          safe_params[:user_chooses_has_physical] = false
+          safe_params[:has_physical             ] = true
         when 'false'
-          safe_params[:has_physical] = false
+          safe_params[:user_chooses_has_physical] = false
+          safe_params[:has_physical             ] = false
         else
-          safe_params[:has_physical] = nil
+          safe_params[:user_chooses_has_physical] = true
+          safe_params[:has_physical             ] = false
       end
 
       if safe_params[:amount_owed].present?
@@ -66,7 +70,7 @@ class Admin::EncounterOrdersController < ApplicationController
         amount_cents = @encounter.price_per_seat * safe_params[:number_of_seats]
 
         if safe_params[:has_physical] == true
-          amount_cents += @encounter_order.encounter.price_physical.to_i
+          amount_cents += @encounter_order.frozen_price_physical.to_i
         end
 
         safe_params[:amount_owed] = amount_cents
@@ -192,7 +196,7 @@ class Admin::EncounterOrdersController < ApplicationController
       return redirect_to(path, alert: alert_message)
     end
 
-    def order_params
+    def encounter_order_params
       return params.require(:encounter_order).permit(PERMITTED_ENCOUNTER_ORDER_PARAMS)
     end
 

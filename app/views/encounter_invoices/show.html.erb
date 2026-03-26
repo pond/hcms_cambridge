@@ -1,8 +1,8 @@
 <%
   actual_price            = @encounter_order.amount_owed
-  expected_seat_price     = @encounter_order.encounter.price_per_seat * @encounter_order.number_of_seats
+  expected_seat_price     = @encounter_order.frozen_price_per_seat * @encounter_order.number_of_seats
   expected_physical_price = if @encounter_order.has_physical
-    @encounter_order.encounter.price_physical
+    @encounter_order.frozen_price_physical
   else
     0
   end
@@ -65,7 +65,7 @@
       <td><%= @encounter_order.number_of_seats %></td>
       <td>
         <% if expected_seat_price == actual_price - expected_physical_price %>
-          <%= apphelp_money(@encounter_order.encounter.price_per_seat, currency: @encounter_order.encounter.currency) %></td>
+          <%= apphelp_money(@encounter_order.frozen_price_per_seat, currency: @encounter_order.encounter.currency) %></td>
         <% else %>
           Special price
         <% end %>

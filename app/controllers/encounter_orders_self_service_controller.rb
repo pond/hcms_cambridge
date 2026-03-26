@@ -78,9 +78,12 @@ class EncounterOrdersSelfServiceController < ApplicationController
       # validation.
       #
       if params[:encounter_order].present?
-        physical_product_was_unknown = @encounter_order.has_physical.nil?
+        safe_params = if @encounter_order.user_chooses_has_physical
+          params.require(:encounter_order).permit(:gift_note, :has_physical, :address)
+        else
+          params.require(:encounter_order).permit(:gift_note, :address)
+        end
 
-        safe_params = params.require(:encounter_order).permit(:gift_note, :has_physical, :address)
         @encounter_order.assign_attributes(safe_params)
 
         unless @encounter_order.valid?
@@ -89,8 +92,12 @@ class EncounterOrdersSelfServiceController < ApplicationController
           return
         end
 
-        if physical_product_was_unknown && @encounter_order.has_physical
-          @encounter_order.amount_owed += @encounter.price_physical
+        if @encounter_order.user_chooses_has_physical && @encounter_order.has_physical_changed?
+          if @encounter_order.has_physical
+            @encounter_order.amount_owed += @encounter.price_physical
+          else
+            @encounter_order.amount_owed -= @encounter.price_physical
+          end
         end
 
         @encounter_order.save!
@@ -145,7 +152,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
             }
           }
         }]
-      elsif @encounter_order.has_physical
+      elsif @encounter_order.has_physical && @encounter.price_physical.present?
         line_items = [
           {
             quantity: @encounter_order.number_of_seats,
@@ -199,7 +206,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
 
     redirect_to(
       encounter_path(@encounter),
-      alert: 'Sorry, there was an unexpected problem trying to update that booking! Please try again later.'
+      alert: 'Sorry, there was an unexpected problem trying to process the booking. Please try again later.'
     )
   end
 
@@ -275,7 +282,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     #
     redirect_to(
       encounter_path(id: @encounter.slug),
-      notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
+      notice: 'Thanks, your encounter booking is confirmed! We look forward to seeing you there.'
     )
   end
 

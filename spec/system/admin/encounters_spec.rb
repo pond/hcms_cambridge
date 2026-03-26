@@ -889,13 +889,15 @@ RSpec.describe "Admin - encounters" do
         encounter_3.save!
 
         encounter_order = EncounterOrder.create!(
-          encounter:       encounter_3,
-          name:            "Fred Flintstone",
-          email:           "fred@example.com",
-          address:         "Wellington",
-          starts_at:       Time.now + 1.week,
-          number_of_seats: 3,
-          amount_owed:     3 * encounter_3.price_per_seat
+          encounter:                 encounter_3,
+          name:                      "Fred Flintstone",
+          email:                     "fred@example.com",
+          address:                   "Wellington",
+          starts_at:                 Time.now + 1.week,
+          number_of_seats:           3,
+          has_physical:              false,
+          user_chooses_has_physical: false,
+          amount_owed:               3 * encounter_3.price_per_seat,
         )
 
         encounter_order.pay_state!

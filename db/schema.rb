@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_230858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,8 +40,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
     t.datetime "created_at", null: false
     t.text "email", null: false
     t.bigint "encounter_id", null: false
+    t.integer "frozen_price_per_seat", null: false
+    t.integer "frozen_price_physical"
     t.text "gift_note"
-    t.boolean "has_physical"
+    t.boolean "has_physical", null: false
     t.bigserial "invoice_number", null: false
     t.text "name", null: false
     t.text "notes_to_buyer"
@@ -51,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
     t.enum "state", default: "new", null: false, enum_type: "order_states"
     t.text "token", null: false
     t.datetime "updated_at", null: false
+    t.boolean "user_chooses_has_physical", default: true, null: false
     t.index ["encounter_id"], name: "index_encounter_orders_on_encounter_id"
     t.index ["invoice_number"], name: "index_encounter_orders_on_invoice_number", unique: true
     t.index ["state"], name: "index_encounter_orders_on_state"
@@ -98,6 +101,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_23_023106) do
     t.datetime "created_at", null: false
     t.text "email", null: false
     t.bigint "event_id", null: false
+    t.integer "frozen_price_per_seat", null: false
     t.bigserial "invoice_number", null: false
     t.text "name", null: false
     t.text "notes"

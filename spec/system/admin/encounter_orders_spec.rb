@@ -1,14 +1,11 @@
 require "spec_helper.rb"
+require_relative "../shared_contexts/encounter_order_context.rb"
 
 RSpec.describe "Admin - encounter orders" do
-  include ApplicationHelper
-  include EncounterOrdersHelper
+  include_context "encounter orders"
 
   before :each do
     spechelp_log_in()
-
-    allow(Hcms.config).to receive(:orders_email).and_return("orders@example.com")
-    allow(Hcms.config).to receive(:site_name   ).and_return("Site Under Test")
 
     @encounter = create(:encounter)
     @encounter.revisions.first.update!(published: true)
@@ -274,7 +271,7 @@ RSpec.describe "Admin - encounter orders" do
     it "can view the invoice" do
       eo = create(:encounter_order, encounter: @encounter, state: "paid")
 
-      visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo))
+      visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
 
       expect(page).to have_button("Invoice")
       click_on("Invoice")
@@ -294,79 +291,10 @@ RSpec.describe "Admin - encounter orders" do
   context "paid events" do
     it_behaves_like "an order creator"
 
-    # A crude way to DRY up tests below, but easy to understand!
-    #
-    def verify_upon_payment_emails(encounter, encounter_order)
-      messages    = spechelp_decode_multipart(count: 2)
-      to_customer = spechelper_find_in_decoded(messages, to: encounter_order.email)
-      to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
-      total       = spechelp_format_money(encounter_order.amount_owed, encounter.currency)
-
-      expect(to_customer).to be_present
-      expect(to_admin   ).to be_present
-
-      expect(to_customer.email.from   ).to eql(["orders@example.com"])
-      expect(to_customer.email.subject).to eql("Booking confirmed for \"#{encounter.title}\"")
-
-      expect(to_customer.text).to include(encounter.title.upcase)
-      expect(to_customer.text).to include(total)
-      expect(to_customer.text).to include(encordshelp_share_link(encounter_order))
-      expect(to_customer.text).to include(encordshelp_magic_link(encounter_order))
-
-      expect(to_customer.html).to include(encounter.title)
-      expect(to_customer.html).to include(total)
-      expect(to_customer.html).to have_link("Your encounter", href: encordshelp_share_link(encounter_order))
-      expect(to_customer.html).to have_link("Manage booking", href: encordshelp_magic_link(encounter_order))
-
-      expect(to_admin.email.from   ).to eql(["orders@example.com"])
-      expect(to_admin.email.subject).to eql("[Site Under Test] New encounter booking from #{encounter_order.name}")
-
-      expect(to_admin.text).to include(encounter_order.name)
-      expect(to_admin.text).to include(encounter_order.email)
-      expect(to_admin.text).to include(encounter_order.phone_number)
-
-      expect(to_admin.html).to have_css("dd", text: encounter_order.name)
-      expect(to_admin.html).to have_css("dd", text: encounter_order.number_of_seats)
-      spechelp_check_mailto(
-        html:    to_admin.html,
-        email:   encounter_order.email,
-        subject: "Your booking for \"#{encounter.title}\""
-      )
-      spechelp_check_tel(
-        html:  to_admin.html,
-        phone: encounter_order.phone_number
-      )
-      expect(to_admin.html).to have_link(
-        "Manage booking",
-        href: admin_encounter_encounter_order_url(encounter_id: encounter.slug, id: encounter_order.id)
-      )
-      expect(to_admin.html).to have_link(
-        "here", # ...as in, "You can find a list of all orders <here>"
-        href: admin_encounter_encounter_orders_url(encounter_id: encounter.slug)
-      )
-    end
-
-    # As above, helps DRY up tests a bit.
-    #
-    def verify_upon_refund_email(encounter, encounter_order)
-      to_customer = spechelp_decode_multipart()
-      total       = spechelp_format_money(encounter_order.amount_owed, encounter.currency)
-
-      expect(to_customer.email.from   ).to eql(["orders@example.com"])
-      expect(to_customer.email.subject).to eql("Confirmation of refund for \"#{encounter.title}\"")
-
-      expect(to_customer.text).to include(encounter.title.upcase)
-      expect(to_customer.text).to include("Your payment of #{total} has been refunded")
-
-      expect(to_customer.html).to include(encounter.title)
-      expect(to_customer.html).to include("Your payment of #{total}")
-      expect(to_customer.html).to include("has been refunded")
-    end
-
     context "before being paid for" do
       before :each do
         @encounter_order = create(:encounter_order, encounter: @encounter)
-        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: @encounter_order))
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: @encounter_order.id))
       end
 
       it "cannot view an invoice" do
@@ -380,7 +308,7 @@ RSpec.describe "Admin - encounter orders" do
         @encounter_order.reload()
 
         expect(@encounter_order.state).to eql("paid")
-        verify_upon_payment_emails(@encounter, @encounter_order)
+        verify_upon_payment_emails(@encounter_order)
 
         # A Some extended tests - check the "magic" link works and the user can
         # reach the invoice; this probably duplicates some test coverage from
@@ -423,6 +351,7 @@ RSpec.describe "Admin - encounter orders" do
 
         to_customer = spechelp_decode_multipart()
 
+        expect(to_customer.email.to     ).to eql([@encounter_order.email])
         expect(to_customer.email.from   ).to eql(["orders@example.com"])
         expect(to_customer.email.subject).to eql("Confirmation of cancellation for \"#{@encounter_order.encounter.title}\"")
 
@@ -439,7 +368,7 @@ RSpec.describe "Admin - encounter orders" do
         eo = create(:encounter_order, encounter: @encounter)
         eo.pay_state!
 
-        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo))
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
 
         expect(page).to have_button("Invoice")
         click_on("Invoice")
@@ -462,11 +391,11 @@ RSpec.describe "Admin - encounter orders" do
         perform_enqueued_jobs()
         ActionMailer::Base.deliveries.clear()
 
-        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo))
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
 
         click_on("Refund customer (process manually)")
 
-        verify_upon_refund_email(@encounter, eo)
+        verify_upon_refund_email(eo)
       end
 
       # For a bit of extra (intentionally overlapping) coverage, this is done
@@ -490,74 +419,12 @@ RSpec.describe "Admin - encounter orders" do
         expect(page).to have_text("#{eo.number_of_seats} → #{total}")
         expect(page).to have_text("#{total}")
 
-
         check("encounter_order_has_physical")
         fill_in("encounter_order_gift_note", with: "Extra test coverage")
 
-        mock_prodid  = "product_test_1234"
-        mock_priceid = "price_test_1234"
-        mock_csid    = "cs_test_1234"
-        mock_payint  = "pi_test_1234"
+        mock_payint = simulate_stripe_payment(eo)
 
-        expect(Stripe::Product).to receive(:create).once do | args |
-          expect(args[:name]).to eql(@encounter.title)
-
-          double(id: mock_prodid)
-        end
-
-        expect(Stripe::Price).to receive(:create).once do | args |
-          expect(args[:currency   ]).to eql(@encounter.currency)
-          expect(args[:unit_amount]).to eql(@encounter.price_per_seat)
-          expect(args[:product    ]).to eql(mock_prodid)
-
-          double(id: mock_priceid)
-        end
-
-        expect(Stripe::Checkout::Session).to receive(:create).once do | args |
-          expect(args[:mode]).to eql("payment")
-          expect(args[:success_url]).to include("manage_encounter")
-          expect(args[:cancel_url ]).to include("manage_encounter")
-          expect(args[:success_url]).to end_with("stripe_payment_succeeded?csid={CHECKOUT_SESSION_ID}")
-          expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
-
-          expect(args[:line_items].size  ).to eql(2)
-          expect(args[:line_items].first ).to eql({quantity: eo.number_of_seats, price: mock_priceid})
-          expect(args[:line_items].second).to eql(
-            {
-              quantity: 1,
-              price_data: {
-                currency: @encounter.currency,
-                unit_amount: @encounter.price_physical,
-                product_data: {
-                  name: @encounter.name_physical.upcase_first,
-                  unit_label: "item"
-                }
-              }
-            }
-          )
-
-          double(url: args[:success_url].gsub("{CHECKOUT_SESSION_ID}", mock_csid))
-        end
-
-        expect(Stripe::Checkout::Session).to receive(:retrieve).with(mock_csid) do
-          double(payment_intent: mock_payint)
-        end
-
-        click_on("Pay now")
-
-        expect(page).to have_text("Thanks, your booking is confirmed")
-        expect(StripePrice.count).to eql(1)
-        expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
-        expect(StripePayment.count).to eql(1)
-        expect(StripePayment.first.stripe_payment_intent).to eql(mock_payint)
-
-        eo.reload
-
-        expect(eo.state).to eql("paid")
-        verify_upon_payment_emails(@encounter, eo)
-
-        ActionMailer::Base.deliveries.clear()
-        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo))
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
 
         expect(Stripe::Refund).to receive(:create).with(payment_intent: mock_payint).and_return(double(status: "succeeded"))
 
@@ -566,25 +433,80 @@ RSpec.describe "Admin - encounter orders" do
         eo.reload
 
         expect(eo.state).to eql("refunded")
-        verify_upon_refund_email(@encounter, eo)
+        verify_upon_refund_email(eo)
       end
     end # 'context "after being paid for" do'
+
+    context "if payment fails" do
+      it "can be cancelled" do
+        eo = create(:encounter_order, encounter: @encounter)
+        eo.payment_failed_state!
+
+        to_customer = spechelp_decode_multipart()
+        total       = spechelp_format_money(eo.amount_owed, @encounter.currency)
+
+        expect(to_customer.email.to     ).to eql([eo.email])
+        expect(to_customer.email.from   ).to eql(["orders@example.com"])
+        expect(to_customer.email.subject).to eql("Payment failure for \"#{eo.encounter.title}\"")
+
+        expect(to_customer.text).to include(eo.encounter.title.upcase)
+        expect(to_customer.text).to include("there was a problem with your payment")
+        expect(to_customer.text).to include(total)
+
+        expect(to_customer.html).to include(eo.encounter.title)
+        expect(to_customer.html).to include("there was a problem with your payment")
+        expect(to_customer.html).to include(total)
+
+        ActionMailer::Base.deliveries.clear()
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
+
+        click_on("Cancel")
+        spechelp_check_flash(:notice, "Booking updated")
+
+        eo.reload()
+
+        expect(eo.state).to eql("cancelled")
+
+        messages    = spechelp_decode_multipart(count: 2)
+        to_customer = spechelper_find_in_decoded(messages, to: eo.email)
+        to_admin    = spechelper_find_in_decoded(messages, to: "orders@example.com")
+
+        expect(to_customer.email.from   ).to eql(["orders@example.com"])
+        expect(to_customer.email.subject).to eql("Confirmation of cancellation for \"#{eo.encounter.title}\"")
+
+        expect(to_customer.text).to include(eo.encounter.title.upcase)
+        expect(to_customer.text).to include("Your booking has been cancelled")
+
+        expect(to_customer.html).to include(eo.encounter.title)
+        expect(to_customer.html).to include("Your booking has been cancelled")
+
+        expect(to_admin.email.from   ).to eql(["orders@example.com"])
+        expect(to_admin.email.subject).to eql("[Site Under Test] Encounter cancellation from #{eo.name}")
+
+        expect(to_admin.text).to include(eo.name)
+        expect(to_admin.text).to include(eo.email)
+        expect(to_admin.text).to include(eo.phone_number)
+
+        expect(to_admin.html).to have_css("dd", text: eo.name)
+        expect(to_admin.html).to have_css("dd", text: eo.number_of_seats)
+        spechelp_check_mailto(
+          html:    to_admin.html,
+          email:   eo.email,
+          subject: "Your booking for \"#{@encounter.title}\""
+        )
+        spechelp_check_tel(
+          html:  to_admin.html,
+          phone: eo.phone_number
+        )
+        expect(to_admin.html).to have_link(
+          "Manage booking",
+          href: admin_encounter_encounter_order_url(encounter_id: @encounter.slug, id: eo.id)
+        )
+        expect(to_admin.html).to have_link(
+          "here", # ...as in, "You can find a list of all encounter bookings <here>"
+          href: admin_encounter_encounter_orders_url(encounter_id: @encounter.slug)
+        )
+      end
+    end # 'context "if payment fails" do'
   end # 'context "paid events" do'
-
-
-
-
-    # THE NEXT THING: Using the orders example, add in all the extra checks for
-    # flows with Stripe, cancelling then continuing, cancelling and bailing out
-    # etc. etc. on the *user-facing* side. Include additional checks for, once
-    # they've paid, the page to which they get redirected; this isn't covered
-    # above, since
-    #
-    # See spec/system/orders_spec.rb line 935; some of the above tests were
-    # derived from that, but overlapping coverage is fine and the above examples
-    # can be reused in the customer-facing tests outside the "admin" folder.
-
-
-
-
 end

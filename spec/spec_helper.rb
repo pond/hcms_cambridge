@@ -261,7 +261,7 @@ def spechelp_format_money(amount, currency, omit_symbol: false)
     amount.to_s()
   else
     if currency == 'TND'
-      "#{amount} #{sym}"
+      "د.ت#{amount}"# Warning: RTL text marker hidden in here!
     else
       "#{sym}#{amount}"
     end

@@ -788,7 +788,7 @@ RSpec.describe "Orders" do
           expect(StripePrice.count).to eql(0)
           expect(Order.count).to eql(1)
           expect(Order.first.state).to eql("new")
-          expect(page).to have_text("Sorry, there was an unexpected problem trying to update that order")
+          expect(page).to have_text("Sorry, there was an unexpected problem trying to process that order")
         end
       end # 'context "handle failures"'
     end # 'context "paid events" do'
@@ -1210,8 +1210,9 @@ RSpec.describe "Orders" do
       expect(page).to have_text("123-456-789")
       expect(page).to have_text("IMAGINARYTAX")
 
-      expect(page).to have_text(per_seat)
-      expect(page).to have_text(total   )
+      expect(page).to_not have_text("Special price")
+      expect(page).to     have_text(per_seat)
+      expect(page).to     have_text(total   )
 
       expect(page).to have_text(order.name)
       expect(page).to have_text(order.email)
@@ -1220,6 +1221,67 @@ RSpec.describe "Orders" do
       print_link = page.find("a", text: "Print")
 
       expect(print_link['onclick']).to eql("window.print()")
+    end
+
+    it "does not change even if the event price changes" do
+      allow(Hcms.config).to receive(:tax_number).and_return("123-456-789")
+      allow(Hcms.config).to receive(:tax_name  ).and_return("IMAGINARYTAX")
+
+      @event.start_public_purchases_state!
+
+      order        = create(:order, event: @event)
+      old_per_seat = spechelp_format_money(@event.price_per_seat,                         @event.currency)
+      total        = spechelp_format_money(@event.price_per_seat * order.number_of_seats, @event.currency)
+
+      order.pay_state!
+
+      @event.update!(price_per_seat: @event.price_per_seat * 2 - 1)
+      new_per_seat = spechelp_format_money(@event.price_per_seat, @event.currency)
+
+      visit URI(ordershelp_magic_link(order)).path
+      click_on("Invoice")
+
+      expect(page).to have_text("Tax Invoice")
+      expect(page).to have_text(order.human_invoice_number)
+
+      expect(page).to have_text("Site Under Test")
+      expect(page).to have_text("123-456-789")
+      expect(page).to have_text("IMAGINARYTAX")
+
+      expect(page).to_not have_text("Special price")
+      expect(page).to     have_text(old_per_seat)
+      expect(page).to_not have_text(new_per_seat)
+      expect(page).to     have_text(total   )
+    end
+
+    it "handles discounts" do
+      allow(Hcms.config).to receive(:tax_number).and_return("123-456-789")
+      allow(Hcms.config).to receive(:tax_name  ).and_return("IMAGINARYTAX")
+
+      @event.start_public_purchases_state!
+
+      order    = create(:order, :discounted, event: @event)
+      per_seat = spechelp_format_money(@event.price_per_seat, @event.currency)
+      total    = spechelp_format_money(order.amount_owed,     @event.currency)
+
+      order.pay_state!
+
+      visit URI(ordershelp_magic_link(order)).path
+
+      expect(page).to have_text("Manage order")
+
+      click_on("Invoice")
+
+      expect(page).to have_text("Tax Invoice")
+      expect(page).to have_text(order.human_invoice_number)
+
+      expect(page).to have_text("Site Under Test")
+      expect(page).to have_text("123-456-789")
+      expect(page).to have_text("IMAGINARYTAX")
+
+      expect(page).to     have_text("Special price")
+      expect(page).to_not have_text(per_seat)
+      expect(page).to     have_text(total   )
     end
   end # 'context "paid order management" do'
 end
