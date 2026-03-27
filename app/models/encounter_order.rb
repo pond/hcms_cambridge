@@ -27,6 +27,7 @@ class EncounterOrder < ApplicationRecord
 
   def encounter=(encounter)
     super
+
     if self.new_record? and encounter.present?
       self.frozen_price_per_seat = self.encounter.price_per_seat
       self.frozen_price_physical = self.encounter.price_physical
