@@ -54,8 +54,6 @@ module EncountersHelper
   end
 
   def encshelp_booking_button(encounter)
-    return nil if encounter.free_of_charge? # NOTE EARLY EXIT
-
     if user_signed_in?
       link_to(
         'Set up a new booking',
