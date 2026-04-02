@@ -8,7 +8,7 @@
 
 <% if page.events.for_navigation.any? %>
   <section class="events with-poster-grid">
-    <% page.events.for_navigation.each do | event | %>
+    <% page.events.for_navigation.includes(:revisions).each do | event | %>
       <% if event.state_archived? && found_archived_section == false %>
         <% found_archived_section = true %>
         </section>

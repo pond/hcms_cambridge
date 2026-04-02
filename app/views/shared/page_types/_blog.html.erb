@@ -6,7 +6,7 @@
 
 <% if page.articles.for_navigation.any? %>
   <section class="blog-articles<%= page.poster_grid ? ' with-poster-grid' : ''%>">
-    <% page.articles.for_navigation.each do | article | %>
+    <% page.articles.for_navigation.includes(:revisions).each do | article | %>
       <article class="article">
         <%= link_to page_article_path(page_id: page.slug, id: article.slug), class: 'article-link' do %>
           <img class="article-hero-image" src="<%= article.article_hero_image.url %>" alt="<%= article.title %>">
