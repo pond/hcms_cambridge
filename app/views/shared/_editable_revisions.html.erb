@@ -66,7 +66,7 @@
         share_link = if share_path.nil?
           nil
         else
-          "https://www.#{Hcms.config.mail_domain}#{share_path}"
+          "https://www.#{Hcms.config.site_domain || Hcms.config.mail_domain}#{share_path}"
         end
       %>
       <% if share_link.present? %>
