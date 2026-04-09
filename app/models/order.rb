@@ -15,6 +15,18 @@ class Order < ApplicationRecord
   INVOICE_NUMBER_PREFIX = "#{Hcms.config.site_name.split(' ').map(&:first).join().upcase()}I-"
 
   # ============================================================================
+  # Association ov
+  # ============================================================================
+
+  def event=(event)
+    super
+
+    if self.new_record? and event.present?
+      self.frozen_price_per_seat = self.event.price_per_seat
+    end
+  end
+
+  # ============================================================================
   # Enumerations (see also any AASM state machine definition(s) later)
   # ============================================================================
 
@@ -69,11 +81,11 @@ class Order < ApplicationRecord
   STATE_LIST_SQL = <<~SQL
     CASE state
       WHEN ? THEN 1
-      WHEN ? THEN 4
       WHEN ? THEN 2
       WHEN ? THEN 3
+      WHEN ? THEN 4
       WHEN ? THEN 5
-      WHEN ? THEN 5
+      WHEN ? THEN 6
       ELSE 100
     END ASC,
     created_at ASC
@@ -85,9 +97,9 @@ class Order < ApplicationRecord
         self.sanitize_sql_array([
           STATE_LIST_SQL,
           self.states[:payment_failed],
-          self.states[:cancelled     ],
           self.states[:paid          ],
           self.states[:reserved      ],
+          self.states[:cancelled     ],
           self.states[:refunded      ],
           self.states[:new           ],
         ])
@@ -236,6 +248,10 @@ class Order < ApplicationRecord
     # .event.ends_at + 1.day
   end
 
+  def theoretical_amount_owed_without_discounts
+    self.frozen_price_per_seat * self.number_of_seats
+  end
+
   def customer_self_service_possible?
     self.customer_can_pay_for_reservation? ||
     self.customer_can_pay_for_booking?
@@ -268,7 +284,7 @@ class Order < ApplicationRecord
   end
 
   def includes_discount?
-    self.amount_owed < self.event.price_per_seat * self.number_of_seats
+    self.amount_owed < self.theoretical_amount_owed_without_discounts()
   end
 
   # ============================================================================

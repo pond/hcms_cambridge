@@ -138,7 +138,9 @@ def spechelp_use_chrome
   headless = ENV["FULL_CHROME"].blank?
   slowmo   = headless ? nil : 0.15
 
-  # https://github.com/rubycdp/ferrum#customization
+  # https://docs.rubycdp.com/docs/ferrum/customization/
+  # https://peter.sh/experiments/chromium-command-line-switches/
+  # https://github.com/teamcapybara/capybara/issues/2795#issuecomment-3144417933
   #
   cuprite.options.merge!(
     window_size:               [1280, 1280],
@@ -150,6 +152,7 @@ def spechelp_use_chrome
     browser_options:           {
       "no-sandbox":               nil,
       "disable-smooth-scrolling": nil,
+      "disable-features":         "MacAppCodeSignClone",
     },
   )
 
@@ -223,7 +226,9 @@ end
 # English-like locale, so decimals are "." not "," and the position of e.g. an
 # EUR symbol is before, not after the numerical amount.
 #
-def spechelp_format_money(amount, currency)
+# Pass "omit_symbol: true" to omit the currency symbol.
+#
+def spechelp_format_money(amount, currency, omit_symbol: false)
   raise "Unsupported currency #{currency.inspect}" unless SUPPORTED_TEST_CURRENCIES.include?(currency)
 
   c_to_sym = {
@@ -252,10 +257,14 @@ def spechelp_format_money(amount, currency)
     delimiter:  I18n.t("number.format.delimiter"),
   )
 
-  if currency == 'TND'
-    "#{amount} #{sym}"
+  if omit_symbol
+    amount.to_s()
   else
-    "#{sym}#{amount}"
+    if currency == 'TND'
+      "د.ت#{amount}"# Warning: RTL text marker hidden in here!
+    else
+      "#{sym}#{amount}"
+    end
   end
 end
 

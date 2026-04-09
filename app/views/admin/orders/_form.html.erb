@@ -12,7 +12,7 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       order.event.currency) %>
-  <%= hidden_field_tag(:price_per_seat_cents, order.event.price_per_seat.to_s) %>
+  <%= hidden_field_tag(:price_per_seat_cents, order.frozen_price_per_seat.to_s) %>
 
   <p>
     <%= apphelp_label(f, :name, required: true) %>

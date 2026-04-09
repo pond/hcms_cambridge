@@ -10,7 +10,7 @@
 <dl>
   <dt>Date and time</dt>
   <dd><%= encordshelp_datetime(@encounter_order) %></dd>
-  <dt>Seats and price</dt>
+  <dt>People and price</dt>
   <dd>
     <%= @encounter_order.number_of_seats %> →
     <% if @encounter_order.amount_owed.zero? %>
@@ -19,8 +19,12 @@
       <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency) %>
     <% end %>
     <% if @encounter_order.has_physical %>
-      (including <%= encshelp_price(@encounter_order.encounter, for_physical_aspect: true) %>
-      for <%= @encounter_order.encounter.name_physical %>)
+      <% if @encounter.physical_aspect_free_of_charge? %>
+        (including free <%= @encounter.name_physical %>)
+      <% else %>
+        (including <%= encshelp_price(@encounter, for_physical_aspect: true) %>
+        for <%= @encounter.name_physical %>)
+      <% end %>
     <% end %>
   </dd>
 
@@ -82,7 +86,7 @@
     ) do | f |
   %>
     <%= hidden_field_tag(:amount_for_seats_cents, @encounter_order.amount_owed) %>
-    <%= hidden_field_tag(:price_physical_cents,   @encounter_order.encounter.price_physical.to_i) %>
+    <%= hidden_field_tag(:price_physical_cents,   @encounter.price_physical.to_i) %>
     <% if Hcms.config.tax_threshold.is_a?(Integer) %>
       <%= hidden_field_tag(:address_required_threshold_cents, Hcms.config.tax_threshold) %>
     <% end %>
@@ -94,7 +98,7 @@
     </div>
 
     <% if @encounter.has_physical_aspect? %>
-      <% if @encounter_order.has_physical.nil? %>
+      <% if @encounter_order.user_chooses_has_physical %>
         <div class="field">
           <%= f.label(:has_physical) do %>
             <%= f.check_box :has_physical %>
@@ -106,14 +110,14 @@
               end
             %>
             <small><em>
-              (Price excludes postage; please enquire after booking for
-              collection or postage options)
+              (Price <strong><u>excludes</u> postage</strong>; please enquire
+              after booking for collection or postage options)
             </em></small>
           <% end %>
         </div>
       <% elsif @encounter_order.has_physical %>
         <div style="display: none">
-          <%= f.check_box :has_physical %><%# Makes JavaScript simpler if always a check box %>
+          <%= f.check_box :has_physical, disabled: true %><%# Makes JavaScript simpler if always a check box %>
         </div>
       <% end %>
     <% end %>

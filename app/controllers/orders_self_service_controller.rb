@@ -150,7 +150,7 @@ class OrdersSelfServiceController < ApplicationController
 
     redirect_to(
       page_event_path(page_id: @page.slug, id: @event.slug),
-      alert: 'Sorry, there was an unexpected problem trying to update that order! Please try again later.'
+      alert: 'Sorry, there was an unexpected problem trying to process that order. Please try again later.'
     )
   end
 

@@ -356,11 +356,16 @@ article.encounter {
     display: flex;
     flex-direction: flex-row;
 
+    section.encounter-poster {
+      min-width: 40%;
+      margin-left: 1em;
+    }
+
     section.encounter-poster img {
       width: 100%;
       height: auto;
       object-fit: cover;
-      aspect-ratio: 2/3;
+      aspect-ratio: 3/2;
       border-radius: 0.5em;
     }
   }
@@ -603,7 +608,7 @@ main, .redactor-box.redactor-styles-on {
     display: grid;
     grid-template-columns: 65% 35%;
 
-    section.event-order-poster, section.encounter-order-poster {
+    section.event-order-poster {
       margin-left: 1em;
       a {
         display: inline-block;
@@ -937,16 +942,19 @@ nav {
     }
 
     article.encounter {
-       section.encounter-body-and-poster {
-          flex-direction: column-reverse;
+      section.encounter-body-and-poster {
+        flex-direction: column-reverse;
 
-          section.encounter-poster {
-            text-align: center;
-            img {
-              width: 75%;
-            }
+        section.encounter-poster {
+          text-align: center;
+          min-width: auto;
+          margin-left: 0;
+
+          img {
+            width: 75%;
           }
-       }
+        }
+      }
     }
 
     // Lists of articles and events - not relevant for encounters.
@@ -1022,6 +1030,10 @@ nav {
     article.encounter {
        section.encounter-body-and-poster {
           flex-direction: column-reverse;
+
+          section.encounter-poster {
+            margin-left: 0;
+          }
        }
     }
     // Lists of articles and events - not relevant for encounters.
@@ -1081,8 +1093,7 @@ nav {
     article.encounter-order-form-container {
       display: block;
 
-      section.event-order-poster,
-      section.encounter-order-poster {
+      section.event-order-poster {
         display: none;
       }
     }

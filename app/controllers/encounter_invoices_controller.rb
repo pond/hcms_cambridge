@@ -4,7 +4,7 @@ class EncounterInvoicesController < ApplicationController
 
   def show
 
-    # Tidy up URLs from "use a GET-based from to get standard button styling"
+    # Tidy up URLs from "use a GET-based form to get standard button styling"
     # hacks. We wouldn't care so much except printed output tends to include
     # the page URL.
     #

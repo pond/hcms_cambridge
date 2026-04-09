@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-    <img id="logo" alt="Logo" src="<%="https://www.#{Hcms.config.mail_domain}#{image_path('logo.svg')}" %>" width="<%= Hcms.config.logo_w %>" height="<%= Hcms.config.logo_h %>">
+    <img id="logo" alt="Logo" src="<%="https://www.#{Hcms.config.site_domain || Hcms.config.mail_domain}#{image_path('logo.svg')}" %>" width="<%= Hcms.config.logo_w %>" height="<%= Hcms.config.logo_h %>">
 <%= yield %>
   </body>
 </html>

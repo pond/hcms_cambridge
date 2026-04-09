@@ -114,7 +114,7 @@ en:
         has_physical: "Include physical product in price?"
         gift_note: "If this is a gift, do you want to add a message for the recipient?"
         notes_to_buyer: "Any other notes?"
-        number_of_seats: "Number of seats"
+        number_of_seats: "Number of people"
         amount_owed: "Total price"
 
       event:
@@ -217,8 +217,8 @@ en:
   views:
     encounter_orders:
       seats:
-        one: "One seat"
-        other: "%{count} seats"
+        one: "One person taking part"
+        other: "%{count} people taking part"
       confirm:
         booking:
           one: "Please check the details of your booking for one seat at “%{encounter_title}”."

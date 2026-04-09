@@ -4,7 +4,6 @@ class Encounter < Editable
   mount_uploader :encounter_hero_image, EncounterHeroImageUploader
 
   has_many :encounter_orders
-  has_many :confirmed_emncounter_orders, -> { self.confirmed }, class_name: 'EncounterOrder' # (for eager-loading use only)
   has_one  :stripe_price, as: :priceable, required: false, dependent: :destroy
 
   after_initialize(unless: :persisted?) do
@@ -88,7 +87,7 @@ class Encounter < Editable
   # Does the encounter have a free physical associated aspect?
   #
   def physical_aspect_free_of_charge?
-    self.price_physical.zero?
+    self.price_physical.present? && self.price_physical.zero?
   end
 
   # This is mostly here for local development and test purposes, where file

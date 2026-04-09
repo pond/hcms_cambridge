@@ -14,6 +14,8 @@
   <nav class="main_menu">
     <% if @page && @page.navigation_title.present? %>
       <h1 id="navigation_title"><%= @page.navigation_title %></h1>
+    <% elsif content.is_a?(Encounter) && content.title.present? %>
+     <h1 id="navigation_title"><%= content.title %></h1>
     <% end %>
 
     <div class="pure-menu pure-menu-horizontal">

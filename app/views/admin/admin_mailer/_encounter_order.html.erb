@@ -22,14 +22,14 @@
     <% if encounter_order.encounter.nil? %>
       <%= link_to('Manage encounters', admin_encounters_url()) %>
     <% else %>
-      <%= link_to('Manage order', admin_encounter_encounter_order_url(encounter_id: encounter_order.encounter.slug, id: encounter_order.id)) %>
+      <%= link_to('Manage booking', admin_encounter_encounter_order_url(encounter_id: encounter_order.encounter.slug, id: encounter_order.id)) %>
     <% end %>
   </dd>
 </dl>
 
 <% if encounter_order.encounter.present? %>
   <p>
-    You can find a list of all encounter orders
+    You can find a list of all encounter bookings
     <%= link_to('here', admin_encounter_encounter_orders_url(encounter_id: encounter_order.encounter.slug)) %>.
   </p>
 <% end %>

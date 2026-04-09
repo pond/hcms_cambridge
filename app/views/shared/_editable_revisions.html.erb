@@ -59,6 +59,8 @@
           page_article_path(editable.page.slug, editable.slug)
         elsif editable.is_a?(Event)
           page_event_path(editable.page.slug, editable.slug)
+        elsif editable.is_a?(Encounter)
+          encounter_path(editable.slug)
         else
           nil
         end
@@ -66,7 +68,7 @@
         share_link = if share_path.nil?
           nil
         else
-          "https://www.#{Hcms.config.mail_domain}#{share_path}"
+          "https://www.#{Hcms.config.site_domain || Hcms.config.mail_domain}#{share_path}"
         end
       %>
       <% if share_link.present? %>

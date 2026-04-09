@@ -13,8 +13,8 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
-  <%= hidden_field_tag(:price_per_seat_cents, encounter_order.encounter.price_per_seat) %>
-  <%= hidden_field_tag(:price_physical_cents, encounter_order.encounter.price_physical.to_i) %>
+  <%= hidden_field_tag(:price_per_seat_cents, encounter_order.frozen_price_per_seat) %>
+  <%= hidden_field_tag(:price_physical_cents, encounter_order.frozen_price_physical.to_i) %>
 
   <hr>
 
@@ -75,7 +75,7 @@
 
   <p>
     <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
-    <%= Money::Currency.new(Hcms.config.currency).symbol %>
+    <%= Money::Currency.new(encounter_order.encounter.currency).symbol %>
     <%=
       parsed_amount = Money.from_cents(
         encounter_order.amount_owed,
@@ -88,7 +88,7 @@
         style: 'width: 5em;'
       )
     %>
-    <small><%= Hcms.config.currency %></small>
+    <small><%= encounter_order.encounter.currency %></small>
     <span id="encounter_order_total_amount_hint" style="display: none">
       <% if encounter_order.encounter.has_physical_aspect? && ! encounter_order.encounter.physical_aspect_free_of_charge? %>
         <small><em>

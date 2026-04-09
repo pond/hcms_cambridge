@@ -22,7 +22,7 @@
 <dl>
   <dt>Date and time</dt>
   <dd><%= encordshelp_datetime(@encounter_order) %></dd>
-  <dt>Seats and price</dt>
+  <dt>People and price</dt>
   <dd>
     <%= @encounter_order.number_of_seats %> →
     <% if @encounter_order.amount_owed.zero? %>
@@ -53,32 +53,42 @@
   <dt>Encounter information "share / gift link" (hides prices)</dt>
   <dd>
     <% share_link = encordshelp_share_link(@encounter_order) %>
-    <%=
-      button_tag(
-        title: 'Copy link',
-        class: 'copy_from_data',
-        style: 'font-size: 85%',
-        data:  { text: share_link }
-      ) do
-    %><i class="fa fa-copy"></i><% end %>
-    <small>
-      <code><%= share_link %></code>
-    </small>
+    <div class="valign-row">
+      <%=
+        button_tag(
+          title: 'Copy link',
+          class: 'copy_from_data',
+          style: 'font-size: 85%',
+          data:  { text: share_link }
+        ) do
+      %><i class="fa fa-copy"></i><% end %>
+      <small>
+        <code><%= share_link %></code>
+      </small>
+      <a href="<%= share_link %>" target="_blank" id="preview-share-link">
+        <i class="fa fa-external-link"></i>
+      </a>
+    </div>
   </dd>
   <dt>Customer's order management "magic link" (shows prices)</dt>
   <dd>
     <% magic_link = encordshelp_magic_link(@encounter_order) %>
-    <%=
-      button_tag(
-        title: 'Copy link',
-        class: 'copy_from_data',
-        style: 'font-size: 85%',
-        data:  { text: magic_link }
-      ) do
-    %><i class="fa fa-copy"></i><% end %>
-    <small>
-      <code><%= magic_link %></code>
-    </small>
+    <div class="valign-row">
+      <%=
+        button_tag(
+          title: 'Copy link',
+          class: 'copy_from_data',
+          style: 'font-size: 85%',
+          data:  { text: magic_link }
+        ) do
+      %><i class="fa fa-copy"></i><% end %>
+      <small>
+        <code><%= magic_link %></code>
+      </small>
+      <a href="<%= magic_link %>" target="_blank" id="preview-magic-link">
+        <i class="fa fa-external-link"></i>
+      </a>
+    </div>
   </dd>
 </dl>
 

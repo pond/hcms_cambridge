@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '4.0.1'
+ruby '4.0.2'
 
 gem 'rails', '>= 8.1', '< 9'
 
@@ -32,14 +32,13 @@ gem 'sdoc'
 #
 #   https://rubygems.org/gems/devise
 #
-# gem 'devise', '~> 4.9'     -- Ruby 3.3 / Rails 7, many deprecation warnings
-gem 'devise', git: 'https://github.com/heartcombo/devise', branch: 'main'
+gem 'devise', '~> 5.0'
 
 # Recaptcha used for e.g. the "booking" type pages.
 #
 #   https://rubygems.org/gems/recaptcha
 #
-gem 'recaptcha', '~> 5.20'
+gem 'recaptcha', '~> 5.21'
 
 # Image uploads and support for the Redactor WYSIWYG-ish page editor.
 #
@@ -48,7 +47,7 @@ gem 'recaptcha', '~> 5.20'
 #   https://rubygems.org/gems/mini_magick
 #   https://rubygems.org/gems/redactor3_rails
 #
-gem 'fog-aws',         '~> 3.32'
+gem 'fog-aws',         '~> 3.33'
 gem 'carrierwave',     '~> 3.1'
 gem 'mini_magick',     '~> 5.3'
 gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branch: 'feature/fix-js'
@@ -57,7 +56,7 @@ gem 'redactor3_rails', git: 'https://github.com/pond/redactor3_rails.git', branc
 #
 #   https://rubygems.org/gems/mailgun-ruby
 #
-gem 'mailgun-ruby', '~> 1.3'
+gem 'mailgun-ruby', '~> 1.4'
 
 # Automated inlining of e-mail styles.
 #
@@ -90,14 +89,14 @@ gem 'phonelib', '~> 0.10'
 #   https://rubygems.org/gems/money
 #   https://rubygems.org/gems/monetize
 #
-gem 'money',    '~> 6.19'
-gem 'monetize', '~> 1.13'
+gem 'money',    '~> 7.0'
+gem 'monetize', '~> 2.0'
 
 # Payments via Stripe.
 #
 #   https://rubygems.org/gems/stripe
 #
-gem 'stripe', '~> 17.0'
+gem 'stripe', '~> 18.0'
 
 # Monitoring and alerting.
 #
@@ -113,7 +112,7 @@ gem 'browser'
 
 group :development do
   gem 'web-console'
-  gem 'mailcatcher', '~> 0.10'
+  gem 'mailcatcher'
 end
 
 group :development, :test do
@@ -132,7 +131,7 @@ group :development, :test do
   #
   #   https://rubygems.org/gems/faker
   #
-  gem 'faker', '~> 3.5'
+  gem 'faker', '~> 3.6'
 end
 
 group :test do

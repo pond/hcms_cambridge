@@ -64,7 +64,7 @@
             <dd><%= encshelp_location(encounter) %></dd>
           <% end %>
           <dt><%= EncounterOrder.human_attribute_name(:number_of_seats) %></dt>
-          <dd><%= encounter_order.number_of_seats %> booked for this encounter</dd>
+          <dd><%= I18n.t('views.encounter_orders.seats', count: encounter_order.number_of_seats) %></dd>
         </dl>
       </div>
     </section>
@@ -73,34 +73,35 @@
   <section class="encounter-body-and-poster">
     <section class="encounter-body">
       <%= encounter.body.html_safe() %>
+
+      <% unless defined?(encounter_order) %>
+        <br>
+        <section class="encounter-meta">
+          <dl>
+            <% if encounter.location.present? %>
+              <dt><%= Encounter.human_attribute_name(:location) %></dt>
+              <dd><%= encshelp_location(encounter) %></dd>
+            <% end %>
+
+            <% unless encounter.free_of_charge? %>
+              <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
+              <dd>
+                <%= encshelp_price(encounter) %>
+                <% if encounter.has_physical_aspect? %>
+                  (with optional <%= encounter.name_physical %> for
+                  <%= encshelp_price(encounter, for_physical_aspect: true) %>)
+                <% end %>
+                &nbsp;
+                <%= encshelp_booking_button(encounter) %>
+              </dd>
+            <% end %>
+          </dl>
+        </section>
+      <% end %>
     </section>
 
     <section class="encounter-poster">
       <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title) %>
     </section>
   </section>
-
-  <% unless defined?(encounter_order) %>
-    <section class="encounter-meta">
-      <dl>
-        <% if encounter.location.present? %>
-          <dt><%= Encounter.human_attribute_name(:location) %></dt>
-          <dd><%= encshelp_location(encounter) %></dd>
-        <% end %>
-
-        <% unless encounter.free_of_charge? %>
-          <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
-          <dd>
-            <%= encshelp_price(encounter) %>
-            <% if encounter.has_physical_aspect? %>
-              (with optional <%= encounter.name_physical %> for
-              <%= encshelp_price(encounter, for_physical_aspect: true) %>)
-            <% end %>
-            &nbsp;
-            <%= encshelp_booking_button(encounter) %>
-          </dd>
-        <% end %>
-      </dl>
-    </section>
-  <% end %>
 </article>
