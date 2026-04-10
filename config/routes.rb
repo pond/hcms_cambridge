@@ -78,8 +78,9 @@ Rails.application.routes.draw do
       resources :encounter_orders
     end
 
-    resources :move_pages, only: :update
-    resources :statistics, only: [:index, :show]
+    resources :move_pages,      only: :update
+    resources :move_encounters, only: :update
+    resources :statistics,      only: [:index, :show]
 
     devise_for :users
   end

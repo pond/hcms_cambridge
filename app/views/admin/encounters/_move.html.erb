@@ -1,0 +1,25 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'move', locals: {
+  #     encounter: Encounter model instance,
+  #   }
+%>
+<td style="text-align: right">
+  <% if encounter.first? %>
+    &nbsp;
+  <% else %>
+    <%= form_for(encounter, url: admin_move_encounter_path(encounter)) do | f | %>
+    <%= f.submit('↑', name: 'higher', style: "line-height: 100%;") %>
+    <% end %>
+  <% end %>
+</td>
+<td style="text-align: left">
+  <% if encounter.last? %>
+    &nbsp;
+  <% else %>
+    <%= form_for(encounter, url: admin_move_encounter_path(encounter)) do | f | %>
+    <%= f.submit('↓', name: 'lower', style: "line-height: 100%;") %>
+    <% end %>
+  <% end %>
+</td>

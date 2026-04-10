@@ -874,6 +874,160 @@ RSpec.describe "Admin - encounters" do
     end
   end # 'context "raw editor" do'
 
+  context "category selection and position auto-management" do
+    def create_in_category(category)
+      visit(new_admin_encounter_path())
+
+      title    = "Quick Brown Fox #{Encounter.count + 1}"
+      summary  = "Jumps Over The"
+      body     = "<p>Lazy Dog</p>"
+      location = "1 Courtenay Place, Wellington 6011 New Zealand"
+
+      fill_in("encounter_title",    with: title)
+      fill_in("encounter_summary",  with: summary)
+      fill_in("encounter_body",     with: body)
+      fill_in("encounter_location", with: location)
+      fill_in("encounter_category", with: category)
+
+      image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+      attach_file("encounter_encounter_hero_image", image_path)
+
+      encounter_ids_before = Encounter.pluck(:id)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "New encounter published")
+
+      return Encounter.where.not(id: encounter_ids_before).first
+    end
+
+    def edit_category(encounter, new_category)
+      visit(edit_admin_encounter_path(encounter))
+
+      find(:css, "details > summary", text: "Expand to edit other attributes").click()
+      select("Add new", from: "encounter_category_chooser")
+      fill_in("encounter_category", with: new_category)
+
+      click_on("Publish encounter")
+      spechelp_check_flash(:notice, "Encounter changes published")
+    end
+
+    it "handles a complex sequence" do
+
+      # Create things in a varying order and show that either existing
+      # category positions are picked up or new category positions are added.
+      #
+      encounter_1_no_category = create_in_category("")
+      encounter_2_no_category = create_in_category("")
+      encounter_3_category_A  = create_in_category("A")
+      encounter_4_no_category = create_in_category("")
+      encounter_5_category_A  = create_in_category("A")
+      encounter_6_category_B  = create_in_category("B")
+      encounter_7_category_C  = create_in_category("C")
+
+      all_created_encounters  = [
+        encounter_1_no_category,
+        encounter_2_no_category,
+        encounter_3_category_A,
+        encounter_4_no_category,
+        encounter_5_category_A,
+        encounter_6_category_B,
+        encounter_7_category_C,
+      ]
+
+      expect(encounter_1_no_category.category_position).to eql(1)
+      expect(encounter_2_no_category.category_position).to eql(1)
+      expect(encounter_4_no_category.category_position).to eql(1)
+
+      expect(encounter_3_category_A.category_position).to eql(2)
+      expect(encounter_5_category_A.category_position).to eql(2)
+
+      expect(encounter_6_category_B.category_position).to eql(3)
+
+      expect(encounter_7_category_C.category_position).to eql(4)
+
+      # Now start editing things and check the position recalculations. If the
+      # only encounter in B is changed to something new, then it would've left
+      # a "hole" that category C should fall down into and then it should
+      # have gained a new position at the end of the list.
+      #
+      edit_category(encounter_6_category_B, "B-2")
+      all_created_encounters.map(&:reload)
+
+      expect(encounter_1_no_category.category_position).to eql(1)
+      expect(encounter_2_no_category.category_position).to eql(1)
+      expect(encounter_4_no_category.category_position).to eql(1)
+
+      expect(encounter_3_category_A.category_position).to eql(2)
+      expect(encounter_5_category_A.category_position).to eql(2)
+
+      expect(encounter_7_category_C.category_position).to eql(3) # Shuffled down
+
+      #                 (Now in "B-2")
+      expect(encounter_6_category_B.category_position).to eql(4) # New position
+
+      # If we edit "A"s to be in category "C" there are no "A"s left, so there
+      # is a hole that should then be filled by lowering higher positions. But
+      # that would include the already-higher category C number and the item
+      # that got edited should track that properly.
+      #
+      # So when we move the first one - nothing shuffles. When we move the last
+      # one - it shuffles.
+      #
+      edit_category(encounter_3_category_A, "C")
+      all_created_encounters.map(&:reload)
+
+      expect(encounter_1_no_category.category_position).to eql(1)
+      expect(encounter_2_no_category.category_position).to eql(1)
+      expect(encounter_4_no_category.category_position).to eql(1)
+
+      expect(encounter_5_category_A.category_position).to eql(2)
+
+      #                  (Now in "C")
+      expect(encounter_3_category_A.category_position).to eql(3) # Matches position
+      expect(encounter_7_category_C.category_position).to eql(3) # Not shuffled
+
+      #                 (Now in "B-2")
+      expect(encounter_6_category_B.category_position).to eql(4)
+
+      edit_category(encounter_5_category_A, "C")
+      all_created_encounters.map(&:reload)
+
+      expect(encounter_1_no_category.category_position).to eql(1)
+      expect(encounter_2_no_category.category_position).to eql(1)
+      expect(encounter_4_no_category.category_position).to eql(1)
+
+      #                  (Now in "C")
+      expect(encounter_3_category_A.category_position).to eql(2) # Shuffled down
+      #             (Now also in "C")
+      expect(encounter_5_category_A.category_position).to eql(2) # Shuffled down
+      expect(encounter_7_category_C.category_position).to eql(2) # Shuffled down
+
+      #                 (Now in "B-2")
+      expect(encounter_6_category_B.category_position).to eql(3) # Shuffled down
+
+      # The opposite now; remove category from all of the above, and note that
+      # eventually things shuffle but there's no "zero" / accidental decrement.
+      #
+      edit_category(encounter_3_category_A, "")
+      edit_category(encounter_5_category_A, "")
+      edit_category(encounter_7_category_C, "")
+      all_created_encounters.map(&:reload)
+
+      expect(encounter_1_no_category.category_position).to eql(1)
+      expect(encounter_2_no_category.category_position).to eql(1)
+      #                   (Now in no category)
+      expect(encounter_3_category_A.category_position ).to eql(1)
+      expect(encounter_4_no_category.category_position).to eql(1)
+      #                   (Now in no category)
+      expect(encounter_5_category_A.category_position ).to eql(1)
+      #                   (Now in no category)
+      expect(encounter_7_category_C.category_position ).to eql(1)
+
+      #                 (Now in "B-2")
+      expect(encounter_6_category_B.category_position).to eql(2) # Shuffled down again
+    end
+  end # 'context "category selection and position auto-management" do'
+
   context "lists" do
     context "display" do
       it "shows details" do

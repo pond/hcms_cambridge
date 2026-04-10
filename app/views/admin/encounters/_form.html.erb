@@ -28,6 +28,23 @@
           <%= f.error_markup_for(:summary) %><br>
           <small><em>A brief, plain text (no styling) summary used in the list of encounters</em></small>
         </div>
+
+        <div class="field">
+          <%= apphelp_label(f, :category) %>
+          <% categories = Encounter.categories; if categories.any? %>
+            <%=
+              # Note - 'categories' is just an Array of Strings
+              f.collection_select(
+                :category_chooser,
+                [['', 'Add new']] + categories.map { |c| [c, c] },
+                :first,
+                :last,
+                selected: f.object.category
+              )
+            %>
+          <% end %>
+          <%= f.text_field :category %>
+        </div>
       </div>
 
       <div class="field_column">

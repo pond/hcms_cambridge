@@ -12,6 +12,7 @@
       <th>Seats</th>
       <th>Amount</th>
       <th>State</th>
+
       <th class="centre" colspan="2">Actions</th>
     </tr>
   </thead>
@@ -32,6 +33,7 @@
           <% end %>
         </td>
         <td><%= order.human_state %></td>
+
         <%= render partial: 'actions', locals: { order: order } %>
       </tr>
 

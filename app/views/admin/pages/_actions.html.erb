@@ -5,30 +5,15 @@
   #     page: Page model instance
   #   }
 %>
-<td class="centre">
-  <% if page.first? %>
-    &nbsp;
-  <% else %>
-    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
-    <%= f.submit('↑', name: 'higher', style: "line-height: 100%;") %>
-    <% end %>
-  <% end %>
-</td>
-<td class="centre">
-  <% if page.last? %>
-    &nbsp;
-  <% else %>
-    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
-    <%= f.submit('↓', name: 'lower', style: "line-height: 100%;") %>
-    <% end %>
-  <% end %>
-</td>
 <td class="admin_actions">
   <%= link_to 'Show', admin_page_path(page.slug) %>
+  /
   <%= link_to 'Edit', edit_admin_page_path(page) %>
   <% if page.is_blog_type? %>
+    /
     <%= link_to 'Articles', admin_page_articles_path(page) %>
   <% elsif page.is_events_type? %>
+    /
     <%= link_to 'Events', admin_page_events_path(page) %>
   <% end %>
 </td>

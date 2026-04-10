@@ -6,11 +6,11 @@ class Admin::MovePagesController < ApplicationController
   before_action :authenticate_admin_user! # (via Devise)
 
   def update
-    page = Page.find( params[ :id ] )
+    page = Page.find(params[:id])
 
-    if params.has_key?( :higher )
+    if params.key?(:higher)
       page.move_higher
-    elsif params.has_key?( :lower )
+    elsif params.key?(:lower)
       page.move_lower
     end
 

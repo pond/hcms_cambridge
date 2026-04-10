@@ -99,7 +99,7 @@ class Admin::PagesController < ApplicationController
       result = page.persist!(self.page_params(), publish: params[:publish].present?)
 
       if result.successful
-        if page.previous_changes.has_key?('raw_editor')
+        if page.previous_changes.key?('raw_editor')
           if result.published
             redirect_to([:edit, :admin, page], notice: 'Editor selection altered and other changes, if any, published.')
           else

@@ -97,6 +97,31 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
+  // Handle changes of the "Category" selector
+  // ===========================================================================
+  //
+  const encounterCategorySelector = $('#encounter_category_chooser')
+
+  if (encounterCategorySelector.length > 0) {
+    const encounterCategoryInput = $('#encounter_category')
+
+    function encounterCategorySelectionChanged() {
+      var selectedCategory = encounterCategorySelector.children("option:selected").val();
+
+      if (selectedCategory === "") {
+        encounterCategoryInput.show();
+        encounterCategoryInput.val("");
+      } else {
+        encounterCategoryInput.hide();
+        encounterCategoryInput.val(selectedCategory);
+      }
+    }
+
+    encounterCategorySelector.on('change', encounterCategorySelectionChanged);
+    encounterCategorySelectionChanged();
+  }
+
+  // ===========================================================================
   // For ad-hoc order or encounter order changes, calculate price based on the
   // number of seats and (for encounters) physical product addition
   // ===========================================================================

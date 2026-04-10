@@ -27,13 +27,12 @@ RSpec.describe Encounter, type: :model do
   end
 
   context "scopes and associations" do
-    it "default scope orders by created-at-date ascending" do
-      t_ref       = Time.now.midnight + 1.day + 18.hours
-      encounter_1 = create(:encounter, created_at: t_ref)
-      encounter_2 = create(:encounter, created_at: t_ref - 1.day)
-      encounter_3 = create(:encounter, created_at: t_ref + 1.day)
+    it "default scope orders by category position, then category" do
+      encounter_1 = create(:encounter, category_position: 2, category: "Caravan")
+      encounter_2 = create(:encounter, category_position: 1, category: "Banana")
+      encounter_3 = create(:encounter, category_position: 2, category: "Aardvark")
 
-      expect(Encounter.all.to_a).to eql([encounter_2, encounter_1, encounter_3])
+      expect(Encounter.all.to_a).to eql([encounter_2, encounter_3, encounter_1])
     end
 
     it "::for_navigation finds nothing" do
@@ -43,7 +42,89 @@ RSpec.describe Encounter, type: :model do
 
       expect(Encounter.for_navigation).to be_empty
     end
+
+    it "::without_category" do
+      encounter_1 = create(:encounter, category: "Caravan")
+      encounter_2 = create(:encounter)
+      encounter_3 = create(:encounter, category: "Aardvark")
+
+      expect(Encounter.without_category.to_a).to eql([encounter_2])
+    end
+
+    it "::with_category" do
+      encounter_1 = create(:encounter, category: "Caravan")
+      encounter_2 = create(:encounter)
+      encounter_3 = create(:encounter, category: "Aardvark")
+
+      expect(Encounter.with_category.to_a).to eql([encounter_3, encounter_1])
+    end
+
+    it "::matching_category" do
+      encounter_1 = create(:encounter, category: "Caravan")
+      encounter_2 = create(:encounter)
+      encounter_3 = create(:encounter, category: "Aardvark")
+
+      expect(Encounter.matching_category("Aardvark").to_a).to eql([encounter_3])
+      expect(Encounter.matching_category(""        ).to_a).to eql([encounter_2])
+      expect(Encounter.matching_category("    "    ).to_a).to eql([encounter_2])
+    end
   end # 'context "scopes and associations" do'
+
+  context "category assistance" do
+    it 'enumerates categories' do
+      encounter_1 = create(:encounter, category: "Caravan")
+      encounter_2 = create(:encounter)
+      encounter_3 = create(:encounter, category: "Aardvark")
+
+      expect(Encounter.categories).to eql(["Aardvark", "Caravan"])
+    end
+
+    it "matches categories (with lenient white space checks)" do
+      encounter_1 = create(:encounter, category: "Caravan")
+      encounter_2 = create(:encounter)
+      encounter_3 = create(:encounter, category: "Aardvark")
+
+      encounter = build(:encounter, category: "Aardvark")
+
+      expect(encounter.category_matches?(encounter_1)).to eql(false)
+      expect(encounter.category_matches?(encounter_2)).to eql(false)
+      expect(encounter.category_matches?(encounter_3)).to eql(true)
+
+      encounter = build(:encounter)
+
+      expect(encounter.category_matches?(encounter_1)).to eql(false)
+      expect(encounter.category_matches?(encounter_2)).to eql(true)
+      expect(encounter.category_matches?(encounter_3)).to eql(false)
+
+      encounter_2.update_column(:category, "                ")
+      encounter = build(:encounter, category: "   ")
+
+      expect(encounter.category_matches?(encounter_2)).to eql(true)
+    end
+
+    it "notes the first and last in a group" do
+      encounter_1 = create(:encounter, category: "A", category_position: 1)
+      encounter_2 = create(:encounter, category: "A", category_position: 1)
+      encounter_3 = create(:encounter, category: "B", category_position: 2)
+      encounter_4 = create(:encounter, category: "C", category_position: 3)
+      encounter_5 = create(:encounter, category: "C", category_position: 3)
+
+      expect(encounter_1.first?).to eql(true)
+      expect(encounter_1.last? ).to eql(false)
+
+      expect(encounter_2.first?).to eql(true)
+      expect(encounter_2.last? ).to eql(false)
+
+      expect(encounter_3.first?).to eql(false)
+      expect(encounter_3.last? ).to eql(false)
+
+      expect(encounter_4.first?).to eql(false)
+      expect(encounter_4.last? ).to eql(true)
+
+      expect(encounter_5.first?).to eql(false)
+      expect(encounter_5.last? ).to eql(true)
+    end
+  end # 'context "category assistance" do'
 
   context "validations" do
     it "requires a title, summary, body and hero image" do
@@ -103,9 +184,32 @@ RSpec.describe Encounter, type: :model do
   end # 'context "base class overrides" do'
 
   context "miscellaneous" do
+    it '#price_on_application?' do
+      priced_encounter = build(:encounter)
+      free_encounter   = build(:encounter, :free)
+
+      # The POA flag should override any setting of price-per-seat.
+      #
+      priced_encounter.price_on_application = true
+        free_encounter.price_on_application = true
+
+      expect(priced_encounter.price_on_application?).to eql(true)
+      expect(  free_encounter.price_on_application?).to eql(true)
+    end
+
     it "#free_of_charge?" do
-      expect(build(:encounter       ).free_of_charge?).to eql(false)
-      expect(build(:encounter, :free).free_of_charge?).to eql(true)
+      priced_encounter = build(:encounter)
+      free_encounter   = build(:encounter, :free)
+
+      expect(priced_encounter.free_of_charge?).to eql(false)
+      expect(  free_encounter.free_of_charge?).to eql(true)
+
+      # The POA flag should override price-per-seat-is-zero; the encounter is
+      # *not* free of charge.
+      #
+      free_encounter.price_on_application = true
+
+      expect(  free_encounter.free_of_charge?).to eql(false)
     end
 
     it "#no_physical_aspect?" do

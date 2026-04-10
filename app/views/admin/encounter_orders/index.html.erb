@@ -3,7 +3,7 @@
 </h1>
 
 <ul>
-  <li><%= @encounter.location %></li>
+  <li><%= @encounter.location.presence or "No location specified" %></li>
 </ul>
 
 <div id="admin-header-with-nav">

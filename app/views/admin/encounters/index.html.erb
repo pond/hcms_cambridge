@@ -15,9 +15,14 @@
   <thead>
     <tr>
       <th>Title</th>
+
       <th class="centre">Published?</th>
       <th class="centre">Has draft?</th>
-      <th class="centre" colspan="3">Actions</th>
+
+      <th>Category</th>
+      <th class="centre" colspan="2">Move category</th>
+
+      <th colspan="3">Actions</th>
     </tr>
   </thead>
 
@@ -26,7 +31,12 @@
 
       <tr class="<%= cycle( 'even', 'odd' ) %>">
         <td class="encounter-title"><%= encounter.title %><br></td>
+
         <%= render partial: 'booleans', locals: { encounter: encounter } %>
+
+        <td><%= encounter.category.present? ? encounter.category : 'Uncategorised' %></td>
+        <%= render partial: 'move', locals: { encounter: encounter } %>
+
         <%= render partial: 'actions', locals: { encounter: encounter } %>
       </tr>
 

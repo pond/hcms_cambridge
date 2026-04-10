@@ -222,7 +222,7 @@ class Admin::EventsController < ApplicationController
       result = event.persist!(safe_params, publish: params[:publish].present?)
 
       if result.successful
-        if event.previous_changes.has_key?('raw_editor')
+        if event.previous_changes.key?('raw_editor')
           if result.published
             redirect_to([:edit, :admin, event.page, event], notice: 'Editor selection altered and other changes, if any, published.')
           else

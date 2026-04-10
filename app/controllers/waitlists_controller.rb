@@ -46,7 +46,7 @@ class WaitlistsController < ApplicationController
     @order.validate()
     @order.errors.delete(:number_of_seats)
 
-    relevant_validation_errors = PERMITTED_PARAMS.any? { | attr | @order.errors.has_key?(attr) }
+    relevant_validation_errors = PERMITTED_PARAMS.any? { | attr | @order.errors.key?(attr) }
 
     if relevant_validation_errors
       render :new

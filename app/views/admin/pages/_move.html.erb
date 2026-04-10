@@ -1,0 +1,25 @@
+<%
+  # Render with:
+  #
+  #   render partial: 'move', locals: {
+  #     page: Page model instance
+  #   }
+%>
+<td style="text-align: right">
+  <% if page.first? %>
+    &nbsp;
+  <% else %>
+    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
+    <%= f.submit('↑', name: 'higher', style: "line-height: 100%;") %>
+    <% end %>
+  <% end %>
+</td>
+<td style="text-align: left">
+  <% if page.last? %>
+    &nbsp;
+  <% else %>
+    <%= form_for(page, url: admin_move_page_path(page)) do | f | %>
+    <%= f.submit('↓', name: 'lower', style: "line-height: 100%;") %>
+    <% end %>
+  <% end %>
+</td>

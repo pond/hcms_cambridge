@@ -12,6 +12,7 @@
       <th>People</th>
       <th>Amount</th>
       <th>State</th>
+
       <th class="centre" colspan="2">Actions</th>
     </tr>
   </thead>
@@ -38,6 +39,7 @@
           <% end %>
         </td>
         <td><%= encounter_order.human_state %></td>
+
         <%= render partial: 'actions', locals: { encounter_order: encounter_order } %>
       </tr>
 

@@ -7,7 +7,7 @@ class Encounter < Editable
   has_one  :stripe_price, as: :priceable, required: false, dependent: :destroy
 
   after_initialize(unless: :persisted?) do
-    self.currency  = Hcms.config.currency
+    self.currency = Hcms.config.currency
   end
 
   after_commit :stripe_make_inactive, on: :destroy
@@ -16,9 +16,22 @@ class Encounter < Editable
   # Scopes
   # ============================================================================
 
-  default_scope -> { order(created_at: :asc) }
+  default_scope -> { order(:category_position, :category) }
 
-  scope :for_navigation, -> { none() }
+  scope :for_navigation,    -> { none() }
+  scope :without_category,  -> { where(category: '') }
+  scope :with_category,     -> { where.not(category: '') }
+
+  # This is of marginal use at best, but tolerates unstripped white space given
+  # as input.
+  #
+  scope :matching_category, -> (category) {
+    if category.blank?
+      without_category
+    else
+      where(category: category)
+    end
+  }
 
   # ============================================================================
   # Validations
@@ -72,10 +85,62 @@ class Encounter < Editable
   # Miscellaneous
   # ============================================================================
 
+  # Class method - return unique category names in the specified order. Will
+  # return an empty array if there are no non-blank category names in category
+  # position order first, category name next.
+  #
+  def self.categories
+    Encounter
+      .with_category
+      .select('DISTINCT ON (category) *')
+      .reorder(:category)
+      .map(&:category) # #pluck will overwrite SELECT DISTINCT ON
+  end
+
+  # Does this record's category match the given other Encounter's category?
+  # "Blank" (with any variation on white space) is treated as a match.
+  #
+  def category_matches?(other_encounter)
+    if self.category.blank?
+      return other_encounter.category.blank?
+    else
+      return self.category == other_encounter.category
+    end
+  end
+
+  # Akin to acts-as-list's "#first?", for category ordering.
+  #
+  def first?
+    sorted_first = Encounter
+      .where(category_position: self.category_position)
+      .where('category_position = (SELECT MIN(category_position) FROM encounters)')
+      .first # (note reliance on default_scope order)
+
+    return sorted_first.present? && self.category_matches?(sorted_first)
+  end
+
+  # Akin to acts-as-list's "#last?", for category ordering.
+  #
+  def last?
+    sorted_last = Encounter
+      .where(category_position: self.category_position)
+      .where('category_position = (SELECT MAX(category_position) FROM encounters)')
+      .last # (note reliance on default_scope order)
+
+    return sorted_last.present? && self.category_matches?(sorted_last)
+  end
+
+  # ActiveRecord gives us this for free, but we want to be explicit and show how
+  # we don't consider the price at all; POA overrides all.
+  #
+  def price_on_application?
+    self.price_on_application
+  end
+
   # Is the encounter free of charge?
   #
   def free_of_charge?
-    self.price_per_seat.zero?
+    ! self.price_on_application? && self.price_per_seat.zero?
   end
 
   # Does the encounter have a physical associated aspect?
