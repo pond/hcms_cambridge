@@ -60,7 +60,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_235502) do
   end
 
   create_table "encounters", force: :cascade do |t|
-    t.text "category"
+    t.text "category", default: "", null: false
     t.integer "category_position", default: 1, null: false
     t.datetime "created_at", null: false
     t.string "currency", limit: 3, null: false
@@ -73,6 +73,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_235502) do
     t.boolean "raw_editor", default: false, null: false
     t.text "slug", null: false
     t.datetime "updated_at", null: false
+    t.index ["category", "category_position"], name: "index_encounters_on_category_and_category_position"
     t.index ["slug"], name: "index_encounters_on_slug", unique: true
   end
 
