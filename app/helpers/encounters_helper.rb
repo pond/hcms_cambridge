@@ -33,13 +33,14 @@ module EncountersHelper
       apphelp_money(
         encounter.price_physical,
         currency:       encounter.currency,
-        free_of_charge: encounter.physical_aspect_free_of_charge?
+        free_of_charge: encounter.physical_aspect_free_of_charge?,
       )
     else
       apphelp_money(
         encounter.price_per_seat,
         currency:       encounter.currency,
-        free_of_charge: encounter.free_of_charge?
+        free_of_charge: encounter.free_of_charge?,
+        poa:            encounter.price_on_application?
       )
     end
   end
@@ -53,7 +54,7 @@ module EncountersHelper
     "#{text} (#{link})".html_safe()
   end
 
-  def encshelp_booking_button(encounter)
+  def encshelp_enquiries_or_booking_button(encounter)
     if user_signed_in?
       link_to(
         'Set up a new booking',

@@ -39,7 +39,7 @@
           <%= encounter.summary %>
         </div>
         <div class="encounter-next-prev">
-          <%= encshelp_booking_button(encounter) %>
+          <%= encshelp_enquiries_or_booking_button(encounter) %>
         </div>
       <% end %>
     </div>
@@ -83,18 +83,16 @@
               <dd><%= encshelp_location(encounter) %></dd>
             <% end %>
 
-            <% unless encounter.free_of_charge? %>
-              <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
-              <dd>
-                <%= encshelp_price(encounter) %>
-                <% if encounter.has_physical_aspect? %>
-                  (with optional <%= encounter.name_physical %> for
-                  <%= encshelp_price(encounter, for_physical_aspect: true) %>)
-                <% end %>
-                &nbsp;
-                <%= encshelp_booking_button(encounter) %>
-              </dd>
-            <% end %>
+            <dt><%= Encounter.human_attribute_name(:price_per_seat) %></dt>
+            <dd>
+              <%= encshelp_price(encounter) %>
+              <% if encounter.has_physical_aspect? && ! encounter.price_on_application? %>
+                (with optional <%= encounter.name_physical %> for
+                <%= encshelp_price(encounter, for_physical_aspect: true) %>)
+              <% end %>
+              <br><br>
+              <%= encshelp_enquiries_or_booking_button(encounter) %>
+            </dd>
           </dl>
         </section>
       <% end %>

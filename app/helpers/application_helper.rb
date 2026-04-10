@@ -68,14 +68,16 @@ module ApplicationHelper
   # Return an amount of money formatted for a given (default - globally
   # configured) configured currency, for a value expressed in 'cents', i.e.
   # fractional units) with an optional support for 'free of charge' via the
-  # given boolean.
+  # given boolean, or 'price on application' (supersedes 'free of charge').
   #
   # Returns an en-dash HTML entity if there's no currency configured or given
   # (specify via an ISO 3-letter code such as GBP or NZD).
   #
-  def apphelp_money(amount_in_cents, currency: Hcms.config.currency, free_of_charge: false)
+  def apphelp_money(amount_in_cents, currency: Hcms.config.currency, free_of_charge: false, poa: false)
     if currency.blank?
       '&ndash;'.html_safe()
+    elsif poa
+      'Price on enquiry'
     elsif free_of_charge
       'Free'
     else

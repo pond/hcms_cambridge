@@ -209,7 +209,7 @@ RSpec.describe Encounter, type: :model do
       #
       free_encounter.price_on_application = true
 
-      expect(  free_encounter.free_of_charge?).to eql(false)
+      expect(free_encounter.free_of_charge?).to eql(false)
     end
 
     it "#no_physical_aspect?" do

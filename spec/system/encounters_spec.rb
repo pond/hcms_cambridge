@@ -2,6 +2,8 @@ require "spec_helper.rb"
 require_relative "shared_examples/footer_spec.rb"
 
 RSpec.describe "Encounters" do
+  include ApplicationHelper
+
   context "navigation" do
     it "redirects to the Admin page if logged in" do
       encounter = create(:encounter)
@@ -32,10 +34,6 @@ RSpec.describe "Encounters" do
   end # 'context "shared" do'
 
   context "viewing" do
-    before :each do
-      @encounter = create(:encounter) # Note, draft
-    end
-
     it "hides drafts once published revisions are available" do
       encounter = create(:encounter)
 
@@ -66,6 +64,58 @@ RSpec.describe "Encounters" do
       expect(page).to_not have_text(encounter_draft_revision.summary)
       expect(page).to_not have_text(spechelp_strip_markup encounter_draft_revision.body)
       expect(page).to_not have_css("section.encounter-poster img[alt=\"#{encounter_draft_revision.title}\"]")
+    end
+
+    it "shows correct event pricing" do
+      [
+        create(:encounter),
+        create(:encounter, :physical_free),
+        create(:encounter, :physical_none),
+        create(:encounter, :free),
+        create(:encounter, :free, :physical_free),
+        create(:encounter, :free, :physical_none),
+        create(:encounter, price_on_application: true),
+        create(:encounter, :physical_free, price_on_application: true),
+        create(:encounter, :physical_none, price_on_application: true),
+        create(:encounter, :free, price_on_application: true),
+        create(:encounter, :free, :physical_free, price_on_application: true),
+        create(:encounter, :free, :physical_none, price_on_application: true),
+      ].each do | encounter |
+        encounter.revisions.first.update!(published: true)
+
+        visit encounter_path(encounter)
+
+        details = page.find(:css, "section.encounter-meta")
+        link    = "mailto:#{Hcms.config.contact_email}?subject=#{ERB::Util.url_encode(encounter.title)}"
+        price   = apphelp_money(
+          encounter.price_per_seat,
+          currency:       encounter.currency,
+          free_of_charge: encounter.free_of_charge?,
+          poa:            encounter.price_on_application?
+        )
+        physical = apphelp_money(
+          encounter.price_physical || 0,
+          currency:       encounter.currency,
+          free_of_charge: encounter.physical_aspect_free_of_charge?,
+        )
+
+        expect(details).to have_text("Price per seat")
+        expect(details).to have_text(price)
+        expect(details).to have_link("Enquire", href: link)
+
+        if encounter.has_physical_aspect? && ! encounter.price_on_application?
+          expect(details).to have_text("optional")
+          expect(details).to have_text(encounter.name_physical)
+          expect(details).to have_text(physical)
+        else
+          expect(details).to_not have_text("optional")
+
+          if encounter.name_physical.present?
+            expect(details).to_not have_text(encounter.name_physical)
+            expect(details).to_not have_text(physical)
+          end
+        end
+      end
     end
   end # 'context "viewing" do'
 end

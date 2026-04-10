@@ -26,17 +26,16 @@
         <td><%= apphelp_human_time(encounter_order.created_at, date_only: true) %></td>
         <td><%= encounter_order.number_of_seats %></td>
         <td>
-          <% if encounter.free_of_charge? %>
-            &ndash;
-          <% else %>
-            <%=
-              apphelp_money(
-                encounter_order.amount_owed,
-                currency:       encounter_order.encounter.currency,
-                free_of_charge: encounter_order.encounter.free_of_charge?
-              )
-            %>
-          <% end %>
+          <%=
+            # An encounter might be free but with a for-price physical item, or
+            # other future combinations; don't special-case "free" to keep it
+            # simple and reliable. Just show the amount owed.
+            #
+            apphelp_money(
+              encounter_order.amount_owed,
+              currency:       encounter_order.encounter.currency,
+            )
+          %>
         </td>
         <td><%= encounter_order.human_state %></td>
 
@@ -67,11 +66,7 @@
         <%= encounter_orders.sum(:number_of_seats) %>
       </td>
       <td>
-        <% if encounter.free_of_charge? %>
-          &ndash;
-        <% else %>
-          <%= apphelp_money(encounter_orders.sum(:amount_owed), currency: encounter.currency) %>
-        <% end %>
+        <%= apphelp_money(encounter_orders.sum(:amount_owed), currency: encounter.currency) %>
       </td>
       <td colspan="3">&nbsp;</td>
     </tr>
