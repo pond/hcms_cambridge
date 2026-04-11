@@ -1026,6 +1026,145 @@ RSpec.describe "Admin - encounters" do
       #                 (Now in "B-2")
       expect(encounter_6_category_B.category_position).to eql(2) # Shuffled down again
     end
+
+    context "category chooser menu" do
+      it "only shows the input field for a first encounter" do
+        visit(new_admin_encounter_path())
+
+        expect(page).to_not have_select("encounter_category_chooser")
+        expect(page).to     have_field("encounter_category")
+      end
+
+      it "only shows the input field if other existing encounters are uncategorised" do
+        create(:encounter)
+        create(:encounter)
+
+        visit(new_admin_encounter_path())
+
+        expect(page).to_not have_select("encounter_category_chooser")
+        expect(page).to     have_field("encounter_category")
+      end
+
+      it "shows a deduplicated category menu if there are existing categorised encounters" do
+        create(:encounter)
+        create(:encounter, category: "Banana")
+        create(:encounter, category: "Zodiac")
+        create(:encounter, category: "Zodiac")
+        create(:encounter, category: "Aardvark")
+
+        visit(new_admin_encounter_path())
+
+        expect(page).to have_select("encounter_category_chooser", with_options: ["Aardvark", "Banana", "Zodiac"])
+        expect(page).to have_field("encounter_category")
+      end
+
+      # Take advantage of non-JS having both fields visible; otherwise we'd have
+      # to select 'add new', enter text, but then select a different thing. Slower
+      # test, same coverage.
+      #
+      it "lets the user select a category (and that overrides the input field)" do
+        create(:encounter)
+        create(:encounter, category: "Aardvark", category_position: 2)
+
+        visit(new_admin_encounter_path())
+
+        fill_in("encounter_category", with: "Banana")
+        select("Aardvark", from: "encounter_category_chooser")
+
+        fill_in("encounter_title",   with: "Quick Brown Fox")
+        fill_in("encounter_summary", with: "Jumps Over The")
+        fill_in("encounter_body",    with: "<p>Lazy Dog</p>")
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+
+        encounter_ids_before = Encounter.pluck(:id)
+
+        click_on("Publish encounter")
+        spechelp_check_flash(:notice, "New encounter published")
+
+        new_encounter = Encounter.where.not(id: encounter_ids_before).first
+
+        expect(new_encounter.category         ).to eql("Aardvark")
+        expect(new_encounter.category_position).to eql(2)
+      end
+
+      it "hides or shows the 'add new' field", js: true do
+        create(:encounter, category: "Aardvark")
+
+        visit(new_admin_encounter_path())
+
+        expect(page).to have_select("encounter_category_chooser")
+        expect(page).to have_field("encounter_category")
+
+        select("Aardvark", from: "encounter_category_chooser")
+
+        expect(page).to_not have_field("encounter_category")
+
+        select("Add new", from: "encounter_category_chooser")
+
+        expect(page).to have_field("encounter_category")
+      end
+
+      it "when editing, it selects an existing encounter's category if there is one, with the 'add new' field hidden", js: true do
+        encounter = create(:encounter, category: "Aardvark")
+
+        visit(edit_admin_encounter_path(encounter))
+        find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+        expect(page).to     have_select("encounter_category_chooser", selected: "Aardvark")
+        expect(page).to_not have_field("encounter_category")
+
+        select("Add new", from: "encounter_category_chooser")
+
+        expect(page).to have_field("encounter_category")
+      end
+
+      it "when editing, it selects 'add new' if there item is uncategorised, with the 'add new' field shown", js: true do
+        create(:encounter, category: "Aardvark")
+        encounter = create(:encounter)
+
+        visit(edit_admin_encounter_path(encounter))
+        find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+        expect(page).to have_select("encounter_category_chooser", selected: "Add new")
+        expect(page).to have_field("encounter_category")
+
+        select("Aardvark", from: "encounter_category_chooser")
+
+        expect(page).to_not have_field("encounter_category")
+      end
+
+      it "when editing, 'add new' can be used to replace an existing category" do
+        encounter = create(:encounter, category: "Aardvark")
+
+        visit(edit_admin_encounter_path(encounter))
+        find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+        select("Add new", from: "encounter_category_chooser")
+        fill_in("encounter_category", with: "Banana")
+
+        click_on("Publish encounter")
+        spechelp_check_flash(:notice, "Encounter changes published")
+
+        expect(encounter.reload.category).to eql("Banana")
+      end
+
+      it "when editing, 'add new' can be used to remove a category" do
+        encounter = create(:encounter, category: "Aardvark")
+
+        visit(edit_admin_encounter_path(encounter))
+        find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+        select("Add new", from: "encounter_category_chooser")
+        fill_in("encounter_category", with: "")
+
+        click_on("Publish encounter")
+        spechelp_check_flash(:notice, "Encounter changes published")
+
+        expect(encounter.reload.category).to eql("")
+      end
+    end # 'context "category chooser menu" do'
   end # 'context "category selection and position auto-management" do'
 
   context "lists" do
