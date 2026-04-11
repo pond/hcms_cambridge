@@ -13,13 +13,12 @@
         <strong><%= encounter.title %></strong>
       </p>
       <%= encounter.body.html_safe() %>
-      <%=
-        link_to(
-          'Find out more',
-          encounter_path(encounter),
-          class: 'bold_button'
-        )
-      %>
+
+      TODO: This as a form maybe? Or at least have the "Show" view as a form.
+      "Enquire Today" skips the prices, but could just have price and location
+      meta inline right here, as in "_encounter.html.erb".
+
+      <%= encshelp_enquiries_or_booking_button(encounter, always_as_enquiries: true) %>
     </section>
   </section>
 <% end %>

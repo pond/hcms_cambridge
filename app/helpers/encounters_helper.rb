@@ -54,8 +54,8 @@ module EncountersHelper
     "#{text} (#{link})".html_safe()
   end
 
-  def encshelp_enquiries_or_booking_button(encounter)
-    if user_signed_in?
+  def encshelp_enquiries_or_booking_button(encounter, always_as_enquiries: false)
+    if user_signed_in? && !always_as_enquiries
       link_to(
         'Set up a new booking',
         new_admin_encounter_encounter_order_path(encounter_id: encounter.slug),
@@ -75,7 +75,7 @@ module EncountersHelper
 
       if enquiry_link.present?
         link_to(
-          'Enquire',
+          'Enquire Today',
           enquiry_link,
           class: 'bold_button'
         )
