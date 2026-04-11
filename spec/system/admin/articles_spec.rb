@@ -777,9 +777,9 @@ RSpec.describe "Admin - articles" do
         #
         # Note reverse order - created-at DESC sorting.
         #
-        expect(row_1).to have_text("#{article_3.title} #{apphelp_human_time(article_3.created_at, date_only: true)} Yes Yes Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{article_2.title} #{apphelp_human_time(article_2.created_at, date_only: true)} Yes No Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{article_1.title} #{apphelp_human_time(article_1.created_at, date_only: true)} No Yes Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{article_3.title} #{apphelp_human_time(article_3.created_at, date_only: true)} Yes Yes Show / Edit Delete", exact: true)
+        expect(row_2).to have_text("#{article_2.title} #{apphelp_human_time(article_2.created_at, date_only: true)} Yes No Show / Edit Delete", exact: true)
+        expect(row_3).to have_text("#{article_1.title} #{apphelp_human_time(article_1.created_at, date_only: true)} No Yes Show / Edit Delete", exact: true)
 
         # Check a few links. Column 1 - article title, 2 - published date,
         # 3-4 - boolean, 5 - main actions, 6 - delete action.

@@ -1144,12 +1144,12 @@ RSpec.describe "Admin - pages" do
 
         # Title / Published? / Draft? / In menu? / Actions
         #
-        expect(row_1).to have_text("#{page_1.title} Yes No No Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{page_2.title} No Yes No Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show Edit Delete", exact: true)
-        expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show Edit Delete", exact: true) # "— " prefix for is-child
-        expect(row_5).to have_text("#{page_5.title} Yes No Yes Show Edit Articles Delete", exact: true)
-        expect(row_6).to have_text("#{page_6.title} Yes No Yes Show Edit Events Delete", exact: true)
+        expect(row_1).to have_text("#{page_1.title} Yes No No Show / Edit Delete", exact: true)
+        expect(row_2).to have_text("#{page_2.title} No Yes No Show / Edit Delete", exact: true)
+        expect(row_3).to have_text("#{page_3.title} Yes Yes Yes Show / Edit Delete", exact: true)
+        expect(row_4).to have_text("— #{page_4.title} Yes No Yes Show / Edit Delete", exact: true) # "— " prefix for is-child
+        expect(row_5).to have_text("#{page_5.title} Yes No Yes Show / Edit / Articles Delete", exact: true)
+        expect(row_6).to have_text("#{page_6.title} Yes No Yes Show / Edit / Events Delete", exact: true)
 
         # Check a few links. Column 1 - title, 2-4 - boolean, 5-6 - position
         # arrows, 7 - main actions, 8 - delete action.
@@ -1183,7 +1183,7 @@ RSpec.describe "Admin - pages" do
     end # 'context "actions" do'
 
     context "ordering" do
-      it "moves pages up and down" do
+      it "moves pages up" do
         page_1 = create(:page)
         page_2 = create(:page)
         page_3 = create(:page)

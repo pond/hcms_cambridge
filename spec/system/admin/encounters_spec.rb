@@ -1035,10 +1035,11 @@ RSpec.describe "Admin - encounters" do
         encounter_2 = create(:encounter); encounter_2.revisions.first.update!(published: true)
         encounter_3 = create(:encounter); encounter_3.revisions.first.update!(published: true)
 
-        encounter_1.update(created_at: Time.now + 1.day - 3.seconds)
-        encounter_2.update(created_at: Time.now + 1.day - 4.seconds)
-        encounter_3.update(created_at: Time.now + 1.day - 5.seconds)
+        encounter_1.update(category_position: 3)
+        encounter_2.update(category_position: 2)
+        encounter_3.update(category_position: 1)
 
+        encounter_3.category = "Goliaths"
         encounter_3.revisions << build(:revision, :for_encounter)
         encounter_3.save!
 
@@ -1068,17 +1069,18 @@ RSpec.describe "Admin - encounters" do
         #
         # Note reverse order - created-at ASC sorting.
         #
-        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Bookings Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{encounter_2.title} Yes No Bookings Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{encounter_1.title} No Yes – Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Goliaths Bookings / Show / Edit Delete", exact: true)
+        expect(row_2).to have_text("#{encounter_2.title} Yes No Uncategorised Bookings / Show / Edit Delete", exact: true)
+        expect(row_3).to have_text("#{encounter_1.title} No Yes Uncategorised Show / Edit Delete", exact: true)
 
-        # Check a few links. Column 1 - encounter title, 2-3 - boolean,
-        # 4 - order action, 5 - main actions, 6 - delete action.
+        # Check a few links. Column 1 - encounter title, 2-3 - boolean, 4-7
+        # category and category move arrow cells, 7 - booking and main actions,
+        # 8 - delete action.
         #
         expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",      href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
-        expect(row_1.find(:css, "> td:nth-child(4)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
-        expect(row_2.find(:css, "> td:nth-child(5)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
-        expect(row_3.find(:css, "> td:nth-child(5)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
+        expect(row_1.find(:css, "> td:nth-child(7)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
+        expect(row_2.find(:css, "> td:nth-child(7)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
       end
 
       it "links to the main 'all pages' list" do
@@ -1107,5 +1109,150 @@ RSpec.describe "Admin - encounters" do
         expect(Revision.count).to eql(0)
       end
     end # 'context "actions" do'
+
+    context "ordering" do
+
+      # We'll use this setup, ordered by category position and assume that
+      # there are no data migration or issues or bugs leading to duplicated
+      # category positions, even though there *is* some tolerance for that.:
+      #
+      #   Zodiac
+      #   Aardvark
+      #   Uncat
+      #   Uncat
+      #   Banana
+      #   Banana
+      #
+      def get_rows
+        1.upto(6).map do | row_number |
+          find(:css, "table tbody > tr:nth-child(#{row_number})")
+        end
+      end
+      def check_row_text
+        rows = get_rows()
+        Encounter.unscoped.order(:category_position).each_with_index do | encounter, index |
+          expect(rows[index]).to have_text(encounter.category)
+        end
+      end
+      before :each do
+        @encounter_aardvark = create(:encounter, category: "Aardvark", category_position: 2)
+        @encounter_banana_1 = create(:encounter, category: "Banana",   category_position: 4)
+        @encounter_banana_2 = create(:encounter, category: "Banana",   category_position: 4)
+        @encounter_uncat_1  = create(:encounter,                       category_position: 3)
+        @encounter_uncat_2  = create(:encounter,                       category_position: 3)
+        @encounter_zodiac   = create(:encounter, category: "Zodiac",   category_position: 1)
+
+        # Do lots of sanity checks before any further movement-specific tests.
+
+        visit(admin_encounters_path())
+
+        check_row_text()
+
+        # Zodiac can move down, but not up since it's already on the first row.
+        # Aardvark and both Uncategorised can move either way. The "Banana" set
+        # come last but they're both the same category, so *both* of them -
+        # given they move as a group - should have buttons to move up only, but
+        # not down.
+
+        rows = get_rows()
+
+        expect(rows[0]).to_not have_button("↑"); expect(rows[0]).to     have_button("↓")
+        expect(rows[1]).to     have_button("↑"); expect(rows[1]).to     have_button("↓")
+        expect(rows[2]).to     have_button("↑"); expect(rows[2]).to     have_button("↓")
+        expect(rows[3]).to     have_button("↑"); expect(rows[3]).to     have_button("↓")
+        expect(rows[4]).to     have_button("↑"); expect(rows[4]).to_not have_button("↓")
+        expect(rows[5]).to     have_button("↑"); expect(rows[6]).to_not have_button("↓")
+      end
+
+      after :each do
+        check_row_text()
+      end
+
+      it "moves category groups up - group moves past group, using group row's first button" do
+        rows = get_rows()
+        rows[4].click_button("↑") # First Banana row - move up
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_aardvark.reload.category_position).to eql(2) # Unchanged
+        expect(@encounter_banana_1.reload.category_position).to eql(3) # Moved
+        expect(@encounter_banana_2.reload.category_position).to eql(3)
+        expect(@encounter_uncat_1 .reload.category_position).to eql(4) # Also moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(4)
+      end
+
+      it "moves category groups up - group moves past group, using group row's second button" do
+        rows = get_rows()
+        rows[5].click_button("↑") # Second Banana row - move up
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_aardvark.reload.category_position).to eql(2) # Unchanged
+        expect(@encounter_banana_1.reload.category_position).to eql(3) # Moved
+        expect(@encounter_banana_2.reload.category_position).to eql(3)
+        expect(@encounter_uncat_1 .reload.category_position).to eql(4) # Also moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(4)
+      end
+
+      it "moves category groups up - group push between individual row categories" do
+        rows = get_rows()
+        rows[4].click_button("↑") # First Banana row - move up
+        rows = get_rows()
+        rows[2].click_button("↑") # Relocated first Banana row - move up again
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_banana_1.reload.category_position).to eql(2) # Moved
+        expect(@encounter_banana_2.reload.category_position).to eql(2)
+        expect(@encounter_aardvark.reload.category_position).to eql(3) # Also moved
+        expect(@encounter_uncat_1 .reload.category_position).to eql(4) # Also moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(4)
+      end
+
+      it "moves category groups down - group moves past group, using group row's first button" do
+        rows = get_rows()
+        rows[2].click_button("↓") # First Uncategorised row - move down
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_aardvark.reload.category_position).to eql(2) # Unchanged
+        expect(@encounter_banana_1.reload.category_position).to eql(3) # Moved
+        expect(@encounter_banana_2.reload.category_position).to eql(3)
+        expect(@encounter_uncat_1 .reload.category_position).to eql(4) # Also moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(4)
+      end
+
+      it "moves category groups down - group moves past group, using group row's second button" do
+        rows = get_rows()
+        rows[3].click_button("↓") # Second Uncategorised row - move down
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_aardvark.reload.category_position).to eql(2) # Unchanged
+        expect(@encounter_banana_1.reload.category_position).to eql(3) # Moved
+        expect(@encounter_banana_2.reload.category_position).to eql(3)
+        expect(@encounter_uncat_1 .reload.category_position).to eql(4) # Also moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(4)
+      end
+
+      it "moves category groups down - inidivudal item moves between other individual item" do
+        rows = get_rows()
+        rows[0].click_button("↓") # Zodiac row - move down
+
+        expect(@encounter_aardvark.reload.category_position).to eql(1) # Moved
+        expect(@encounter_zodiac  .reload.category_position).to eql(2) # Also moved
+        expect(@encounter_uncat_1 .reload.category_position).to eql(3) # Unchanged
+        expect(@encounter_uncat_2 .reload.category_position).to eql(3)
+        expect(@encounter_banana_1.reload.category_position).to eql(4) # Unchanged
+        expect(@encounter_banana_2.reload.category_position).to eql(4)
+      end
+
+      it "moves category groups down - inidivudal item moves between groups" do
+        rows = get_rows()
+        rows[1].click_button("↓") # Aardvark row - move down
+
+        expect(@encounter_zodiac  .reload.category_position).to eql(1) # Unchanged
+        expect(@encounter_uncat_1 .reload.category_position).to eql(2) # Moved
+        expect(@encounter_uncat_2 .reload.category_position).to eql(2)
+        expect(@encounter_aardvark.reload.category_position).to eql(3) # Also moved
+        expect(@encounter_banana_1.reload.category_position).to eql(4) # Unchanged
+        expect(@encounter_banana_2.reload.category_position).to eql(4)
+      end
+    end # 'context "ordering" do'
   end # 'context "lists" do'"
 end

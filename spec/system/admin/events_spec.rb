@@ -988,9 +988,9 @@ RSpec.describe "Admin - events" do
         #
         # Note reverse order - starts-at ASC sorting.
         #
-        expect(row_1).to have_text("#{event_3.title} #{event_3.human_state} #{apphelp_human_time(event_3.starts_at, date_only: true)} Yes No Yes 👤 Orders (3) Show Edit Delete", exact: true)
-        expect(row_2).to have_text("#{event_2.title} #{event_2.human_state} #{apphelp_human_time(event_2.starts_at, date_only: true)} Yes No No 🟠 Orders Show Edit Delete", exact: true)
-        expect(row_3).to have_text("#{event_1.title} #{event_1.human_state} #{apphelp_human_time(event_1.starts_at, date_only: true)} No Yes Yes – Show Edit Delete", exact: true)
+        expect(row_1).to have_text("#{event_3.title} #{event_3.human_state} #{apphelp_human_time(event_3.starts_at, date_only: true)} Yes No Yes 👤 Orders (3) Show / Edit Delete", exact: true)
+        expect(row_2).to have_text("#{event_2.title} #{event_2.human_state} #{apphelp_human_time(event_2.starts_at, date_only: true)} Yes No No 🟠 Orders Show / Edit Delete", exact: true)
+        expect(row_3).to have_text("#{event_1.title} #{event_1.human_state} #{apphelp_human_time(event_1.starts_at, date_only: true)} No Yes Yes – Show / Edit Delete", exact: true)
 
         # Check a few links. Column 1 - event title, 2 - start date,
         # 3-5 - boolean, 6 - order action, 7 - main actions, 8 - delete action.

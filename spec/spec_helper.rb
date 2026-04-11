@@ -54,8 +54,12 @@ SUPPORTED_TEST_CURRENCIES = ["NZD", "EUR", "GBP", "JPY", "TND"]
 # https://thoughtbot.com/blog/acceptance-tests-with-subdomains
 #
 Capybara.configure do |config|
-  config.always_include_port = true
+  config.always_include_port  = true
   config.default_normalize_ws = true # ("have_text..." will squish whitespace arising from markup into single spaces)
+
+  # NB: Sadly using "config.disable_animations = true" breaks Redactor modals
+  # (they open instantly, but never close) and I had no luck trying to use CSS
+  # selectors instead of "true" to narrow down its effects.
 end
 
 # https://github.com/mattheworiordan/capybara-screenshot#better-looking-html-screenshots
