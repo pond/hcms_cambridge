@@ -216,7 +216,7 @@ class Event < Editable
   # storage is in use - otherwise the event hero URL from S3 is used.
   #
   def product_image_url
-    product_image_url = if self.event_hero_image.class.storage == CarrierWave::Storage::File
+    if self.event_hero_image.class.storage == CarrierWave::Storage::File
       'https://upload.wikimedia.org/wikipedia/commons/1/15/Hieronymus_Bosch_-_Allegory_of_Gluttony_and_Lust_-_WGA02558.jpg'
     else
       self.event_hero_image.url

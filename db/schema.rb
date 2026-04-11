@@ -34,13 +34,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_220520) do
     t.index ["slug"], name: "index_articles_on_slug", unique: true
   end
 
-  create_table "encounter_order_itemss", force: :cascade do |t|
+  create_table "encounter_order_items", force: :cascade do |t|
     t.integer "amount_owed", null: false
     t.datetime "created_at", null: false
     t.text "description", null: false
     t.bigint "encounter_order_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["encounter_order_id"], name: "index_encounter_order_itemss_on_encounter_order_id"
+    t.index ["encounter_order_id"], name: "index_encounter_order_items_on_encounter_order_id"
   end
 
   create_table "encounter_orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

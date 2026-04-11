@@ -2,7 +2,7 @@
 #
 class AddEncounterOrderItems < ActiveRecord::Migration[8.1]
   def change
-    create_table :encounter_order_itemss do | t |
+    create_table :encounter_order_items do | t |
       t.timestamps null: false
 
       t.belongs_to :encounter_order, null: false
