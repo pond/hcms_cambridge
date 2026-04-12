@@ -5,7 +5,7 @@
   #
   #   render partial: 'shared/event', locals: { event: @event }
 %>
-<%= render partial: 'shared/editable_revisions', locals: { editable: event, form_path: admin_page_event_path(event.page, event) } %>
+<%= render partial: 'shared/components/editable_revisions', locals: { editable: event, form_path: admin_page_event_path(event.page, event) } %>
 
 <article class="event">
   <section class="event-header">

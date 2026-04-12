@@ -1,5 +1,5 @@
-<%= @page.title.upcase %>
-<%= '=' * @page.title.size %>
+<%= @pagelike.title.upcase %>
+<%= '=' * @pagelike.title.size %>
 
 You have received a new booking enquiry.
 
@@ -7,12 +7,12 @@ From:           <%= @name %>
 E-mail address: <%= @email %>
 Phone number:   <%= @phone.presence || 'Not given' %>
 
-<% unless @page.hide_date_and_time %>
+<% unless @pagelike.hide_date_and_time %>
 Date:           <%= @date.presence || 'None specified' %>
 Preferred time: <%= @time.presence || 'None specified' %>
 <% end %>
 <% unless @menu.blank? %>
-<%= @page.form_selection_list_label.presence || 'Menu selection' %>: <%= @menu %>
+<%= @pagelike.form_selection_list_label.presence || 'Menu selection' %>: <%= @menu %>
 
 <% end %>
 

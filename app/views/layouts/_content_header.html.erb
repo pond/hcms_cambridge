@@ -23,7 +23,7 @@
         <% Page.top_level.for_navigation.includes(:revisions, {children_for_navigation: :revisions}).each do | top_level_page | %>
           <%
             nav_list_classes = %w{pure-menu-item pure-menu-allow-hover}
-            nav_list_classes << 'pure-menu-has-children' if top_level_page.children_for_navigation.any?
+            nav_list_classes << 'pure-menu-has-children' if top_level_page.has_children_for_navigation?
             nav_list_classes << 'current' if (
               (content.is_a?(Article) && (top_level_page.id == content.page_id)) ||
               (content.is_a?(Event) && (top_level_page.id == content.page_id)) ||
@@ -39,19 +39,27 @@
 
           <%= tag.li(class: nav_list_classes) do %>
             <%= link_to(top_level_page_title_to_show, page_path(id: top_level_page.slug), class: 'pure-menu-link') %>
-            <% if top_level_page.children_for_navigation.any? %>
+            <% if top_level_page.has_children_for_navigation? %>
               <ul class="pure-menu-children">
-                <% top_level_page.children_for_navigation.each do | child_page | %>
-                  <%
-                    child_page_title_to_show = if child_page == @page
-                      @page.displayed_revision.title
-                    else
-                      child_page.title
-                    end
-                  %>
-                  <li class="pure-menu-item">
-                    <%= link_to(child_page_title_to_show, page_path(id: child_page.slug), class: 'pure-menu-link') %>
-                  </li>
+                <% if top_level_page.is_encounters_type? %>
+                  <% top_level_page.cached_encounters.each do | encounter | %>
+                    <li class="pure-menu-item">
+                      <%= link_to(encounter.title, encounter_path(id: encounter.slug), class: 'pure-menu-link') %>
+                    </li>
+                  <% end %>
+                <% else %>
+                  <% top_level_page.children_for_navigation.each do | child_page | %>
+                    <%
+                      child_page_title_to_show = if child_page == @page
+                        @page.displayed_revision.title
+                      else
+                        child_page.title
+                      end
+                    %>
+                    <li class="pure-menu-item">
+                      <%= link_to(child_page_title_to_show, page_path(id: child_page.slug), class: 'pure-menu-link') %>
+                    </li>
+                  <% end %>
                 <% end %>
               </ul>
             <% end %>

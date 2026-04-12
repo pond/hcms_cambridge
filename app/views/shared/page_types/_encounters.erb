@@ -1,5 +1,14 @@
-<% most_recent_category = nil %>
-<% Encounter.all.each do | encounter | %>
+<%
+  # Render the body for an 'encounters' type page. Usually only rendered via the
+  # "shared/_page.html.erb" Partial. Requires local "page", holding the Page
+  # instance that is being rendered.
+
+  most_recent_category = nil
+%>
+
+<%= page.body.html_safe() %>
+
+<% page.cached_encounters.each do | encounter | %>
   <% if encounter.category != most_recent_category %>
     <% most_recent_category = encounter.category %>
     <h2><%= encounter.category %></h2>
@@ -13,12 +22,13 @@
         <strong><%= encounter.title %></strong>
       </p>
       <%= encounter.body.html_safe() %>
-
-      TODO: This as a form maybe? Or at least have the "Show" view as a form.
-      "Enquire Today" skips the prices, but could just have price and location
-      meta inline right here, as in "_encounter.html.erb".
-
-      <%= encshelp_enquiries_or_booking_button(encounter, always_as_enquiries: true) %>
+      <%=
+        link_to(
+          'More Info',
+          encounter_path(encounter),
+          class: 'bold_button'
+        )
+      %>
     </section>
   </section>
 <% end %>

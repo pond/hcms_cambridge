@@ -31,7 +31,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
       @encounter_order.cancel_state!
 
       redirect_to(
-        encounter_path(@encounter),
+        root_path(),
         notice: "OK, that's cancelled."
       )
 
@@ -66,7 +66,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
         )
 
         redirect_to(
-          encounter_path(@encounter),
+          helpers.encordshelp_magic_link(@encounter_order),
           notice: "Sorry, this encounter isn't accepting payments anymore."
         )
 
@@ -109,7 +109,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
         @encounter_order.pay_state!
 
         redirect_to(
-          encounter_path(@encounter),
+          helpers.encordshelp_magic_link(@encounter_order),
           notice: 'Thanks, your encounter booking is confirmed! We look forward to seeing you there.'
         )
 
@@ -205,7 +205,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     Sentry.capture_exception(e, extra: { encounter_order_id: (@encounter_order&.id rescue nil) })
 
     redirect_to(
-      encounter_path(@encounter),
+      helpers.encordshelp_magic_link(@encounter_order),
       alert: 'Sorry, there was an unexpected problem trying to process the booking. Please try again later.'
     )
   end
@@ -222,7 +222,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     @encounter_order.destroy!
 
     redirect_to(
-      encounter_path(id: @encounter.slug),
+      root_path(),
       notice: "OK, that's cancelled."
     )
   end
@@ -281,7 +281,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     # was a problem, it can be manually resolved.
     #
     redirect_to(
-      encounter_path(id: @encounter.slug),
+      helpers.encordshelp_magic_link(@encounter_order),
       notice: 'Thanks, your encounter booking is confirmed! We look forward to seeing you there.'
     )
   end
@@ -290,7 +290,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
   #
   def stripe_payment_cancelled
     redirect_to(
-      manage_encounter_order_path(encounter_order_id: @encounter_order.id, token: @encounter_order.token),
+      helpers.encordshelp_magic_link(@encounter_order),
       notice: "Please confirm cancellation by using the 'cancel' button below, or retry with the 'pay now' button."
     )
   end

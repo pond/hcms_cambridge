@@ -389,6 +389,12 @@ RSpec.describe "Admin - encounter orders" do
   context "unusual workflows" do
     before :each do
       @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
+
+      # Some tests cause a redirection back to the root path - so there needs to
+      # *be* a root path!
+      #
+      create(:page).revisions.first.update!(published: true)
+
       visit(encordshelp_magic_link(@encounter_order))
     end
 
@@ -420,6 +426,7 @@ RSpec.describe "Admin - encounter orders" do
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("cancelled")
       expect(page).to have_text("OK, that's cancelled")
+      expect(page).to have_current_path(root_path())
     end
 
     it "handles the user cancelling from within Stripe but then changing their mind and paying" do
@@ -457,6 +464,7 @@ RSpec.describe "Admin - encounter orders" do
       click_on("Pay now")
 
       expect(page).to have_text("Thanks, your encounter booking is confirmed")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
       expect(StripePrice.count).to eql(1)
       expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
       expect(StripePayment.count).to eql(1)
@@ -528,6 +536,7 @@ RSpec.describe "Admin - encounter orders" do
       # e-mail alerts.
       #
       expect(page).to have_text("Thanks, your encounter booking is confirmed")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
 
       to_admin = spechelp_decode_multipart()
 
@@ -589,6 +598,7 @@ RSpec.describe "Admin - encounter orders" do
       # then recorded, but everything else should still work.
       #
       expect(page).to have_text("Thanks, your encounter booking is confirmed")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
       expect(StripePrice.count).to eql(1)
       expect(StripePrice.first.stripe_price_id).to eql(mock_priceid)
       expect(StripePayment.count).to eql(0)
@@ -613,6 +623,7 @@ RSpec.describe "Admin - encounter orders" do
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("new")
       expect(page).to have_text("Sorry, there was a problem trying to talk to the payment provider")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
     end
 
     it "of Stripe price creation" do
@@ -626,6 +637,7 @@ RSpec.describe "Admin - encounter orders" do
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("new")
       expect(page).to have_text("Sorry, there was a problem trying to talk to the payment provider")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
     end
 
     it "of Stripe checkout session creation" do
@@ -640,6 +652,7 @@ RSpec.describe "Admin - encounter orders" do
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("new")
       expect(page).to have_text("Sorry, there was a problem trying to talk to the payment provider")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
     end
 
     it "with other exceptions" do
@@ -652,9 +665,7 @@ RSpec.describe "Admin - encounter orders" do
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("new")
       expect(page).to have_text("Sorry, there was an unexpected problem trying to process the booking")
+      expect(page).to have_current_path(encordshelp_magic_link(@encounter_order))
     end
   end # 'context "handling failures"'
-
-
-
 end

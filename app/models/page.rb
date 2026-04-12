@@ -2,6 +2,7 @@ class Page < Editable
   PAGE_TYPE_NORMAL       = 'normal'
   PAGE_TYPE_BLOG         = 'blog'
   PAGE_TYPE_EVENTS       = 'events'
+  PAGE_TYPE_ENCOUNTERS   = 'encounters'
   PAGE_TYPE_BOOKING_FORM = 'booking_form'
   PAGE_TYPE_CONTACT_FORM = 'contact_form'
 
@@ -10,7 +11,8 @@ class Page < Editable
     PAGE_TYPE_BOOKING_FORM,
     PAGE_TYPE_CONTACT_FORM,
     PAGE_TYPE_BLOG,
-    PAGE_TYPE_EVENTS
+    PAGE_TYPE_EVENTS,
+    PAGE_TYPE_ENCOUNTERS,
   ]
 
   belongs_to :parent, class_name: 'Page', foreign_key: 'page_id', optional: true
@@ -45,6 +47,14 @@ class Page < Editable
     self.is_contact_form? || self.is_booking_form?
   end
 
+  def is_contact_form?
+    self.page_type == PAGE_TYPE_CONTACT_FORM
+  end
+
+  def is_booking_form?
+    self.page_type == PAGE_TYPE_BOOKING_FORM
+  end
+
   def is_blog_type?
     self.page_type == PAGE_TYPE_BLOG
   end
@@ -53,16 +63,25 @@ class Page < Editable
     self.page_type == PAGE_TYPE_EVENTS
   end
 
+  def is_encounters_type?
+    self.page_type == PAGE_TYPE_ENCOUNTERS
+  end
+
   def for_navigation?
     ! self.hidden && self.published_revision.present?
   end
 
-  def is_contact_form?
-    self.page_type == PAGE_TYPE_CONTACT_FORM
+  def has_children_for_navigation?
+    if self.is_encounters_type?
+      @encounters_cache ||= Encounter.all
+      @encounters_cache.any?
+    elsif self.children_for_navigation.any?
+      true
+    end
   end
 
-  def is_booking_form?
-    self.page_type == PAGE_TYPE_BOOKING_FORM
+  def cached_encounters
+    @encounters_cache ||= Encounter.all
   end
 
   def form_class

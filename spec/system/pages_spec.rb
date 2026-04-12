@@ -475,8 +475,9 @@ RSpec.describe "Pages" do
 
       click_on("Send enquiry")
 
-      expect(page).to have_css("div.field_error_messages", text: "Name must be provided")
-      expect(page).to have_css("div.field_error_messages", text: "E-mail address must be provided")
+      expect(page).to     have_css("div.field_error_messages", text: "Name must be provided")
+      expect(page).to     have_css("div.field_error_messages", text: "E-mail address must be provided")
+      expect(page).to_not have_css("div.field_error_messages", text: "Notes must be provided")
 
       fill_in("forms_booking_phone", with: "123")
       click_on("Send enquiry")
@@ -701,7 +702,7 @@ RSpec.describe "Pages" do
       expect(delivered.html).to_not have_css("dt", text: "Date")
       expect(delivered.html).to_not have_css("dt", text: "Preferred time")
       expect(delivered.html).to     include(">Quick Brown Fox</p>")
-     end
+    end
   end # 'context "booking forms" do'
 
   context "blog containers" do

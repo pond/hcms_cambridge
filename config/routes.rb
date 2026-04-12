@@ -60,9 +60,11 @@ Rails.application.routes.draw do
   #
   resources :by_titles, only: :show
 
-  # Used for the "contact us" form and ad-hoc booking form submissions.
+  # Used for the "contact us" form and ad-hoc booking form submissions, or
+  # used for the encounter "enquire" form submission, respectively.
   #
-  post '/user_mails/:page_id', to: 'user_emails#create', as: :user_emails
+  post '/user_mails/:page_id',                   to: 'user_emails#create', as: :user_emails
+  post '/user_mails_by_encounter/:encounter_id', to: 'user_emails#create', as: :user_emails_by_encounter
 
   namespace :admin, path: 'hcms' do
     root 'pages#index'

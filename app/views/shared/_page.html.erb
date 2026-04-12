@@ -1,10 +1,13 @@
 <%
   # Render with locals 'page' giving the Page to render, with delegation set up
   # to pull data from an appropriate Revision (by default - published, falling
-  # back the only unpublished revision if nothing is published).
+  # back the only unpublished revision if nothing is published). There should
+  # also be local "form_model" holding an instance of a "Forms::..." subclass
+  # with the "pagelike" field filled in, should the page's type include a form;
+  # else this can be "nil".
   #
-  #   render partial: 'shared/page', locals: { page: @page }
+  #   render partial: 'shared/page', locals: { page: @page, form_model: @form_model }
 %>
 
-<%= render partial: 'shared/editable_revisions', locals: { editable: page, form_path: admin_page_path(page) } %>
-<%= render partial: "shared/page_types/#{page.page_type}", locals: { page: page } %>
+<%= render partial: 'shared/components/editable_revisions', locals: { editable: page, form_path: admin_page_path(page) } %>
+<%= render partial: "shared/page_types/#{page.page_type}", locals: { page: page, form_model: form_model } %>

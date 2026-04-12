@@ -225,6 +225,10 @@ class Editable < ApplicationRecord
     false
   end
 
+  def is_encounters_type?
+    false
+  end
+
   def is_article?
     false
   end

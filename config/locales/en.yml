@@ -67,7 +67,7 @@ en:
         # Long forms for labels via apphelp_label
         labels/date: "Date (at least two days in advance)"
         labels/time: "Preferred time (10am or later)"
-        labels/notes: "Additional notes and requests"
+        labels/notes: "Notes and requests"
 
     errors:
       messages:
@@ -208,6 +208,7 @@ en:
       booking_form: "Booking form"
       blog: "Blog"
       events: "Events"
+      encounters: "Encounters"
 
     revision:
       published: "Published"

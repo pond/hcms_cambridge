@@ -82,6 +82,37 @@ class Encounter < Editable
   end
 
   # ============================================================================
+  # Be page-like for "pagelike use cases such as in the Booking Mailer
+  # ============================================================================
+
+  # Yes, this acts like a booking form...
+  #
+  def is_booking_form?
+    true
+  end
+
+  # ...using this form submission class, though only a subset of its attributes
+  # is actually needed.
+  #
+  def form_class
+    Forms::Booking
+  end
+
+  # In the context of a booking form, should date-time be offered? Encounters
+  # are quite bespoke and can have constrained availability, so we prefer to
+  # have that done as a negotiation of sorts between operator and customer, with
+  # no risk of setting unrealistic expectations up-front. So, hide those things.
+  #
+  def hide_date_and_time
+    true
+  end
+
+  # There are no selection list options.
+  #
+  def form_selection_list_label;    nil; end
+  def form_selection_list_contents;  ""; end
+
+  # ============================================================================
   # Miscellaneous
   # ============================================================================
 

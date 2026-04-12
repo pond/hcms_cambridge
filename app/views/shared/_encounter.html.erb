@@ -13,7 +13,7 @@
 
 %>
 <% unless defined?(encounter_order) %>
-  <%= render partial: 'shared/editable_revisions', locals: { editable: encounter, form_path: admin_encounter_path(encounter) } %>
+  <%= render partial: 'shared/components/editable_revisions', locals: { editable: encounter, form_path: admin_encounter_path(encounter) } %>
 <% end %>
 
 <article class="encounter">
@@ -39,7 +39,7 @@
           <%= encounter.summary %>
         </div>
         <div class="encounter-next-prev">
-          <%= encshelp_enquiries_or_booking_button(encounter) %>
+          <%= encshelp_admin_booking_button(encounter) %>
         </div>
       <% end %>
     </div>
@@ -73,7 +73,6 @@
   <section class="encounter-body-and-poster">
     <section class="encounter-body">
       <%= encounter.body.html_safe() %>
-
       <% unless defined?(encounter_order) %>
         <br>
         <section class="encounter-meta">
@@ -91,7 +90,7 @@
                 <%= encshelp_price(encounter, for_physical_aspect: true) %>)
               <% end %>
               <br><br>
-              <%= encshelp_enquiries_or_booking_button(encounter) %>
+              <%= encshelp_admin_booking_button(encounter) %>
             </dd>
           </dl>
         </section>
@@ -103,3 +102,16 @@
     </section>
   </section>
 </article>
+
+<% unless defined?(encounter_order) || user_signed_in? %>
+  <hr>
+  <%=
+    render(
+      partial: 'shared/components/booking_form',
+      locals:  {
+        form_model: @form_model,
+        form_path:  user_emails_by_encounter_path(encounter_id: encounter.id)
+      }
+    )
+  %>
+<% end %>

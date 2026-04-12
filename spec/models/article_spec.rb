@@ -65,13 +65,14 @@ RSpec.describe Article, type: :model do
   it "responds correctly to trait enquiries" do
     article = build(:article)
 
-    expect(article.is_normal_type?).to eql(false)
-    expect(article.is_blog_type?  ).to eql(false)
-    expect(article.is_form_type?  ).to eql(false)
-    expect(article.is_events_type?).to eql(false)
-    expect(article.is_article?    ).to eql(true)
-    expect(article.is_encounter?  ).to eql(false)
-    expect(article.is_event?      ).to eql(false)
+    expect(article.is_normal_type?    ).to eql(false)
+    expect(article.is_blog_type?      ).to eql(false)
+    expect(article.is_form_type?      ).to eql(false)
+    expect(article.is_events_type?    ).to eql(false)
+    expect(article.is_encounters_type?).to eql(false)
+    expect(article.is_article?        ).to eql(true)
+    expect(article.is_encounter?      ).to eql(false)
+    expect(article.is_event?          ).to eql(false)
   end
 
   context "base class overrides" do

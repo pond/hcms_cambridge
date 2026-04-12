@@ -1,0 +1,60 @@
+<%
+  # This renders a reusable contact form, used by for example the  *page type*
+  # of "contact_form" via "shared/page_types/_contact_form.html.erb".
+  #
+  # Render with local "form_model" holding an instance of a "Forms::..."
+  # subclass with the "pagelike" field filled in, and with the URL to use for
+  # form submission in local "form_path".
+  #
+  # Example:
+  #
+  #   render(
+  #     partial: 'shared/contact_form',
+  #     locals:  {
+  #       form_model: @form_model,
+  #       form_path:  user_emails_path(page_id: @form_model.pagelike.id),
+  #     }
+  #   )
+%>
+<%=
+  form_with(
+    model:   form_model,
+    builder: FormBuilderWithInlineErrors,
+    url:     form_path
+  ) do | f |
+%>
+<p>
+  <%= apphelp_label(f, :name, required: true) %>
+  <%= f.text_field :name %>
+</p>
+<p>
+  <%= apphelp_label(f, :email, required: true) %>
+  <%= f.email_field :email %>
+</p>
+<p>
+  <%= apphelp_label(f, :phone) %>
+  <%= f.telephone_field :phone %>
+</p>
+<hr>
+<% if form_model.pagelike.form_selection_list_contents.strip.present? %>
+  <p>
+    <%= apphelp_label(f, :menu_selection, text: form_model.pagelike.form_selection_list_label) %>
+    <%= pageshelp_form_page_selection_list(f, form_model.pagelike) %>
+  <p>
+<% end %>
+<p>
+  <%= apphelp_label(f, :message) %>
+  <%= f.text_area :message, rows: 8, cols: 80 %>
+  <%= f.error_markup_for(:message) %>
+</p>
+
+<% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
+  <%= recaptcha_tags() %>
+<% else %>
+  <%= recaptcha_v3(action: 'contact') %>
+<% end %>
+
+<p>
+  <%= submit_tag 'Send message' %>
+</p>
+<% end %>

@@ -19,7 +19,7 @@ class Admin::PagesController < ApplicationController
 
     # GET /admin/pages/1
     def show
-      @form_model = @page&.form_class&.new
+      @form_model = @page&.form_class&.new(pagelike: @page)
     end
 
     # GET /admin/pages/new

@@ -40,7 +40,7 @@ RSpec.describe ContactMailer, type: :mailer do
   context "with all fields filled in" do
     let(:params_proc) { -> {
       Forms::Contact.new(
-        page:           page(),
+        pagelike:       page(),
         name:           Faker::Name.name,
         email:          Faker::Internet.email,
         phone:          "+6421000#{rand(111..999)}",
@@ -55,10 +55,10 @@ RSpec.describe ContactMailer, type: :mailer do
   context "with bare minimum fields filled in" do
     let(:params_proc) { -> {
       Forms::Contact.new(
-        page:    page(),
-        name:    Faker::Name.name,
-        email:   Faker::Internet.email,
-        message: Faker::Lorem.paragraph,
+        pagelike: page(),
+        name:     Faker::Name.name,
+        email:    Faker::Internet.email,
+        message:  Faker::Lorem.paragraph,
       )
     } }
 

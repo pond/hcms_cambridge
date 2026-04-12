@@ -17,7 +17,7 @@ class PagesController < ApplicationController
       redirect_to admin_page_path(id: page_id) and return
     else
       @page       = Page.find_by_id_or_slug!(page_id)
-      @form_model = @page.form_class&.new
+      @form_model = @page.form_class&.new(pagelike: @page)
     end
   end
 end

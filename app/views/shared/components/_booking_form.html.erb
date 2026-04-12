@@ -1,0 +1,73 @@
+<%
+  # This renders a reusable booking form, used by for example the  *page type*
+  # of "booking_form" via "shared/page_types/_booking_form.html.erb". It is also
+  # used for Encounters.
+  #
+  # Render with local "form_model" holding an instance of a "Forms::..."
+  # subclass with the "pagelike" field filled in, and with the URL to use for
+  # form submission in local "form_path".
+  #
+  # Example:
+  #
+  #   render(
+  #     partial: 'shared/booking_form',
+  #     locals:  {
+  #       form_model: @form_model,
+  #       form_path:  user_emails_path(page_id: @form_model.pagelike.id),
+  #     }
+  #   )
+%>
+<%=
+  form_with(
+    model:   form_model,
+    builder: FormBuilderWithInlineErrors,
+    url:     form_path
+  ) do | f |
+%>
+  <p>
+    <%= apphelp_label(f, :name, required: true) %>
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :email, required: true) %>
+    <%= f.email_field :email %>
+  </p>
+  <p>
+    <%= apphelp_label(f, :phone) %>
+    <%= f.telephone_field :phone %>
+  </p>
+  <hr>
+  <% if ! form_model.pagelike.hide_date_and_time %>
+    <p>
+      <%= apphelp_label(f, :date) %>
+      <%= f.date_field :date, min: Date.current + 2.days %>
+    </p>
+    <p>
+      <%= apphelp_label(f, :time) %>
+      <%= f.time_field :time, min: '10:00', max: '19:00', step: 1.minute %>
+    </p>
+  <% end %>
+  <% if form_model.pagelike.form_selection_list_contents.strip.present? %>
+    <p>
+      <%= apphelp_label(f, :menu_selection, text: form_model.pagelike.form_selection_list_label) %>
+      <%= pageshelp_form_page_selection_list(f, form_model.pagelike) %>
+    <p>
+  <% end %>
+  <p>
+    <%= apphelp_label(f, :notes, required: form_model.pagelike.is_a?(Encounter)) %>
+    <%= f.text_area :notes, rows: 8, cols: 80, placeholder: 'General questions, number of attendees, date/time requests etc.' %>
+    <%= f.error_markup_for(:notes) %>
+  </p>
+
+  <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
+    <%= recaptcha_tags() %>
+  <% else %>
+    <%= recaptcha_v3(action: 'contact') %>
+  <% end %>
+
+  <p>
+    <%= submit_tag 'Send enquiry' %>
+  </p>
+<% end %>
+
+

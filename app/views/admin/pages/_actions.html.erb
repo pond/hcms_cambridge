@@ -15,6 +15,9 @@
   <% elsif page.is_events_type? %>
     /
     <%= link_to 'Events', admin_page_events_path(page) %>
+  <% elsif page.is_encounters_type? %>
+    /
+    <%= link_to 'Encounters', admin_encounters_path(page) %>
   <% end %>
 </td>
 <td class="admin_actions for_delete">

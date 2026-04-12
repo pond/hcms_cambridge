@@ -160,13 +160,14 @@ RSpec.describe Encounter, type: :model do
   it "responds correctly to trait enquiries" do
     encounter = build(:encounter)
 
-    expect(encounter.is_normal_type?).to eql(false)
-    expect(encounter.is_form_type?  ).to eql(false)
-    expect(encounter.is_blog_type?  ).to eql(false)
-    expect(encounter.is_events_type?).to eql(false)
-    expect(encounter.is_article?    ).to eql(false)
-    expect(encounter.is_encounter?  ).to eql(true)
-    expect(encounter.is_event?      ).to eql(false)
+    expect(encounter.is_normal_type?    ).to eql(false)
+    expect(encounter.is_form_type?      ).to eql(false)
+    expect(encounter.is_blog_type?      ).to eql(false)
+    expect(encounter.is_events_type?    ).to eql(false)
+    expect(encounter.is_encounters_type?).to eql(false)
+    expect(encounter.is_article?        ).to eql(false)
+    expect(encounter.is_encounter?      ).to eql(true)
+    expect(encounter.is_event?          ).to eql(false)
   end
 
   context "base class overrides" do

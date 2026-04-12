@@ -25,6 +25,10 @@
             <%= link_to 'Add event', new_admin_page_event_path(page_id: @page.id) %> |
             <%= link_to 'List events', admin_page_events_path(page_id: @page.id) %> |
             <%= pageshelp_edit_link_for(@page, params) %> |
+          <% elsif @page.is_encounters_type? %>
+            <%= link_to 'Add encounter', new_admin_encounter_path() %> |
+            <%= link_to 'List encounters', admin_encounters_path() %> |
+            <%= pageshelp_edit_link_for(@page, params) %> |
           <% else %>
             <%= pageshelp_edit_link_for(@page, params) %> |
             <%= link_to 'New page', new_admin_page_path() %> |

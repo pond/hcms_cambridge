@@ -1,53 +1,22 @@
 <%
   # Render the body for a 'contact form' type page. Usually only rendered via
-  # the "shared/_page.html.erb" Partial. Requires local "page", holding the
-  # Page instance that is being rendered.
+  # the "shared/_page.html.erb" Partial. Requires local "page", holding the Page
+  # instance that is being rendered and "form_model" holding an instance of a
+  # "Forms::..." subclass with the "pagelike" field filled in.
 %>
 
 <%= page.body.html_safe() %>
 
-<%=
-  form_with(
-    model:   @form_model,
-    builder: FormBuilderWithInlineErrors,
-    url:     user_emails_path(page_id: @page.id)
-  ) do | f |
-%>
-  <% if page.body.present? %>
-    <hr>
-  <% end %>
-  <p>
-    <%= apphelp_label(f, :name, required: true) %>
-    <%= f.text_field :name %>
-  </p>
-  <p>
-    <%= apphelp_label(f, :email, required: true) %>
-    <%= f.email_field :email %>
-  </p>
-  <p>
-    <%= apphelp_label(f, :phone) %>
-    <%= f.telephone_field :phone %>
-  </p>
+<% if page.body.present? %>
   <hr>
-  <% unless page.form_selection_list_contents.strip.blank? %>
-    <p>
-      <%= apphelp_label(f, :menu_selection, text: page.form_selection_list_label) %>
-      <%= pageshelp_form_page_selection_list(f, page) %>
-    <p>
-  <% end %>
-  <p>
-    <%= apphelp_label(f, :message) %>
-    <%= f.text_area :message, rows: 8, cols: 80 %>
-    <%= f.error_markup_for(:message) %>
-  </p>
-
-  <% if ENV["RECAPTCHA_PUBLIC_KEY"].present? %>
-    <%= recaptcha_tags() %>
-  <% else %>
-    <%= recaptcha_v3(action: 'contact') %>
-  <% end %>
-
-  <p>
-    <%= submit_tag 'Send message' %>
-  </p>
 <% end %>
+
+<%=
+  render(
+    partial: 'shared/components/contact_form',
+    locals:  {
+      form_model: form_model,
+      form_path:  user_emails_path(page_id: page.id)
+    }
+  )
+%>

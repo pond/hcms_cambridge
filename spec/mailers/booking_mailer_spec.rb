@@ -40,7 +40,7 @@ RSpec.describe BookingMailer, type: :mailer do
   context "with all fields filled in" do
     let(:params_proc) { -> {
       Forms::Booking.new(
-        page:           page(),
+        pagelike:       page(),
         name:           Faker::Name.name,
         email:          Faker::Internet.email,
         phone:          "+6421000#{rand(111..999)}",
@@ -57,9 +57,22 @@ RSpec.describe BookingMailer, type: :mailer do
   context "with bare minimum fields filled in" do
     let(:params_proc) { -> {
       Forms::Booking.new(
-        page:  page(),
-        name:  Faker::Name.name,
-        email: Faker::Internet.email,
+        pagelike: page(),
+        name:     Faker::Name.name,
+        email:    Faker::Internet.email,
+      )
+    } }
+
+    it_behaves_like "a working mailer"
+  end
+
+  context "with an Encounter" do
+    let(:params_proc) { -> {
+      Forms::Booking.new(
+        pagelike: create(:encounter),
+        name:     Faker::Name.name,
+        email:    Faker::Internet.email,
+        notes:    Faker::Lorem.paragraph,
       )
     } }
 

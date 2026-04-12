@@ -12,7 +12,7 @@
   end
 %>
 
-<h1><%= @page.title %></h1>
+<h1><%= @pagelike.title %></h1>
 <h2>New message</h2>
 
 <dl>
@@ -26,7 +26,7 @@
   <dd><%= @phone.present? ? link_to(@phone, "tel:#{@phone}") : 'Not given' %></dd>
 
   <% unless @menu.blank? %>
-    <dt><%= @page.form_selection_list_label.presence || 'Menu selection' %></dt>
+    <dt><%= @pagelike.form_selection_list_label.presence || 'Menu selection' %></dt>
     <dd><%= @menu %></dd>
   <% end %>
 </dl>

@@ -54,34 +54,35 @@ module EncountersHelper
     "#{text} (#{link})".html_safe()
   end
 
-  def encshelp_enquiries_or_booking_button(encounter, always_as_enquiries: false)
-    if user_signed_in? && !always_as_enquiries
+  def encshelp_admin_booking_button(encounter)
+    if user_signed_in?
       link_to(
         'Set up a new booking',
         new_admin_encounter_encounter_order_path(encounter_id: encounter.slug),
         class: 'bold_button'
       )
     else
-      enquiry_link       = nil
-      first_contact_page = Page.where(page_type: Page::PAGE_TYPE_CONTACT_FORM).first
-
-      if first_contact_page.present?
-        enquiry_link = page_path(first_contact_page.slug)
-      elsif Hcms.config.contact_email.present?
-        enquiry_link = "mailto:#{Hcms.config.contact_email}?subject=#{ERB::Util.url_encode(encounter.title)}"
-      elsif Hcms.config.contact_tel_human.present?
-        enquiry_link = "tel:#{ Hcms.config.contact_tel_full }"
-      end
-
-      if enquiry_link.present?
-        link_to(
-          'Enquire Today',
-          enquiry_link,
-          class: 'bold_button'
-        )
-      else
-        nil
-      end
+      nil
+      # enquiry_link       = nil
+      # first_contact_page = Page.where(page_type: Page::PAGE_TYPE_CONTACT_FORM).first
+      #
+      # if first_contact_page.present?
+      #   enquiry_link = page_path(first_contact_page.slug)
+      # elsif Hcms.config.contact_email.present?
+      #   enquiry_link = "mailto:#{Hcms.config.contact_email}?subject=#{ERB::Util.url_encode(encounter.title)}"
+      # elsif Hcms.config.contact_tel_human.present?
+      #   enquiry_link = "tel:#{ Hcms.config.contact_tel_full }"
+      # end
+      #
+      # if enquiry_link.present?
+      #   link_to(
+      #     'Find out more',
+      #     enquiry_link,
+      #     class: 'bold_button'
+      #   )
+      # else
+      #   nil
+      # end
     end
   end
 
