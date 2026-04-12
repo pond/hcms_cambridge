@@ -13,6 +13,7 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
+  <%= hidden_field_tag(:price_on_application, encounter_order.encounter.price_on_application) %>
   <%= hidden_field_tag(:price_per_seat_cents, encounter_order.frozen_price_per_seat) %>
   <%= hidden_field_tag(:price_physical_cents, encounter_order.frozen_price_physical.to_i) %>
 
@@ -70,11 +71,21 @@
   <p>
     <%= apphelp_label(f, :number_of_seats, required: true) %>
     <%= f.number_field(:number_of_seats, min: 1) %>
-    at <strong><%= evtshelp_price(encounter_order.encounter) %></strong> per seat <small>(<%= encounter_order.encounter.currency %>)</small>
+    <% unless encounter_order.encounter.price_on_application? %>
+      at <strong><%= evtshelp_price(encounter_order.encounter) %></strong> per seat
+      <small>(<%= encounter_order.encounter.currency %>)</small>
+    <% end %>
   </p>
 
   <p>
-    <%= apphelp_label(f, :amount_owed, hint: "optional override of calculated amount, usually used for discounted pricing") %>
+    <%
+      amount_owed_hint = if encounter_order.encounter.price_on_application?
+        'amount previously agreed with customer'
+      else
+        'optional override of calculated amount, usually used for discounted pricing'
+     end
+    %>
+    <%= apphelp_label(f, :amount_owed, hint: amount_owed_hint) %>
     <%= Money::Currency.new(encounter_order.encounter.currency).symbol %>
     <%=
       parsed_amount = Money.from_cents(
@@ -98,6 +109,18 @@
         </em></small>
       <% end %>
     </span>
+  </p>
+
+  <p id="encounter_order_address_container">
+    <%
+      threshold = apphelp_money(
+        Hcms.config.tax_threshold,
+        currency: @encounter_order.encounter.currency
+      )
+    %>
+    <%= apphelp_label(f, :address, hint: "mandatory for invoices above #{threshold}, else optional") %>
+    <%= f.text_area :address, rows: 3, cols: 80 %>
+    <%= f.error_markup_for(:address) %>
   </p>
 
   <p>

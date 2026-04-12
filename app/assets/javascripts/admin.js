@@ -141,10 +141,11 @@ $(document).ready(function() {
   // number of seats and (for encounters) physical product addition
   // ===========================================================================
   //
+  const priceOnApplicationHidden = $('#price_on_application');
   const pricePerSeatCentsHidden  = $('#price_per_seat_cents');
   const pricePhysicalCentsHidden = $('#price_physical_cents');
 
-  if (pricePerSeatCentsHidden.length > 0) {
+  if (pricePerSeatCentsHidden.length > 0 && priceOnApplicationHidden.val() !== 'true') {
     const currency            = $('#price_currency').val();
     const hasPhysicalInput    = $('#encounter_order_has_physical');
     const isEncounter         = (hasPhysicalInput.length > 0);

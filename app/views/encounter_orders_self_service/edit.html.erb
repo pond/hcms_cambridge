@@ -152,6 +152,26 @@
             )
           %>
         <% end %>
+        <% if @encounter_order.may_pay_state? %>
+          <%=
+            # Whether paid or not, there's an invoice link; for corporations especially
+            # they usually want an "amount owed" tax invoice before payment, as well as
+            # sometimes one showing "paid" afterwards.
+            #
+            link_to(
+              'Invoice',
+              encounter_encounter_order_invoice_path(
+                encounter_id:       @encounter.slug,
+                encounter_order_id: @encounter_order.id,
+              ),
+              {
+                class:  'bold_button',
+                style:  'margin-left: auto;',
+                target: '_blank'
+              }
+            )
+          %>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -173,6 +193,7 @@
         <%= mail_to(Hcms.config.orders_email) %> or by phone on
         <%= link_to(Hcms.config.contact_tel_human, "tel:#{Hcms.config.contact_tel_human}") %>.
       </span>
+
       <% if @encounter_order.state_paid? %>
         <%=
           link_to(

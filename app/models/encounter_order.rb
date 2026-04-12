@@ -244,9 +244,13 @@ class EncounterOrder < ApplicationRecord
   end
 
   def theoretical_amount_owed_without_discounts
-    amount  = self.frozen_price_per_seat * self.number_of_seats
-    amount += self.frozen_price_physical.to_i if self.has_physical
-    amount
+    if self.encounter.price_on_application?
+      0
+    else
+      amount  = self.frozen_price_per_seat * self.number_of_seats
+      amount += self.frozen_price_physical.to_i if self.has_physical
+      amount
+    end
   end
 
   def customer_self_service_possible?
