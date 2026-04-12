@@ -104,6 +104,7 @@ en:
         price_per_seat: "Price per seat"
         price_physical: "Optional physical item price"
         name_physical: "Optional physical item name"
+        price_on_application: "Price on enquiry"
 
       encounter_order:
         name: "Name"

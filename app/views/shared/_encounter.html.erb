@@ -94,6 +94,19 @@
             </dd>
           </dl>
         </section>
+
+        <% unless user_signed_in? %>
+          <hr>
+          <%=
+            render(
+              partial: 'shared/components/booking_form',
+              locals:  {
+                form_model: @form_model,
+                form_path:  user_emails_by_encounter_path(encounter_id: encounter.id)
+              }
+            )
+          %>
+        <% end %>
       <% end %>
     </section>
 
@@ -102,16 +115,3 @@
     </section>
   </section>
 </article>
-
-<% unless defined?(encounter_order) || user_signed_in? %>
-  <hr>
-  <%=
-    render(
-      partial: 'shared/components/booking_form',
-      locals:  {
-        form_model: @form_model,
-        form_path:  user_emails_by_encounter_path(encounter_id: encounter.id)
-      }
-    )
-  %>
-<% end %>

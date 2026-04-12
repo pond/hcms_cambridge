@@ -43,7 +43,9 @@
               )
             %>
           <% end %>
-          <%= f.text_field :category %>
+          <div id="encounter_category_input_container">
+            <%= f.text_field :category %>
+          </div>
         </div>
       </div>
 
@@ -55,26 +57,34 @@
 
         <% if Hcms.config.currency.present? %>
           <div class="two_column">
-            <div class="field">
-              <%= apphelp_label(f, :price_per_seat) %>
-              <%= Money::Currency.new(Hcms.config.currency).symbol %>
-              <%=
-                parsed_per_seat_amount = Money.from_cents(
-                  f.object.price_per_seat,
-                  @encounter.currency
-                ) if f.object.price_per_seat.present?
+            <div>
+              <div class="field" id="encounter_price_per_seat_container">
+                <%= apphelp_label(f, :price_per_seat) %>
+                <%= Money::Currency.new(Hcms.config.currency).symbol %>
+                <%=
+                  parsed_per_seat_amount = Money.from_cents(
+                    f.object.price_per_seat,
+                    @encounter.currency
+                  ) if f.object.price_per_seat.present?
 
-                f.text_field(
-                  :price_per_seat,
-                  value: parsed_per_seat_amount&.format(symbol: false),
-                  class: 'not_full_width_in_two_column'
-                )
-              %>
-              <small><%= Hcms.config.currency %></small>
-              <br>
-              <small><em>
-                Set to zero if free of charge.
-              </em></small>
+                  f.text_field(
+                    :price_per_seat,
+                    value: parsed_per_seat_amount&.format(symbol: false),
+                    class: 'not_full_width_in_two_column'
+                  )
+                %>
+                <small><%= Hcms.config.currency %></small>
+                <br>
+                <small><em>
+                  Enter a price, set to zero if free of charge, <strong>OR</strong> choose
+                  "<%= Encounter.human_attribute_name(:price_per_seat) %>" below.
+                </em></small>
+              </div>
+              <div class="field">
+                <div class="checkbox">
+                  <%= f.check_box :price_on_application %> <%= f.label :price_on_application %>
+                </div>
+              </div>
             </div>
 
             <div>

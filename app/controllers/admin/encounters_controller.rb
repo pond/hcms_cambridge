@@ -17,6 +17,7 @@ class Admin::EncountersController < ApplicationController
     raw_editor
 
     location
+    price_on_application
     price_per_seat
     price_physical
     name_physical

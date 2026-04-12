@@ -239,7 +239,6 @@ RSpec.describe "Admin - encounters" do
 
         title    = "Quick Brown Fox"
         summary  = "Jumps Over The"
-        body     = "Lazy Dog"
         location = "1 Courtenay Place, Wellington 6011 New Zealand"
         price    = "49.99"
 
@@ -293,7 +292,6 @@ RSpec.describe "Admin - encounters" do
 
         title    = "Quick Brown Fox"
         summary  = "Jumps Over The"
-        body     = "Lazy Dog"
         location = "1 Courtenay Place, Wellington 6011 New Zealand"
         price    = "49.99"
 
@@ -341,8 +339,64 @@ RSpec.describe "Admin - encounters" do
         expect(Redactor3Rails::Asset.first.data_file_name   ).to eql("example.pdf")
         expect(Redactor3Rails::Asset.first.data_content_type).to eql("application/pdf")
       end
+
+      it "hides the price field when 'price on application' is being toggled" do
+        visit(new_admin_encounter_path())
+
+        title    = "Quick Brown Fox"
+        summary  = "Jumps Over The"
+        body     = "Lazy Dog"
+        location = "1 Courtenay Place, Wellington 6011 New Zealand"
+
+        fill_in("encounter_title",    with: title)
+        fill_in("encounter_summary",  with: summary)
+        fill_in("encounter_location", with: location)
+
+        expect(page).to have_field(:encounter_price_per_seat)
+
+        check("encounter_price_on_application")
+
+        expect(page).to_not have_field(:encounter_price_per_seat)
+
+        image_path = Rails.root.join("spec", "fixtures", "example.jpg")
+        attach_file("encounter_encounter_hero_image", image_path)
+
+        spechelp_fill_in_redactor(body, for_type: "encounter")
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "New draft encounter created")
+
+        expect(Encounter.first.title               ).to eql(title)
+        expect(Encounter.first.price_on_application).to eql(true)
+      end
     end # context "dynamic behaviour", js: true do'
   end # 'context "creation" do'
+
+  context "editing" do
+    context "dynamic behaviour", js: true do
+      it "shows the price field when 'price on application' is being toggled off" do
+        encounter = create(:encounter, :physical_none, currency: "NZD", price_per_seat: 0, price_on_application: true)
+        price     = "49.99"
+
+        visit(edit_admin_encounter_path(encounter))
+        find(:css, "details > summary", text: "Expand to edit other attributes").click()
+
+        expect(page).to_not have_field(:encounter_price_per_seat)
+
+        uncheck("encounter_price_on_application")
+
+        expect(page).to have_field(:encounter_price_per_seat)
+
+        fill_in("encounter_price_per_seat", with: price)
+
+        click_on("Save draft")
+        spechelp_check_flash(:notice, "Changes saved as draft")
+
+        expect(encounter.reload.price_on_application).to eql(false)
+        expect(encounter.reload.price_per_seat      ).to eql((price.to_f * 100).to_i)
+      end
+    end # context "dynamic behaviour", js: true do'
+  end # 'context "editing" do'
 
   context "revision management" do
     context "with only one revision" do

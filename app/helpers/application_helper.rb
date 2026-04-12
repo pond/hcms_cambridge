@@ -77,7 +77,7 @@ module ApplicationHelper
     if currency.blank?
       '&ndash;'.html_safe()
     elsif poa
-      'Price on enquiry'
+      Encounter.human_attribute_name(:price_on_application)
     elsif free_of_charge
       'Free'
     else

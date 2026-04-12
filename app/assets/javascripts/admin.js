@@ -44,10 +44,7 @@ $(document).ready(function() {
     }
 
     setVisibilities();
-
-    pageTypeSelector.change(function(event) {
-      setVisibilities();
-    });
+    pageTypeSelector.change(setVisibilities);
   }
 
   // ===========================================================================
@@ -68,10 +65,7 @@ $(document).ready(function() {
     }
 
     setVisibilities();
-
-    eventOnArchiveSelector.change(function(event) {
-      setVisibilities();
-    });
+    eventOnArchiveSelector.change(setVisibilities);
   }
 
   // ===========================================================================
@@ -97,28 +91,49 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
-  // Handle changes of the "Category" selector
+  // Handle changes of the encounter "Price on application" option
   // ===========================================================================
   //
-  const encounterCategorySelector = $('#encounter_category_chooser')
+  const encounterPriceOnApplicationCheckbox = $('#encounter_price_on_application');
+
+  if (encounterPriceOnApplicationCheckbox.length > 0) {
+    const encounterPricePerSeatContainer = $('#encounter_price_per_seat_container');
+
+    function setVisibilities() {
+      if (encounterPriceOnApplicationCheckbox.is(':checked')) {
+        encounterPricePerSeatContainer.slideUp();
+      } else {
+        encounterPricePerSeatContainer.slideDown();
+      }
+    }
+
+    setVisibilities();
+    encounterPriceOnApplicationCheckbox.change(setVisibilities);
+  }
+
+  // ===========================================================================
+  // Handle changes of the encounter "Category" selector
+  // ===========================================================================
+  //
+  const encounterCategorySelector = $('#encounter_category_chooser');
 
   if (encounterCategorySelector.length > 0) {
-    const encounterCategoryInput = $('#encounter_category')
+    const encounterCategoryInput = $('#encounter_category');
 
-    function encounterCategorySelectionChanged() {
+    function setVisibilities() {
       var selectedCategory = encounterCategorySelector.children("option:selected").val();
 
       if (selectedCategory === "") {
-        encounterCategoryInput.show();
         encounterCategoryInput.val("");
+        encounterCategoryInput.show();
       } else {
         encounterCategoryInput.hide();
         encounterCategoryInput.val(selectedCategory);
       }
     }
 
-    encounterCategorySelector.on('change', encounterCategorySelectionChanged);
-    encounterCategorySelectionChanged();
+    setVisibilities();
+    encounterCategorySelector.change(setVisibilities);
   }
 
   // ===========================================================================

@@ -12,13 +12,17 @@
   <% if encounter.category != most_recent_category %>
     <% most_recent_category = encounter.category %>
     <h2><%= encounter.category %></h2>
+  <% else %>
+    <div style="margin-top: 2em"></div>
   <% end %>
   <section class="encounter-body-and-poster" style="display: flex; gap: 1em;">
-    <section class="encounter-poster" style="width: 40%;">
-      <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title, style: "width: 100%; border-radius: 5px;") %>
+    <section class="encounter-poster" style="width: 50%;">
+      <figure data-redactor-type="image">
+        <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title, style: "width: 100%; border-radius: 5px;") %>
+      </figure>
     </section>
-    <section class="encounter-body" style="width: 60%;">
-      <p style="margin-top: 0; font-size: 125%;">
+    <section class="encounter-body" style="width: 50%;">
+      <p style="margin-top: 0;">
         <strong><%= encounter.title %></strong>
       </p>
       <%= encounter.body.html_safe() %>
