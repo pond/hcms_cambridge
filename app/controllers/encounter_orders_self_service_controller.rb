@@ -138,7 +138,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
-      if @encounter.price_on_application? || @encounter_order.includes_discount?
+      if @encounter_order.price_agreed_by_application? || @encounter_order.includes_discount?
         line_items = [{
           quantity:   1,
           price_data: {

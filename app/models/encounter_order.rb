@@ -29,8 +29,9 @@ class EncounterOrder < ApplicationRecord
     super
 
     if self.new_record? and encounter.present?
-      self.frozen_price_per_seat = self.encounter.price_per_seat
-      self.frozen_price_physical = self.encounter.price_physical
+      self.frozen_price_on_application = self.encounter.price_on_application
+      self.frozen_price_per_seat       = self.encounter.price_per_seat
+      self.frozen_price_physical       = self.encounter.price_physical
     end
   end
 
@@ -244,7 +245,7 @@ class EncounterOrder < ApplicationRecord
   end
 
   def theoretical_amount_owed_without_discounts
-    if self.encounter.price_on_application?
+    if self.frozen_price_on_application?
       0
     else
       amount  = self.frozen_price_per_seat * self.number_of_seats
@@ -261,8 +262,14 @@ class EncounterOrder < ApplicationRecord
     self.state_new? || self.state_payment_failed?
   end
 
+  def price_agreed_by_application?
+    self.frozen_price_on_application
+  end
+
   def includes_discount?
-    self.amount_owed < self.theoretical_amount_owed_without_discounts()
+    ! self.price_agreed_by_application? && (
+      self.amount_owed < self.theoretical_amount_owed_without_discounts()
+    )
   end
 
   def open_ended?

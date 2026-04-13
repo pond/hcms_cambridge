@@ -60,7 +60,7 @@
       <td><%= @order.number_of_seats %></td>
       <td>
         <% if expected_price == actual_price %>
-          <%= apphelp_money(@order.frozen_price_per_seat, currency: @order.event.currency) %></td>
+          <%= apphelp_money(@order.frozen_price_per_seat, currency: @order.event.currency) %>
         <% else %>
           Special price
         <% end %>

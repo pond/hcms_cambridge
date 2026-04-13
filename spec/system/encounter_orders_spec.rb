@@ -279,111 +279,162 @@ RSpec.describe "Admin - encounter orders" do
   end # "context "making payment" do"
 
   context "after payment" do
-    before :each do
-      @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
-      visit(encordshelp_magic_link(@encounter_order))
-      simulate_stripe_payment(@encounter_order)
-    end
+    context "priced by seat" do
+      before :each do
+        @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
+        visit(encordshelp_magic_link(@encounter_order))
+        simulate_stripe_payment(@encounter_order)
+      end
 
-    it "lets the user view their booking" do
-      visit(encordshelp_magic_link(@encounter_order))
+      it "lets the user view their booking" do
+        visit(encordshelp_magic_link(@encounter_order))
 
-      expect(page).to have_text(@encounter.title)
-      expect(page).to have_text(apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency))
-      expect(page).to have_text(encordshelp_datetime(@encounter_order))
-      expect(page).to have_text(encordshelp_share_link(@encounter_order))
-      expect(page).to have_text("The booking has been paid for successfully")
-    end
+        expect(page).to have_text(@encounter.title)
+        expect(page).to have_text(apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency))
+        expect(page).to have_text(encordshelp_datetime(@encounter_order))
+        expect(page).to have_text(encordshelp_share_link(@encounter_order))
+        expect(page).to have_text("The booking has been paid for successfully")
+      end
 
-    it "lets the user view an invoice" do
-      visit(encordshelp_magic_link(@encounter_order))
-      click_on("Invoice")
+      it "lets the user view an invoice" do
+        visit(encordshelp_magic_link(@encounter_order))
+        click_on("Invoice")
 
-      seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
-      items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
-      total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+        seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
+        items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
+        total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
 
-      expect(page).to     have_text(@encounter.title)
-      expect(page).to     have_text(@encounter_order.human_invoice_number)
-      expect(page).to     have_text(@encounter_order.name)
-      expect(page).to     have_text(@encounter_order.email)
-      expect(page).to     have_text(@encounter_order.address)
+        expect(page).to     have_text(@encounter.title)
+        expect(page).to     have_text(@encounter_order.human_invoice_number)
+        expect(page).to     have_text(@encounter_order.name)
+        expect(page).to     have_text(@encounter_order.email)
+        expect(page).to     have_text(@encounter_order.address)
 
-      expect(page).to_not have_text("Special price")
-      expect(page).to     have_text(seats)
-      expect(page).to     have_text(items)
-      expect(page).to     have_text(total)
+        expect(page).to_not have_text("Special price")
+        expect(page).to     have_text(seats)
+        expect(page).to     have_text(items)
+        expect(page).to     have_text(total)
 
-      expect(page).to     have_text("PAID IN FULL")
-    end
+        expect(page).to     have_text("PAID IN FULL")
+      end
 
-    it "does not change even if the encounter price is altered" do
-      visit(encordshelp_magic_link(@encounter_order))
+      it "does not change even if the encounter price is altered" do
+        visit(encordshelp_magic_link(@encounter_order))
 
-      @encounter.update!(
-        price_per_seat: @encounter.price_per_seat * 2,
-        price_physical: @encounter.price_physical * 2
-      )
+        @encounter.update!(
+          price_per_seat: @encounter.price_per_seat * 2,
+          price_physical: @encounter.price_physical * 2
+        )
 
-      click_on("Invoice")
+        click_on("Invoice")
 
-      seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
-      items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
-      total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+        seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
+        items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
+        total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
 
-      expect(page).to     have_text(@encounter.title)
+        expect(page).to     have_text(@encounter.title)
 
-      expect(page).to     have_text(@encounter_order.human_invoice_number)
-      expect(page).to     have_text(@encounter_order.name)
-      expect(page).to     have_text(@encounter_order.email)
-      expect(page).to     have_text(@encounter_order.address)
+        expect(page).to     have_text(@encounter_order.human_invoice_number)
+        expect(page).to     have_text(@encounter_order.name)
+        expect(page).to     have_text(@encounter_order.email)
+        expect(page).to     have_text(@encounter_order.address)
 
-      expect(page).to_not have_text("Special price")
-      expect(page).to     have_text(seats)
-      expect(page).to     have_text(items)
-      expect(page).to     have_text(total)
+        expect(page).to_not have_text("Special price")
+        expect(page).to     have_text(seats)
+        expect(page).to     have_text(items)
+        expect(page).to     have_text(total)
 
-      expect(page).to     have_text("PAID IN FULL")
-    end
+        expect(page).to     have_text("PAID IN FULL")
+      end
 
-    it "shows discounts" do
-      visit(encordshelp_magic_link(@encounter_order))
+      it "shows discounts" do
+        visit(encordshelp_magic_link(@encounter_order))
 
-      @encounter_order.update!(amount_owed: @encounter_order.amount_owed / 2)
+        @encounter_order.update!(amount_owed: @encounter_order.amount_owed / 2)
 
-      click_on("Invoice")
+        click_on("Invoice")
 
-      seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
-      items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
-      total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+        seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
+        items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
+        total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
 
-      expect(page).to     have_text(@encounter.title)
-      expect(page).to     have_text(@encounter_order.human_invoice_number)
-      expect(page).to     have_text(@encounter_order.name)
-      expect(page).to     have_text(@encounter_order.email)
-      expect(page).to     have_text(@encounter_order.address)
+        expect(page).to     have_text(@encounter.title)
+        expect(page).to     have_text(@encounter_order.human_invoice_number)
+        expect(page).to     have_text(@encounter_order.name)
+        expect(page).to     have_text(@encounter_order.email)
+        expect(page).to     have_text(@encounter_order.address)
 
-      expect(page).to     have_text("Special price")
-      expect(page).to_not have_text(seats)
-      expect(page).to     have_text(items)
-      expect(page).to     have_text(total)
+        expect(page).to     have_text("Special price")
+        expect(page).to_not have_text(seats)
+        expect(page).to     have_text(items)
+        expect(page).to     have_text(total)
 
-      expect(page).to     have_text("PAID IN FULL")
-    end
+        expect(page).to     have_text("PAID IN FULL")
+      end
 
-    it "lets a giftee view encounter details, with no prices shown" do
-      visit(encordshelp_share_link(@encounter_order))
+      it "lets a giftee view encounter details, with no prices shown" do
+        visit(encordshelp_share_link(@encounter_order))
 
-      expect(page).to     have_text(@encounter.title)
-      expect(page).to     have_text(@encounter_order.gift_note)
-      expect(page).to     have_text(encordshelp_datetime(@encounter_order))
-      expect(page).to     have_text(spechelp_strip_markup @encounter.body)
+        expect(page).to     have_text(@encounter.title)
+        expect(page).to     have_text(@encounter_order.gift_note)
+        expect(page).to     have_text(encordshelp_datetime(@encounter_order))
+        expect(page).to     have_text(spechelp_strip_markup @encounter.body)
 
-      expect(page).to_not have_text(apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency))
-      expect(page).to_not have_text(Money.new(0, @encounter.currency).symbol)
-      expect(page).to_not have_text(encordshelp_share_link(@encounter_order))
-      expect(page).to_not have_text("The booking has been paid for successfully")
-    end
+        expect(page).to_not have_text(apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency))
+        expect(page).to_not have_text(Money.new(0, @encounter.currency).symbol)
+        expect(page).to_not have_text(encordshelp_share_link(@encounter_order))
+        expect(page).to_not have_text("The booking has been paid for successfully")
+      end
+    end # 'context "priced by seat" do'
+
+    context "price-on-application" do
+      before :each do
+        @encounter.update!(price_on_application: true)
+        @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
+        @encounter_order.update!(amount_owed: rand(11111..99999))
+        visit(encordshelp_magic_link(@encounter_order))
+        simulate_stripe_payment(@encounter_order)
+      end
+
+      shared_examples "a price-on-application invoice" do
+        it "which shows the custom amount" do
+          seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
+          items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
+          total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+
+          expect(page).to     have_text(@encounter.title)
+          expect(page).to     have_text(@encounter_order.human_invoice_number)
+          expect(page).to     have_text(@encounter_order.name)
+          expect(page).to     have_text(@encounter_order.email)
+          expect(page).to     have_text(@encounter_order.address)
+
+          expect(page).to     have_text("Custom price")
+          expect(page).to_not have_text(seats)
+          expect(page).to_not have_text(items)
+          expect(page).to     have_text(total)
+
+          expect(page).to     have_text("PAID IN FULL")
+        end
+      end
+
+      context "when the encounter record remains unchanged" do
+        before :each do
+          click_on("Invoice")
+        end
+
+        it_behaves_like "a price-on-application invoice"
+      end # 'context "when the encounter record remains unchanged" do'
+
+      context "when the encounter record POA flag is later cleared" do
+        before :each do
+          @encounter.update!(price_on_application: false)
+          expect(@encounter.price_per_seat).to_not be_zero # (self-check of prior factory setup)
+          click_on("Invoice")
+        end
+
+        it_behaves_like "a price-on-application invoice"
+      end # 'context "when the encounter record POA flag is later cleared" do'
+    end # 'context "price-on-application" do'
   end # 'context "after payment" do'"
 
   context "unusual workflows" do

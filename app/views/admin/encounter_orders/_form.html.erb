@@ -13,7 +13,7 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
-  <%= hidden_field_tag(:price_on_application, encounter_order.encounter.price_on_application) %>
+  <%= hidden_field_tag(:price_on_application, encounter_order.frozen_price_on_application) %>
   <%= hidden_field_tag(:price_per_seat_cents, encounter_order.frozen_price_per_seat) %>
   <%= hidden_field_tag(:price_physical_cents, encounter_order.frozen_price_physical.to_i) %>
 

@@ -64,17 +64,24 @@
       <td><%= @encounter_order.encounter.title %></td>
       <td><%= @encounter_order.number_of_seats %></td>
       <td>
-        <% if expected_seat_price == actual_price - expected_physical_price %>
-          <%= apphelp_money(@encounter_order.frozen_price_per_seat, currency: @encounter_order.encounter.currency) %></td>
+        <% if @encounter_order.frozen_price_on_application %>
+          Custom price
+        <% elsif expected_seat_price == actual_price - expected_physical_price %>
+          <%= apphelp_money(@encounter_order.frozen_price_per_seat, currency: @encounter_order.encounter.currency) %>
         <% else %>
           Special price
         <% end %>
       </td>
       <td class="amounts">
-        <%= apphelp_money(actual_price - expected_physical_price, currency: @encounter_order.encounter.currency) %>
+        <% if @encounter_order.frozen_price_on_application %>
+          <%= apphelp_money(actual_price, currency: @encounter_order.encounter.currency) %>
+        <% else %>
+          <%= apphelp_money(actual_price - expected_physical_price, currency: @encounter_order.encounter.currency) %>
+        <% end %>
       </td>
     </tr>
-    <% if @encounter_order.has_physical %>
+    <%# Itemisation for POA orders is handled in a different way; don't list a physical item here in that case %>
+    <% if ! @encounter_order.frozen_price_on_application && @encounter_order.has_physical %>
       <tr>
         <td><%= @encounter_order.encounter.name_physical.upcase_first %></td>
         <td>1</td>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_220520) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_13_061329) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_220520) do
     t.datetime "created_at", null: false
     t.text "email", null: false
     t.bigint "encounter_id", null: false
+    t.boolean "frozen_price_on_application", null: false
     t.integer "frozen_price_per_seat", null: false
     t.integer "frozen_price_physical"
     t.text "gift_note"

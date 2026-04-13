@@ -51,7 +51,7 @@ RSpec.shared_context "encounter orders" do
         expect(args[:success_url]).to end_with("stripe_payment_succeeded?csid={CHECKOUT_SESSION_ID}")
         expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
 
-        if encounter_order.includes_discount?
+        if encounter_order.price_agreed_by_application? || encounter_order.includes_discount?
           expect(args[:line_items].size ).to eql(1)
           expect(args[:line_items].first).to eql(
             {
