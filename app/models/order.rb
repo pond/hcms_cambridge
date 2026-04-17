@@ -163,11 +163,21 @@ class Order < ApplicationRecord
     }
   )
 
+  # A defensive validation.
+  #
+  # Back-end processing takes human-entered, formatted money amounts and turns
+  # it into integer smallest currency units, so this should never happen...
+  #
   validates(
-    :number_of_seats, :amount_owed,
+    :amount_owed,
+    numericality: { only_integer: true }
+  )
+
+  validates(
+    :number_of_seats,
     numericality: {
       only_integer: true,
-      message:      'must be a whole number'
+      message:      'must be a positive whole number'
     }
   )
 

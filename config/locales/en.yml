@@ -118,6 +118,10 @@ en:
         number_of_seats: "Number of people"
         amount_owed: "Total price"
 
+      encounter_order_item:
+        description: "Line item"
+        amount_owed: "Price"
+
       event:
         title: "Title"
         summary: "Brief summary"

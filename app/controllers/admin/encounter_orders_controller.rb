@@ -20,6 +20,14 @@ class Admin::EncounterOrdersController < ApplicationController
     amount_owed
   }
 
+  PERMITTED_ENCOUNTER_ORDER_PARAMS << { encounter_order_items_attributes: [
+    :id, :description, :amount_owed, :_destroy
+  ] }
+
+  # ============================================================================
+  # PUBLIC INSTANCE METHODS
+  # ============================================================================
+  #
   public
 
     # GET /admin/encounters/<encounter_id>/orders
@@ -61,11 +69,10 @@ class Admin::EncounterOrdersController < ApplicationController
       end
 
       if safe_params[:amount_owed].present?
-        parsed_amount = Monetize.parse(
-          safe_params[:amount_owed],
-          @encounter.currency
+        normalise_amount_owed!(
+          for_encounter:        @encounter,
+          updating_params_hash: safe_params
         )
-        safe_params[:amount_owed] = parsed_amount.cents
       else
         amount_cents = @encounter.price_per_seat * safe_params[:number_of_seats]
 
@@ -74,6 +81,15 @@ class Admin::EncounterOrdersController < ApplicationController
         end
 
         safe_params[:amount_owed] = amount_cents
+      end
+
+      if safe_params[:encounter_order_items_attributes].present?
+        safe_params[:encounter_order_items_attributes].each do | _key, eoi_params_hash_by_ref |
+          normalise_amount_owed!(
+            for_encounter:        @encounter,
+            updating_params_hash: eoi_params_hash_by_ref
+          )
+        end
       end
 
       @encounter_order.assign_attributes(safe_params)
@@ -161,6 +177,10 @@ class Admin::EncounterOrdersController < ApplicationController
       end
     end
 
+  # ============================================================================
+  # PRIVATE INSTANCE METHODS
+  # ============================================================================
+  #
   private
 
     # Called before-action.
@@ -180,8 +200,8 @@ class Admin::EncounterOrdersController < ApplicationController
       @encounter_order = EncounterOrder.find_by_id(params[:id])
     end
 
-    # Redirect to the order 'show' page with a given alert message if @encounter_order
-    # is set, else the index page with that message.
+    # Redirect to the order 'show' page with a given alert message if
+    # @encounter_order is set, else the index page with that message.
     #
     def bail_out_with(alert_message)
       path = if @encounter_order.nil?
@@ -194,6 +214,21 @@ class Admin::EncounterOrdersController < ApplicationController
       end
 
       return redirect_to(path, alert: alert_message)
+    end
+
+    # For a given encounter and a given params hash/subhash which might have an
+    # "amount_owed" key with, if present, a String value, parse that key's value
+    # as a money amount using the encounter's currency and write back the amount
+    # owed as an Integer into the given hash.
+    #
+    def normalise_amount_owed!(for_encounter:, updating_params_hash:)
+      if updating_params_hash[:amount_owed].present?
+        parsed_amount = Monetize.parse(
+          updating_params_hash[:amount_owed],
+          for_encounter.currency
+        )
+        updating_params_hash[:amount_owed] = parsed_amount.cents
+      end
     end
 
     def encounter_order_params

@@ -173,28 +173,33 @@ RSpec.describe EncounterOrder, type: :model do
     end # 'context "presence" do'
 
     context "formats" do
-      it "requires an integer numeric number of seats and amount owed" do
+
+      # Back-end formats human currency strings into smallest currency units as
+      # an integer, but in case that has bugs, a must-be-integer validation is
+      # included for the amount.
+      #
+      it "requires an integer numeric number of seats and (defensively) amount owed" do
         order                 = EncounterOrder.new
         order.number_of_seats = "hello"
         order.amount_owed     = "hello"
         order.validate()
 
-        expect(order.errors.messages_for(:number_of_seats)).to include("must be a whole number")
-        expect(order.errors.messages_for(:amount_owed    )).to include("must be a whole number")
+        expect(order.errors.messages_for(:number_of_seats)).to include("must be a positive whole number")
+        expect(order.errors.messages_for(:amount_owed    )).to include("is not a number")
 
         order.number_of_seats = 2.5
         order.amount_owed     = 3.5
         order.validate()
 
-        expect(order.errors.messages_for(:number_of_seats)).to include("must be a whole number")
-        expect(order.errors.messages_for(:amount_owed    )).to include("must be a whole number")
+        expect(order.errors.messages_for(:number_of_seats)).to include("must be a positive whole number")
+        expect(order.errors.messages_for(:amount_owed    )).to include("must be an integer")
 
         order.number_of_seats = 2
         order.amount_owed     = 3
         order.validate()
 
-        expect(order.errors.messages_for(:number_of_seats)).to_not include("must be a whole number")
-        expect(order.errors.messages_for(:amount_owed    )).to_not include("must be a whole number")
+        expect(order.errors.messages_for(:number_of_seats)).to_not include("must be a positive whole number")
+        expect(order.errors.messages_for(:amount_owed    )).to_not include("is not a number")
       end
 
       it "needs a valid e-mail address" do

@@ -1,0 +1,37 @@
+<% currency = @encounter.currency %>
+
+<div class="encounter_order_item valign-row">
+  <div class="field valign-row">
+    <%= f.label :description %>
+    <%=
+      f.text_field(
+        :description,
+        class: 'encounter_order_item_input_field encounter_order_item_description_field',
+      )
+    %>
+  </div>
+
+  <div class="field valign-row valign-row-tight">
+    <%= f.label :amount_owed %>
+    <%= Money::Currency.new(currency).symbol %>
+    <%=
+      parsed_amount = Money.from_cents(f.object.amount_owed, currency)
+
+      f.text_field(
+        :amount_owed,
+        value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+        class: 'encounter_order_item_input_field encounter_order_item_amount_owed_field',
+        style: 'width: 5em;'
+      )
+    %>
+    <small><%= currency %></small>
+  </div>
+
+  <% if f.object.new_record? %>
+    <button type="button" class="remove_encounter_order_item_button">Remove</button>
+  <% else %>
+    <%= f.label :_destroy, "Delete" do %>
+      <%= f.check_box :_destroy %>
+    <% end %>
+  <% end %>
+</div>

@@ -77,6 +77,25 @@
     <% end %>
   </p>
 
+  <% if encounter_order.encounter.price_on_application? %>
+    <fieldset>
+      <legend>Optional itemisation for invoice</legend>
+      <div id="encounter_order_items_wrapper">
+        <%= f.fields_for :encounter_order_items do |encounter_order_item_fields| %>
+          <%= render 'item_fields', f: encounter_order_item_fields %>
+        <% end %>
+      </div>
+
+      <button type="button" id="add_encounter_order_item_button">Add Item</button>
+
+      <template id="encounter_order_item_template">
+        <%= f.fields_for :encounter_order_items, EncounterOrderItem.new, child_index: 'NEW_RECORD' do |encounter_order_item_fields| %>
+          <%= render 'item_fields', f: encounter_order_item_fields %>
+        <% end %>
+      </template>
+    </fieldset>
+  <% end %>
+
   <p>
     <%
       amount_owed_hint = if encounter_order.encounter.price_on_application?

@@ -5,6 +5,13 @@ class EncounterOrder < ApplicationRecord
 
   belongs_to :encounter
   has_one :stripe_payment, as: :payable, required: false, dependent: :destroy
+  has_many :encounter_order_items, dependent: :destroy # (these are optional)
+
+  accepts_nested_attributes_for(
+    :encounter_order_items,
+    allow_destroy: true,
+    reject_if:     :all_blank
+  )
 
   # Uses the site name first letters capitalised plus "EI-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSEI-".
@@ -183,15 +190,23 @@ class EncounterOrder < ApplicationRecord
     }
   )
 
+  # A defensive validation.
+  #
+  # Back-end processing takes human-entered, formatted money amounts and turns
+  # it into integer smallest currency units, so this should never happen...
+  #
   validates(
-    :number_of_seats,
     :amount_owed,
-    numericality: { only_integer: true, message: 'must be a whole number' }
+    numericality: { only_integer: true }
   )
 
   validates(
     :number_of_seats,
-    numericality: { greater_than: 0 }
+    numericality: {
+      only_integer: true,
+      greater_than: 0,
+      message:      'must be a positive whole number'
+    }
   )
 
   # See similar validation in the Order model for rationale.

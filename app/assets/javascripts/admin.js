@@ -69,28 +69,6 @@ $(document).ready(function() {
   }
 
   // ===========================================================================
-  // Handle changes of kind of encounter order starting date/time
-  // ===========================================================================
-  //
-  const encounterOrderStartsAtKindRadios = $('[id^="encounter_order_starts_at_kind_"]');
-
-  if (encounterOrderStartsAtKindRadios.length > 0) {
-    const encounterOrderStartsAtKindFixedDateRadio = $('#encounter_order_starts_at_kind_fixed_date');
-    const encounterOrderDateTimeInput = $('#encounter_order_starts_at');
-
-    function enableOrDisableDateTimeInput() {
-      if (encounterOrderStartsAtKindFixedDateRadio.is(':checked')) {
-        encounterOrderDateTimeInput.prop('disabled', false);
-      } else {
-        encounterOrderDateTimeInput.prop('disabled', true);
-      }
-    }
-
-    enableOrDisableDateTimeInput();
-    encounterOrderStartsAtKindRadios.on('change', enableOrDisableDateTimeInput);
-  }
-
-  // ===========================================================================
   // Handle changes of the encounter "Price on application" option
   // ===========================================================================
   //
@@ -222,5 +200,148 @@ $(document).ready(function() {
         showOrHideHint();
       });
     }
+  }
+
+  // ===========================================================================
+  // Handle addition or removal of optional encounter order item rows; this code
+  // relies in part on constants defined earlier, for price calculations.
+  // ===========================================================================
+  //
+  const encounterOrderItemTemplate = $('#encounter_order_item_template');
+
+  if (encounterOrderItemTemplate.length > 0) {
+    const encounterOrderItemsWrapper = $('#encounter_order_items_wrapper');
+
+    // Add item rows for encounter orders.
+    //
+    function addRow() {
+      const rowCount = $('.encounter_order_item').length; // Row count becomes next 0-based index index
+      const newRow   = encounterOrderItemTemplate.html().replace(/NEW_RECORD/g, rowCount);
+
+      encounterOrderItemsWrapper.append(newRow);
+      $('.encounter_order_item:last-child .encounter_order_item_input_field')[0].focus();
+    }
+
+    $('#add_encounter_order_item_button').on('click', addRow)
+
+    // Pressing Return adds another item, rather than submitting the form.
+    //
+    encounterOrderItemsWrapper.on('keypress', '.encounter_order_item_input_field', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addRow();
+      }
+    });
+
+    // Remove item rows for new encounter orders.
+    //
+    encounterOrderItemsWrapper.on('click', '.remove_encounter_order_item_button', function() {
+      $(this).closest('.encounter_order_item').remove();
+    });
+
+    // Remove item rows when editing eexisting encounter orders.
+    //
+    encounterOrderItemsWrapper.on('change', 'input[type=checkbox][name*="_destroy"]', function() {
+      $(this).closest('.encounter_order_item').toggle(!this.checked);
+    });
+
+    // Update total price if itemised amounts are entered. There's a fair chunk
+    // of close duplication with code earlier, but enough variation to make it
+    // mostly worthwhile for sake of keeping this relatively self-contained.
+    //
+    const currency                  = $('#price_currency').val();
+    const hasPhysicalInput          = $('#encounter_order_has_physical');
+    const totalExcludesPhysicalHint = $('#encounter_order_total_amount_hint');
+    var   pricePhysicalCents;
+    var   amountOwedInput;
+    var   manualInputDetected = false;
+
+    amountOwedInput    = $('#encounter_order_amount_owed');
+    pricePhysicalCents = parseInt(pricePhysicalCentsHidden.val());
+
+    const formatter = new Intl.NumberFormat(
+      navigator.language, {
+        style:               'currency',
+        currency:            currency,
+        currencyDisplay:     'code',
+        trailingZeroDisplay: 'stripIfInteger',
+      }
+    );
+
+    const integerDivisor = 10 ** formatter.resolvedOptions().maximumFractionDigits;
+
+    function updateTotal() {
+      if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
+        var amountOwedCents = 0;
+
+        if (hasPhysicalInput.val() == 'true') {
+          amountOwedCents += pricePhysicalCents;
+        }
+
+        $('.encounter_order_item_amount_owed_field').each(function(_index, element) {
+          const itemAmount = $(element).val()?.trim();
+
+          if (itemAmount && itemAmount.length > 0) {
+            const itemFloatAmount = parseFloat(itemAmount); // (Float, ick)
+            const itemCentsAmount = Math.floor(itemFloatAmount * integerDivisor);
+
+            amountOwedCents += itemCentsAmount;
+          }
+        });
+
+        if (amountOwedCents > 0) {
+          formatted = formatter.format(amountOwedCents / integerDivisor);
+          formatted = formatted.replace(currency, '').trim();
+
+          amountOwedInput.val(formatted);
+        } else {
+          amountOwedInput.val('');
+        }
+      }
+    }
+
+    function showOrHideHint() {
+      if (hasPhysicalInput.val() == '') {
+        totalExcludesPhysicalHint.show()
+      } else {
+        totalExcludesPhysicalHint.hide()
+      }
+    }
+
+    updateTotal();
+    showOrHideHint();
+
+    hasPhysicalInput.on('change', function(e) {
+      updateTotal();
+      showOrHideHint();
+    });
+
+    amountOwedInput.on('input', function(e) {
+      manualInputDetected = (amountOwedInput.val().trim().length > 0);
+    });
+
+    encounterOrderItemsWrapper.on('input', '.encounter_order_item_amount_owed_field', updateTotal);
+  }
+
+  // ===========================================================================
+  // Handle changes of kind of encounter order starting date/time
+  // ===========================================================================
+  //
+  const encounterOrderStartsAtKindRadios = $('[id^="encounter_order_starts_at_kind_"]');
+
+  if (encounterOrderStartsAtKindRadios.length > 0) {
+    const encounterOrderStartsAtKindFixedDateRadio = $('#encounter_order_starts_at_kind_fixed_date');
+    const encounterOrderDateTimeInput = $('#encounter_order_starts_at');
+
+    function enableOrDisableDateTimeInput() {
+      if (encounterOrderStartsAtKindFixedDateRadio.is(':checked')) {
+        encounterOrderDateTimeInput.prop('disabled', false);
+      } else {
+        encounterOrderDateTimeInput.prop('disabled', true);
+      }
+    }
+
+    enableOrDisableDateTimeInput();
+    encounterOrderStartsAtKindRadios.on('change', enableOrDisableDateTimeInput);
   }
 });
