@@ -38,7 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_061329) do
     t.integer "amount_owed", null: false
     t.datetime "created_at", null: false
     t.text "description", null: false
-    t.bigint "encounter_order_id", null: false
+    t.uuid "encounter_order_id", null: false
     t.datetime "updated_at", null: false
     t.index ["encounter_order_id"], name: "index_encounter_order_items_on_encounter_order_id"
   end
