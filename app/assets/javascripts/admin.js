@@ -219,6 +219,10 @@ $(document).ready(function() {
       const newRow   = encounterOrderItemTemplate.html().replace(/NEW_RECORD/g, rowCount);
 
       encounterOrderItemsWrapper.append(newRow);
+
+      // The DOM updates synchronously here, so the immediately chained-in
+      // 'focus' call is safe.
+      //
       $('.encounter_order_item:last-child .encounter_order_item_input_field')[0].focus();
     }
 
@@ -229,7 +233,16 @@ $(document).ready(function() {
     encounterOrderItemsWrapper.on('keypress', '.encounter_order_item_input_field', function(event) {
       if (event.key === 'Enter') {
         event.preventDefault();
-        addRow();
+
+        const currentRow   = $(this).closest('.encounter_order_item');
+        const allFields    = currentRow.find('.encounter_order_item_input_field');
+        const currentIndex = allFields.index(this);
+
+        if (currentIndex < allFields.length - 1) {
+          allFields.eq(currentIndex + 1).focus();
+        } else {
+          addRow();
+        }
       }
     });
 
