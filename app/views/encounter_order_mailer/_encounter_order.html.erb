@@ -2,7 +2,7 @@
   <% if defined?(show_price) %>
     <li><strong><%= apphelp_money(encounter_order.amount_owed, currency: encounter_order.encounter.currency) %></strong></li>
   <% end %>
-  <li><%= I18n.t('views.encounter_orders.seats', count: encounter_order.number_of_seats) %> to <%= encounter_order.encounter.title %></li>
+  <li><%= I18n.t('views.encounter_orders.seats', count: encounter_order.number_of_seats) %></li>
   <% if encounter_order.has_physical %>
     <li>Includes <%= encounter_order.encounter.name_physical %></li>
   <% end %>

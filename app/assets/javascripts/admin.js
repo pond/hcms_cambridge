@@ -215,10 +215,12 @@ $(document).ready(function() {
     // Add item rows for encounter orders.
     //
     function addRow() {
-      const rowCount = $('.encounter_order_item').length; // Row count becomes next 0-based index index
-      const newRow   = encounterOrderItemTemplate.html().replace(/NEW_RECORD/g, rowCount);
+      const uniqueIdForFormSubmission = Date.now();
+      const newRowTemplateHtml        = encounterOrderItemTemplate.html();
 
-      encounterOrderItemsWrapper.append(newRow);
+      encounterOrderItemsWrapper.append(
+        newRowTemplateHtml.replace(/UNIQUE_ROW_ID/g, uniqueIdForFormSubmission)
+      );
 
       // The DOM updates synchronously here, so the immediately chained-in
       // 'focus' call is safe.
@@ -246,17 +248,11 @@ $(document).ready(function() {
       }
     });
 
-    // Remove item rows for new encounter orders.
+    // DRY up a few use cases below.
     //
-    encounterOrderItemsWrapper.on('click', '.remove_encounter_order_item_button', function() {
-      $(this).closest('.encounter_order_item').remove();
-    });
-
-    // Remove item rows when editing eexisting encounter orders.
-    //
-    encounterOrderItemsWrapper.on('change', 'input[type=checkbox][name*="_destroy"]', function() {
-      $(this).closest('.encounter_order_item').toggle(!this.checked);
-    });
+    function rowContaining(htmlElement) {
+      return $(htmlElement).closest('.encounter_order_item');
+    }
 
     // Update total price if itemised amounts are entered. There's a fair chunk
     // of close duplication with code earlier, but enough variation to make it
@@ -283,6 +279,24 @@ $(document).ready(function() {
 
     const integerDivisor = 10 ** formatter.resolvedOptions().maximumFractionDigits;
 
+    // It's 2026 and JavaScript is still a complete and utter atrocity. A number
+    // can be properly formatted into a string via Intl - but not parsed back...
+    // We have to use a Float, too. At least precision isn't vital here, since
+    // the user can fix the total if need be (sigh).
+    //
+    function parseFormattedNumber(str, locale = navigator.language) {
+      const parts   = new Intl.NumberFormat(locale).formatToParts(11111.1);
+      const group   = parts.find(p => p.type === 'group'  )?.value ?? '';
+      const decimal = parts.find(p => p.type === 'decimal')?.value ?? '.';
+
+      const normalized = str
+        .trim()
+        .replaceAll(group, '')
+        .replace(decimal, '.');
+
+      return parseFloat(normalized); // (Float, ick)
+    }
+
     function updateTotal() {
       if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
         var amountOwedCents = 0;
@@ -292,13 +306,17 @@ $(document).ready(function() {
         }
 
         $('.encounter_order_item_amount_owed_field').each(function(_index, element) {
-          const itemAmount = $(element).val()?.trim();
+          const row = rowContaining(element);
 
-          if (itemAmount && itemAmount.length > 0) {
-            const itemFloatAmount = parseFloat(itemAmount); // (Float, ick)
-            const itemCentsAmount = Math.floor(itemFloatAmount * integerDivisor);
+          if (! row.is(':hidden')) {
+            const itemAmount = $(element).val()?.trim();
 
-            amountOwedCents += itemCentsAmount;
+            if (itemAmount && itemAmount.length > 0) {
+              const itemFloatAmount = parseFormattedNumber(itemAmount);
+              const itemCentsAmount = Math.floor(itemFloatAmount * integerDivisor);
+
+              amountOwedCents += itemCentsAmount;
+            }
           }
         });
 
@@ -334,6 +352,26 @@ $(document).ready(function() {
     });
 
     encounterOrderItemsWrapper.on('input', '.encounter_order_item_amount_owed_field', updateTotal);
+
+    // Remove item rows for new encounter orders.
+    //
+    encounterOrderItemsWrapper.on('click', '.remove_encounter_order_item_button', function() {
+      const row = rowContaining(this);
+
+      row.remove();
+      updateTotal();
+    });
+
+    // Remove item rows when editing encounter orders.
+    //
+    encounterOrderItemsWrapper.on('click', '.destroy_encounter_order_item_button', function() {
+      const row = rowContaining(this);
+
+      row.find('input[name*="[_destroy]"]').val('1');
+      row.hide();
+      updateTotal();
+    });
+
   }
 
   // ===========================================================================

@@ -92,10 +92,22 @@ main.admin {
     border: 1px solid $head_foot_border_colour;
     border-radius: 4px;
 
-    legend                              { margin-bottom: 0.5em; }
-    button, label                       { font-size: 85%; }
-    .field.valign-row                   { margin-bottom: 0; }
-    .remove_encounter_order_item_button { margin-left: auto; }
+    legend            { margin-bottom: 0.5em; }
+    button, label     { font-size: 85%; }
+    .field.valign-row { margin-bottom: 0; }
+
+    .remove_encounter_order_item_button,
+    .destroy_encounter_order_item_button {
+      margin-left: auto;
+    }
+
+    div.encounter_order_item {
+      padding: 1px 5px;
+    }
+
+    div.encounter_order_item:nth-of-type(odd) {
+      background: #0000000f;
+    }
   }
 
   table {

@@ -30,8 +30,7 @@
   <% if f.object.new_record? %>
     <button type="button" class="remove_encounter_order_item_button">Remove</button>
   <% else %>
-    <%= f.label :_destroy, "Delete" do %>
-      <%= f.check_box :_destroy %>
-    <% end %>
+    <button type="button" class="destroy_encounter_order_item_button">Remove</button>
+    <%= f.check_box :_destroy, style: 'display: none;' %>
   <% end %>
 </div>

@@ -113,6 +113,19 @@
       </span>
     <% else %>
       <span>
+        <% if @encounter_order.admin_can_make_amendments? %>
+          <%=
+            button_to(
+              'Amend booking', # EncounterOrder reuses Order states
+              edit_admin_encounter_encounter_order_path(
+                encounter_id: @encounter_order.encounter.slug,
+                id:           @encounter_order.id,
+              ),
+              { method: :get }
+            )
+          %>
+        <% end %>
+
         <% @encounter_order.valid_events.each do | event | %>
           <% next if event.name == :payment_failed %>
           <%=
@@ -133,6 +146,7 @@
         <% end %>
       </span>
     <% end %>
+
     <% if @encounter_order.state_paid? %>
       <%=
         button_to(

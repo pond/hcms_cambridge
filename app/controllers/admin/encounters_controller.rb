@@ -228,9 +228,15 @@ class Admin::EncountersController < ApplicationController
             redirect_to([:edit, :admin, encounter], notice: 'Editor selection altered.')
           end
         elsif result.published
-          redirect_to(admin_encounter_path(encounter.slug), notice: published_message)
+          redirect_to(
+            admin_encounter_path(encounter.slug),
+            notice: published_message
+          )
         else
-          redirect_to(admin_encounter_path(encounter.slug, revision: encounter.current_revision.id), notice: draft_message)
+          redirect_to(
+            admin_encounter_path(encounter.slug, revision: encounter.current_revision.id),
+            notice: draft_message
+          )
         end
       else
         render(render_on_fail)

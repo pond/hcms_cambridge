@@ -291,6 +291,10 @@ class EncounterOrder < ApplicationRecord
     self.starts_at.blank?
   end
 
+  def admin_can_make_amendments?
+    self.valid_events.any? && ! self.state_paid?
+  end
+
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Main definition
   # ============================================================================

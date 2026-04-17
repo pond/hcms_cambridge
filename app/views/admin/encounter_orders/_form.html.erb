@@ -89,7 +89,7 @@
       <button type="button" id="add_encounter_order_item_button">Add Item</button>
 
       <template id="encounter_order_item_template">
-        <%= f.fields_for :encounter_order_items, EncounterOrderItem.new, child_index: 'NEW_RECORD' do |encounter_order_item_fields| %>
+        <%= f.fields_for :encounter_order_items, EncounterOrderItem.new, child_index: 'UNIQUE_ROW_ID' do |encounter_order_item_fields| %>
           <%= render 'item_fields', f: encounter_order_item_fields %>
         <% end %>
       </template>
@@ -152,9 +152,13 @@
     <div class="field-row">
       <%= submit_tag(button_text, class: 'bold_button') %>
       <span>
-        The customer will be notified of the encounter details automatically,
-        asked for any additional information if relevant and be able to pay
-        for the finalised order directly via Stripe.
+        <% if encounter_order.new_record? %>
+          The customer will <em>not</em> be notified of the booking automatically,
+          as the assumption is that there is already an ongoing contact thread for
+          sharing details. Sharing information is shown once you save the booking.
+        <% else %>
+          The customer won't be sent any automatic notifications about amendments.
+        <% end %>
       </span>
     </div>
   </div>

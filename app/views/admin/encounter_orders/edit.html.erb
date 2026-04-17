@@ -1,0 +1,10 @@
+<h1>Amend a booking for an encounter</h1>
+<h2><%= @encounter_order.encounter.title %></h2>
+
+<%= render partial: 'form', locals: { encounter_order: @encounter_order, button_text: 'Save Amendments' } %>
+
+<% content_for :extra_footer_links do %>
+  <div class="extra_footer_links">
+    <%= link_to 'Back', :back %>
+  </div>
+<% end %>

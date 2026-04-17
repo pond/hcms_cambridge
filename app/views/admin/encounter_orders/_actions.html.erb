@@ -7,6 +7,10 @@
 %>
 <td class="admin_actions">
   <%= link_to 'Show', admin_encounter_encounter_order_path(encounter_id: encounter_order.encounter.slug, id: encounter_order.id) %>
+  <% if encounter_order.admin_can_make_amendments? %>
+    /
+    <%= link_to 'Amend', edit_admin_encounter_encounter_order_path(encounter_id: encounter_order.encounter.slug, id: encounter_order.id) %>
+  <% end %>
 </td>
 <td class="admin_actions for_delete">
   <%=

@@ -49,86 +49,66 @@ class Admin::EncounterOrdersController < ApplicationController
     def create
       @encounter_order = EncounterOrder.new(encounter: @encounter)
 
-      safe_params = self.encounter_order_params()
-
-      safe_params[:number_of_seats] = safe_params[:number_of_seats].to_i
-      if safe_params[:number_of_seats] < 0
-        safe_params[:number_of_seats] = 0
-      end
-
-      case safe_params[:has_physical]
-        when 'true'
-          safe_params[:user_chooses_has_physical] = false
-          safe_params[:has_physical             ] = true
-        when 'false'
-          safe_params[:user_chooses_has_physical] = false
-          safe_params[:has_physical             ] = false
-        else
-          safe_params[:user_chooses_has_physical] = true
-          safe_params[:has_physical             ] = false
-      end
-
-      if safe_params[:amount_owed].present?
-        normalise_amount_owed!(
-          for_encounter:        @encounter,
-          updating_params_hash: safe_params
-        )
-      else
-        amount_cents = @encounter.price_per_seat * safe_params[:number_of_seats]
-
-        if safe_params[:has_physical] == true
-          amount_cents += @encounter_order.frozen_price_physical.to_i
-        end
-
-        safe_params[:amount_owed] = amount_cents
-      end
-
-      if safe_params[:encounter_order_items_attributes].present?
-        safe_params[:encounter_order_items_attributes].each do | _key, eoi_params_hash_by_ref |
-          normalise_amount_owed!(
-            for_encounter:        @encounter,
-            updating_params_hash: eoi_params_hash_by_ref
-          )
-        end
-      end
-
-      @encounter_order.assign_attributes(safe_params)
-
-      if @encounter_order.save
-        @encounter_order.pay_state! if @encounter_order.amount_owed.zero?
-
-        redirect_to(
-          admin_encounter_encounter_order_path(
-            encounter_id: @encounter_order.encounter.slug,
-            id:           @encounter_order.id,
-          ),
-          notice: 'Encounter booking set up successfully.'
-        )
-      else
-        render :new
-      end
+      handle_form_submission(
+        encounter_order:    @encounter_order,
+        render_on_fail:     :new,
+        message_on_success: 'Encounter booking set up successfully.',
+      )
     end
 
     # GET /admin/encounters/<encounter_id>/orders/edit/<id>
     def edit
+      @encounter_order = EncounterOrder.find(params[:id])
+
+      unless @encounter_order.admin_can_make_amendments?
+        # bail_out_with("This booking is not in a state that permits amendments.")
+      end
     end
 
     # PATCH/PUT /admin/encounters/<encounter_id>/orders/<id>
+    #
+    # ** IMPORTANT! **
+    #
+    # This is used for two things. One is the typical Rails edit-update cycle
+    # (see #edit above). The other is for buttons driven off the state machine
+    # that PATCH here directly with params[:process] set to "state" as an
+    # indicator. The code expects either that or permitted params for an update,
+    # else it'll bail out early with a complaint.
+    #
     def update
-      if params[:process] != 'state'
-        return bail_out_with('Unrecognised booking change requested') # NOTE EARLY EXIT
-      end
+      @encounter_order = EncounterOrder.find(params[:id])
+      @encounter_order.with_lock do
 
-      all_events   = EncounterOrder.aasm(:state).events.map(&:name).map(&:to_s)
-      valid_events = @encounter_order.valid_events.map(&:name).map(&:to_s)
-      event_name   = params[:event]
+        # What if, say, the customer paid while the admin was editing the item?
+        #
+        if ! @encounter_order.admin_can_make_amendments?
+          bail_out_with("This booking is no longer in a state that permits amendments.")
+          return # NOTE EARLY EXIT
+        end
 
-      if all_events.exclude?(event_name)
-        return bail_out_with('Unrecognised booking change requested')
-      elsif valid_events.exclude?(event_name)
-        return bail_out_with('That booking cannot be changed in that way')
-      else
-        ActiveRecord::Base.transaction do
+        unless params[:process] == 'state'
+          if params.key?(:encounter_order)
+            handle_form_submission(
+              encounter_order:    @encounter_order,
+              render_on_fail:     :edit,
+              message_on_success: 'Booking successfully amended.'
+            )
+          else
+            bail_out_with('Unrecognised booking change requested') # NOTE EARLY EXIT
+          end
+
+          return # NOTE EARLY EXIT
+        end
+
+        all_events   = EncounterOrder.aasm(:state).events.map(&:name).map(&:to_s)
+        valid_events = @encounter_order.valid_events.map(&:name).map(&:to_s)
+        event_name   = params[:event]
+
+        if all_events.exclude?(event_name)
+          return bail_out_with('Unrecognised booking change requested')
+        elsif valid_events.exclude?(event_name)
+          return bail_out_with('That booking cannot be changed in that way')
+        else
           stripe_payment_was_present = @encounter_order.stripe_payment.present?
 
           @encounter_order.send("#{event_name}_state!")
@@ -214,6 +194,77 @@ class Admin::EncounterOrdersController < ApplicationController
       end
 
       return redirect_to(path, alert: alert_message)
+    end
+
+    # Used by #create and #update; internal API, see callers for examples. If
+    # calling for an update, you almost certainly should have locked the record
+    # first!
+    #
+    def handle_form_submission(
+      encounter_order:,
+      render_on_fail:,
+      message_on_success:
+    )
+      safe_params = self.encounter_order_params()
+      safe_params[:number_of_seats] = safe_params[:number_of_seats].to_i
+
+      debugger
+
+      if safe_params[:number_of_seats] < 0
+        safe_params[:number_of_seats] = 0
+      end
+
+      case safe_params[:has_physical]
+        when 'true'
+          safe_params[:user_chooses_has_physical] = false
+          safe_params[:has_physical             ] = true
+        when 'false'
+          safe_params[:user_chooses_has_physical] = false
+          safe_params[:has_physical             ] = false
+        else
+          safe_params[:user_chooses_has_physical] = true
+          safe_params[:has_physical             ] = false
+      end
+
+      if safe_params[:amount_owed].present?
+        normalise_amount_owed!(
+          for_encounter:        @encounter,
+          updating_params_hash: safe_params
+        )
+      else
+        amount_cents = @encounter.price_per_seat * safe_params[:number_of_seats]
+
+        if safe_params[:has_physical] == true
+          amount_cents += encounter_order.frozen_price_physical.to_i
+        end
+
+        safe_params[:amount_owed] = amount_cents
+      end
+
+      if safe_params[:encounter_order_items_attributes].present?
+        safe_params[:encounter_order_items_attributes].each do | _key, eoi_params_hash_by_ref |
+          normalise_amount_owed!(
+            for_encounter:        @encounter,
+            updating_params_hash: eoi_params_hash_by_ref
+          )
+        end
+      end
+
+      encounter_order.assign_attributes(safe_params)
+
+      if encounter_order.save
+        encounter_order.pay_state! if encounter_order.amount_owed.zero?
+
+        redirect_to(
+          admin_encounter_encounter_order_path(
+            encounter_id: encounter_order.encounter.slug,
+            id:           encounter_order.id,
+          ),
+          notice: message_on_success
+        )
+      else
+        render(render_on_fail)
+      end
     end
 
     # For a given encounter and a given params hash/subhash which might have an
