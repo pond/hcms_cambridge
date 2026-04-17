@@ -370,6 +370,27 @@ article.encounter {
     }
   }
 
+  section.encounter-body-and-poster.in-encounter-type-page {
+    row-gap: 0;
+    column-gap: 2em;
+    margin-bottom: 2em;
+
+    section.encounter-poster {
+      min-width: auto;
+      margin: 0;
+      width: 50%;
+
+      img {
+        margin: 0.4em 0 1em 0; // (Hack: ~align to top of text lines when floated)
+        @include standard_shadow;
+      }
+    }
+
+    section.encounter-body {
+      width: 50%;
+    }
+  }
+
   .article-date-and-heading-container,  .event-date-and-heading-container,  .encounter-date-and-heading-container,
   .article-summary-and-links-container, .event-summary-and-links-container, .encounter-summary-and-links-container {
     display: flex;
@@ -533,7 +554,7 @@ main, .redactor-box.redactor-styles-on {
   /* Most Redactor object containers are usually <figure> */
 
   figure {
-    margin: 0.4em 0 1em 0; // (~align to top of text lines when floated)
+    margin: 0.4em 0 1em 0; // (Hack: ~align to top of text lines when floated)
     padding: 0;
     border-radius: 0.3em;
 
@@ -955,6 +976,20 @@ nav {
           }
         }
       }
+
+      section.encounter-body-and-poster.in-encounter-type-page {
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 4em;
+
+        section.encounter-poster {
+          width: 100%;
+        }
+
+        section.encounter-body {
+          width: 100%;
+        }
+      }
     }
 
     // Lists of articles and events - not relevant for encounters.
@@ -1028,13 +1063,27 @@ nav {
     }
 
     article.encounter {
-       section.encounter-body-and-poster {
-          flex-direction: column-reverse;
+      section.encounter-body-and-poster {
+         flex-direction: column-reverse;
 
-          section.encounter-poster {
-            margin-left: 0;
-          }
-       }
+         section.encounter-poster {
+           margin-left: 0;
+         }
+      }
+
+      section.encounter-body-and-poster.in-encounter-type-page {
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 4em;
+
+        section.encounter-poster {
+          width: 100%;
+        }
+
+        section.encounter-body {
+          width: 100%;
+        }
+      }
     }
     // Lists of articles and events - not relevant for encounters.
     //

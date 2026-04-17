@@ -89,10 +89,12 @@ main.admin {
   }
 
   fieldset {
-    border-radius: 5px;
-    legend { margin-bottom: 0.5em; }
-    button, label { font-size: 85%; }
-    .field.valign-row { margin-bottom: 0; }
+    border: 1px solid $head_foot_border_colour;
+    border-radius: 4px;
+
+    legend                              { margin-bottom: 0.5em; }
+    button, label                       { font-size: 85%; }
+    .field.valign-row                   { margin-bottom: 0; }
     .remove_encounter_order_item_button { margin-left: auto; }
   }
 

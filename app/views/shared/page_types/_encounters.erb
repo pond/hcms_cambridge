@@ -12,27 +12,25 @@
   <% if encounter.category != most_recent_category %>
     <% most_recent_category = encounter.category %>
     <h2><%= encounter.category %></h2>
-  <% else %>
-    <div style="margin-top: 2em"></div>
   <% end %>
-  <section class="encounter-body-and-poster" style="display: flex; gap: 1em;">
-    <section class="encounter-poster" style="width: 50%;">
-      <figure data-redactor-type="image">
-        <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title, style: "width: 100%; border-radius: 5px;") %>
-      </figure>
+  <article class="encounter">
+    <section class="encounter-body-and-poster in-encounter-type-page">
+      <section class="encounter-poster">
+        <%= image_tag(encounter.encounter_hero_image.url, alt: encounter.title) %>
+      </section>
+      <section class="encounter-body">
+        <p>
+          <strong><%= encounter.title %></strong>
+        </p>
+        <%= encounter.body.html_safe() %>
+        <%=
+          link_to(
+            'More Info',
+            encounter_path(encounter),
+            class: 'bold_button'
+          )
+        %>
+      </section>
     </section>
-    <section class="encounter-body" style="width: 50%;">
-      <p style="margin-top: 0;">
-        <strong><%= encounter.title %></strong>
-      </p>
-      <%= encounter.body.html_safe() %>
-      <%=
-        link_to(
-          'More Info',
-          encounter_path(encounter),
-          class: 'bold_button'
-        )
-      %>
-    </section>
-  </section>
+  </article>
 <% end %>
