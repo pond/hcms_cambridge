@@ -215,7 +215,7 @@ $(document).ready(function() {
     // Add item rows for encounter orders.
     //
     function addRow() {
-      const uniqueIdForFormSubmission = Date.now();
+      const uniqueIdForFormSubmission = "-" + Date.now(); // Negative integer
       const newRowTemplateHtml        = encounterOrderItemTemplate.html();
 
       encounterOrderItemsWrapper.append(

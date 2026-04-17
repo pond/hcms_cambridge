@@ -208,8 +208,6 @@ class Admin::EncounterOrdersController < ApplicationController
       safe_params = self.encounter_order_params()
       safe_params[:number_of_seats] = safe_params[:number_of_seats].to_i
 
-      debugger
-
       if safe_params[:number_of_seats] < 0
         safe_params[:number_of_seats] = 0
       end
