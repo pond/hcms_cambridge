@@ -122,6 +122,26 @@
         </td>
       </tr>
     <% end %>
+    <% if @encounter_order.encounter.all_prices_exclude_sales_tax? %>
+      <tr>
+        <td colspan="3">
+          <strong>Total excluding <%= Hcms.config.tax_name %></strong>
+        </td>
+        <td class="amounts">
+          <strong>
+            <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency) %>
+          </strong>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          Plus <%= Hcms.config.tax_name %>
+        </td>
+        <td class="amounts">
+          <%= apphelp_money(@encounter_order.amount_of_tax_owed, currency: @encounter_order.encounter.currency) %>
+        </td>
+      </tr>
+    <% end %>
     <tr>
       <td colspan="3">
         <strong>
@@ -133,7 +153,7 @@
       </td>
       <td class="amounts">
         <strong>
-          <%= apphelp_money(actual_price, currency: @encounter_order.encounter.currency) %>
+          <%= apphelp_money(@encounter_order.amount_owed_plus_tax, currency: @encounter_order.encounter.currency) %>
         </strong>
       </td>
     </tr>

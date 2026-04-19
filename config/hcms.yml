@@ -22,12 +22,21 @@ default: &default
   # If supporting events and orders and you want local invoices to be proper
   # tax invoices, provide your business's tax (e.g. GST, VAT) number here and
   # the name of tax type you want to show therein (e.g. GST, "taxes", etc.).
+  #
+  # Price-on-application Encounters are treated as for-business-customers and
+  # will be shown with totals and invoices excluding sales tax, if and only if
+  # a sales "tax_rate" is given below (in quotes, e.g. '12.5' for 12.5%). Set
+  # to "''" (an empty value) if you do *not* want to set such a rate, forcing
+  # all invoices for all Encounters to be considered tax-inclusive with no tax
+  # breakdown.
+  #
   # Provide also the threshold of invoice value at or above which a postal
   # address is required, in the smallest unit of your currency (e.g. pennies
   # or cents), else set 'false' if there is no such threshold.
   #
   tax_number:        '65-749-556'
   tax_name:          'GST'
+  tax_rate:          '15' # 15%
   tax_threshold:     100000 # $1000.00
 
   # Enable the Encounters system (reusable, bespoke, "one off" events)?

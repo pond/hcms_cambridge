@@ -25,6 +25,79 @@ module EncounterOrdersHelper
     return apphelp_human_time(datetime, invoice: true)
   end
 
+  # If the encounter for this encounter order is POA, and there's a tax name and
+  # a tax rate defined, then returns a marked-up HTML-safe string usable as a
+  # suffix in currency amount displays to indicate that the amount is exclusive
+  # of sales tax. Otherwise, returns an empty string.
+  #
+  # See also:
+  #
+  #   #encordshelp_currency_and_tax_suffix
+  #   #encordshelp_amount_excl_and_incl_for
+  #
+  def encordshelp_tax_suffix(encounter_order)
+    if encounter_order.encounter.all_prices_exclude_sales_tax?
+      return (
+        I18n.t(
+          'views.encounter_orders.amounts.html_tax_suffix',
+          html_safe_tax_name: h(Hcms.config.tax_name),
+          html_safe_tax_rate: h(Hcms.config.tax_rate)
+        )
+        .html_safe()
+      )
+    else
+      return ''
+    end
+  end
+
+  # Generates a suffix for amounts which give a currency code and show whether
+  # or not sales tax (GST, VAT etc.) is included.
+  #
+  # See also:
+  #
+  #   #encordshelp_tax_suffix
+  #   #encordshelp_amount_excl_and_incl_for(encounter_order)
+  #
+  def encordshelp_currency_and_tax_suffix(encounter_order)
+    return (
+      I18n.t(
+        'views.encounter_orders.amounts.html_currency_and_tax_suffix',
+        html_safe_currency:   h(encounter_order.encounter.currency),
+        html_safe_tax_suffix: encordshelp_tax_suffix(encounter_order)
+      )
+      .strip()
+      .html_safe()
+    )
+  end
+
+  # Return a string with a full formatted tax exclusive and inclusive amount
+  # with sales tax amount and sales tax name for tax-exclusive encounter orders,
+  # or just the overall formatted total otherwise.
+  #
+  # See also:
+  #
+  #   #encordshelp_tax_suffix
+  #   #encordshelp_currency_and_tax_suffix
+  #
+  def encordshelp_amount_excl_and_incl_for(encounter_order)
+    if encounter_order.encounter.all_prices_exclude_sales_tax?
+      formatted_owed_excl = apphelp_money(encounter_order.amount_owed,          currency: encounter_order.encounter.currency)
+      formatted_owed_incl = apphelp_money(encounter_order.amount_owed_plus_tax, currency: encounter_order.encounter.currency)
+
+      return (
+        I18n.t(
+          'views.encounter_orders.amounts.html_amount_excl_and_incl_tax',
+          fmtd_amount_excl:   formatted_owed_excl,
+          fmtd_amount_incl:   formatted_owed_incl,
+          html_safe_tax_name: h(Hcms.config.tax_name)
+        )
+        .html_safe()
+      )
+    else
+      return apphelp_money(encounter_order.amount_owed, currency: encounter_order.encounter.currency)
+    end
+  end
+
   # Generates a shareable "your encounter" URL based on encounter order token.
   #
   def encordshelp_share_link(encounter_order)

@@ -229,6 +229,10 @@ en:
         booking:
           one: "Please check the details of your booking for one seat at “%{encounter_title}”."
           other: "Please check the details of your booking for %{count} seats at “%{encounter_title}”."
+      amounts:
+        html_tax_suffix: "<strong>excl. %{html_safe_tax_name} at %{html_safe_tax_rate}%"
+        html_currency_and_tax_suffix: "%{html_safe_currency} (%{html_safe_tax_suffix})"
+        html_amount_excl_and_incl_tax: "%{fmtd_amount_excl} excl. %{html_safe_tax_name} (total <strong>%{fmtd_amount_incl}</strong> %{html_safe_tax_name})"
 
     orders:
       seats:

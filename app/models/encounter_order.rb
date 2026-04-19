@@ -295,6 +295,48 @@ class EncounterOrder < ApplicationRecord
     self.valid_events.any? && ! self.state_paid?
   end
 
+  # If the encounter prices exclude tax, then #amount_owed is tax-exclusive and
+  # this function returns the amount *plus* tax (half-up rounding). Otherwise,
+  # it just returns the same as #amount_owed.
+  #
+  # As with #amount_owed, return value is in smallest integer currency units.
+  #
+  def amount_owed_plus_tax
+    if self.encounter.all_prices_exclude_sales_tax?
+      tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
+      amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
+
+      return amount_owed_incl_tax.to_i
+    else
+      return self.amount_owed
+    end
+  end
+
+  # If the encounter prices exclude tax, then #amount_owed is tax-exclusive and
+  # this function returns the amount of tax that must be added to get a total.
+  # Otherwise, provided a tax rate is configured, it'll estimate the amount of
+  # #amount_owed which already incldues sale tax; and failing that, returns 0.
+  #
+  # As with #amount_owed, return value is in smallest integer currency units.
+  #
+  def amount_of_tax_owed
+    if self.encounter.all_prices_exclude_sales_tax?
+      tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
+      amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
+      tax_amount_excluded  = amount_owed_incl_tax - self.amount_owed
+
+      return tax_amount_excluded.to_i
+    elsif Hcms.config.tax_rate.present?
+      tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
+      amount_owed_excl_tax = (self.amount_owed / tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
+      tax_amount_included  = self.amount_owed - amount_owed_excl_tax
+
+      return tax_amount_included.to_i
+    else
+      return 0
+    end
+  end
+
   # ============================================================================
   # AASM STATE MACHINE namespace 'state': Main definition
   # ============================================================================

@@ -16,7 +16,7 @@ RSpec.describe "Admin - encounter orders" do
 
     click_on("Bookings") # (we expect only one row with that, for @encounter)
     click_on("Set up a new booking")
-    click_on("Save and send")
+    click_on("Save booking")
 
     expect(page).to have_css(".field_error_messages", text: "Name must be provided")
     expect(page).to have_css(".field_error_messages", text: "E-mail address must be provided")
@@ -24,7 +24,7 @@ RSpec.describe "Admin - encounter orders" do
 
     fill_in("encounter_order_name", with: "Fred Flinstone")
 
-    click_on("Save and send")
+    click_on("Save booking")
 
     expect(page).to     have_field("encounter_order_name", with: "Fred Flinstone")
     expect(page).to_not have_css(".field_error_messages", text: "Name must be provided")
@@ -34,7 +34,7 @@ RSpec.describe "Admin - encounter orders" do
     fill_in("encounter_order_email", with: "fred@example.com")
     fill_in("encounter_order_number_of_seats", with: 2)
 
-    click_on("Save and send")
+    click_on("Save booking")
 
     expect(page).to have_text("Encounter booking set up successfully")
   end
@@ -228,7 +228,7 @@ RSpec.describe "Admin - encounter orders" do
       fill_in("encounter_order_notes_to_buyer",  with: notes)
       select("Included", from: "encounter_order_has_physical")
 
-      click_on("Save and send")
+      click_on("Save booking")
 
       expect(page).to have_text("Encounter booking set up successfully")
 

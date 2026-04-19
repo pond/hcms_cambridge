@@ -1,5 +1,9 @@
-<% currency = @encounter.currency %>
+<%
+  # Render as fields, but with additional local 'encounter_order' giving the
+  # parent for which these items are being built or edited.
 
+  currency = encounter_order.encounter.currency
+%>
 <div class="encounter_order_item valign-row">
   <div class="field valign-row">
     <%= f.label :description %>
@@ -24,7 +28,7 @@
         style: 'width: 5em;'
       )
     %>
-    <small><%= currency %></small>
+    <small><%= encordshelp_currency_and_tax_suffix(encounter_order) %></small>
   </div>
 
   <% if f.object.new_record? %>

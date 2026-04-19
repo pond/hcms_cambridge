@@ -168,6 +168,16 @@ class Encounter < Editable
     self.price_on_application
   end
 
+  # Is all encounter pricing considered exclusive of sales tax? This is treated
+  # as 'true' for any POA encounter, when the system has a tax name and a tax
+  # rate defined in configuration.
+  #
+  def all_prices_exclude_sales_tax?
+    self.price_on_application? &&
+    Hcms.config.tax_name.present? &&
+    Hcms.config.tax_rate.present?
+  end
+
   # Is the encounter free of charge?
   #
   def free_of_charge?

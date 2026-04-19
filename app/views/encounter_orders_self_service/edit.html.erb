@@ -16,7 +16,7 @@
     <% if @encounter_order.amount_owed.zero? %>
       No charge
     <% else %>
-      <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency) %>
+      <%= encordshelp_amount_excl_and_incl_for(@encounter_order) %>
     <% end %>
     <% if @encounter_order.has_physical %>
       <% if @encounter.physical_aspect_free_of_charge? %>
