@@ -29,6 +29,7 @@
       No charge
     <% else %>
       <%= apphelp_money(@encounter_order.amount_owed, currency: @encounter_order.encounter.currency) %>
+      <small><%= encordshelp_tax_suffix(@encounter_order) %></small>
     <% end %>
   </dd>
   <dt>Physical product included?</dt>
