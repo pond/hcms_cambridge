@@ -60,44 +60,51 @@ class OrdersController < ApplicationController
 
     @order.amount_owed = (@order.number_of_seats || 0) * (@event.price_per_seat)
 
-    if ! @order.save # Invalid record
-      render(action_name == 'create' ? :new : :edit)
-      return # NOTE EARLY EXIT
-    end
-
-    # Presales - just render the page that lets the user confirm the
-    # reservation. It's the reservations equivalent of a checkout page.
+    # Lock the event row while we save and do state stuff, since number-of-seats
+    # calculations etc. need to avoid race conditions.
     #
-    if @event.state_presales?
-      render :create_for_confirm_reservation
+    Event.transaction do
+      @order.event.lock!
 
-    # Full booking, but nothing owed; move to paid state immediately and
-    # confirm the successful booking.
-    #
-    elsif @order.amount_owed.zero?
-      @order.pay_state!
-      redirect_to(
-        page_event_path(page_id: @page.slug, id: @event.slug),
-        notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
-      )
+      if ! @order.save # Invalid record
+        render(action_name == 'create' ? :new : :edit)
+        return # NOTE EARLY EXIT
+      end
 
-    # Payment flow. The user wants to pay now.
-    #
-    elsif @order.may_pay_state?
-      render :create_for_confirm_booking
+      # Presales - just render the page that lets the user confirm the
+      # reservation. It's the reservations equivalent of a checkout page.
+      #
+      if @event.state_presales?
+        render :create_for_confirm_reservation
 
-    # This flow is hit for orders created or edited (via self-service). The
-    # rendering for reservations above happens, or we have valid order
-    # details and now go on to sort payment. If we hit this 'else', then
-    # state is strange - the order is for a booking and has an owed amount,
-    # but it's not allowed to transition to a "paid" state. Perhaps the
-    # event was updated "under our feet". Either way, give a hand-wavey
-    # alert message and re-render the form.
-    #
-    else
-      flash[:alert] = 'There was a problem with the order confirmation; please check the order details'
-      render :new
-    end
+      # Full booking, but nothing owed; move to paid state immediately and
+      # confirm the successful booking.
+      #
+      elsif @order.amount_owed.zero?
+        @order.pay_state!
+        redirect_to(
+          page_event_path(page_id: @page.slug, id: @event.slug),
+          notice: 'Thanks, your booking is confirmed! We look forward to seeing you there.'
+        )
+
+      # Payment flow. The user wants to pay now.
+      #
+      elsif @order.may_pay_state?
+        render :create_for_confirm_booking
+
+      # This flow is hit for orders created or edited (via self-service). The
+      # rendering for reservations above happens, or we have valid order
+      # details and now go on to sort payment. If we hit this 'else', then
+      # state is strange - the order is for a booking and has an owed amount,
+      # but it's not allowed to transition to a "paid" state. Perhaps the
+      # event was updated "under our feet". Either way, give a hand-wavey
+      # alert message and re-render the form.
+      #
+      else
+        flash[:alert] = 'There was a problem with the order confirmation; please check the order details'
+        render :new
+      end
+    end # Event.transaction do
   end
 
   # DELETE /pages/<page_id>/events/<event_id>/orders/<order_id>
@@ -110,7 +117,10 @@ class OrdersController < ApplicationController
   #
   def destroy
     if @order.state_new?
-      @order.destroy!
+      Event.transaction do
+        @order.event.lock!
+        @order.destroy!
+      end
 
       redirect_to(
         page_event_path(page_id: @page.slug, id: @event.slug),
@@ -127,11 +137,11 @@ class OrdersController < ApplicationController
   # A non-RESTful POST endpoint, nested by page and event ID or slug.
   #
   def confirm_reservation
-    ActiveRecord::Base.transaction do
-      locked_order = Order.lock.find(@order.id)
+    Event.transaction do
+      @order.event.lock!
 
-      if locked_order.valid?
-        locked_order.reserve_state!
+      if @order.valid?
+        @order.reserve_state!
 
         notice = 'Thanks, your reservation has been made! '
 
@@ -140,7 +150,7 @@ class OrdersController < ApplicationController
         # charge - e.g. any kind of future voucher code or similar thing. Deal
         # with that now, rather than leaving a potential future bug.
         #
-        if locked_order.event.free_of_charge? || locked_order.amount_owed.zero?
+        if @order.event.free_of_charge? || @order.amount_owed.zero?
           notice << 'We look forward to seeing you there.'
         else
           notice << "We'll be in touch when it's time to pay."
@@ -184,6 +194,7 @@ class OrdersController < ApplicationController
 
       @order ||= Order.new(event: @event)
     end
+
     def order_params
       permitted_order_params = %i{
         name

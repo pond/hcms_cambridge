@@ -1,5 +1,5 @@
 class Admin::AdminMailer < ApplicationMailer
-  helper :events, :encounters
+  helper :application, :events, :encounters
 
   def order_reserved(order)
     @order = order

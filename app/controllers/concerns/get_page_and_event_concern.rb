@@ -27,7 +27,7 @@ module GetPageAndEventConcern
       @event ||= @page&.events&.find_by_id(params[:event_id])
 
       if @event.nil?
-        path = @page.nil? ? root_path() : page_path(@page.id)
+        path = @page.nil? ? root_path() : page_path(id: @page.slug)
         redirect_to path, alert: 'Sorry, that event seems to have disappeared!'
         return
       end

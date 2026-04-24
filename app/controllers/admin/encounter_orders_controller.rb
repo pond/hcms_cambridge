@@ -82,7 +82,7 @@ class Admin::EncounterOrdersController < ApplicationController
         # What if, say, the customer paid while the admin was editing the item?
         #
         if ! @encounter_order.admin_can_make_amendments?
-          bail_out_with("This booking is no longer in a state that permits amendments.")
+          bail_out_with('This booking is no longer in a state that permits amendments.')
           return # NOTE EARLY EXIT
         end
 

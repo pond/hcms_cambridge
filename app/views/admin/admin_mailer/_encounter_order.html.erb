@@ -15,7 +15,7 @@
   <dd><%= encounter_order.number_of_seats %></dd>
 
   <dt>Physical product requested</dt>
-  <dd><%= encounter_order.has_physical ? 'Yes' : 'No' %></dd>
+  <dd><%= apphelp_boolean(encounter_order.has_physical) %></dd>
 
   <dt>Manage</dt>
   <dd>

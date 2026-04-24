@@ -1284,4 +1284,61 @@ RSpec.describe "Orders" do
       expect(page).to     have_text(total   )
     end
   end # 'context "paid order management" do'
+
+  context "edge-condition error handling" do
+    before :each do
+      visit new_page_event_order_path(@page.slug, @event.slug)
+
+      name  = "Fred Flintstone"
+      email = "fred@example.com"
+      phone = "+64 021 000 000"
+      seats = 2
+
+      fill_in("order_name",            with: name)
+      fill_in("order_email",           with: email)
+      fill_in("order_phone_number",    with: phone)
+      fill_in("order_number_of_seats", with: seats)
+
+      click_on("Next")
+
+      expect(Order.count).to eql(1)
+      expect(page).to have_text("Please confirm your reservation")
+
+      @order = Order.first
+    end
+
+    it "handles the Order's Event disappearing as elegantly as it can" do
+      @event.destroy!
+
+      click_on("Confirm reservation")
+
+      expect(page).to have_text("Sorry, that event seems to have disappeared!")
+      expect(page).to have_current_path(page_path(id: @page.slug))
+    end
+
+    it "handles the Order's Event's Page disappearing as elegantly as it can" do
+      @event.destroy!
+      @page.destroy!
+
+      # Create at leaset one Page so that root-path doesn't end up redirecting
+      # to the HCMS first-time site setup login page.
+      #
+      other_page = create(:page)
+      other_page.revisions.first.update!(published: true)
+
+      click_on("Confirm reservation")
+
+      expect(page).to have_text("Sorry, that event seems to have disappeared!")
+      expect(page).to have_current_path(root_path())
+    end
+
+    it "handles the Order disappearing as elegantly as it can" do
+      @order.destroy!
+
+      click_on("Confirm reservation")
+
+      expect(page).to have_text("Sorry, that reservation or booking cannot be found!")
+      expect(page).to have_current_path(page_event_path(page_id: @page.slug, id: @event.slug))
+    end
+  end # 'context "edge-condition error handling" do'
 end

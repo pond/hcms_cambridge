@@ -1,11 +1,17 @@
 <%
-  actual_price            = @encounter_order.amount_owed
-  itemised_total          = @encounter_order.encounter_order_items.sum(&:amount_owed) # (done in Ruby, not in DB)
-  expected_seat_price     = @encounter_order.frozen_price_per_seat * @encounter_order.number_of_seats
+  actual_price   = @encounter_order.amount_owed
+  itemised_total = @encounter_order.encounter_order_items.sum(&:amount_owed) # (done in Ruby, not in DB)
+
   expected_physical_price = if @encounter_order.has_physical
     @encounter_order.frozen_price_physical
   else
     0
+  end
+
+  expected_seat_price = if @encounter_order.price_agreed_by_application?
+    @encounter_order.amount_owed - expected_physical_price
+  else
+    @encounter_order.frozen_price_per_seat * @encounter_order.number_of_seats
   end
 
   difference_amount = if @encounter_order.encounter_order_items.any?
@@ -85,7 +91,7 @@
         <td><%= @encounter_order.encounter.title %></td>
         <td><%= @encounter_order.number_of_seats %></td>
         <td>
-          <% if @encounter_order.frozen_price_on_application %>
+          <% if @encounter_order.price_agreed_by_application? %>
             Custom price
           <% elsif expected_seat_price == actual_price - expected_physical_price %>
             <%= apphelp_money(@encounter_order.frozen_price_per_seat, currency: @encounter_order.encounter.currency) %>
@@ -122,7 +128,7 @@
         </td>
       </tr>
     <% end %>
-    <% if @encounter_order.encounter.all_prices_exclude_sales_tax? %>
+    <% if @encounter_order.all_prices_exclude_sales_tax? %>
       <tr>
         <td colspan="3">
           <strong>Total excluding <%= Hcms.config.tax_name %></strong>
@@ -135,7 +141,7 @@
       </tr>
       <tr>
         <td colspan="3">
-          Plus <%= Hcms.config.tax_name %>
+          Plus <%= Hcms.config.tax_name %> at <%= Hcms.config.tax_rate %>%
         </td>
         <td class="amounts">
           <%= apphelp_money(@encounter_order.amount_of_tax_owed, currency: @encounter_order.encounter.currency) %>

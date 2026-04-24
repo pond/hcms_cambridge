@@ -1,4 +1,15 @@
+# Represents a booking for an Encounter. These tend to be quite bespoke, unlike
+# orders for Events. Whereas Event defines its own start and end date-time, an
+# Encounter is booked for a customer-specified date-time so that information is
+# held here, rather than in the parent Encounter.
+#
+# Prices are tax-inclusive if the parent Encounter is also tax-inclusive, else
+# tax-exclusive. This can only really work in any meaningful way if there is a
+# configured "tax_number", "tax_name" and "tax_rate" in 'Hcms.config'.
+#
 class EncounterOrder < ApplicationRecord
+  class RefundError < StandardError; end
+
   include AASM
 
   has_secure_token()
@@ -36,9 +47,13 @@ class EncounterOrder < ApplicationRecord
     super
 
     if self.new_record? and encounter.present?
-      self.frozen_price_on_application = self.encounter.price_on_application
-      self.frozen_price_per_seat       = self.encounter.price_per_seat
-      self.frozen_price_physical       = self.encounter.price_physical
+      self.frozen_price_per_seat = self.encounter.price_per_seat
+      self.frozen_price_physical = self.encounter.price_physical
+
+      # Note use of "?" method which is overridden in Encounter, to makes sure
+      # that required sales tax information is present.
+      #
+      self.frozen_price_on_application = self.encounter.price_on_application?
     end
   end
 
@@ -139,7 +154,7 @@ class EncounterOrder < ApplicationRecord
   # encounter to deal with payment before we start getting nervous about how
   # long it's been since the encounter order was created.
   #
-  INFLIGHT_WINDOW = 2.days
+  INFLIGHT_WINDOW = 3.days
   scope :inflight, -> {
     confirmed.or(where(state: self.states[:new], updated_at: INFLIGHT_WINDOW.ago..))
   }
@@ -148,7 +163,7 @@ class EncounterOrder < ApplicationRecord
   # haven't been touched in several days. Might need to get in touch with the
   # customer and check that everything's OK.
   #
-  STALE_WINDOW = 5.days
+  STALE_WINDOW = 7.days
   scope :stale, -> { where(state: self.states[:new], updated_at: ..STALE_WINDOW.ago) }
 
   # ============================================================================
@@ -211,7 +226,7 @@ class EncounterOrder < ApplicationRecord
 
   # See similar validation in the Order model for rationale.
   #
-  validate :phone_number do
+  validate do
     if self.phone_number.present?
       parsed = Phonelib.parse(self.phone_number)
       if parsed.valid?
@@ -239,6 +254,8 @@ class EncounterOrder < ApplicationRecord
     # See "en.yml", models.order_state
     #
     if self.state_new?
+      stale_window = STALE_WINDOW
+
       if self.updated_at < INFLIGHT_WINDOW.ago
         if self.updated_at > STALE_WINDOW.ago
           state_for_i18n = 'getting_older'
@@ -255,18 +272,15 @@ class EncounterOrder < ApplicationRecord
     "#{INVOICE_NUMBER_PREFIX}#{self.invoice_number}"
   end
 
+  # TODO: FIX ME? Invoice pages are accessed via tokens, so on that basis they
+  #       cannot ever expire. Is there a better design?
+  #
   def token_expires_at
-    Time.now + 1.year # TODO: FIX ME! - invoice pages are accessed from here.
+    Time.now + 1.year
   end
 
-  def theoretical_amount_owed_without_discounts
-    if self.frozen_price_on_application?
-      0
-    else
-      amount  = self.frozen_price_per_seat * self.number_of_seats
-      amount += self.frozen_price_physical.to_i if self.has_physical
-      amount
-    end
+  def open_ended?
+    self.starts_at.blank?
   end
 
   def customer_self_service_possible?
@@ -277,22 +291,32 @@ class EncounterOrder < ApplicationRecord
     self.state_new? || self.state_payment_failed?
   end
 
+  def admin_can_make_amendments?
+    self.valid_events.any?
+  end
+
   def price_agreed_by_application?
     self.frozen_price_on_application
+  end
+
+  def all_prices_exclude_sales_tax?
+    self.price_agreed_by_application?
+  end
+
+  def theoretical_amount_owed_without_discounts
+    if self.price_agreed_by_application?
+      0
+    else
+      amount  = self.frozen_price_per_seat * self.number_of_seats
+      amount += self.frozen_price_physical.to_i if self.has_physical
+      amount
+    end
   end
 
   def includes_discount?
     ! self.price_agreed_by_application? && (
       self.amount_owed < self.theoretical_amount_owed_without_discounts()
     )
-  end
-
-  def open_ended?
-    self.starts_at.blank?
-  end
-
-  def admin_can_make_amendments?
-    self.valid_events.any? && ! self.state_paid?
   end
 
   # If the encounter prices exclude tax, then #amount_owed is tax-exclusive and
@@ -302,9 +326,9 @@ class EncounterOrder < ApplicationRecord
   # As with #amount_owed, return value is in smallest integer currency units.
   #
   def amount_owed_plus_tax
-    if self.encounter.all_prices_exclude_sales_tax?
+    if self.all_prices_exclude_sales_tax?
       tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
-      amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
+      amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(0, BigDecimal::ROUND_HALF_UP)
 
       return amount_owed_incl_tax.to_i
     else
@@ -315,26 +339,28 @@ class EncounterOrder < ApplicationRecord
   # If the encounter prices exclude tax, then #amount_owed is tax-exclusive and
   # this function returns the amount of tax that must be added to get a total.
   # Otherwise, provided a tax rate is configured, it'll estimate the amount of
-  # #amount_owed which already incldues sale tax; and failing that, returns 0.
+  # #amount_owed which already includes sale tax; and failing that, returns 0.
   #
   # As with #amount_owed, return value is in smallest integer currency units.
   #
   def amount_of_tax_owed
-    if self.encounter.all_prices_exclude_sales_tax?
-      tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
-      amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
-      tax_amount_excluded  = amount_owed_incl_tax - self.amount_owed
+    if Hcms.config.tax_rate.present?
+      tax_rate_decimal = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
 
-      return tax_amount_excluded.to_i
-    elsif Hcms.config.tax_rate.present?
-      tax_rate_decimal     = (BigDecimal(Hcms.config.tax_rate) / 100) + 1
-      amount_owed_excl_tax = (self.amount_owed / tax_rate_decimal).round(BigDecimal::ROUND_HALF_UP)
-      tax_amount_included  = self.amount_owed - amount_owed_excl_tax
-
-      return tax_amount_included.to_i
-    else
-      return 0
+      return (
+        if self.all_prices_exclude_sales_tax?
+          amount_owed_incl_tax = (self.amount_owed * tax_rate_decimal).round(0, BigDecimal::ROUND_HALF_UP)
+          tax_amount_excluded  = amount_owed_incl_tax - self.amount_owed
+          tax_amount_excluded.to_i
+        else
+          amount_owed_excl_tax = (self.amount_owed / tax_rate_decimal).round(0, BigDecimal::ROUND_HALF_UP)
+          tax_amount_included  = self.amount_owed - amount_owed_excl_tax
+          tax_amount_included.to_i
+        end
+      )
     end
+
+    return 0
   end
 
   # ============================================================================
@@ -430,7 +456,10 @@ class EncounterOrder < ApplicationRecord
       if stripe_refund.status == 'succeeded'
         self.stripe_payment.destroy!
       else
-        raise "Stripe refund error - state #{stripe_refund.status.inspect} for ID #{stripe_refund.id.inspect}"
+        raise(
+          RefundError,
+          "Stripe refund error - state #{stripe_refund.status.inspect} for ID #{stripe_refund.id.inspect}"
+        )
       end
     end
   end

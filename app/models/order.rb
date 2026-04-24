@@ -1,4 +1,6 @@
 class Order < ApplicationRecord
+  class RefundError < StandardError; end
+
   include AASM
 
   has_secure_token()
@@ -181,7 +183,7 @@ class Order < ApplicationRecord
     }
   )
 
-  validate :number_of_seats do
+  validate do
     if (
       self.number_of_seats.present?  &&
       self.number_of_seats > 0       &&
@@ -209,7 +211,7 @@ class Order < ApplicationRecord
   # phone numbers on older orders and might even clear them out now and again
   # to avoid unnecessary accumulation of unwanted PII.
   #
-  validate :phone_number do
+  validate do
     if self.phone_number.present?
       parsed = Phonelib.parse(self.phone_number)
       if parsed.valid?
@@ -253,8 +255,11 @@ class Order < ApplicationRecord
     "#{INVOICE_NUMBER_PREFIX}#{self.invoice_number}"
   end
 
+  # TODO: FIX ME? Invoice pages are accessed via tokens, so on that basis they
+  #       cannot ever expire. Is there a better design?
+  #
   def token_expires_at
-    Time.now + 1.year # TODO: FIX ME! - invoice pages are accessed from here.
+    Time.now + 1.year
     # .event.ends_at + 1.day
   end
 
@@ -424,7 +429,10 @@ class Order < ApplicationRecord
       if stripe_refund.status == 'succeeded'
         self.stripe_payment.destroy!
       else
-        raise "Stripe refund error - state #{stripe_refund.status.inspect} for ID #{stripe_refund.id.inspect}"
+        raise(
+          RefundError,
+          "Stripe refund error - state #{stripe_refund.status.inspect} for ID #{stripe_refund.id.inspect}"
+        )
       end
     end
   end

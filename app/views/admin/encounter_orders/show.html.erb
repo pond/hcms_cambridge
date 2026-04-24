@@ -34,7 +34,7 @@
   </dd>
   <dt>Physical product included?</dt>
   <dd>
-    <% if ! @encounter_order.encounter.has_physical_aspect? %>
+    <% if ! @encounter_order.frozen_price_physical.nil? %>
       N/A
     <% elsif @encounter_order.has_physical.nil? %>
       Customer has not yet decided

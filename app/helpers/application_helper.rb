@@ -81,8 +81,11 @@ module ApplicationHelper
     elsif free_of_charge
       'Free'
     else
-      parsed_amount = Money.from_cents(amount_in_cents, currency)
-      parsed_amount.format()
+      parsed_amount = Money.from_cents(amount_in_cents.abs(), currency)
+
+      result = parsed_amount.format()
+      result = '−' + result if amount_in_cents < 0
+      result
     end
   end
 end

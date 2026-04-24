@@ -45,7 +45,7 @@ class Encounter < Editable
 
   validates :encounter_hero_image, presence: true, on: :create
 
-  validate :name_physical do
+  validate do
     if self.has_physical_aspect? && self.name_physical.blank?
       self.errors.add(:name_physical, :blank)
     end
@@ -161,19 +161,11 @@ class Encounter < Editable
     return sorted_last.present? && self.category_matches?(sorted_last)
   end
 
-  # ActiveRecord gives us this for free, but we want to be explicit and show how
-  # we don't consider the price at all; POA overrides all.
+  # Price-on-application can only work if there's tax information set.
   #
   def price_on_application?
-    self.price_on_application
-  end
-
-  # Is all encounter pricing considered exclusive of sales tax? This is treated
-  # as 'true' for any POA encounter, when the system has a tax name and a tax
-  # rate defined in configuration.
-  #
-  def all_prices_exclude_sales_tax?
-    self.price_on_application? &&
+    self.price_on_application &&
+    Hcms.config.tax_number.present? &&
     Hcms.config.tax_name.present? &&
     Hcms.config.tax_rate.present?
   end

@@ -20,7 +20,7 @@ RSpec.describe "Admin - encounter orders" do
 
     expect(page).to have_css(".field_error_messages", text: "Name must be provided")
     expect(page).to have_css(".field_error_messages", text: "E-mail address must be provided")
-    expect(page).to have_css(".field_error_messages", text: "Number of people must be greater than 0")
+    expect(page).to have_css(".field_error_messages", text: "Number of people must be a positive whole number")
 
     fill_in("encounter_order_name", with: "Fred Flinstone")
 
@@ -29,7 +29,7 @@ RSpec.describe "Admin - encounter orders" do
     expect(page).to     have_field("encounter_order_name", with: "Fred Flinstone")
     expect(page).to_not have_css(".field_error_messages", text: "Name must be provided")
     expect(page).to     have_css(".field_error_messages", text: "E-mail address must be provided")
-    expect(page).to     have_css(".field_error_messages", text: "Number of people must be greater than 0")
+    expect(page).to     have_css(".field_error_messages", text: "Number of people must be a positive whole number")
 
     fill_in("encounter_order_email", with: "fred@example.com")
     fill_in("encounter_order_number_of_seats", with: 2)
@@ -434,6 +434,34 @@ RSpec.describe "Admin - encounter orders" do
 
         expect(eo.state).to eql("refunded")
         verify_upon_refund_email(eo)
+      end
+
+      # Consider, for example, double-form submission despite button debounce.
+      #
+      it "handles the edge case of somehow the order not being in an updateable state" do
+        eo = create(:encounter_order, encounter: @encounter)
+        visit URI(encordshelp_magic_link(eo)).path
+
+        expect(page).to have_text("Manage booking for")
+
+        mock_payint = simulate_stripe_payment(eo)
+        visit(admin_encounter_encounter_order_path(encounter_id: @encounter.slug, id: eo.id))
+
+        # Force a refund via driving state directly, while the encounter order
+        # admin page is still open.
+        #
+        expect(Stripe::Refund).to receive(:create).with(payment_intent: mock_payint).and_return(double(status: "succeeded"))
+
+        eo.refund_state!
+
+        # If the admin now tries to refund via the UI, we shouldn't get any
+        # attempt to refund again.
+        #
+        expect(Stripe::Refund).to_not receive(:create)
+
+        click_on("Refund customer (automatic via Stripe)")
+
+        expect(page).to have_text("This booking is no longer in a state that permits amendments")
       end
     end # 'context "after being paid for" do'
 

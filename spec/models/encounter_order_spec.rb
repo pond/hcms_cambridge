@@ -271,6 +271,22 @@ RSpec.describe EncounterOrder, type: :model do
     end # 'context "formats" do'
   end # 'context "validations" do'
 
+  context "initialised state" do
+    it "sets #frozen_price_on_application only if Encounter#price_on_application? is 'true'" do
+      allow(@encounter).to receive(:price_on_application?).and_return(false)
+
+      eo = EncounterOrder.new(encounter: @encounter)
+
+      expect(eo.frozen_price_on_application).to eql(false)
+
+      allow(@encounter).to receive(:price_on_application?).and_return(true)
+
+      eo = EncounterOrder.new(encounter: @encounter)
+
+      expect(eo.frozen_price_on_application).to eql(true)
+    end
+  end # 'context "initialised state" do'
+
   context "utilities" do
     context '#human_state' do
       it "works for basic state" do
@@ -358,7 +374,153 @@ RSpec.describe EncounterOrder, type: :model do
       eo.amount_owed -= 1
 
       expect(eo.includes_discount?).to eql(true)
+
+      # Setting POA should always lead to "no discount" since the whole thing is
+      # being charged at a custom price agreed with the customer anyway.
+      #
+      eo.frozen_price_on_application = true
+
+      expect(eo.includes_discount?).to eql(false)
     end
+
+    # Currently this just reflects the underlying boolean with a different name,
+    # but that might change one day.
+    #
+    it "#price_agreed_by_application?" do
+      eo = build(:encounter_order, frozen_price_on_application: false)
+
+      expect(eo.price_agreed_by_application?).to eql(false)
+
+      eo = build(:encounter_order, frozen_price_on_application: true)
+
+      expect(eo.price_agreed_by_application?).to eql(true)
+    end
+
+    # Prove that right now, this just consults #price_agreed_by_application?
+    #
+    it "#all_prices_exclude_sales_tax?" do
+      eo = build(:encounter_order, frozen_price_on_application: false)
+
+      expect(eo).to receive(:price_agreed_by_application?).and_return("Mock")
+      expect(eo.all_prices_exclude_sales_tax?).to eql("Mock")
+    end
+
+    context "#theoretical_amount_owed_without_discounts" do
+      it "returns 0 for price-on-application orders" do
+        eo = build(:encounter_order)
+        eo.frozen_price_on_application = true
+
+        expect(eo.theoretical_amount_owed_without_discounts).to eql(0)
+      end
+
+      it "calculates seats * price_per_seat without physical" do
+        eo = build(:encounter_order, has_physical: false)
+
+        expect(eo.theoretical_amount_owed_without_discounts).to eql(
+          eo.frozen_price_per_seat * eo.number_of_seats
+        )
+      end
+
+      it "adds frozen_price_physical when has_physical is true" do
+        eo = build(:encounter_order, has_physical: true)
+
+        expect(eo.theoretical_amount_owed_without_discounts).to eql(
+          eo.frozen_price_per_seat * eo.number_of_seats + eo.frozen_price_physical
+        )
+      end
+    end # 'context "#theoretical_amount_owed_without_discounts" do'
+
+    context "tax calculations" do
+      TaxItem   = Data.define(:excl, :incl, :tax)
+      TAX_TESTS = [
+        TaxItem.new(excl: 1000, incl: 1150, tax: 150), # 1000 * 1.15 = 1150
+        TaxItem.new(excl: 1001, incl: 1151, tax: 150), # 1001 * 1.15 = 1151.15 (round down)
+        TaxItem.new(excl: 1010, incl: 1162, tax: 152), # 1010 * 1.15 = 1161.50 (round half-up)
+        TaxItem.new(excl: 1005, incl: 1156, tax: 151), # 1005 * 1.15 = 1155.75 (round up)
+      ]
+
+      context "#amount_owed_plus_tax" do
+        before :each do
+          allow(Hcms.config).to receive(:tax_rate).and_return("15")
+        end
+
+        context "when prices exclude tax (POA)" do
+          before :each do
+            @eo = build(:encounter_order)
+            @eo.frozen_price_on_application = true
+
+            expect(@eo.all_prices_exclude_sales_tax?).to eql(true) # (self-check)
+          end
+
+          TAX_TESTS.each do | test |
+            it "adds tax (#{test.excl})" do
+              @eo.amount_owed = test.excl
+              expect(@eo.amount_owed_plus_tax).to eql(test.incl)
+            end
+          end
+        end
+
+        context "when prices include tax" do
+          it "returns amount_owed unchanged" do
+            eo = build(:encounter_order)
+            eo.frozen_price_on_application = false
+            original = eo.amount_owed
+
+            expect(eo.all_prices_exclude_sales_tax?).to eql(false) # (self-check)
+            expect(eo.amount_owed_plus_tax).to eql(original)
+          end
+        end
+      end # 'context "#amount_owed_plus_tax" do'
+
+      context "#amount_of_tax_owed" do
+        context "when prices exclude tax (POA)" do
+          before :each do
+            allow(Hcms.config).to receive(:tax_rate).and_return("15")
+
+            @eo = build(:encounter_order)
+            @eo.frozen_price_on_application = true
+
+            expect(@eo.all_prices_exclude_sales_tax?).to eql(true) # (self-check)
+          end
+
+          TAX_TESTS.each do | test |
+            it "returns the tax component to be added (#{test.excl})" do
+              @eo.amount_owed = test.excl
+              expect(@eo.amount_of_tax_owed).to eql(test.tax)
+            end
+          end
+        end # 'context "when prices exclude tax (POA)" do'
+
+        context "when prices include tax, tax_rate configured" do
+          before :each do
+            allow(Hcms.config).to receive(:tax_rate).and_return("15")
+
+            @eo = build(:encounter_order)
+            @eo.frozen_price_on_application = false
+
+            expect(@eo.all_prices_exclude_sales_tax?).to eql(false) # (self-check)
+          end
+
+          TAX_TESTS.each do | test |
+            it "returns the tax component to be added (#{test.incl})" do
+              @eo.amount_owed = test.incl
+              expect(@eo.amount_of_tax_owed).to eql(test.tax)
+            end
+          end
+        end # 'context "when prices include tax, tax_rate configured" do'
+
+        context "when no tax_rate configured" do
+          before :each do
+            allow(Hcms.config).to receive(:tax_rate).and_return(nil)
+          end
+
+          it "returns 0" do
+            eo = build(:encounter_order)
+            expect(eo.amount_of_tax_owed).to eql(0)
+          end
+        end # 'context "when no tax_rate configured" do'
+      end # 'context "#amount_of_tax_owed" do'
+    end # 'context "tax calculations" do'
   end # 'context "utilities" do'
 
   context "state machine" do
@@ -579,7 +741,7 @@ RSpec.describe EncounterOrder, type: :model do
 
             expect {
               @eo.send(refund_method)
-            }.to raise_error("Stripe refund error - state \"#{mock_refund_status}\" for ID \"#{mock_refund_id}\"")
+            }.to raise_error(EncounterOrder::RefundError, "Stripe refund error - state \"#{mock_refund_status}\" for ID \"#{mock_refund_id}\"")
 
             perform_enqueued_jobs()
             expect(ActionMailer::Base.deliveries.size).to eql(0)

@@ -27,27 +27,34 @@ RSpec.describe "Admin - encounter orders" do
           expect(page).to have_text("→ #{apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency)}")
         end
 
-        physical = if @encounter.physical_aspect_free_of_charge?
-          "(including free #{@encounter.name_physical})"
-        else
-          "(including #{apphelp_money(@encounter.price_physical, currency: @encounter.currency)} for #{@encounter.name_physical})"
-        end
+        unless @encounter_order.frozen_price_physical.nil?
+          physical = if @encounter.physical_aspect_free_of_charge?
+            "including free #{@encounter.name_physical}"
+          else
+            "including " +
+            apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency) +
+            " for #{@encounter.name_physical})"
+          end
 
-        if @encounter_order.has_physical
-          expect(page).to have_text(physical)
-        else
-          expect(page).to_not have_text(physical)
+          if @encounter_order.has_physical
+            expect(page).to have_text(physical)
+          else
+            expect(page).to_not have_text(physical)
+          end
         end
 
         expect(page).to have_field("encounter_order_gift_note")
 
-        if @encounter.has_physical_aspect? and @encounter_order.user_chooses_has_physical
+        if @encounter_order.user_chooses_has_physical && @encounter_order.frozen_price_physical.present?
           expect(page).to have_unchecked_field("encounter_order_has_physical")
           label = page.find(:css, "label[for='encounter_order_has_physical']")
           if @encounter.physical_aspect_free_of_charge?
             expect(label).to have_text("Include free #{@encounter.name_physical}?")
           else
-            expect(label).to have_text("Add #{@encounter.name_physical} for #{apphelp_money(@encounter.price_physical, currency: @encounter.currency)}?")
+            expect(label).to have_text(
+              "Add #{@encounter.name_physical} for " +
+              apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency)
+            )
           end
         else
           expect(page).to_not have_field("encounter_order_has_physical")
@@ -122,6 +129,22 @@ RSpec.describe "Admin - encounter orders" do
 
         it_behaves_like "an encounter booking confirmation form"
       end # 'context "but the encounter offers no physical product" do'
+
+      # Bad/unexpected data edge case check.
+      #
+      context "but the encounter order has no frozen product price" do
+        before :each do
+          @encounter_order = create(:encounter_order, encounter: @encounter)
+          @encounter_order.update_column(:frozen_price_physical, nil)
+
+          expect(@encounter.has_physical_aspect?           ).to eql(true)
+          expect(@encounter.physical_aspect_free_of_charge?).to eql(false)
+          expect(@encounter_order.user_chooses_has_physical).to eql(true)
+          expect(@encounter_order.has_physical             ).to eql(false)
+        end
+
+        it_behaves_like "an encounter booking confirmation form"
+      end # 'context "but the encounter order has no frozen product price" do'
     end # 'context "user chooses physical product" do'
 
     context "with a physical product" do
@@ -167,6 +190,22 @@ RSpec.describe "Admin - encounter orders" do
 
         it_behaves_like "an encounter booking confirmation form"
       end # 'context "but the encounter offers no physical product" do'
+
+      # Bad/unexpected data edge case check.
+      #
+      context "but the encounter order has no frozen product price" do
+        before :each do
+          @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
+          @encounter_order.update_column(:frozen_price_physical, nil)
+
+          expect(@encounter.has_physical_aspect?           ).to eql(true)
+          expect(@encounter.physical_aspect_free_of_charge?).to eql(false)
+          expect(@encounter_order.user_chooses_has_physical).to eql(false)
+          expect(@encounter_order.has_physical             ).to eql(true)
+        end
+
+        it_behaves_like "an encounter booking confirmation form"
+      end # 'context "but the encounter order has no frozen product price" do'
     end # 'context "with a physical product" do'
 
     context "without a physical product" do
@@ -389,31 +428,76 @@ RSpec.describe "Admin - encounter orders" do
 
     context "price-on-application" do
       before :each do
+        @tax_name   = "SALESTAXNAME"
+        @tax_rate   = "12.5"
+        @tax_number = "11-999-222"
+
+        allow(Hcms.config).to receive(:tax_name  ).and_return(@tax_name  )
+        allow(Hcms.config).to receive(:tax_rate  ).and_return(@tax_rate  )
+        allow(Hcms.config).to receive(:tax_number).and_return(@tax_number)
+
         @encounter.update!(price_on_application: true)
         @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
         @encounter_order.update!(amount_owed: rand(11111..99999))
+
         visit(encordshelp_magic_link(@encounter_order))
         simulate_stripe_payment(@encounter_order)
       end
 
       shared_examples "a price-on-application invoice" do
-        it "which shows the custom amount" do
-          seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
-          items = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
-          total = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+        it "which shows the custom amount, with itemisation where available and a sales tax breakdown" do
+          expect(page).to have_text(@encounter_order.human_invoice_number)
+          expect(page).to have_text(@encounter_order.name)
+          expect(page).to have_text(@encounter_order.email)
+          expect(page).to have_text(@encounter_order.address)
 
-          expect(page).to     have_text(@encounter.title)
-          expect(page).to     have_text(@encounter_order.human_invoice_number)
-          expect(page).to     have_text(@encounter_order.name)
-          expect(page).to     have_text(@encounter_order.email)
-          expect(page).to     have_text(@encounter_order.address)
+          expect(page).to have_text("Total excluding #{@tax_name}")
+          expect(page).to have_text("Plus #{@tax_name} at #{@tax_rate}%")
+          expect(page).to have_text("Total (#{@encounter.currency}) incl. #{@tax_name}")
+          expect(page).to have_text("PAID IN FULL")
 
-          expect(page).to     have_text("Custom price")
-          expect(page).to_not have_text(seats)
-          expect(page).to_not have_text(items)
-          expect(page).to     have_text(total)
+          if @encounter_order.has_physical
+            physical_item = spechelp_format_money(@encounter_order.frozen_price_physical, @encounter.currency)
 
-          expect(page).to     have_text("PAID IN FULL")
+            expect(page).to have_text(@encounter_order.encounter.name_physical.upcase_first)
+            expect(page).to have_text(physical_item)
+          end
+
+          total_excl_gst = spechelp_format_money(@encounter_order.amount_owed,           @encounter.currency)
+          total_incl_gst = spechelp_format_money(@encounter_order.amount_owed_plus_tax,  @encounter.currency)
+          amount_of_gst  = spechelp_format_money(@encounter_order.amount_of_tax_owed,    @encounter.currency)
+
+          if @encounter_order.encounter_order_items.any?
+            expect(page).to_not have_text("Custom price")
+
+            @encounter_order.encounter_order_items.each do | eoi |
+              item_total = spechelp_format_money(eoi.amount_owed, @encounter.currency)
+
+              expect(page).to have_text(eoi.description)
+              expect(page).to have_text(item_total)
+            end
+
+            remaining_amount  = @encounter_order.amount_owed - @encounter_order.encounter_order_items.sum(&:amount_owed)
+            remaining_amount -= @encounter_order.frozen_price_physical if @encounter_order.has_physical
+
+            if remaining_amount.zero?
+              expect(page).to_not have_text("Other charges")
+              expect(page).to_not have_text("Discount")
+            else
+              remaining = spechelp_format_money(remaining_amount.abs(), @encounter.currency)
+
+              if remaining_amount > 0
+                expect(page).to have_text("Other charges")
+                expect(page).to have_text(remaining)
+              else
+                expect(page).to have_text("Discount")
+                expect(page).to have_text("−" + remaining)
+              end
+            end
+          else
+            expect(page).to have_text(@encounter.title)
+            expect(page).to have_text("Custom price")
+          end
         end
       end
 
@@ -434,6 +518,114 @@ RSpec.describe "Admin - encounter orders" do
 
         it_behaves_like "a price-on-application invoice"
       end # 'context "when the encounter record POA flag is later cleared" do'
+
+      context "with encounter order items" do
+        def define_items_matching_total()
+          define_items_below_total()
+
+          # The amount owed always includes the price of a physical item, if one
+          # is chosen either by the admin or by the user when they go to pay; so
+          # the individual order items must account for that being present.
+          #
+          remaining_amount  = @encounter_order.amount_owed - @encounter_order.encounter_order_items.sum(&:amount_owed)
+          remaining_amount -= @encounter_order.frozen_price_physical if @encounter_order.has_physical
+
+          @encounter_order.encounter_order_items.build(
+            description: Faker::Commerce.product_name,
+            amount_owed: remaining_amount
+          )
+
+          @encounter_order.save!
+        end
+
+        def define_items_below_total
+          1.upto(3) do
+            @encounter_order.encounter_order_items.create(
+              description: Faker::Commerce.product_name,
+              amount_owed: rand(100..@encounter_order.amount_owed / 4)
+            )
+          end
+
+          @encounter_order.save!
+        end
+
+        def define_items_above_total
+          1.upto(3) do
+            @encounter_order.encounter_order_items.create(
+              description: Faker::Commerce.product_name,
+              amount_owed: rand(((@encounter_order.amount_owed / 3) + 100)...(@encounter_order.amount_owed / 2))
+            )
+          end
+
+          @encounter_order.save!
+        end
+
+        context "that add up to the total, with no physical item" do
+          before :each do
+            @encounter_order.has_physical = false
+            define_items_matching_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to the total, with no physical item" do'
+
+        context "that add up to the total, except for an included physical item" do
+          before :each do
+            @encounter_order.has_physical = true
+            define_items_matching_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to the total, except for an included physical item" do'
+
+        context "that add up to less than the total, with no physical item" do
+          before :each do
+            @encounter_order.has_physical = false
+            define_items_below_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to less than the total, with no physical item" do'
+
+        context "that add up to less than the total, with an included physical item" do
+          before :each do
+            @encounter_order.has_physical = true
+            define_items_below_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to less than the total, with an included physical item" do'
+
+        context "that add up to *more* than the total, with no physical item" do
+          before :each do
+            @encounter_order.has_physical = false
+            define_items_above_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to *more* than the total, with no physical item" do'
+
+        context "that add up to *more* than the total, including the physical item" do
+          before :each do
+            @encounter_order.has_physical = true
+            define_items_above_total()
+
+            click_on("Invoice")
+          end
+
+          it_behaves_like "a price-on-application invoice"
+        end # 'context "that add up to *more* than the total, including the physical item" do'
+      end # 'context "with encounter order items" do'
     end # 'context "price-on-application" do'
   end # 'context "after payment" do'"
 

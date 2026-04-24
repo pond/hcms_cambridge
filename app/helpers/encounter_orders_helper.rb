@@ -36,7 +36,7 @@ module EncounterOrdersHelper
   #   #encordshelp_amount_excl_and_incl_for
   #
   def encordshelp_tax_suffix(encounter_order)
-    if encounter_order.encounter.all_prices_exclude_sales_tax?
+    if encounter_order.all_prices_exclude_sales_tax?
       return (
         I18n.t(
           'views.encounter_orders.amounts.html_tax_suffix',
@@ -59,11 +59,14 @@ module EncounterOrdersHelper
   #   #encordshelp_amount_excl_and_incl_for(encounter_order)
   #
   def encordshelp_currency_and_tax_suffix(encounter_order)
+    tax_suffix = encordshelp_tax_suffix(encounter_order)
+    tax_suffix = "(#{tax_suffix})" unless tax_suffix.blank?
+
     return (
       I18n.t(
         'views.encounter_orders.amounts.html_currency_and_tax_suffix',
         html_safe_currency:   h(encounter_order.encounter.currency),
-        html_safe_tax_suffix: encordshelp_tax_suffix(encounter_order)
+        html_safe_tax_suffix: tax_suffix
       )
       .strip()
       .html_safe()
@@ -80,7 +83,7 @@ module EncounterOrdersHelper
   #   #encordshelp_currency_and_tax_suffix
   #
   def encordshelp_amount_excl_and_incl_for(encounter_order)
-    if encounter_order.encounter.all_prices_exclude_sales_tax?
+    if encounter_order.all_prices_exclude_sales_tax?
       formatted_owed_excl = apphelp_money(encounter_order.amount_owed,          currency: encounter_order.encounter.currency)
       formatted_owed_incl = apphelp_money(encounter_order.amount_owed_plus_tax, currency: encounter_order.encounter.currency)
 

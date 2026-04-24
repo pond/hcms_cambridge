@@ -51,7 +51,35 @@ RSpec.shared_context "encounter orders" do
         expect(args[:success_url]).to end_with("stripe_payment_succeeded?csid={CHECKOUT_SESSION_ID}")
         expect(args[:cancel_url ]).to end_with("stripe_payment_cancelled?csid={CHECKOUT_SESSION_ID}")
 
-        if encounter_order.price_agreed_by_application? || encounter_order.includes_discount?
+        if encounter_order.price_agreed_by_application?
+          expect(args[:line_items].size).to eql(2)
+          expect(args[:line_items][0]  ).to eql(
+            {
+              quantity: 1,
+              price_data: {
+                currency: encounter.currency,
+                unit_amount: encounter_order.amount_owed,
+                product_data: {
+                  name:        encounter.title,
+                  description: "Date & time: #{encordshelp_datetime(encounter_order)}",
+                  images:      [encounter.product_image_url],
+                }
+              }
+            }
+          )
+          expect(args[:line_items][1]).to eql(
+            {
+              quantity: 1,
+              price_data: {
+                currency: encounter.currency,
+                unit_amount: encounter_order.amount_of_tax_owed,
+                product_data: {
+                  name: Hcms.config.tax_name.presence || "Sales tax"
+                }
+              }
+            }
+          )
+        elsif encounter_order.includes_discount?
           expect(args[:line_items].size ).to eql(1)
           expect(args[:line_items].first).to eql(
             {
@@ -61,9 +89,8 @@ RSpec.shared_context "encounter orders" do
                 unit_amount: encounter_order.amount_owed,
                 product_data: {
                   name:        encounter.title,
-                  description: encordshelp_datetime(encounter_order),
+                  description: "Date & time: #{encordshelp_datetime(encounter_order)}",
                   images:      [encounter.product_image_url],
-                  unit_label:  "booking",
                 }
               }
             }

@@ -895,7 +895,7 @@ RSpec.describe Order, type: :model do
 
             expect {
               @order.send(refund_method)
-            }.to raise_error("Stripe refund error - state \"#{mock_refund_status}\" for ID \"#{mock_refund_id}\"")
+            }.to raise_error(Order::RefundError, "Stripe refund error - state \"#{mock_refund_status}\" for ID \"#{mock_refund_id}\"")
 
             perform_enqueued_jobs()
             expect(ActionMailer::Base.deliveries.size).to eql(0)

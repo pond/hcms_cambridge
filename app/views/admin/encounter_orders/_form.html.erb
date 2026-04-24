@@ -13,7 +13,7 @@
   ) do | f |
 %>
   <%= hidden_field_tag(:price_currency,       encounter_order.encounter.currency) %>
-  <%= hidden_field_tag(:price_on_application, encounter_order.frozen_price_on_application) %>
+  <%= hidden_field_tag(:price_on_application, encounter_order.price_agreed_by_application?) %>
   <%= hidden_field_tag(:price_per_seat_cents, encounter_order.frozen_price_per_seat) %>
   <%= hidden_field_tag(:price_physical_cents, encounter_order.frozen_price_physical.to_i) %>
 
@@ -37,11 +37,25 @@
   <div class="field">
     <%= apphelp_label(f, :starts_at) %>
     <%= f.label "starts_at_kind_#{ EncounterOrder::STARTS_AT_KIND_OPEN_ENDED }" do %>
-      <%= f.radio_button :starts_at_kind, EncounterOrder::STARTS_AT_KIND_OPEN_ENDED %> Open-ended
+      <%=
+        f.radio_button(
+          :starts_at_kind,
+          EncounterOrder::STARTS_AT_KIND_OPEN_ENDED,
+          checked: encounter_order.starts_at.nil?
+        )
+      %>
+      Open-ended
     <% end %>
     <div class="field-row">
       <%= f.label "starts_at_kind_#{ EncounterOrder::STARTS_AT_KIND_FIXED_DATE }" do %>
-        <%= f.radio_button :starts_at_kind, EncounterOrder::STARTS_AT_KIND_FIXED_DATE %> Fixed:
+        <%=
+          f.radio_button(
+            :starts_at_kind,
+            EncounterOrder::STARTS_AT_KIND_FIXED_DATE,
+            checked: encounter_order.starts_at.present?
+          )
+        %>
+        Fixed:
       <% end %>
       <%= f.datetime_field :starts_at %>
     </div>

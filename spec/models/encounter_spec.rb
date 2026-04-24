@@ -185,18 +185,45 @@ RSpec.describe Encounter, type: :model do
   end # 'context "base class overrides" do'
 
   context "miscellaneous" do
-    it '#price_on_application?' do
-      priced_encounter = build(:encounter)
-      free_encounter   = build(:encounter, :free)
+    context '#price_on_application?' do
+      it "with tax information configured" do
+        priced_encounter = build(:encounter)
+        free_encounter   = build(:encounter, :free)
 
-      # The POA flag should override any setting of price-per-seat.
-      #
-      priced_encounter.price_on_application = true
-        free_encounter.price_on_application = true
+        allow(Hcms.config).to receive(:tax_rate  ).and_return("15")
+        allow(Hcms.config).to receive(:tax_name  ).and_return("GST")
+        allow(Hcms.config).to receive(:tax_number).and_return("11-999-222")
 
-      expect(priced_encounter.price_on_application?).to eql(true)
-      expect(  free_encounter.price_on_application?).to eql(true)
-    end
+        priced_encounter.price_on_application = true
+          free_encounter.price_on_application = true
+
+        # The POA flag should override the presence of a price-per-seat value.
+        #
+        expect(priced_encounter.price_on_application?).to eql(true)
+        expect(  free_encounter.price_on_application?).to eql(true)
+      end
+
+      it "with tax information absent" do
+        priced_encounter = build(:encounter)
+        free_encounter   = build(:encounter, :free)
+
+        [
+          [nil, "GST", "11-999-222"],
+          ["15", nil, "11-999-222"],
+          ["15", "GST", nil]
+        ].each do | mock_config |
+          allow(Hcms.config).to receive(:tax_rate  ).and_return(mock_config[0])
+          allow(Hcms.config).to receive(:tax_name  ).and_return(mock_config[1])
+          allow(Hcms.config).to receive(:tax_number).and_return(mock_config[2])
+
+          priced_encounter.price_on_application = true
+            free_encounter.price_on_application = true
+
+          expect(priced_encounter.price_on_application?).to eql(false)
+          expect(  free_encounter.price_on_application?).to eql(false)
+        end
+      end
+    end # 'context '#price_on_application?' do'
 
     it "#free_of_charge?" do
       priced_encounter = build(:encounter)

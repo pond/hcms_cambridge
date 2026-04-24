@@ -138,7 +138,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
       templated_success_url = base_success_url + '?csid={CHECKOUT_SESSION_ID}'
       templated_cancel_url  = base_cancel_url  + '?csid={CHECKOUT_SESSION_ID}'
 
-      if @encounter_order.price_agreed_by_application? || @encounter_order.includes_discount?
+      if @encounter_order.price_agreed_by_application?
         line_items = [{
           quantity:   1,
           price_data: {
@@ -146,9 +146,36 @@ class EncounterOrdersSelfServiceController < ApplicationController
             unit_amount:  @encounter_order.amount_owed,
             product_data: {
               name:        @encounter.title,
-              description: helpers.encordshelp_datetime(@encounter_order),
+              description: "Date & time: #{helpers.encordshelp_datetime(@encounter_order)}",
               images:      [@encounter.product_image_url],
-              unit_label:  "booking",
+            }
+          }
+        }]
+
+        tax = @encounter_order.amount_of_tax_owed
+
+        if tax > 0
+          line_items += [{
+            quantity:   1,
+            price_data: {
+              currency:     @encounter.currency,
+              unit_amount:  tax,
+              product_data: {
+                name: Hcms.config.tax_name.presence || "Sales tax"
+              }
+            }
+          }]
+        end
+      elsif @encounter_order.includes_discount?
+        line_items = [{
+          quantity:   1,
+          price_data: {
+            currency:     @encounter.currency,
+            unit_amount:  @encounter_order.amount_owed,
+            product_data: {
+              name:        @encounter.title,
+              description: "Date & time: #{helpers.encordshelp_datetime(@encounter_order)}",
+              images:      [@encounter.product_image_url],
             }
           }
         }]
