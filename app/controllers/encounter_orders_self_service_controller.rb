@@ -13,6 +13,24 @@ class EncounterOrdersSelfServiceController < ApplicationController
   end
 
   def update
+
+    # An early-exit possibility for AJAX calls due to toggling the physical item
+    # checkbox, where available.
+    #
+    if params[:state_ajax] && params.key?(:has_physical)
+      head 500
+      return
+      begin
+        has_physical = ActiveModel::Type::Boolean.new.cast(params[:has_physical])
+        @encounter_order.update!(has_physical: has_physical)
+        head :ok
+      rescue => error
+        Sentry.capture_exception(error)
+        head :internal_server_error
+      end
+      return # NOTE EARLY EXIT
+    end
+
     event = if params[:state_pay]
       'pay'
     elsif params[:state_cancel]

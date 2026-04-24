@@ -751,6 +751,10 @@ input[type="submit"].bold_button {
   text-decoration: none;
 
   transition: opacity 0.2s ease-out;
+
+  &.disabled {
+    opacity: 0.3;
+  }
 }
 
                    a.bold_button:hover,

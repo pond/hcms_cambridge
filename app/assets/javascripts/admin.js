@@ -22,7 +22,7 @@ $(document).ready(function() {
 
   if (pageTypeSelector.length > 0) {
     function setVisibilities() {
-      var selectedPageType = pageTypeSelector.children("option:selected").val();
+      let selectedPageType = pageTypeSelector.children("option:selected").val();
 
       if (selectedPageType == 'blog' || selectedPageType == 'events') {
         $('.non-blog-or-events-fields').slideUp();
@@ -55,7 +55,7 @@ $(document).ready(function() {
 
   if (eventOnArchiveSelector.length > 0) {
     function setVisibilities() {
-      var selectedOnArchiveAction = eventOnArchiveSelector.children("option:selected").val();
+      let selectedOnArchiveAction = eventOnArchiveSelector.children("option:selected").val();
 
       if (selectedOnArchiveAction == 'move') {
         $('#on-archive-action-move-fields').slideDown();
@@ -99,7 +99,7 @@ $(document).ready(function() {
     const encounterCategoryInput = $('#encounter_category');
 
     function setVisibilities() {
-      var selectedCategory = encounterCategorySelector.children("option:selected").val();
+      let selectedCategory = encounterCategorySelector.children("option:selected").val();
 
       if (selectedCategory === "") {
         encounterCategoryInput.val("");
@@ -128,10 +128,10 @@ $(document).ready(function() {
     const hasPhysicalInput    = $('#encounter_order_has_physical');
     const isEncounter         = (hasPhysicalInput.length > 0);
     const pricePerSeatCents   = parseInt(pricePerSeatCentsHidden.val());
-    var   pricePhysicalCents;
-    var   numberOfSeatsInput;
-    var   amountOwedInput;
-    var   manualInputDetected = false;
+    let   pricePhysicalCents;
+    let   numberOfSeatsInput;
+    let   amountOwedInput;
+    let   manualInputDetected = false;
 
     if (isEncounter) {
       numberOfSeatsInput = $('#encounter_order_number_of_seats');
@@ -164,7 +164,7 @@ $(document).ready(function() {
 
         if (numberOfSeatsInput.val().length > 0) {
           const numberOfSeats   = parseInt(inputAmount);
-          var   amountOwedCents = numberOfSeats * pricePerSeatCents;
+          let   amountOwedCents = numberOfSeats * pricePerSeatCents;
 
           if (isEncounter && hasPhysicalInput.val() == 'true') {
             amountOwedCents += pricePhysicalCents;
@@ -261,9 +261,9 @@ $(document).ready(function() {
     const currency                  = $('#price_currency').val();
     const hasPhysicalInput          = $('#encounter_order_has_physical');
     const totalExcludesPhysicalHint = $('#encounter_order_total_amount_hint');
-    var   pricePhysicalCents;
-    var   amountOwedInput;
-    var   manualInputDetected = false;
+    let   pricePhysicalCents;
+    let   amountOwedInput;
+    let   manualInputDetected = false;
 
     amountOwedInput    = $('#encounter_order_amount_owed');
     pricePhysicalCents = parseInt(pricePhysicalCentsHidden.val());
@@ -299,7 +299,7 @@ $(document).ready(function() {
 
     function updateTotal() {
       if (amountOwedInput.val().trim() === '' || manualInputDetected === false) {
-        var amountOwedCents = 0;
+        let amountOwedCents = 0;
 
         if (hasPhysicalInput.val() == 'true') {
           amountOwedCents += pricePhysicalCents;

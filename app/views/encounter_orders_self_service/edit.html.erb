@@ -85,6 +85,8 @@
       )
     ) do | f |
   %>
+    <%= hidden_field_tag(:id_for_changes,         @encounter_order.id) %>
+    <%= hidden_field_tag(:token_for_changes,      @encounter_order.token) %>
     <%= hidden_field_tag(:amount_for_seats_cents, @encounter_order.amount_owed) %>
     <%= hidden_field_tag(:price_physical_cents,   @encounter_order.frozen_price_physical.to_i) %>
     <% if Hcms.config.tax_threshold.is_a?(Integer) %>
@@ -165,6 +167,7 @@
                 encounter_order_id: @encounter_order.id,
               ),
               {
+                id:     'encounter_order_invoice_button',
                 class:  'bold_button',
                 style:  'margin-left: auto;',
                 target: '_blank'

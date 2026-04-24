@@ -10,7 +10,7 @@ $(document).ready(function() {
   const buttonsWithConfirmsSelector = $('button[data-confirm], input[type="submit"][data-confirm]');
 
   buttonsWithConfirmsSelector.on('click', function(e) {
-    var warning = $(this).data('confirm');
+    let warning = $(this).data('confirm');
 
     if (!confirm(warning)) {
       e.preventDefault();
@@ -36,8 +36,8 @@ $(document).ready(function() {
     const addressRequiredAtThreshold       = !isNaN(addressRequiredCents);
 
     function setElementVisibility(e) {
-      var showAddress       = false;
-      var overallTotalCents = amountForSeatsCents;
+      let showAddress       = false;
+      let overallTotalCents = amountForSeatsCents;
 
       if (addPhysicalCheckbox.is(':checked')) {
         overallTotalCents += pricePhysicalCents;
