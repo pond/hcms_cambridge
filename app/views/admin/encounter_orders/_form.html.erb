@@ -122,57 +122,90 @@
     </fieldset>
   <% end %>
 
-  <p>
-    <%
-      amount_owed_hint = if encounter_order.encounter.price_on_application?
-        'amount previously agreed with customer'
-      else
-        'optional override of calculated amount, usually used for discounted pricing'
-     end
-    %>
-    <%= apphelp_label(f, :amount_owed, hint: amount_owed_hint) %>
-    <%= Money::Currency.new(encounter_order.encounter.currency).symbol %>
-    <%=
-      parsed_amount = Money.from_cents(
-        encounter_order.amount_owed,
-        encounter_order.encounter.currency
-      )
+  <div class="two_column">
+    <div>
+      <%
+        amount_owed_hint = if encounter_order.encounter.price_on_application?
+          'amount previously agreed with customer'
+        else
+          'optional override of calculated amount, usually used for discounted pricing'
+        end
+      %>
+      <%= apphelp_label(f, :amount_owed, hint: amount_owed_hint) %>
+      <%= Money::Currency.new(encounter_order.encounter.currency).symbol %>
+      <%=
+        parsed_amount = Money.from_cents(
+          encounter_order.amount_owed,
+          encounter_order.encounter.currency
+        )
 
-      f.text_field(
-        :amount_owed,
-        value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
-        style: 'width: 5em;'
-      )
-    %>
-    <small><%= encordshelp_currency_and_tax_suffix(encounter_order) %></small>
-    <span id="encounter_order_total_amount_hint" style="display: none">
-      <% if encounter_order.encounter.has_physical_aspect? && ! encounter_order.encounter.physical_aspect_free_of_charge? %>
-        <small><em>
-          (which will be increased by
-          <%= encshelp_price(encounter_order.encounter, for_physical_aspect: true) %>
-          if the customer adds the physical product at checkout)
-        </em></small>
-      <% end %>
-    </span>
-  </p>
+        f.text_field(
+          :amount_owed,
+          value: parsed_amount.zero? ? '' : parsed_amount.format(symbol: false),
+          style: 'width: 5em;'
+        )
+      %>
+      <small><%= encordshelp_currency_and_tax_suffix(encounter_order) %></small>
+      <span id="encounter_order_total_amount_hint" style="display: none">
+        <% if encounter_order.encounter.has_physical_aspect? && ! encounter_order.encounter.physical_aspect_free_of_charge? %>
+          <small><em>
+            (which will be increased by
+            <%= encshelp_price(encounter_order.encounter, for_physical_aspect: true) %>
+            if the customer adds the physical product at checkout)
+          </em></small>
+        <% end %>
+      </span>
 
-  <p id="encounter_order_address_container">
-    <%
-      threshold = apphelp_money(
-        Hcms.config.tax_threshold,
-        currency: @encounter_order.encounter.currency
-      )
-    %>
-    <%= apphelp_label(f, :address, hint: "mandatory for invoices above #{threshold}, else optional") %>
-    <%= f.text_area :address, rows: 3, cols: 80 %>
-    <%= f.error_markup_for(:address) %>
-  </p>
+      <p>
+        <%
+          threshold = apphelp_money(
+            Hcms.config.tax_threshold,
+            currency: @encounter_order.encounter.currency
+          )
+        %>
+        <%= apphelp_label(f, :address, hint: "mandatory for invoices above #{threshold}, else optional") %>
+        <%= f.text_area :address, rows: 3, cols: 80 %>
+        <%= f.error_markup_for(:address) %>
+      </p>
 
-  <p>
-    <%= apphelp_label(f, :notes_to_buyer, hint: 'the customer will be able to see these') %>
-    <%= f.text_area :notes_to_buyer, rows: 3, cols: 80 %>
-    <%= f.error_markup_for(:notes_to_buyer) %>
-  </p>
+      <p>
+        <%= apphelp_label(f, :notes_to_buyer, hint: 'the customer will be able to see these') %>
+        <%= f.text_area :notes_to_buyer, rows: 3, cols: 80 %>
+        <%= f.error_markup_for(:notes_to_buyer) %>
+      </p>
+    </div>
+
+    <div>
+      <div class="field" style="margin-bottom: 0">
+        <%= apphelp_label(f, :supported_payment_methods) %>
+        <%=
+          f.collection_check_boxes(
+            :supported_payment_methods,
+            SupportedPaymentMethod.methods,
+            :internal_name,
+            :human_name
+          ) do | b |
+        %>
+          <div class="checkbox in_collection">
+            <%= b.check_box %>
+            <%= b.label %>
+          </div>
+        <% end %>
+        <%= f.error_markup_for(:supported_payment_methods) %>
+      </div>
+      <div class="field" style="margin: 0;">
+        <%=
+          f.text_area(
+            :supported_payment_method_other_details,
+            rows: 6,
+            cols: 40,
+            placeholder: I18n.t('views.encounter_orders.supported_payment_methods.other_info_hint'),
+          )
+        %>
+        <%= f.error_markup_for(:supported_payment_method_other_details) %>
+      </div>
+    </div>
+  </div>
 
   <div class="field">
     <div class="field-row">

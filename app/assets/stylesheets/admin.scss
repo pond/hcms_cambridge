@@ -89,6 +89,7 @@ main.admin {
   }
 
   fieldset {
+    margin: 1.25em 0 1.5em 0;
     border: 1px solid $head_foot_border_colour;
     border-radius: 4px;
 
@@ -240,11 +241,23 @@ main.admin {
     justify-content: flex-start;
     align-items: center;
 
+    &:has(details[open]) {
+      align-items: flex-start;
+    }
+
     details {
       margin: 5px 0.5em;
 
       dl {
         font-size: smaller;
+      }
+
+      // Roughly match the height of a typical input field alongside to reduce
+      // the ammount of vertical movement when the summary is expanded and the
+      // vertical alignment changes from "center" to "flex-start".
+
+      summary {
+        line-height: 36px;
       }
     }
   }

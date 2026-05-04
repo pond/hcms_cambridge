@@ -133,15 +133,47 @@
     <div class="row-wide-column-small-container">
       <div class="row-wide-column-small">
         <% if @encounter_order.may_pay_state? %>
-          <%=
-            f.submit(
-              @encounter_order.amount_owed.zero? ? 'Finalise booking' : 'Pay now',
-              {
-                name:  'state_pay',
-                class: 'bold_button'
-              },
-            )
-          %>
+          <% spms = @encounter_order.decorated_supported_payment_methods %>
+          <% spms = spms.first if @encounter_order.amount_owed.zero? %>
+          <% spms.each do | spm | %>
+            <% if spms.size == 1 %>
+              <%=
+                f.button(
+                  @encounter_order.amount_owed.zero? ? 'Finalise booking' : 'Pay now',
+                  {
+                    type:  :submit,
+                    name:  'state_pay',
+                    value: spm.internal_name,
+                    class: 'bold_button'
+                  },
+                )
+              %>
+            <% elsif spm.is_other? %>
+              <%=
+                f.button(
+                  "Pay another way",
+                  {
+                    type:  :submit,
+                    name:  'state_pay',
+                    value: spm.internal_name,
+                    class: 'bold_button'
+                  },
+                )
+              %>
+            <% else %>
+              <%=
+                f.button(
+                  "Pay using #{spm.human_name}",
+                  {
+                    type:  :submit,
+                    name:  'state_pay',
+                    value: spm.internal_name,
+                    class: 'bold_button'
+                  },
+                )
+              %>
+            <% end %>
+          <% end %>
         <% end %>
         <% if @encounter_order.may_cancel_state? %>
           <%=

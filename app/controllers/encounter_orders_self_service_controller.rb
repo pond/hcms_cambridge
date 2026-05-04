@@ -82,6 +82,7 @@ class EncounterOrdersSelfServiceController < ApplicationController
     # incurs significant PCI compliance obligations.
     #
     elsif event == 'pay'
+      payment_method = params[:state_pay]
 
       # First deal with the unhappy path, then the payment flow.
       #
@@ -102,6 +103,17 @@ class EncounterOrdersSelfServiceController < ApplicationController
         redirect_to(
           helpers.encordshelp_magic_link(@encounter_order),
           notice: "Sorry, this encounter isn't accepting payments anymore."
+        )
+
+        return # NOTE EARLY EXIT
+      end
+
+      # Bad payment method requested?
+      #
+      unless @encounter_order.supported_payment_methods.include?(payment_method)
+        redirect_to(
+          helpers.encordshelp_magic_link(@encounter_order),
+          notice: "Sorry, that payment method is not available anymore. Please choose another."
         )
 
         return # NOTE EARLY EXIT
@@ -148,6 +160,26 @@ class EncounterOrdersSelfServiceController < ApplicationController
         )
 
         return # NOTE EARLY EXIT
+      end
+
+      # Now deal with payment methods. Is it for "other"?
+      #
+      if payment_method == EncounterOrder::SUPPORTED_PAYMENT_METHOD_OTHER
+        redirect_to(
+          encounter_encounter_order_invoice_path(
+            encounter_id:       @encounter.slug,
+            encounter_order_id: @encounter_order.id,
+          ),
+          notice: @encounter_order.supported_payment_method_other_details
+        )
+
+        return # NOTE EARLY EXIT
+      end
+
+      # Otherwise, right now, it *must* be Stripe.
+      #
+      unless payment_method == EncounterOrder::SUPPORTED_PAYMENT_METHOD_STRIPE
+        raise "Implement payment method #{payment_method}"
       end
 
       product_url  = encounter_url(@encounter)

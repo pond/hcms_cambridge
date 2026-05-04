@@ -42,6 +42,18 @@
       <%= apphelp_boolean(@encounter_order.has_physical) %>
     <% end %>
   </dd>
+  <dt>Payment</dt>
+  <dd>
+    <% spms = @encounter_order.decorated_supported_payment_methods %>
+    <% spms.each do | spm | %>
+      <%= spm.human_name %>
+      <% if spm.is_other? %>
+        &ndash;
+        <%= @encounter_order.supported_payment_method_other_details %>
+      <% end %>
+      <% if spm != spms.last %><br><% end %>
+    <% end %>
+  </dd>
 </dl>
 
 <dl>

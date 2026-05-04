@@ -117,6 +117,11 @@ en:
         notes_to_buyer: "Any other notes?"
         number_of_seats: "Number of people"
         amount_owed: "Total price"
+        supported_payment_methods: "Payment methods offered"
+        supported_payment_methods_other_details: "Payment instructions"
+        supported_payment_methods_each_method:
+          stripe: "Stripe"
+          other:  "Other (e.g. give bank account details)"
 
       encounter_order_item:
         description: "Line item"
@@ -222,6 +227,10 @@ en:
       current: "Draft (%{time})"
       unpublished: "Old (%{time})"
 
+    supported_payment_method:
+      stripe: "Stripe"
+      other: "Other"
+
   views:
     encounter_orders:
       seats:
@@ -235,6 +244,8 @@ en:
         html_tax_suffix: "<strong>excl. %{html_safe_tax_name} at %{html_safe_tax_rate}%</strong>"
         html_currency_and_tax_suffix: "%{html_safe_currency} %{html_safe_tax_suffix}"
         html_amount_excl_and_incl_tax: "%{fmtd_amount_excl} excl. %{html_safe_tax_name} (total <strong>%{fmtd_amount_incl}</strong> %{html_safe_tax_name})"
+      supported_payment_methods:
+        other_info_hint: "Instructions, e.g. direct bank transfer information"
 
     orders:
       seats:

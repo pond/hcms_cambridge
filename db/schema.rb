@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_13_061329) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_04_022623) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_061329) do
   create_enum "event_on_archive_actions", ["keep", "hide", "move"]
   create_enum "event_states", ["presales", "reserver_purchases", "public_purchases", "archived", "cancelled"]
   create_enum "order_states", ["new", "reserved", "paid", "payment_failed", "cancelled", "refunded"]
+  create_enum "supported_payment_methods", ["stripe", "other"]
 
   create_table "articles", force: :cascade do |t|
     t.text "article_hero_image", null: false
@@ -61,6 +62,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_061329) do
     t.text "phone_number"
     t.datetime "starts_at"
     t.enum "state", default: "new", null: false, enum_type: "order_states"
+    t.text "supported_payment_method_other_details"
+    t.enum "supported_payment_methods", default: [], null: false, array: true, enum_type: "supported_payment_methods"
     t.text "token", null: false
     t.datetime "updated_at", null: false
     t.boolean "user_chooses_has_physical", default: true, null: false

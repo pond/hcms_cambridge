@@ -24,6 +24,9 @@ class EncounterOrder < ApplicationRecord
     reject_if:     :all_blank
   )
 
+  after_initialize :set_default_payment_methods!, unless: :persisted?
+  before_save      :clean_default_payment_methods!
+
   # Uses the site name first letters capitalised plus "EI-" - e.g. for a site
   # name of "Some web site", the prefix would be "SWSEI-".
   #
@@ -106,6 +109,30 @@ class EncounterOrder < ApplicationRecord
     self.states[:paid],
     self.states[:refunded],
   ]
+
+  # NB: This is also backed by a PostgreSQL array of an enum, so changes
+  # require corresponding migrations. Enum originally created by
+  # "20260504020644_add_payment_options_to_encounter_order.rb".
+  #
+  SUPPORTED_PAYMENT_METHOD_STRIPE = 'stripe'
+  SUPPORTED_PAYMENT_METHOD_OTHER  = 'other'
+  SUPPORTED_PAYMENT_METHODS       = [
+    SUPPORTED_PAYMENT_METHOD_STRIPE,
+    SUPPORTED_PAYMENT_METHOD_OTHER,
+  ]
+
+  validate do
+    methods = self.supported_payment_methods.compact_blank
+    invalid = methods - SUPPORTED_PAYMENT_METHODS
+
+    if invalid.any?
+      errors.add(:supported_payment_methods, "contains unsupported method(s) #{invalid.to_sentence}")
+    elsif methods.none?
+      errors.add(:supported_payment_methods, "must include at least one option")
+    elsif self.includes_other_payment_method_option? && self.supported_payment_method_other_details.blank?
+      errors.add(:supported_payment_method_other_details, :blank)
+    end
+  end
 
   # ============================================================================
   # Scopes
@@ -292,7 +319,7 @@ class EncounterOrder < ApplicationRecord
   end
 
   def admin_can_make_amendments?
-    self.valid_events.any?
+    self.valid_events.any? && ! self.state_paid?
   end
 
   def price_agreed_by_application?
@@ -361,6 +388,16 @@ class EncounterOrder < ApplicationRecord
     end
 
     return 0
+  end
+
+  def decorated_supported_payment_methods
+    self.supported_payment_methods.map do |method|
+      SupportedPaymentMethod.new(method)
+    end
+  end
+
+  def includes_other_payment_method_option?
+    self.supported_payment_methods.include?(SUPPORTED_PAYMENT_METHOD_OTHER)
   end
 
   # ============================================================================
@@ -469,4 +506,31 @@ class EncounterOrder < ApplicationRecord
       EncounterOrderMailer.encounter_order_state_refunded_email(self).deliver_later()
     end
   end
+
+  # ============================================================================
+  # PRIVATE INSTANCE METHODS
+  # ============================================================================
+  #
+  private
+
+    # Called via 'after_initialize' for new records only.
+    #
+    def set_default_payment_methods!
+      if self.supported_payment_methods.empty?
+        if self.frozen_price_on_application
+          self.supported_payment_methods = [SUPPORTED_PAYMENT_METHOD_OTHER]
+        else
+          self.supported_payment_methods = SUPPORTED_PAYMENT_METHODS - [SUPPORTED_PAYMENT_METHOD_OTHER]
+        end
+      end
+    end
+
+    # Called via 'before_save' to strip any blank entries from the payment
+    # methods array - Rails form submission data for "no checkboxes selected"
+    # can lead to these.
+    #
+    def clean_default_payment_methods!
+      self.supported_payment_methods.compact_blank!
+    end
+
 end

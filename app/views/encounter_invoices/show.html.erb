@@ -164,7 +164,11 @@
       </td>
     </tr>
     <tr>
-      <td colspan="3"></td>
+      <td colspan="3">
+        <% if @encounter_order.includes_other_payment_method_option? %>
+          <%= @encounter_order.supported_payment_method_other_details %>
+        <% end %>
+      </td>
       <td class="amounts">
         <% if @encounter_order.state_paid? %>
           <strong>PAID IN FULL</strong>

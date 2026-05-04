@@ -94,6 +94,14 @@ form div.field div.checkbox {
   justify-content: space-after;
   gap: 7px;
   align-items: baseline;
+
+  &.in_collection {
+    margin: 0.5em 0;
+
+    label {
+      font-weight: normal;
+    }
+  }
 }
 
 div.row-wide-column-small-container, div.highlighted-area-container {

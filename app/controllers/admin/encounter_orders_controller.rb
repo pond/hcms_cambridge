@@ -18,8 +18,11 @@ class Admin::EncounterOrdersController < ApplicationController
     starts_at_kind
     number_of_seats
     amount_owed
+
+    supported_payment_method_other_details
   }
 
+  PERMITTED_ENCOUNTER_ORDER_PARAMS << { :supported_payment_methods => [] }
   PERMITTED_ENCOUNTER_ORDER_PARAMS << { encounter_order_items_attributes: [
     :id, :description, :amount_owed, :_destroy
   ] }

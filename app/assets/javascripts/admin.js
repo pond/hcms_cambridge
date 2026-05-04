@@ -211,7 +211,7 @@ $(document).ready(function() {
   });
 
   // ===========================================================================
-  // Handle addition or removal of optional encounter order item rows; this code
+  // Handle addition or removal of optional Encounter Order item rows; this code
   // relies in part on constants defined earlier, for price calculations.
   // ===========================================================================
   //
@@ -307,7 +307,7 @@ $(document).ready(function() {
       }
     }
 
-    // Add item rows for encounter orders.
+    // Add item rows for Encounter Orders.
     //
     function addRow() {
       const uniqueIdForFormSubmission = "-" + Date.now(); // Negative integer
@@ -343,7 +343,7 @@ $(document).ready(function() {
       }
     });
 
-    // Remove item rows for new encounter orders.
+    // Remove item rows for new Encounter Orders.
     //
     $encounterOrderItemsWrapper.on('click', '.remove_encounter_order_item_button', function() {
       const $row = rowContaining(this);
@@ -352,7 +352,7 @@ $(document).ready(function() {
       updateTotal();
     });
 
-    // Remove item rows when editing encounter orders.
+    // Remove item rows when editing Encounter Orders.
     //
     $encounterOrderItemsWrapper.on('click', '.destroy_encounter_order_item_button', function() {
       const $row = rowContaining(this);
@@ -378,7 +378,7 @@ $(document).ready(function() {
   });
 
   // ===========================================================================
-  // Handle changes of kind of encounter order starting date/time
+  // Handle changes of kind of Encounter Order starting date/time
   // ===========================================================================
   //
   init('[id^="encounter_order_starts_at_kind_"]', ($encounterOrderStartsAtKindRadios) => {
@@ -396,4 +396,25 @@ $(document).ready(function() {
     enableOrDisableDateTimeInput();
     $encounterOrderStartsAtKindRadios.on('change', enableOrDisableDateTimeInput);
   });
+
+  // ===========================================================================
+  // Handle changes of Encounter Order payment method
+  // ===========================================================================
+  //
+  init('#encounter_order_supported_payment_methods_other', ($encounterOrderOtherPaymentMethodCheckbox) => {
+    const $encounterOrderOtherPaymentMethodDetailsTextarea = $('#encounter_order_supported_payment_method_other_details');
+
+    function setVisibilities() {
+      if ($encounterOrderOtherPaymentMethodCheckbox.is(':checked')) {
+        $encounterOrderOtherPaymentMethodDetailsTextarea.show();
+      } else {
+        $encounterOrderOtherPaymentMethodDetailsTextarea.hide();
+      }
+    }
+
+    setVisibilities();
+    $encounterOrderOtherPaymentMethodCheckbox.change(setVisibilities);
+  });
+
+
 });
