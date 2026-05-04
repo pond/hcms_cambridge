@@ -1,0 +1,22 @@
+<%#
+  Renders a row of customer-facing text to summarise the people (number of
+  seats) and price of an encounter order. Exists so that the AJAX fetcher for
+  toggling of the "Add physical item" checkbox can update this row.
+
+  Render without layout and with local "encounter_order" giving the Encounter
+  Order instance to consult.
+%>
+<%= encounter_order.number_of_seats %> →
+<% if encounter_order.amount_owed.zero? %>
+  No charge
+<% else %>
+  <%= encordshelp_amount_excl_and_incl_for(encounter_order) %>
+<% end %>
+<% if encounter_order.has_physical %>
+  <% if (encounter_order.frozen_price_physical || 0).zero? %>
+    (including free <%= encounter_order.encounter.name_physical %>)
+  <% else %>
+    (including <%= apphelp_money(encounter_order.frozen_price_physical, currency: encounter_order.encounter.currency) %>
+    for <%= encounter_order.encounter.name_physical %>)
+  <% end %>
+<% end %>

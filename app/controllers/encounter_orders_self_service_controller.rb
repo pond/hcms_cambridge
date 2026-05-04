@@ -39,11 +39,16 @@ class EncounterOrdersSelfServiceController < ApplicationController
         @encounter_order.has_physical = has_physical
         @encounter_order.save!
 
-        head :ok
+        render(
+          partial: 'people_and_price_row',
+          locals:  { encounter_order: @encounter_order },
+          layout:  false
+        )
       rescue => error
         Sentry.capture_exception(error)
         head :internal_server_error
       end
+
       return # NOTE EARLY EXIT
     end
 

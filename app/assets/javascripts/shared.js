@@ -36,8 +36,9 @@ $(document).ready(function() {
   // ===========================================================================
   //
   init('#encounter_order_has_physical', ($encounterOrderPhysicalCheckbox) => {
-    const $encounterOrderIdHidden    = $('#id_for_changes');
-    const $encounterOrderTokenHidden = $('#token_for_changes');
+    const $encounterOrderIdHidden                   = $('#id_for_changes');
+    const $encounterOrderTokenHidden                = $('#token_for_changes');
+    const $encounterOrderPeopleAndPriceRowContainer = $('#people_and_price_row');
 
     // NOTE EARLY EXIT.
     //
@@ -80,7 +81,8 @@ $(document).ready(function() {
         headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
         data:    { state_ajax: 'toggle', has_physical: (checked ? '1' : '0') },
 
-        success() {
+        success(html) {
+          $encounterOrderPeopleAndPriceRowContainer.html(html);
           enableElts();
         },
 

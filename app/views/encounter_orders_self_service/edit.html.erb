@@ -11,7 +11,7 @@
   <dt>Date and time</dt>
   <dd><%= encordshelp_datetime(@encounter_order) %></dd>
   <dt>People and price</dt>
-  <dd>
+  <dd id="people_and_price_row">
     <%= @encounter_order.number_of_seats %> →
     <% if @encounter_order.amount_owed.zero? %>
       No charge
