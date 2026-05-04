@@ -1,5 +1,5 @@
 require "spec_helper.rb"
-require_relative "shared_examples/footer_spec.rb"
+require_relative "shared_examples/footer.rb"
 
 RSpec.describe "Pages" do
   context "navigation" do

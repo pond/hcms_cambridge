@@ -461,7 +461,7 @@ RSpec.describe "Admin - encounter orders" do
 
         click_on("Refund customer (automatic via Stripe)")
 
-        expect(page).to have_text("This booking is no longer in a state that permits amendments")
+        expect(page).to have_text("That booking cannot be changed in that way")
       end
     end # 'context "after being paid for" do'
 

@@ -81,15 +81,12 @@ class Admin::EncounterOrdersController < ApplicationController
     def update
       @encounter_order = EncounterOrder.find(params[:id])
       @encounter_order.with_lock do
-
-        # What if, say, the customer paid while the admin was editing the item?
-        #
-        if ! @encounter_order.admin_can_make_amendments?
-          bail_out_with('This booking is no longer in a state that permits amendments.')
-          return # NOTE EARLY EXIT
-        end
-
         unless params[:process] == 'state'
+          if ! @encounter_order.admin_can_make_amendments?
+            bail_out_with('This booking is no longer in a state that permits amendments.')
+            return # NOTE EARLY EXIT
+          end
+
           if params.key?(:encounter_order)
             handle_form_submission(
               encounter_order:    @encounter_order,

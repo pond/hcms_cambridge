@@ -157,13 +157,15 @@
       </span>
 
       <p>
-        <%
-          threshold = apphelp_money(
-            Hcms.config.tax_threshold,
-            currency: @encounter_order.encounter.currency
-          )
-        %>
-        <%= apphelp_label(f, :address, hint: "mandatory for invoices above #{threshold}, else optional") %>
+        <% if Hcms.config.tax_threshold.is_a?(Integer) %>
+          <%
+            threshold = apphelp_money(
+              Hcms.config.tax_threshold,
+              currency: @encounter_order.encounter.currency
+            )
+          %>
+          <%= apphelp_label(f, :address, hint: "mandatory for invoices above #{threshold}, else optional") %>
+        <% end %>
         <%= f.text_area :address, rows: 3, cols: 80 %>
         <%= f.error_markup_for(:address) %>
       </p>
