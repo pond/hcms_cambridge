@@ -134,7 +134,7 @@
       <div class="row-wide-column-small">
         <% if @encounter_order.may_pay_state? %>
           <% spms = @encounter_order.decorated_supported_payment_methods %>
-          <% spms = spms.first if @encounter_order.amount_owed.zero? %>
+          <% spms = [spms.first] if @encounter_order.amount_owed.zero? %>
           <% spms.each do | spm | %>
             <% if spms.size == 1 %>
               <%=
