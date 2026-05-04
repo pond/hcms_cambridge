@@ -74,6 +74,10 @@ div.two_column {
 
 form div.field {
   margin-bottom: 1em;
+
+  & + div.field_error_messages.dynamic {
+    margin: -1em 0 1em 0;
+  }
 }
 
 form div.field div.field-row {

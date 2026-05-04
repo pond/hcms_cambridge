@@ -1,71 +1,78 @@
 $(document).ready(function() {
 
+  // A helper which is called with a jQuery selector and function object. If
+  // the selector matches any elements, the function is invoked and passed the
+  // jQuery object for the given selector (so you don't have to look up twice).
+  //
+  const init = (selector, fn) => {
+    const $el = $(selector);
+    if ($el.length) fn($el);
+  };
+
   // ===========================================================================
   // Copy buttons
   // ===========================================================================
   //
-  const copyFromDataButtons = $('button.copy_from_data[data-text]');
+  init('button.copy_from_data[data-text]', ($copyFromDataButtons) => {
+    $copyFromDataButtons.on('click', function(e) {
+      const $targetButton = $(this);
+      const $icon         = $targetButton.find('i.fa');
+      const text          = $targetButton.data('text');
 
-  if (copyFromDataButtons.length > 0) {
-    copyFromDataButtons.on('click', function(e) {
-      const targetButton = $(this);
-
-      text = targetButton.data('text');
       navigator.clipboard.writeText(text);
-
-      icon = targetButton.find('i.fa');
-      icon.removeClass('fa-copy');
-      icon.addClass('fa-check');
+      $icon.removeClass('fa-copy').addClass('fa-check');
 
       window.setTimeout(
         function() {
-          icon.removeClass('fa-check');
-          icon.addClass('fa-copy');
+          $icon.removeClass('fa-check').addClass('fa-copy');
         },
         2000
       );
     });
-  }
+  });
 
   // ===========================================================================
   // "Manage booking" for Encounter Orders - toggling physical item
   // ===========================================================================
   //
-  const encounterOrderPhysicalCheckbox = $('#encounter_order_has_physical');
-  const encounterOrderIdHidden         = $('#id_for_changes');
-  const encounterOrderTokenHidden      = $('#token_for_changes');
+  init('#encounter_order_has_physical', ($encounterOrderPhysicalCheckbox) => {
+    const $encounterOrderIdHidden    = $('#id_for_changes');
+    const $encounterOrderTokenHidden = $('#token_for_changes');
 
-  if (
-    encounterOrderPhysicalCheckbox.length > 0 &&
-    encounterOrderIdHidden.length         > 0 &&
-    encounterOrderTokenHidden.length      > 0
-  ) {
-    const invoiceButton    = $('#encounter_order_invoice_button');
-    const id               = encounterOrderIdHidden.val();
-    const token            = encounterOrderTokenHidden.val();
-    let   callIsInProgress = false;
+    // NOTE EARLY EXIT.
+    //
+    if (! $encounterOrderIdHidden.length || ! $encounterOrderTokenHidden.length) return;
+
+    const $invoiceButton = $('#encounter_order_invoice_button');
+    const id             = $encounterOrderIdHidden.val();
+    const token          = $encounterOrderTokenHidden.val();
 
     function disableElts() {
-      encounterOrderPhysicalCheckbox.prop('disabled', true);
+      $encounterOrderPhysicalCheckbox.prop('disabled', true);
 
-      invoiceButton.addClass('disabled')
-      invoiceButton.attr('aria-disabled', 'true')
-      invoiceButton.on('click.guard', e => e.preventDefault());
+      $invoiceButton.addClass('disabled');
+      $invoiceButton.attr('aria-disabled', 'true');
+      $invoiceButton.on('click.guard', e => e.preventDefault());
     }
 
     function enableElts() {
-      encounterOrderPhysicalCheckbox.prop('disabled', false);
+      $encounterOrderPhysicalCheckbox.prop('disabled', false);
 
-      invoiceButton.removeClass('disabled')
-      invoiceButton.removeAttr('aria-disabled')
-      invoiceButton.off('click.guard');
+      $invoiceButton.removeClass('disabled');
+      $invoiceButton.removeAttr('aria-disabled');
+      $invoiceButton.off('click.guard');
     }
 
-    $(encounterOrderPhysicalCheckbox).on('change', function () {
-      const checked = encounterOrderPhysicalCheckbox.prop('checked');
+    $encounterOrderPhysicalCheckbox.on('change', function () {
+      const checked = $encounterOrderPhysicalCheckbox.prop('checked');
 
-      disableElts()
-      $('.js-physical-warning').remove()
+      disableElts();
+      $('.dynamic').remove()
+      $encounterOrderPhysicalCheckbox
+        .closest('div.field')
+        .find('.field_with_errors')
+        .contents()
+        .unwrap();
 
       $.ajax({
         url:     `/manage_encounter/${id}/${token}`,
@@ -78,12 +85,16 @@ $(document).ready(function() {
         },
 
         error() {
-          encounterOrderPhysicalCheckbox.prop('checked', !checked);
+          $encounterOrderPhysicalCheckbox.prop('checked', !checked);
           enableElts();
-          $('<div class="field_error_messages js-physical-warning">Could not save change — please try again.</p>')
-            .insertAfter(encounterOrderPhysicalCheckbox);
+
+          const $field = $encounterOrderPhysicalCheckbox.closest('div.field');
+
+          $field.wrapInner('<div class="field_with_errors">');
+          $('<div class="field_error_messages dynamic">Could not save that change - please try again.</div>')
+            .insertAfter($field);
         },
       });
     });
-  }
+  });
 });
