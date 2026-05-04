@@ -12,17 +12,33 @@ class EncounterOrdersSelfServiceController < ApplicationController
     render()
   end
 
+  # This is used in two ways:
+  #
+  # * AJAX calls from toggling the "has physical item" checkbox (where present),
+  #   to make sure that the data layer stays current and an invoice, if opened
+  #   off the view with that checkbox straight after it was toggled, would
+  #   include that change and display a correct total
+  #
+  # * User-requested changes of state, e.g. payment or cancellation.
+  #
   def update
 
     # An early-exit possibility for AJAX calls due to toggling the physical item
     # checkbox, where available.
     #
     if params[:state_ajax] && params.key?(:has_physical)
-      head 500
-      return
       begin
         has_physical = ActiveModel::Type::Boolean.new.cast(params[:has_physical])
-        @encounter_order.update!(has_physical: has_physical)
+
+        if @encounter_order.has_physical == true && has_physical == false
+          @encounter_order.amount_owed -= @encounter_order.frozen_price_physical
+        elsif @encounter_order.has_physical == false && has_physical == true
+          @encounter_order.amount_owed += @encounter_order.frozen_price_physical
+        end
+
+        @encounter_order.has_physical = has_physical
+        @encounter_order.save!
+
         head :ok
       rescue => error
         Sentry.capture_exception(error)
