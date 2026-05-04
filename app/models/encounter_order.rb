@@ -390,14 +390,20 @@ class EncounterOrder < ApplicationRecord
     return 0
   end
 
+  # Returns 'true' if the supported payment options include the "Other" option,
+  # else 'false'.
+  #
+  def includes_other_payment_method_option?
+    self.supported_payment_methods.include?(SUPPORTED_PAYMENT_METHOD_OTHER)
+  end
+
+  # Returns an array of SupportedPaymentMethod utility objects that match the
+  # current array of supported payment methods, in the same order.
+  #
   def decorated_supported_payment_methods
     self.supported_payment_methods.map do |method|
       SupportedPaymentMethod.new(method)
     end
-  end
-
-  def includes_other_payment_method_option?
-    self.supported_payment_methods.include?(SUPPORTED_PAYMENT_METHOD_OTHER)
   end
 
   # ============================================================================
@@ -518,7 +524,8 @@ class EncounterOrder < ApplicationRecord
     def set_default_payment_methods!
       if self.supported_payment_methods.empty?
         if self.frozen_price_on_application
-          self.supported_payment_methods = [SUPPORTED_PAYMENT_METHOD_OTHER]
+          self.supported_payment_methods              = [SUPPORTED_PAYMENT_METHOD_OTHER]
+          self.supported_payment_method_other_details = ENV['OTHER_PAYMENT_METHOD_DESCRIPTION']&.strip.presence
         else
           self.supported_payment_methods = SUPPORTED_PAYMENT_METHODS - [SUPPORTED_PAYMENT_METHOD_OTHER]
         end

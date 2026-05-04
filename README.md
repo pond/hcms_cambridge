@@ -85,7 +85,7 @@ heroku config:set AWS_S3_BUCKET_NAME="s3-bucket-name"                 --app your
 
 ### Other configuration
 
-The configuration described above may be _required_ for Heroku but are otherwise optional on other deployment platforms; meanwhile, various other integrations can be used for any deployment platform you choose.
+The configuration described above may be _required_ for Heroku but is otherwise optional on other deployment platforms; meanwhile, various other integrations can be used for any deployment platform you choose.
 
 #### Stripe payments
 
@@ -100,6 +100,12 @@ heroku config:set STRIPE_API_KEY="sk_test_..." --app your-appname-1234
 ```
 
 With this done, Stripe payment support is activated. When a user chooses to pay for an event on-site, they'll be sent to the Stripe hosted checkout page (where appearance is configured via Stripe's settings UI). If they cancel, then the user is returned to HCMS with their order cancelled; else the order is marked as successful and the Stripe payment details are connected to it. You can then issue a refund, should you wish, directly from inside HCMS - this means the order state on HCMS's site is kept up to date and the user will receive a refund notifiation e-mail from HCMS as well as Stripe. The former is more "friendly" and relevant in tone and branding to your site and the event you offered.
+
+#### Other payment methods
+
+Encounter Orders are created by the site administrator as a result of agreeing details of an Encounter with a customer. When setting these up, you choose available payment methods on an order-by-order-basis. There's an "other" option which, if chosen, requires you to type in a free-text description of this other way to pay - typically something like bank transfer instructions - and this gets shown to the customer if they choose that option (or if that's the only option available) when they are ready to pay.
+
+Filling this in every time with what is likely to be the same message - e.g. "Please pay by direct bank transfer to..." - could be tedious, so you can set a default via environment variable `OTHER_PAYMENT_METHOD_DESCRIPTION`. This isn't stored in `hcms.yml` or anywhere else in code, since it's usually a good idea to minimise the number of places where such data is exposed - especially to bots!
 
 #### GTM
 
