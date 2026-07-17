@@ -374,6 +374,20 @@ def spechelp_check_tel(html:, phone:)
   expect(html).to include(helper.link_to(phone, "tel:#{phone.gsub(' ', '%20')}"))
 end
 
+# JS tests only - get the currently focused element. You can then do things
+# like call "send_keys" on it.
+#
+def spechelp_get_focused_element
+  page.evaluate_script("document.activeElement")
+end
+
+# JS tests only - assert input focus is in the element identified by the
+# given selector (e.g. a CSS selector).
+#
+def spechelp_expect_focus_on(selector)
+  expect(spechelp_get_focused_element()).to eq(find(selector))
+end
+
 # Wait for a default jQuery animation to complete.
 #
 # TODO: Currently, this a very simple implementation! Just assumes a 400ms

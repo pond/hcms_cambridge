@@ -1229,7 +1229,7 @@ RSpec.describe "Admin - encounters" do
         encounter_3 = create(:encounter); encounter_3.revisions.first.update!(published: true)
 
         encounter_1.update(category_position: 3)
-        encounter_2.update(category_position: 2)
+        encounter_2.update(category_position: 2, price_on_application: true)
         encounter_3.update(category_position: 1)
 
         encounter_3.category = "Goliaths"
@@ -1258,22 +1258,23 @@ RSpec.describe "Admin - encounters" do
         row_2 = find(:css, "table tbody > tr:nth-child(2)")
         row_3 = find(:css, "table tbody > tr:nth-child(3)")
 
-        # Title / Published? / Draft? / Actions
+        # Title / Published? / Draft? / POA? / Actions
         #
         # Note reverse order - created-at ASC sorting.
         #
-        expect(row_1).to have_text("#{encounter_3.title} Yes Yes Goliaths Bookings / Show / Edit Delete", exact: true)
-        expect(row_2).to have_text("#{encounter_2.title} Yes No Uncategorised Bookings / Show / Edit Delete", exact: true)
-        expect(row_3).to have_text("#{encounter_1.title} No Yes Uncategorised Show / Edit Delete", exact: true)
+        expect(row_1).to have_text("#{encounter_3.title} Yes Yes No Goliaths Bookings / Show / Edit Delete", exact: true)
+        expect(row_2).to have_text("#{encounter_2.title} Yes No Yes Uncategorised Bookings / Show / Edit Delete", exact: true)
+        expect(row_3).to have_text("#{encounter_1.title} No Yes No Uncategorised Show / Edit Delete", exact: true)
 
-        # Check a few links. Column 1 - encounter title, 2-3 - boolean, 4-7
-        # category and category move arrow cells, 7 - booking and main actions,
-        # 8 - delete action.
+        # Check a few links. Column 1 - encounter title, 2-4 - boolean, 5-7
+        # category and category move arrow cells, 8 - booking and main actions,
+        # 9 - delete action.
         #
         expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",      href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
-        expect(row_1.find(:css, "> td:nth-child(7)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
-        expect(row_2.find(:css, "> td:nth-child(7)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
-        expect(row_3.find(:css, "> td:nth-child(7)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
+        expect(row_1.find(:css, "> td:nth-child(8)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
+        expect(row_2.find(:css, "> td:nth-child(8)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
+        expect(row_3.find(:css, "> td:nth-child(8)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
+        expect(row_3.find(:css, "> td:nth-child(9)")).to have_link("Delete",   href: admin_encounter_path( encounter_1.id))
       end
 
       it "links to the main 'all pages' list" do

@@ -1,21 +1,32 @@
 require "spec_helper.rb"
 require_relative "shared_contexts/encounter_order_context.rb"
 
-RSpec.describe "Admin - encounter orders" do
+RSpec.describe "Encounter orders" do
   include_context "encounter orders"
 
   before :each do
+    spechelp_log_in()
     @encounter = create(:encounter)
     @encounter.revisions.first.update!(published: true)
   end
 
+  # Avoid timeoutes with headless Chrome due to full URL's 'example.com' use.
+  #
+  def visit_magic_link_by_path(encounter_order)
+    visit(URI.parse(encordshelp_magic_link(@encounter_order)).path)
+  end
+
   context "making payment" do
-    shared_examples "an encounter booking confirmation form" do | select_physical = nil |
+
+    # Current options: "select_physical: true/false/undefined" to toggle the physical
+    # product item box & verify the expected on-page changes (via a JS test).
+    #
+    shared_examples "an encounter booking confirmation form" do | opts = {} |
       before :each do
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
       end
 
-      it "which has the expected text and fields" do
+      it "which has the expected text and fields", js: opts.key?(:select_physical) do
         expect(page).to have_text("Manage booking for")
         expect(page).to have_text(@encounter.title)
         expect(page).to have_text(encordshelp_datetime(@encounter_order))
@@ -27,19 +38,21 @@ RSpec.describe "Admin - encounter orders" do
           expect(page).to have_text("→ #{apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency)}")
         end
 
-        unless @encounter_order.frozen_price_physical.nil?
-          physical = if @encounter.physical_aspect_free_of_charge?
-            "including free #{@encounter.name_physical}"
-          else
-            "including " +
-            apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency) +
-            " for #{@encounter.name_physical})"
-          end
+        physical_product_info_text = if @encounter_order.frozen_price_physical.nil?
+          nil
+        elsif @encounter.physical_aspect_free_of_charge?
+          "including free #{@encounter.name_physical}"
+        else
+          "including " +
+          apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency) +
+          " for #{@encounter.name_physical})"
+        end
 
+        unless @encounter_order.frozen_price_physical.nil?
           if @encounter_order.has_physical
-            expect(page).to have_text(physical)
+            expect(page).to have_text(physical_product_info_text)
           else
-            expect(page).to_not have_text(physical)
+            expect(page).to_not have_text(physical_product_info_text)
           end
         end
 
@@ -60,16 +73,18 @@ RSpec.describe "Admin - encounter orders" do
           expect(page).to_not have_field("encounter_order_has_physical")
         end
 
-        if select_physical == true
+        if opts[:select_physical] == true
           check("encounter_order_has_physical")
-        elsif select_physical == false
+          expect(page).to have_text(physical_product_info_text)
+        elsif opts[:select_physical] == false
           uncheck("encounter_order_has_physical")
+          expect(page).to_not have_text(physical_product_info_text)
         end
       end
 
       context "which lets the user pay" do
         before :each do
-          visit(encordshelp_magic_link(@encounter_order))
+          visit_magic_link_by_path(@encounter_order)
 
           @gift_note = [SecureRandom.uuid, nil].sample()
 
@@ -321,12 +336,12 @@ RSpec.describe "Admin - encounter orders" do
     context "priced by seat" do
       before :each do
         @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
         simulate_stripe_payment(@encounter_order)
       end
 
       it "lets the user view their booking" do
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
 
         expect(page).to have_text(@encounter.title)
         expect(page).to have_text(apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency))
@@ -336,7 +351,7 @@ RSpec.describe "Admin - encounter orders" do
       end
 
       it "lets the user view an invoice" do
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
         click_on("Invoice")
 
         seats = spechelp_format_money(@encounter_order.frozen_price_per_seat, @encounter.currency)
@@ -358,7 +373,7 @@ RSpec.describe "Admin - encounter orders" do
       end
 
       it "does not change even if the encounter price is altered" do
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
 
         @encounter.update!(
           price_per_seat: @encounter.price_per_seat * 2,
@@ -387,7 +402,7 @@ RSpec.describe "Admin - encounter orders" do
       end
 
       it "shows discounts" do
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
 
         @encounter_order.update!(amount_owed: @encounter_order.amount_owed / 2)
 
@@ -440,7 +455,7 @@ RSpec.describe "Admin - encounter orders" do
         @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
         @encounter_order.update!(amount_owed: rand(11111..99999))
 
-        visit(encordshelp_magic_link(@encounter_order))
+        visit_magic_link_by_path(@encounter_order)
         simulate_stripe_payment(@encounter_order)
       end
 
@@ -638,7 +653,17 @@ RSpec.describe "Admin - encounter orders" do
       #
       create(:page).revisions.first.update!(published: true)
 
-      visit(encordshelp_magic_link(@encounter_order))
+      visit_magic_link_by_path(@encounter_order)
+    end
+
+    it "handles the user cancelling from the checkout stage", js: true do
+      accept_confirm do
+        find(:css, "input[name='state_cancel'").click()
+      end
+
+      spechelp_check_flash(:notice, "OK, that's cancelled")
+      expect(EncounterOrder.count).to eql(1)
+      expect(@encounter_order.reload.state).to eql("cancelled")
     end
 
     it "handles the user cancelling from within Stripe and confirming" do
@@ -666,10 +691,9 @@ RSpec.describe "Admin - encounter orders" do
 
       click_on("Cancel")
 
+      spechelp_check_flash(:notice, "OK, that's cancelled")
       expect(EncounterOrder.count).to eql(1)
       expect(@encounter_order.reload.state).to eql("cancelled")
-      expect(page).to have_text("OK, that's cancelled")
-      expect(page).to have_current_path(root_path())
     end
 
     it "handles the user cancelling from within Stripe but then changing their mind and paying" do
@@ -727,7 +751,7 @@ RSpec.describe "Admin - encounter orders" do
   context "handling failures" do
     before :each do
       @encounter_order = create(:encounter_order, :has_physical, encounter: @encounter)
-      visit(encordshelp_magic_link(@encounter_order))
+      visit_magic_link_by_path(@encounter_order)
     end
 
     # This is probably the most serious of all error cases, since it means

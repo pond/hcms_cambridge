@@ -199,6 +199,297 @@ RSpec.describe "Admin - encounter orders" do
 
         expect(page).to have_field("encounter_order_amount_owed", with: "0")
       end
+
+      context "optional line items" do
+        it "are not offered for price-known (non-POA) encounters" do
+          expect(@encounter.price_on_application?).to eql(false)
+          visit(new_admin_encounter_encounter_order_path(encounter_id: @encounter.slug))
+
+          expect(page).to have_text("Any other notes?")
+          expect(page).to_not have_text("Optional itemisation for invoice")
+        end
+
+        it "can be added for POA encounters" do
+          @encounter.update!(price_on_application: true)
+          expect(@encounter.price_on_application?).to eql(true) # (self-check)
+          visit(new_admin_encounter_encounter_order_path(encounter_id: @encounter.slug))
+
+          expect(page).to have_text("Optional itemisation for invoice")
+
+          # "Add item" should put focus into first new row; should be able to
+          # type text for that, Tab to value, Enter for a new row.
+
+          click_button "Add Item"
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 1)
+          end
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(1) .encounter_order_item_description_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("Item 1")
+          field.send_keys(:tab) # Move to amount field
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(1) .encounter_order_item_amount_owed_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("23")
+          field.send_keys(:enter) # Add a new row and focus the description field
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 2)
+          end
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(2) .encounter_order_item_description_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("Item 2")
+          field.send_keys(:tab)
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(2) .encounter_order_item_amount_owed_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("11")
+
+          # Check that totals are being updated
+          #
+          expect(find("#encounter_order_amount_owed").value).to eq("34") # (23 + 11)
+
+          # A bit of drive-by extra coverage; we expect POA items to have chosen
+          # "Other" as a default payment method and that'll require instructions,
+          # so this should fail validation when we save it...
+          #
+          fill_in("encounter_order_name", with: "Fred Flinstone")
+          fill_in("encounter_order_email", with: "fred@example.com")
+          fill_in("encounter_order_number_of_seats", with: 2)
+
+          click_on("Save booking")
+
+          expect(page).to have_css("div.field_with_errors > textarea#encounter_order_supported_payment_method_other_details")
+          expect(page).to have_text("Supported payment method other details must be provided")
+
+          fill_in("encounter_order_supported_payment_method_other_details", with: "In exchange for some Burgandy")
+
+          click_on("Save booking")
+
+          expect(page).to have_text("Encounter booking set up successfully")
+
+          expect(EncounterOrder.count).to eql(1)
+          expect(EncounterOrder.first.name                                  ).to eql("Fred Flinstone")
+          expect(EncounterOrder.first.email                                 ).to eql("fred@example.com")
+          expect(EncounterOrder.first.number_of_seats                       ).to eql(2)
+          expect(EncounterOrder.first.supported_payment_methods             ).to eql(["other"])
+          expect(EncounterOrder.first.supported_payment_method_other_details).to eql("In exchange for some Burgandy")
+
+          items = EncounterOrder.first.encounter_order_items.sort_by(&:description)
+
+          expect(items.count).to eql(2)
+
+          expect(items[0].description).to eql("Item 1")
+          expect(items[0].amount_owed).to eql(23 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          expect(items[1].description).to eql("Item 2")
+          expect(items[1].amount_owed).to eql(11 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+        end
+
+        it "must be validate, but empty rows are ignored" do
+          @encounter.update!(price_on_application: true)
+          expect(@encounter.price_on_application?).to eql(true) # (self-check)
+          visit(new_admin_encounter_encounter_order_path(encounter_id: @encounter.slug))
+
+          expect(page).to have_text("Optional itemisation for invoice")
+
+          # "Add item" should put focus into first new row; should be able to
+          # type text for that, Tab to value, Enter for a new row.
+
+          click_button "Add Item"
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 1)
+          end
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(1) .encounter_order_item_description_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("Item 1")
+          field.send_keys(:enter) # Drive-by test; Enter in the description field moves to the amount field
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(1) .encounter_order_item_amount_owed_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys(:enter) # Add a new row and focus the description field, before filling in amount
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 2)
+          end
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(2) .encounter_order_item_description_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys(:tab) # Skip to the amount field, without filling in the description
+
+          spechelp_expect_focus_on(".encounter_order_item:nth-child(2) .encounter_order_item_amount_owed_field")
+
+          field = spechelp_get_focused_element()
+          field.send_keys("11")
+
+          fill_in("encounter_order_name", with: "Fred Flinstone")
+          fill_in("encounter_order_email", with: "fred@example.com")
+          fill_in("encounter_order_number_of_seats", with: 2)
+          fill_in("encounter_order_supported_payment_method_other_details", with: "In exchange for some Burgandy")
+
+          click_on("Save booking")
+
+          expect(page).to have_css("div.field_with_errors > input#encounter_order_encounter_order_items_attributes_0_amount_owed")
+          expect(page).to have_css("div.field_with_errors > input#encounter_order_encounter_order_items_attributes_1_description")
+
+          # Fill in the missing information, and add a third row which we'll
+          # leave blank. The "0/1" indexing only appears after saving the form;
+          # JS row addition has to generate random unique negative IDs, so we
+          # can't depend on those above.
+          #
+          fill_in("encounter_order_encounter_order_items_attributes_0_amount_owed", with: "23")
+          fill_in("encounter_order_encounter_order_items_attributes_1_description", with: "Item 2")
+          click_on("Add Item")
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 3)
+          end
+
+          click_on("Save booking")
+
+          # No validation issues from that blank row
+          #
+          expect(page).to have_text("Encounter booking set up successfully")
+
+          expect(EncounterOrder.count).to eql(1)
+          expect(EncounterOrder.first.name                                  ).to eql("Fred Flinstone")
+          expect(EncounterOrder.first.email                                 ).to eql("fred@example.com")
+          expect(EncounterOrder.first.number_of_seats                       ).to eql(2)
+          expect(EncounterOrder.first.supported_payment_methods             ).to eql(["other"])
+          expect(EncounterOrder.first.supported_payment_method_other_details).to eql("In exchange for some Burgandy")
+
+          items = EncounterOrder.first.encounter_order_items.sort_by(&:description)
+
+          expect(items.count).to eql(2) # Not 3 - the blank row was ignored
+
+          expect(items[0].description).to eql("Item 1")
+          expect(items[0].amount_owed).to eql(23 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          expect(items[1].description).to eql("Item 2")
+          expect(items[1].amount_owed).to eql(11 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+        end
+
+        it "hides/shows extra payment instructions and allows amendments to line items" do
+          @encounter.update!(price_on_application: true)
+          expect(@encounter.price_on_application?).to eql(true) # (self-check)
+          visit(new_admin_encounter_encounter_order_path(encounter_id: @encounter.slug))
+
+          expect(page).to have_text("Optional itemisation for invoice")
+
+          # A bit of drive-by extra coverage; we expect POA items to have chosen
+          # "Other" as a default payment method and that'll require instructions,
+          # so this should fail validation when we save it...
+          #
+          fill_in("encounter_order_name", with: "Fred Flinstone")
+          fill_in("encounter_order_email", with: "fred@example.com")
+          fill_in("encounter_order_number_of_seats", with: 2)
+          fill_in("encounter_order_supported_payment_method_other_details", with: "In exchange for some Burgandy")
+
+          click_on("Add Item")
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 1)
+          end
+
+          click_on("Add Item")
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 2)
+          end
+
+          #encounter_order_items_wrapper
+
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(1) input.encounter_order_item_description_field").set("Item 1")
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(1) input.encounter_order_item_amount_owed_field").set("24")
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(2) input.encounter_order_item_description_field").set("Item 2")
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(2) input.encounter_order_item_amount_owed_field").set("15")
+
+          expect(find("#encounter_order_amount_owed").value).to eq("39") # (24 + 15)
+
+          check("encounter_order_supported_payment_methods_stripe")
+          uncheck("encounter_order_supported_payment_methods_other")
+
+          expect(page).to_not have_css("#encounter_order_supported_payment_method_other_details")
+
+          check("encounter_order_supported_payment_methods_other")
+
+          expect(page).to have_css("#encounter_order_supported_payment_method_other_details")
+
+          click_on("Save booking")
+
+          expect(page).to have_text("Encounter booking set up successfully")
+
+          expect(EncounterOrder.count).to eql(1)
+          expect(EncounterOrder.first.name                                  ).to eql("Fred Flinstone")
+          expect(EncounterOrder.first.email                                 ).to eql("fred@example.com")
+          expect(EncounterOrder.first.number_of_seats                       ).to eql(2)
+          expect(EncounterOrder.first.supported_payment_methods             ).to match_array(["other", "stripe"])
+          expect(EncounterOrder.first.supported_payment_method_other_details).to eql("In exchange for some Burgandy")
+
+          items = EncounterOrder.first.encounter_order_items.sort_by(&:description)
+
+          expect(items.count).to eql(2)
+
+          expect(items[0].description).to eql("Item 1")
+          expect(items[0].amount_owed).to eql(24 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          expect(items[1].description).to eql("Item 2")
+          expect(items[1].amount_owed).to eql(15 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          # Try some small amendments
+
+          click_on("Amend booking")
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 2)
+          end
+
+          # *Third* child, as on edit, a hidden form field ends up at child index 2 & 4
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(3) input.encounter_order_item_amount_owed_field").set("11")
+
+          expect(find("#encounter_order_amount_owed").value).to eq("35") # (24 + 11)
+
+          click_on("Add Item")
+
+          within "#encounter_order_items_wrapper" do
+            expect(page).to have_css(".encounter_order_item", count: 3)
+          end
+
+          # *Fifth* child, as on edit, a hidden form field ends up at child index 2 & 4
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(5) input.encounter_order_item_description_field").set("Item 3")
+          find("#encounter_order_items_wrapper .encounter_order_item:nth-child(5) input.encounter_order_item_amount_owed_field").set("41")
+
+          expect(find("#encounter_order_amount_owed").value).to eq("76") # (24 + 11 + 41)
+
+          click_on("Save Amendments")
+          spechelp_check_flash(:notice, "Booking successfully amended")
+
+          items = EncounterOrder.first.encounter_order_items.sort_by(&:description)
+
+          expect(items.count).to eql(3)
+
+          expect(items[0].description).to eql("Item 1")
+          expect(items[0].amount_owed).to eql(24 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          expect(items[1].description).to eql("Item 2")
+          expect(items[1].amount_owed).to eql(11 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+
+          expect(items[2].description).to eql("Item 3")
+          expect(items[2].amount_owed).to eql(41 * (10 ** Money::Currency.new(@encounter.currency).exponent))
+        end
+      end # 'context "optional line items" do'
     end # 'context "form variants" do'
   end # 'context "dynamic behaviour", js: true do'
 
@@ -339,6 +630,22 @@ RSpec.describe "Admin - encounter orders" do
         expect(page).to have_text("Extra test coverage")
         expect(page).to have_text(@encounter.location)
         expect(page).to have_text(encordshelp_datetime(@encounter_order))
+      end
+
+      it "can be amended" do
+        click_on("Amend booking")
+
+        old_seats = @encounter_order.number_of_seats
+        new_seats = old_seats + 1
+
+        fill_in("encounter_order_number_of_seats", with: new_seats)
+
+        click_on("Save Amendments")
+        spechelp_check_flash(:notice, "Booking successfully amended")
+
+        @encounter_order.reload
+
+        expect(@encounter_order.number_of_seats).to eql(new_seats)
       end
 
       it "can be cancelled" do
