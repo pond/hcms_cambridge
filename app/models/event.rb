@@ -92,8 +92,6 @@ class Event < Editable
     )
   }
 
-  default_scope -> { order(starts_at: :asc) }
-
   scope :not_hidden, -> { where(hidden: false) }
 
   scope :for_navigation, -> {
@@ -366,7 +364,7 @@ class Event < Editable
             order.update!(state: Order.states[:paid])
           else
             order.update!(state: Order.states[:new])
-            OrderMailer.event_state_public_purchases_email(order).deliver()
+            OrderMailer.event_state_public_purchases_email(order).deliver_later()
           end
         rescue => e
           Sentry.capture_exception(e)

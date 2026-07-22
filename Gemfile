@@ -132,6 +132,12 @@ group :development, :test do
   #   https://rubygems.org/gems/faker
   #
   gem 'faker', '~> 3.6'
+
+  # LSP for e.g. Zed or other editors that support such things.
+  #
+  #   https://rubygems.org/gems/ruby-lsp
+  #
+  gem 'ruby-lsp'
 end
 
 group :test do

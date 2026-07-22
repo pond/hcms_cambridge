@@ -1232,6 +1232,8 @@ RSpec.describe "Admin - encounters" do
         encounter_2.update(category_position: 2, price_on_application: true)
         encounter_3.update(category_position: 1)
 
+        encounter_2.update!(price_on_application: true)
+
         encounter_3.category = "Goliaths"
         encounter_3.revisions << build(:revision, :for_encounter)
         encounter_3.save!
@@ -1273,7 +1275,7 @@ RSpec.describe "Admin - encounters" do
         expect(row_1.find(:css, "> td:nth-child(3)")).to have_link("Yes",      href: admin_encounter_path(encounter_3, revision: encounter_3.revisions.last.id))
         expect(row_1.find(:css, "> td:nth-child(8)")).to have_link("Bookings", href: admin_encounter_encounter_orders_path(encounter_id: encounter_3.slug))
         expect(row_2.find(:css, "> td:nth-child(8)")).to have_link("Show",     href: admin_encounter_path(id: encounter_2.slug))
-        expect(row_3.find(:css, "> td:nth-child(8)")).to have_link("Edit",     href: edit_admin_encounter_path( encounter_1.id))
+        expect(row_3.find(:css, "> td:nth-child(8)")).to have_link("Edit",     href: edit_admin_encounter_path(encounter_1.id))
         expect(row_3.find(:css, "> td:nth-child(9)")).to have_link("Delete",   href: admin_encounter_path( encounter_1.id))
       end
 
