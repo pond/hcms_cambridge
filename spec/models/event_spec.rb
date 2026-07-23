@@ -57,6 +57,31 @@ RSpec.describe Event, type: :model do
     end
   end # 'context "scopes and associations" do'
 
+  context "initialisation" do
+    it "sets currency" do
+      allow(Hcms.config).to receive(:currency).and_return("XYZ")
+      expect(Event.new.currency).to eql("XYZ")
+    end
+
+    it "sets a time of 9am to 5pm today if 'now' is 8am or earlier" do
+      base_time = Time.zone.local(2026, 1, 1, 8, 00) # 8:00am
+
+      travel_to(base_time) do
+        expect(Event.new.starts_at).to eql(base_time + 1.hour)
+        expect(Event.new.ends_at  ).to eql(base_time + 9.hours)
+      end
+    end
+
+    it "sets a time of 9am to 5pm tomorrow if 'now' is after 8am" do
+      base_time = Time.zone.local(2026, 1, 1, 8, 01) # 8:01am
+
+      travel_to(base_time) do
+        expect(Event.new.starts_at).to eql(base_time + 1.day - 1.minute + 1.hour)
+        expect(Event.new.ends_at  ).to eql(base_time + 1.day - 1.minute + 9.hours)
+      end
+    end
+  end # 'context "initialisation" do'
+
   context "validations" do
     it "requires a title, summary, body and hero image" do
       event = build(:event)

@@ -136,11 +136,21 @@ RSpec.describe "Admin - events" do
 
       click_on("Publish event")
 
-      expect(page).to have_css(".field_error_messages", text: "Title must be provided")
-      expect(page).to have_css(".field_error_messages", text: "Poster photo must be provided")
-      expect(page).to have_css(".field_error_messages", text: "Brief summary must be provided")
+      expect(page).to     have_css(".field_error_messages", text: "Title must be provided")
+      expect(page).to     have_css(".field_error_messages", text: "Poster photo must be provided")
+      expect(page).to     have_css(".field_error_messages", text: "Brief summary must be provided")
+      expect(page).to_not have_css(".field_error_messages", text: "Start date and time must be in the future")
+      expect(page).to     have_css(".field_error_messages", text: "Event details must be provided")
+
+      starts = (Time.current - 2.days).midnight + 18.hours
+      ends   = (Time.current - 2.days).midnight + 21.hours
+
+      fill_in("event_starts_at", with: starts.iso8601)
+      fill_in("event_ends_at",   with: ends.iso8601)
+
+      click_on("Publish event")
+
       expect(page).to have_css(".field_error_messages", text: "Start date and time must be in the future")
-      expect(page).to have_css(".field_error_messages", text: "Event details must be provided")
     end
 
     context "dynamic behaviour", js: true do

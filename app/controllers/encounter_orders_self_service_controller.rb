@@ -308,23 +308,6 @@ class EncounterOrdersSelfServiceController < ApplicationController
     )
   end
 
-  # DELETE /encounters/<encounter_id>/encounter_orders/<encounter_order_id>
-  #
-  # When the end user cancels an order that's in flight, it just gets deleted
-  # since there's no point keeping unfinished order records around the place.
-  # In the admin UI, cancellation changes the order object state to "cancelled"
-  # instead, because the end user might have a link to that order item and it
-  # would be surprising if the link just broke.
-  #
-  def destroy
-    @encounter_order.destroy!
-
-    redirect_to(
-      root_path(),
-      notice: "OK, that's cancelled."
-    )
-  end
-
   # A non-RESTful GET endpoint, nested by encounter ID or slug, and encounter
   # order ID. Stripe redirects here when payment succeeds including the session
   # ID via a template variable in the URL we gave them. See the payment flow in

@@ -154,23 +154,6 @@ class OrdersSelfServiceController < ApplicationController
     )
   end
 
-  # DELETE /pages/<page_id>/events/<event_id>/orders/<order_id>
-  #
-  # When the end user cancels an order that's in flight, it just gets deleted
-  # since there's no point keeping unfinished order records around the place.
-  # In the admin UI, cancellation changes the order object state to "cancelled"
-  # instead, because the end user might have a link to that order item and it
-  # would be surprising if the link just broke.
-  #
-  def destroy
-    @order.destroy!
-
-    redirect_to(
-      page_event_path(page_id: @page.slug, id: @event.slug),
-      notice: "OK, that's cancelled."
-    )
-  end
-
   # A non-RESTful GET endpoint, nested by page and event ID or slug, and order
   # ID. Stripe redirects here when payment succeeds including the session ID
   # via a template variable in the URL we gave them. See the payment flow in

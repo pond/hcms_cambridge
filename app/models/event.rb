@@ -14,6 +14,11 @@ class Event < Editable
     self.starts_at = tz_now.beginning_of_day +  9.hours
     self.ends_at   = tz_now.beginning_of_day + 17.hours
     self.currency  = Hcms.config.currency
+
+    if self.starts_at < tz_now + 1.hour
+      self.starts_at += 1.day
+      self.ends_at   += 1.day
+    end
   end
 
   after_commit :stripe_make_inactive, on: :destroy

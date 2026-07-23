@@ -38,47 +38,55 @@ RSpec.describe "Encounter orders" do
           expect(page).to have_text("→ #{apphelp_money(@encounter_order.amount_owed, currency: @encounter.currency)}")
         end
 
-        physical_product_info_text = if @encounter_order.frozen_price_physical.nil?
-          nil
-        elsif @encounter.physical_aspect_free_of_charge?
-          "including free #{@encounter.name_physical}"
-        else
-          "including " +
-          apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency) +
-          " for #{@encounter.name_physical})"
-        end
+        expect(page).to have_field("encounter_order_gift_note")
 
-        unless @encounter_order.frozen_price_physical.nil?
+        if @encounter_order.frozen_price_physical.nil?
+          expect(page).to_not have_field("encounter_order_has_physical")
+        else
+          physical_product_info_text = if @encounter.physical_aspect_free_of_charge?
+            "including free #{@encounter.name_physical}"
+          else
+            "including " +
+            apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency) +
+            " for #{@encounter.name_physical})"
+          end
+
           if @encounter_order.has_physical
             expect(page).to have_text(physical_product_info_text)
           else
             expect(page).to_not have_text(physical_product_info_text)
           end
-        end
 
-        expect(page).to have_field("encounter_order_gift_note")
+          if @encounter_order.user_chooses_has_physical
+            if @encounter_order.has_physical
+              expect(page).to have_checked_field("encounter_order_has_physical")
+            else
+              expect(page).to have_unchecked_field("encounter_order_has_physical")
+            end
 
-        if @encounter_order.user_chooses_has_physical && @encounter_order.frozen_price_physical.present?
-          expect(page).to have_unchecked_field("encounter_order_has_physical")
-          label = page.find(:css, "label[for='encounter_order_has_physical']")
-          if @encounter.physical_aspect_free_of_charge?
-            expect(label).to have_text("Include free #{@encounter.name_physical}?")
+            label = page.find(:css, "label[for='encounter_order_has_physical']")
+
+            if @encounter.physical_aspect_free_of_charge?
+              expect(label).to have_text("Include free #{@encounter.name_physical}?")
+            else
+              expect(label).to have_text(
+                "Add #{@encounter.name_physical} for " +
+                apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency)
+              )
+            end
+
+            if opts[:select_physical] == true
+              check("encounter_order_has_physical")
+              expect(page).to have_text(physical_product_info_text)
+              expect(@encounter_order.reload.has_physical).to eql(true)
+            elsif opts[:select_physical] == false
+              uncheck("encounter_order_has_physical")
+              expect(page).to_not have_text(physical_product_info_text)
+              expect(@encounter_order.reload.has_physical).to eql(false)
+            end
           else
-            expect(label).to have_text(
-              "Add #{@encounter.name_physical} for " +
-              apphelp_money(@encounter_order.frozen_price_physical, currency: @encounter.currency)
-            )
+            expect(page).to_not have_field("encounter_order_has_physical")
           end
-        else
-          expect(page).to_not have_field("encounter_order_has_physical")
-        end
-
-        if opts[:select_physical] == true
-          check("encounter_order_has_physical")
-          expect(page).to have_text(physical_product_info_text)
-        elsif opts[:select_physical] == false
-          uncheck("encounter_order_has_physical")
-          expect(page).to_not have_text(physical_product_info_text)
         end
       end
 
@@ -116,17 +124,33 @@ RSpec.describe "Encounter orders" do
       end # 'context "physical product is free" do'
 
       context "physical product must be paid for" do
-        before :each do
-          @encounter_order = create(:encounter_order, encounter: @encounter)
+        context "and order starts with has_physical 'false'" do
+          before :each do
+            @encounter_order = create(:encounter_order, encounter: @encounter, has_physical: false)
 
-          expect(@encounter.has_physical_aspect?           ).to eql(true)
-          expect(@encounter.physical_aspect_free_of_charge?).to eql(false)
-          expect(@encounter_order.user_chooses_has_physical).to eql(true)
-          expect(@encounter_order.has_physical             ).to eql(false)
-        end
+            expect(@encounter.has_physical_aspect?           ).to eql(true)
+            expect(@encounter.physical_aspect_free_of_charge?).to eql(false)
+            expect(@encounter_order.user_chooses_has_physical).to eql(true)
+            expect(@encounter_order.has_physical             ).to eql(false)
+          end
 
-        it_behaves_like "an encounter booking confirmation form", select_physical: true
-        it_behaves_like "an encounter booking confirmation form", select_physical: false
+          it_behaves_like "an encounter booking confirmation form", select_physical: true
+          it_behaves_like "an encounter booking confirmation form", select_physical: false
+        end # 'context "and order starts with has_physical 'false'" do'
+
+        context "and order starts with has_physical 'true'" do
+          before :each do
+            @encounter_order = create(:encounter_order, encounter: @encounter, has_physical: true)
+
+            expect(@encounter.has_physical_aspect?           ).to eql(true)
+            expect(@encounter.physical_aspect_free_of_charge?).to eql(false)
+            expect(@encounter_order.user_chooses_has_physical).to eql(true)
+            expect(@encounter_order.has_physical             ).to eql(true)
+          end
+
+          it_behaves_like "an encounter booking confirmation form", select_physical: true
+          it_behaves_like "an encounter booking confirmation form", select_physical: false
+        end # 'context "and order starts with has_physical 'true'" do'
       end # 'context "physical product must be paid for" do'
 
       # Bad/unexpected data edge case check.
